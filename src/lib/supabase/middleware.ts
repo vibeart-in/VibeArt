@@ -39,11 +39,24 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // If user is authenticated and trying to access auth pages (except callback, confirm, error pages)
+  if (
+    user &&
+    (request.nextUrl.pathname === "/auth/login" ||
+      request.nextUrl.pathname === "/auth/signup")
+  ) {
+    // redirect authenticated users away from login/signup pages
+    const url = request.nextUrl.clone();
+    url.pathname = "/image/generate";
+    return NextResponse.redirect(url);
+  }
+
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+    !request.nextUrl.pathname.startsWith("/api") &&
+    !request.nextUrl.pathname.startsWith("/auth") &&
+    !request.nextUrl.pathname.startsWith("/pricing")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();

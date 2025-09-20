@@ -5,7 +5,9 @@ import { MessageType } from "../types/BaseType";
 type GenerationParams = {
   parameters: Record<string, any>;
   conversationId?: string;
-  model: string;
+  modelIdentifier: string;
+  modelCredit: number;
+  modelProvider: "running_hub" | "replicate";
 };
 
 const generateImage = async (formData: GenerationParams) => {

@@ -24,33 +24,33 @@ interface MessageBoxProps {
 }
 
 export default function MessageBox({ message }: MessageBoxProps) {
-  const {
-    job_status,
-    output_images,
-    parameters,
-    error_message,
-    userPrompt,
-  } = message;
+  const { job_status, output_images, parameters, error_message, userPrompt } =
+    message;
   const numOfOutputs = parameters?.num_of_output || 1;
   const ratio = parameters?.aspect_ratio;
   const [isHovered, setIsHovered] = useState(false);
-  console.log("MessageBox rendered with job_status:", message);
-  return (
-    <div className="w-full max-w-4xl">
-      <motion.div
-        className="overflow-hidden "
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
-        animate={{
-          height: isHovered ? "auto" : "60px",
-        }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-      >
-        <p className="text-lg pt-1 ml-8 p-4 cursor-pointer">{userPrompt}</p>
-      </motion.div>
 
-      <div className="mt-4 pl-12">
-        <div className="flex gap-4 border-l-2 border-gray-700 p-4 pt-0">
+  return (
+    <div className="w-full flex max-w-5xl">
+      <div>
+        <motion.div className="h-fit overflow-x-auto max-h-[200px] w-[300px] bg-[#161618] p-4 rounded-3xl">
+          <p className="text-base cursor-pointer">{userPrompt}</p>
+        </motion.div>
+        <div className="flex gap-3 mt-2 items-center w-full justify-between">
+          <div className="flex gap-2">
+            <IconCopy size={25} className="custom-box" />
+            <p className="flex custom-box items-center gap-2 text-xs font-semibold text-white/80">
+              <IconCoin size={20} className="text-white/80" />4
+            </p>
+          </div>
+          <p className="text-sm tracking-wide text-white/80">
+            <span className="font-medium">Model:</span> Image 2.1
+          </p>
+        </div>
+      </div>
+
+      <div className=" pl-4">
+        <div className="flex gap-4">
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image, index) => (
               <div key={image.imageUrl || index} className="max-w-[400px]">
@@ -79,21 +79,6 @@ export default function MessageBox({ message }: MessageBoxProps) {
               `` ❌ Generation failed: {error_message || "Unknown error."}
             </p>
           ) : null}
-        </div>
-        <div className="flex gap-3 mt-2 items-center">
-          <IconCopy size={25} className="custom-box" />
-          <IconRefresh size={25} className="custom-box" />
-          <p className="flex custom-box items-center gap-2 text-xs font-semibold text-white/80">
-            <IconCoin size={20} className="text-white/80" />
-            18
-          </p>
-          <p className="text-sm tracking-wide text-white/80">
-            <span className="font-medium">Model:</span> Image 2.1
-          </p>
-          <p className="text-sm tracking-wide text-white/80">
-            <span className="font-medium">Ratio:</span>{" "}
-            {parameters?.aspect_ratio || "1:1"}
-          </p>
         </div>
       </div>
     </div>

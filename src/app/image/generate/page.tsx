@@ -35,8 +35,8 @@ const page = async () => {
         </h1>
         <InputBox />
       </div>
-      <div className="p-2 mt-16">
-        <p className="p-2 ml-3 mb-2 flex font-medium">Examples</p>
+      <div className="p-2 mt-16 mx-32">
+        <p className="p-2 ml-3 mb-1 flex font-medium">Examples</p>
         <ImageGallery images={images} />
       </div>
     </div>

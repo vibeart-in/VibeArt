@@ -77,25 +77,8 @@ const DynamicParameters = ({
   };
   return (
     <div className="grid grid-cols-2 lg:flex lg: items-center justify-center gap-x-6 gap-y-4">
-      {numOfOutputsParam && (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <p className="text-xs text-gray-300 font-medium tracking-wide">
-            Batch
-          </p>
-          <AnimatedCounter
-            initialValue={numOfOutputsParam.default ?? 1}
-            min={numOfOutputsParam.minimum ?? 1}
-            max={numOfOutputsParam.maximum ?? 4}
-            onChange={(value) => handleParamChange("num_of_outputs", value)}
-          />
-        </div>
-      )}
 
       {aspect_ratio && aspect_ratio.enum && (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <p className="text-xs text-gray-300 font-medium tracking-wide">
-            Aspect Ratio
-          </p>
           <Select
             onValueChange={(value) => handleParamChange("aspect_ratio", value)}
             defaultValue={aspect_ratio.default || "1:1"}
@@ -116,13 +99,9 @@ const DynamicParameters = ({
               </SelectGroup>
             </SelectContent>
           </Select>
-        </div>
       )}
 
-      <div className="flex flex-col justify-center items-center gap-2">
-        <p className="text-xs text-gray-300 font-medium tracking-wide">
-          Quality
-        </p>
+      {/* <div className="flex flex-col justify-center items-center gap-2"> */}
         <Select
           onValueChange={(value) => qualitySettings(value)}
           defaultValue="medium"
@@ -140,21 +119,25 @@ const DynamicParameters = ({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      {/* </div> */}
 
       {promptUpsamplingParam && (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <p className="text-xs text-gray-300 font-medium tracking-wide">
-            Enhance prompt
-          </p>
           <Switch
             checked={outputParameters["prompt_upsampling"] ?? false}
             onCheckedChange={(value) =>
               handleParamChange("prompt_upsampling", value)
             }
           />
-        </div>
       )}
+      
+      {/* {numOfOutputsParam && ( */}
+          <AnimatedCounter
+            initialValue={1}
+            min={1}
+            max={4}
+            onChange={(value) => handleParamChange("num_of_outputs", value)}
+          />
+      {/* )} */}
     </div>
   );
 };

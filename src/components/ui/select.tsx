@@ -20,13 +20,13 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       // Base styles
-      "flex items-center justify-between whitespace-nowrap rounded-lg px-2.5 py-1.5",
+      "flex items-center justify-between whitespace-nowrap rounded-xl px-2.5 py-1.5",
       // Custom size from your spec
       "h-[32.12px] w-[105px]",
       // Custom background & border from your spec
       "bg-[#131312] border border-solid border-[#313131]",
       // Custom shadow from your spec
-      "shadow-[inset_0px_0px_12px_-4px_rgba(200,200,200,0.25)]",
+      // "shadow-[inset_0px_0px_12px_-4px_rgba(200,200,200,0.25)]",
       // Custom text styles from your spec
       "font-normal text-[10px] leading-[14px] text-[rgba(255,255,255,0.81)]",
       // Focus and placeholder states

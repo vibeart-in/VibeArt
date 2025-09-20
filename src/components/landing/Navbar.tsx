@@ -26,7 +26,7 @@ export function NavbarLander() {
     },
     {
       name: "Enterprise",
-      link: "/login",
+      link: "/auth/login",
     },
     {
       name: "Showcase",
@@ -156,7 +156,7 @@ export function NavbarLander() {
             ) : (
               <>
                 <NavbarButton
-                  href="/login"
+                  href="/auth/login"
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant="secondary"
                   className="w-full"
@@ -164,7 +164,7 @@ export function NavbarLander() {
                   Login
                 </NavbarButton>
                 <NavbarButton
-                  href="/signup"
+                  href="/auth/signup"
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant="primary"
                   className="w-full"

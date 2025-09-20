@@ -14,7 +14,7 @@ const page = async () => {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
   const { data, error } = await supabase.rpc("get_user_generated_images", {

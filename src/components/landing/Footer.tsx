@@ -1,6 +1,12 @@
 import Image from "next/image";
 import * as motion from "motion/react-client"; // Using your specified motion import
-import { Twitter, Instagram, Linkedin, Github, MessageSquare } from "lucide-react";
+import {
+  Twitter,
+  Instagram,
+  Linkedin,
+  Github,
+  MessageSquare,
+} from "lucide-react";
 
 // --- YOUR ORIGINAL COMPONENTS (used as-is) ---
 import GlassPaneBG from "./GlassPaneBG";
@@ -12,20 +18,20 @@ const footerLinks = [
   {
     title: "Product",
     links: [
-      { name: "Create", href: "#" },
-      { name: "Edit", href: "#" },
-      { name: "Upscale", href: "#" },
-      { name: "API", href: "#" },
-      { name: "Pricing", href: "#" },
+      { name: "Create", href: "/image/generate" },
+      { name: "Edit", href: "/image/edit" },
+      { name: "Upscale", href: "/image/upscale" },
+      { name: "AI Apps", href: "/image/apps" },
+      { name: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Company",
     links: [
-      { name: "About Us", href: "#" },
-      { name: "Careers", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "Contact", href: "#" },
+      { name: "About Us", href: "/about" },
+      { name: "Blog", href: "/blog" },
+      { name: "Contact", href: "/contact" },
+      { name: "Terms and services", href: "/terms-and-conditions" },
     ],
   },
 ];
@@ -49,17 +55,14 @@ const gradientColors = {
   highlight2: "#FF7EEA",
 };
 
-
 const Footer = () => {
   return (
     <footer className="relative mt-32 text-white">
       {/* The main content container with your glass effect */}
       <GlassPaneBG paneWidth={55}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20 relative z-10">
-          
           {/* Top section: Brand, Links */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
             {/* Column 1: Brand Info & CTA */}
             <div className="flex flex-col items-start gap-4">
               <a href="#" className="flex items-center space-x-2">
@@ -74,10 +77,12 @@ const Footer = () => {
                 </p>
               </a>
               <p className="text-white/70 max-w-xs pt-2">
-                The future of AI-powered creative tooling, built for professionals.
+                The future of AI-powered creative tooling, built for
+                professionals.
               </p>
               {/* Your exact motion button, preserved */}
-              <motion.button
+              <motion.a
+                href="/image/generate"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -91,7 +96,7 @@ const Footer = () => {
                 <span className="font-century-gothic font-semibold text-xs tracking-widest leading-[17px] text-[#D9E825]">
                   GET STARTED
                 </span>
-              </motion.button>
+              </motion.a>
             </div>
 
             {/* Columns 2 & 3: Dynamic Links */}
@@ -104,7 +109,10 @@ const Footer = () => {
                   <ul className="mt-4 space-y-3">
                     {column.links.map((link) => (
                       <li key={link.name}>
-                        <a href={link.href} className="text-white/80 hover:text-accent transition-colors duration-200">
+                        <a
+                          href={link.href}
+                          className="text-white/80 hover:text-accent transition-colors duration-200"
+                        >
                           {link.name}
                         </a>
                       </li>
@@ -113,7 +121,6 @@ const Footer = () => {
                 </div>
               ))}
             </div>
-
           </div>
 
           {/* Bottom section: Copyright and Social Links */}
@@ -122,48 +129,51 @@ const Footer = () => {
               &copy; {new Date().getFullYear()} Aura.ai. All Rights Reserved.
             </p>
             <div className="flex items-center space-x-6">
-                {socialLinks.map((social) => (
-                    <motion.a 
-                        key={social.name} 
-                        href={social.href}
-                        aria-label={social.name}
-                        whileHover={{ y: -2, scale: 1.1 }}
-                        className="text-white/60 hover:text-white transition-colors"
-                    >
-                        <social.icon strokeWidth={1.5} size={22} />
-                    </motion.a>
-                ))}
+              {socialLinks.map((social) => (
+                <motion.a
+                  key={social.name}
+                  href={social.href}
+                  aria-label={social.name}
+                  whileHover={{ y: -2, scale: 1.1 }}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  <social.icon strokeWidth={1.5} size={22} />
+                </motion.a>
+              ))}
             </div>
           </div>
         </div>
-        
+
         {/* Decorative Image - positioned absolutely to not affect layout */}
         {/* It's hidden on smaller screens to prevent clutter */}
         <div className="absolute bottom-0 right-0 z-10">
-            <Image
-                src={"/images/landing/footer/footerMain.png"}
-                width={500}
-                height={500}
-                alt="Decorative abstract graphic"
-                className=""
-            />
+          <Image
+            src={"/images/landing/footer/footerMain.png"}
+            width={500}
+            height={500}
+            alt="Decorative abstract graphic"
+            className=""
+          />
         </div>
-      <div className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
+        <div
+          className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
 			[mask-image:linear-gradient(to_bottom,white,transparent)] !backdrop-blur-lg"
-			/>
-      <div className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
+        />
+        <div
+          className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
 			[mask-image:linear-gradient(to_bottom,white,transparent)] !backdrop-blur-lg"
-			/>
-      <div className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
+        />
+        <div
+          className="z-0 absolute inset-x-0 -bottom-2 h-[120%] bg-black/5
 			[mask-image:linear-gradient(to_bottom,white,transparent)] !backdrop-blur-lg"
-			/>
+        />
       </GlassPaneBG>
       {/* Background Gradient - using your component */}
       <div className="absolute -top-40 left-1/2 -translate-x-1/2 -z-10">
         <GradientComponent
           colors={gradientColors}
           sizeVW={150}
-          isAnimated={false}
+          isAnimated={true}
         />
       </div>
     </footer>

@@ -1,27 +1,19 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
-// Helper to generate a random number within a range
-const random = (max: number, min: number = 0): number =>
-  Math.random() * (max - min) + min;
-
-/**
- * A component that renders animated particles falling from the top,
- * with the screen being instantly populated.
- * @param {number} count - The number of particles to render.
- */
 export const FloatingParticles = ({ count = 100 }) => {
-  const particles = useMemo(() => {
-    return Array.from({ length: count }).map((_, index) => {
-      // Generate particles that start distributed across the entire screen
-      const startY = -random(20, 10); // Start just above viewport
-      const endY = random(20) + 100; // End just below viewport
-      
+  const [particles, setParticles] = useState<any[]>([]);
 
+  useEffect(() => {
+    const generatedParticles = Array.from({ length: count }).map((_, index) => {
+      const random = (max: number, min: number = 0): number =>
+        Math.random() * (max - min) + min;
+
+      const startY = -random(20, 10);
+      const endY = random(20) + 100;
       const startX = random(100);
       const endX = random(100);
-
       const duration = random(57000, 50000);
       const innerDuration = 5000;
 
@@ -32,17 +24,17 @@ export const FloatingParticles = ({ count = 100 }) => {
         "--from-y": `${startY}vh`,
         "--to-x": `${endX}vw`,
         "--to-y": `${endY}vh`,
-
-        // Use negative delay to distribute particles along their animation path
-        // This creates the effect of particles being already in motion across the screen
         animationDuration: `${duration}ms`,
         animationDelay: `-${random(duration)}ms`,
-
-        // Randomize inner animation timing as well
         innerAnimationDelay: `-${random(innerDuration)}ms`,
       };
     });
+
+    setParticles(generatedParticles);
   }, [count]);
+
+  // Render nothing during SSR
+  if (particles.length === 0) return null;
 
   return (
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -56,7 +48,7 @@ export const FloatingParticles = ({ count = 100 }) => {
               height: `${p.size}px`,
               animation: `move-particle linear infinite`,
               animationDuration: p.animationDuration,
-              animationDelay: p.animationDelay, // Apply the negative delay
+              animationDelay: p.animationDelay,
               "--from-x": p["--from-x"],
               "--from-y": p["--from-y"],
               "--to-x": p["--to-x"],
@@ -70,7 +62,7 @@ export const FloatingParticles = ({ count = 100 }) => {
               backgroundImage:
                 "radial-gradient(hsl(180, 100%, 40%), hsl(180, 100%, 40%) 10%, hsla(180, 100%, 80%, 0) 46%)",
               animation: "fade-and-scale 2s infinite",
-              animationDelay: p.innerAnimationDelay, // Apply the negative delay
+              animationDelay: p.innerAnimationDelay,
             }}
           />
         </div>

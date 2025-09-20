@@ -77,7 +77,7 @@ export function LoginForm({
         </div>
         <div className="mt-4 text-center text-sm flex justify-center gap-4">
           <Link
-            href="/sign-up"
+            href="/auth/signup"
             className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
           >
             Sign up

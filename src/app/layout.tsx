@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { TanStackProvider } from "../lib/TanstackProvider";
 import localFont from "next/font/local";
+import { RealtimeProvider } from "../components/providers/RealtimeProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -113,7 +114,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <RealtimeProvider>{children}</RealtimeProvider>
           </ThemeProvider>
         </TanStackProvider>
       </body>

@@ -53,11 +53,11 @@ const ModelCard = ({ model, onSelect }: ModelCardProps) => {
 
       <div className="absolute inset-0 flex flex-col justify-between">
         <div className="flex justify-between p-2">
-          <div className="bg-black/80 rounded-[7px] py-1 px-2">
+          {/* <div className="bg-black/80 rounded-[7px] py-1 px-2">
             <p className="text-white font-semibold text-[8px] leading-[10px] capitalize">
               {model.model_type}
             </p>
-          </div>
+          </div> */}
           <div className="bg-black/80 rounded-[7px] py-1 px-2">
             <p className="text-white font-semibold text-[8px] leading-[10px] uppercase">
               {model.base_model}
@@ -68,7 +68,7 @@ const ModelCard = ({ model, onSelect }: ModelCardProps) => {
           <p className="font-quicksand text-white font-medium text-[11px] leading-[14px]">
             {model.model_name}
           </p>
-          <div className="flex justify-between items-center mt-2">
+          {/* <div className="flex justify-between items-center mt-2">
             <div className="bg-white/50 rounded-[7px] py-0.5 px-2">
               <p className="font-quicksand text-white font-semibold text-[8px] leading-[10px]">
                 V1
@@ -80,7 +80,7 @@ const ModelCard = ({ model, onSelect }: ModelCardProps) => {
                 Favorite
               </p>
             </div>
-          </div>
+          </div> */}
           <AnimatePresence>
             {isHovered && (
               <motion.button

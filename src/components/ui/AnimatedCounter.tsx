@@ -40,9 +40,8 @@ const AnimatedCounter = ({
 
   return (
     <div className="flex flex-col justify-center items-center ml-2 gap-4">
-      <p className="text-xs text-gray-300 font-medium tracking-wide">{label}</p>
 
-      <div className="relative w-16 h-8 bg-[#131312] border border-[#313131] shadow-[inset_0px_0px_12px_-4px_rgba(200,200,200,0.25)] rounded-lg text-sm flex items-center justify-center p-1 transition-all duration-300 hover:border-[#404040] hover:shadow-[inset_0px_0px_16px_-4px_rgba(200,200,200,0.35)]">
+      <div className="relative w-16 h-8 bg-[#131312] border border-accent  rounded-xl text-sm flex items-center justify-center p-1 transition-all duration-300">
         {/* Minus Button */}
         <button
           onClick={handleDecrement}
@@ -53,7 +52,7 @@ const AnimatedCounter = ({
             ${
               count <= min
                 ? "text-gray-600 cursor-not-allowed opacity-50"
-                : "text-gray-300 hover:text-white hover:bg-[#2a2a2a] hover:scale-110 active:scale-95 cursor-pointer"
+                : "text-accent hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
             }
           `}
         >
@@ -63,8 +62,8 @@ const AnimatedCounter = ({
         {/* Counter Display */}
         <div
           className={`
-          bg-[#363635] w-full h-full rounded-md flex justify-center items-center text-[12px] mx-1
-          font-semibold text-white transition-all duration-200 ease-out
+          w-full h-full rounded-md flex justify-center items-center text-[12px] mx-1
+          font-semibold text-accent transition-all duration-200 ease-out
           ${isAnimating ? "scale-110 bg-[#404040] shadow-lg" : "scale-100"}
         `}
         >
@@ -87,7 +86,7 @@ const AnimatedCounter = ({
             ${
               count >= max
                 ? "text-gray-600 cursor-not-allowed opacity-50"
-                : "text-gray-300 hover:text-white hover:bg-[#2a2a2a] hover:scale-110 active:scale-95 cursor-pointer"
+                : "text-accent hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
             }
           `}
         >

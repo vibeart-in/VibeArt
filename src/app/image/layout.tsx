@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import SidebarMain from "@/src/components/home/Sidebar";
+import { MainNavbar } from "@/src/components/home/MainNavbar";
+import GenerateHistory from "@/src/components/home/GenerateHistory";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -18,8 +19,12 @@ export default function ImageLayout({
   return (
     <main className="relative flex h-full w-full flex-row">
       <nav className="">
-        <SidebarMain />
+        {/* <SidebarMain /> */}
+        <MainNavbar />
       </nav>
+      <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20">
+        <GenerateHistory />
+      </div>
       <section className="w-full h-full">{children}</section>
     </main>
   );

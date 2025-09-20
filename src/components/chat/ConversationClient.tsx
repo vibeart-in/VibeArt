@@ -66,13 +66,7 @@ export default function ConversationClient({
   // Main content
   return (
     <section className="relative flex flex-col h-screen bg-background text-white">
-      <header className="absolute flex gap-2 items-center p-4 text-sm font-semibold backdrop-blur-sm">
-        <IconSparkles size={25} className="text-accent custom-box" />
-        Generate
-      </header>
-
       <ChatView messages={formattedMessages} />
-
       <footer className="absolute bottom-0 z-10 w-full px-2">
         <div className="relative mx-auto flex w-full max-w-3xl flex-col text-center">
           <InputBox conversationId={conversationId} />

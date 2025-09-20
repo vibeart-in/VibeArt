@@ -9,5 +9,6 @@ export default async function ConversationPage({
   const { id } = await params;
 
   // Pass id to client component
-  return <ConversationClient conversationId={id} />;
+  return (
+  <ConversationClient conversationId={id} />);
 }

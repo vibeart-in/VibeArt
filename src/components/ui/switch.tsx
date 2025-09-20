@@ -1,45 +1,66 @@
 "use client";
 
 import * as React from "react";
-import * as SwitchPrimitives from "@radix-ui/react-switch";
+import { cn } from "@/src/lib/utils"; // Assuming you have a cn utility for classes
+import { Wand2Icon } from "lucide-react";
 
-import { cn } from "@/src/lib/utils";
+// Define the props for the custom switch
+interface CustomSwitchProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}
 
 const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitives.Root
-    className={cn(
-      // Base styles from Radix for functionality and accessibility
-      "peer inline-flex h-5 w-10 shrink-0 cursor-pointer items-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-
-      // New styles for the Track
-      "rounded-xl border border-[#494949] bg-[#2D2D2D] shadow-[inset_0px_4px_4px_rgba(0,0,0,0.37)]",
-
-      className
-    )}
-    {...props}
-    ref={ref}
-  >
-    <SwitchPrimitives.Thumb
+  HTMLButtonElement,
+  CustomSwitchProps
+>(({ className, checked, onCheckedChange, ...props }, ref) => {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onCheckedChange(!checked)}
+      ref={ref}
       className={cn(
-        // Base styles for the Thumb
-        "pointer-events-none block h-3.5 w-3.5 rounded-full shadow-[0px_2px_8px_rgba(0,0,0,0.16)] ring-0",
+        // Base container styles
+        "inline-flex items-center justify-center gap-2 rounded-xl border p-2",
+        "cursor-pointer select-none transition-all duration-200 ease-in-out",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 
-        // Add transition for color and transform
-        "transition-all", // This will animate both the color and position change
-
-        // State-based positioning
-        "data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0.5",
-
-        // State-based colors for clear on/off indication
-        "data-[state=checked]:bg-[#D9E825]", // Active "on" color
-        "data-[state=unchecked]:bg-[#888888]" // Muted "off" color
+        // State-based styles
+        {
+          "border-accent bg-black shadow-accent": checked,
+          "border-white/ bg-background text-white": !checked,
+        },
+        className 
       )}
-    />
-  </SwitchPrimitives.Root>
-));
-Switch.displayName = SwitchPrimitives.Root.displayName;
+      {...props}
+    >
+      <Wand2Icon
+        className={cn(
+          "w-4 h-4",
+          {
+            "text-accent": checked, // Icon becomes accent color when on
+            "text-white": !checked,
+          }
+        )}
+      />
+      <span
+        className={cn(
+          "text-xs font-medium", // Base text styles
+          {
+            "text-accent": checked, // Your 'text-accent'
+            "text-white": !checked,
+          }
+        )}
+      >
+        {checked ? "On" : "Off"}
+      </span>
+    </button>
+  );
+});
+
+Switch.displayName = "CustomSwitch";
 
 export { Switch };

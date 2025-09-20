@@ -37,7 +37,7 @@ export default function ChatView({ messages }: ChatViewProps) {
   return (
     <div
       ref={scrollContainerRef}
-      className="w-full flex flex-col-reverse items-center h-full overflow-y-auto gap-12 pb-48 pt-8 px-4"
+      className="w-full flex flex-col-reverse items-center h-full overflow-y-auto gap-12 pb-48 pt-32 px-4"
     >
       {messages.map((message) => (
         <MessageBox key={message.id} message={message} />

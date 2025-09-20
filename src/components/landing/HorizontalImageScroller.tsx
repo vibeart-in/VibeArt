@@ -1,6 +1,5 @@
 "use client"
 import React, { useRef, useState, useEffect } from 'react';
-// We only need the 'motion' component from framer-motion now
 import { motion } from 'motion/react';
 import Image from 'next/image';
 

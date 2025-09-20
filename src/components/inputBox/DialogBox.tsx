@@ -93,7 +93,7 @@ const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
           <Input
             placeholder="Search..."
             // Make search bar full-width on mobile to be easily tappable
-            className="rounded-2xl w-full min-w-52 py-1.5 pr-8 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+            className="rounded-2xl w-full min-w-52 py-1.5 pr-8 bg-[#161616] text-white placeholder-gray-400"
             value={searchTerm}
             onChange={handleSearchChange}
           />
@@ -103,7 +103,7 @@ const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-14 mt-6 gap-4">
         {filteredModels.length > 0 ? (
           filteredModels.map((model) => (
             <ModelCard key={model.id} model={model} onSelect={onSelectModel} />

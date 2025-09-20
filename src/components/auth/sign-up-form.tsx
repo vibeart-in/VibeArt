@@ -37,7 +37,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${window.location.origin}/image/generate`,
         },
       });
       if (error) throw error;
@@ -94,7 +94,7 @@ export function SignUpForm({
         <div className="mt-4 text-center text-sm ">
           Already have an account?{" "}
           <Link
-            href="/login"
+            href="/auth/login"
             className="inline-block text-sm underline-offset-4 underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
           >
             Login

@@ -15,12 +15,12 @@ import { Edit3, ImageIcon } from "lucide-react";
 import HistoryCard from "./HistoryCard";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
-import { UserProfile } from "../UserProfile";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
 import { HistoryItem } from "@/src/types/BaseType";
 import { usePathname } from "next/navigation";
+import { UserProfileDropdown } from "../ui/UserProfileDropdown";
 
 const supabase = createClient();
 const CONVERSATION_HISTORY_QUERY_KEY = ["conversationHistory"];
@@ -169,15 +169,15 @@ export default function SidebarMain() {
           <div className="flex h-full flex-1 flex-col overflow-hidden">
             {/* Header */}
             <div className="flex flex-shrink-0 items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <div
-                  className="custom-box"
+                  className=""
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
                 >
-                  <div className="relative h-[20px] w-[20px]">
+                  <div className="relative h-[30px] w-[30px]">
                     <Image
-                      src="/images/logo.png"
+                      src="/images/newlogo.png"
                       alt="Aura.ai Logo"
                       fill
                       className={clsx(
@@ -201,9 +201,9 @@ export default function SidebarMain() {
                   </div>
                 </div>
                 {open && (
-                  <p className="text-2xl font-bold">
+                  <Link href={"/"} className="text-2xl font-bold cursor-pointer">
                     Aura<span className="text-accent">.</span>ai
-                  </p>
+                  </Link>
                 )}
               </div>
               {open && (
@@ -324,11 +324,16 @@ export default function SidebarMain() {
                             scale: 1.02,
                             transition: { duration: 0.2 },
                           }}
+                          className={
+                            pathname === `/image/generate/${history.id}`
+                              ? "border-2 border-accent rounded-2xl p-1"
+                              : ""
+                          }
                         >
                           <Link href={`/image/generate/${history.id}`}>
                             <HistoryCard
                               imageUrl={history.imageUrl}
-                              title={history.title}
+                              title={"Image generation"}
                               prompt={history.prompt}
                             />
                           </Link>
@@ -340,7 +345,7 @@ export default function SidebarMain() {
             </CollapsibleSection>
           </div>
           <div className="absolute bottom-0 left-0 right-0 p-4 pt-1 backdrop-blur-sm bg-gradient-to-t from-black to-transparent">
-            <UserProfile />
+            <UserProfileDropdown />
           </div>
         </SidebarBody>
       </Sidebar>

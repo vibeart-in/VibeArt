@@ -1,11 +1,16 @@
-
 export interface MessageType {
   id: string;
   userPrompt: string;
   output_images: { imageUrl: string }[];
   jobId?: string | null;
   input_images?: { imageUrl: string }[];
-  job_status: 'pending' | 'processing' | 'succeeded' | 'failed' | 'starting' | null;
+  job_status:
+    | "pending"
+    | "processing"
+    | "succeeded"
+    | "failed"
+    | "starting"
+    | null;
   parameters?: any;
   credit_cost: number;
   error_message?: string | null;
@@ -27,6 +32,7 @@ export interface ModelData {
   link: string | null;
   model_uploaded: string;
   parameters: Record<string, InputBoxParameter>;
+  provider: "running_hub" | "replicate";
 }
 
 export interface HistoryItem {
@@ -51,7 +57,7 @@ export interface InputBoxParameter {
   minimum?: number;
   maximum?: number;
   "x-order"?: number;
-  format?: string
+  format?: string;
 }
 
 export interface ImageCard3DType {

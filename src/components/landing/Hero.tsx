@@ -17,6 +17,60 @@ const cardData1: ImageCard3DType[] = [
     topImageScale: 1.2,
   },
   {
+    topImageUrl: "/images/landing/cards/figurine_trans2.png",
+    bottomImageUrl: "/images/landing/cards/figurine.jpg",
+    cardText: "Editing",
+    topImageScale: 1.1,
+  },
+  {
+    topImageUrl: "/images/landing/cards/site-dsgin.jpg",
+    bottomImageUrl: "/images/landing/cards/site-desgin.jpg",
+    cardText: "Web desgin",
+    topImageScale: 1.1,
+  },
+  {
+    topImageUrl: "/images/landing/cards/90s-top.png",
+    bottomImageUrl: "/images/landing/cards/90s-bottom.jpg",
+    cardText: "90s",
+    topImageScale: 1.2,
+  },
+  {
+    topImageUrl: "/images/landing/cards/game-top.png",
+    bottomImageUrl: "/images/landing/cards/game-bottom.jpg",
+    cardText: "Game",
+    topImageScale: 1.1,
+  },
+  {
+    topImageUrl: "/images/landing/cards/concept-top.png",
+    bottomImageUrl: "/images/landing/cards/concept-bottom.jpg",
+    cardText: "concept",
+    topImageScale: 1.2,
+  },
+  {
+    topImageUrl: "/images/landing/cards/emotion-top.png",
+    bottomImageUrl: "/images/landing/cards/emotion-bottom.jpg",
+    cardText: "concept",
+    topImageScale: 1.1,
+  },
+  {
+    topImageUrl: "/images/landing/cards/product-top.png",
+    bottomImageUrl: "/images/landing/cards/product-bottom.jpg",
+    cardText: "Product",
+    topImageScale: 1.05,
+  },
+  {
+    topImageUrl: "/images/landing/cards/phone-to.png",
+    bottomImageUrl: "/images/landing/cards/phone-bottom.png",
+    cardText: "Ultra real",
+    topImageScale: 1.1
+  },
+  {
+    topImageUrl: "/images/landing/cards/keys-trans.png",
+    bottomImageUrl: "/images/landing/cards/keys.jpg",
+    cardText: "Abstract",
+    topImageScale: 1.4,
+  },
+  {
     topImageUrl: "/images/landing/cards/anime_girl_top.png",
     bottomImageUrl: "/images/landing/cards/anime_girl_bottom.png",
     cardText: "Anime",
@@ -50,6 +104,7 @@ const cardData2: ImageCard3DType[] = [
     topImageScale: 1.1,
     width: 400,
     height: 600,
+    fontSize: 1000
   },
   {
     topImageUrl: "/images/landing/cards/mirror_girl_top.png",
@@ -263,7 +318,7 @@ const Hero = () => {
       </div>
 
       {/* Background Gradient - Fixed Position with Animated Colors */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[-1]">
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 z-[-1]">
         <AnimatePresence mode="wait">
           <motion.div
             key={`gradient-${currentSlide.id}`}
@@ -275,7 +330,7 @@ const Hero = () => {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
           >
-            <GradientComponent colors={currentSlide.gradient} sizeVW={150} />
+            <GradientComponent colors={currentSlide.gradient} sizeVW={130} />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -285,7 +340,7 @@ const Hero = () => {
         <GlassPaneBG paneWidth={50}>
           <div className="flex flex-col items-center ">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-accent text-center mt-4 sm:mt-6 mb-6 sm:mb-8 max-w-4xl leading-tight">
-              Generate anything in any style
+              Generate anything in any style and with any models
             </h2>
 
             {/* Card Scrolls */}

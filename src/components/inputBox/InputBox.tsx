@@ -9,6 +9,7 @@ import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
 import { ModelData } from "@/src/types/BaseType";
 import DynamicParameters from "./DynamicParameters";
+import GradualBlurMemo from "../ui/GradualBlur";
 
 const initialModel: ModelData = {
   id: "1",
@@ -143,7 +144,7 @@ const initialModel: ModelData = {
         "Automatically modify the prompt for more creative generation",
     },
   },
-  cost: 1,
+  cost: 2,
   model_type: "Flux",
   cover_image:
     "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/model_cover/3.webp",
@@ -151,6 +152,7 @@ const initialModel: ModelData = {
   identifier: "black-forest-labs/flux-dev",
   version: "1.0",
   created_at: "",
+  provider: "running_hub",
 };
 
 const validateAndSanitizePrompt = (prompt: string) => {
@@ -179,10 +181,21 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   const handleModelSelect = (model: ModelData) => {
     setSelectedModel(model);
+    localStorage.setItem("lastSelectedModel", JSON.stringify(model));
     setIsDialogOpen(false);
   };
 
-  // Clear mutation state on component unmount
+  useEffect(() => {
+    const savedModel = localStorage.getItem("lastSelectedModel");
+    if (savedModel) {
+      try {
+        setSelectedModel(JSON.parse(savedModel));
+      } catch {
+        console.warn("Failed to parse saved model.");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     return () => {
       mutation.reset();
@@ -206,7 +219,9 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       {
         parameters,
         conversationId,
-        model: selectedModel.identifier,
+        modelIdentifier: selectedModel.identifier,
+        modelCredit: selectedModel.cost,
+        modelProvider: selectedModel.provider,
       },
       {
         onSuccess: () => {
@@ -228,85 +243,92 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   const handleParametersChange = (values: Record<string, any>) => {
     setParameters(values);
-    console.log("Updated form values:", values);
   };
 
   return (
-    <>
-      <section className="w-fit bg-[rgba(17,17,17,0.8)] border border-white/10 backdrop-blur-[5px] rounded-3xl p-2 md:p-4 mb-2">
-        <AnimatePresence>
-          {isDialogOpen && (
-            <motion.div
-              className="w-full mb-2 overflow-hidden"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "22rem" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <div className="w-full h-full p-2 overflow-y-auto">
-                <DialogBox onSelectModel={handleModelSelect} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {formError && (
-          <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-md mb-2 text-sm">
-            <XCircle size={16} />
-            <p>{formError}</p>
-          </div>
-        )}
-        <AnimatePresence>
-          {!isDialogOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="relative"
-            >
-              <IconTerminal className="absolute top-4 left-4 text-neutral-500" />
-              <Textarea
-                value={parameters.prompt || ""}
-                onChange={(e) =>
-                  setParameters((prev) => ({
-                    ...prev,
-                    prompt: e.target.value,
-                  }))
-                }
-                className="pl-12 hide-scrollbar"
-                placeholder="A cute magical flying cat, cinematic, 4k"
-                maxHeight={100}
-                disabled={mutation.isPending}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleGenerateClick();
-                  }
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="mt-2 flex items-center gap-2">
-          <div
-            onClick={handleCardClick}
-            className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-md relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0"
+    <div className="relative w-fit bg-background/80 border border-white/10 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
+      <AnimatePresence>
+        {isDialogOpen && (
+          <motion.div
+            className=" w-full mb-2 overflow-hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "24rem" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
           >
-            <div className="absolute w-full h-full bg-black/60 flex justify-center items-center p-1 text-center">
-              <p className="text-white text-xs font-semibold leading-tight">
-                {selectedModel.model_name}
-              </p>
+            <div className="w-full h-full p-2 overflow-y-auto">
+              <DialogBox onSelectModel={handleModelSelect} />
             </div>
-            <Image
-              className="object-cover w-full h-full"
-              src={selectedModel.cover_image}
-              alt={selectedModel.model_name}
-              width={100}
-              height={75}
+            <GradualBlurMemo
+              target="parent"
+              position="bottom"
+              height="12rem"
+              strength={2}
+              divCount={5}
+              zIndex={1}
+              className="!bottom-2 p-2"
+              curve="bezier"
+              exponential={true}
+              opacity={1}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <section className="flex gap-4">
+        <div
+          onClick={handleCardClick}
+          className="w-[120px] h-[95px] z-20 rounded-3xl relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0"
+        >
+          <div className="absolute inset-0 shadow-[inset_0_4px_18px_rgba(0,0,0,0.9)] rounded-3xl pointer-events-none"></div>
+
+          <Image
+            className="object-cover w-full h-full"
+            src={selectedModel.cover_image}
+            alt={selectedModel.model_name}
+            width={150}
+            height={95}
+          />
+
+          <div className="absolute inset-0 bg-black/20 flex justify-center items-center p-1 text-center">
+            <p className="text-accent font-gothic text-base font-medium leading-tight">
+              {selectedModel.model_name}
+            </p>
           </div>
+        </div>
+
+        <div className="mt-2 flex z-20 flex-col items-center gap-2">
+          <AnimatePresence>
+            {!isDialogOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.1 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="relative w-full"
+              >
+                <IconTerminal className="absolute top-2 left-4 text-white/80" />
+                <Textarea
+                  value={parameters.prompt || ""}
+                  onChange={(e) =>
+                    setParameters((prev) => ({
+                      ...prev,
+                      prompt: e.target.value,
+                    }))
+                  }
+                  className="pl-12 hide-scrollbar min-w-[400px]"
+                  placeholder="A cute magical flying cat, cinematic, 4k"
+                  maxHeight={100}
+                  disabled={mutation.isPending}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleGenerateClick();
+                    }
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* DESKTOP: Show parameters inline */}
           <div className="hidden md:flex flex-grow justify-center">
@@ -316,23 +338,16 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               onValuesChange={handleParametersChange}
             />
           </div>
-
-          <button
-            onClick={handleGenerateClick}
-            disabled={mutation.isPending}
-            className="h-[75px] px-6 rounded-2xl text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed flex-shrink-0"
-          >
-            {mutation.isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Sparkles />
-            )}
-            <span
-              className={mutation.isPending ? "hidden sm:inline" : "inline"}
-            >
-              {mutation.isPending ? "Generating..." : "Generate"}
-            </span>
-          </button>
+          {formError && (
+            <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-xl mb-2 text-sm">
+              <XCircle
+                size={16}
+                className="cursor-pointer hover:text-red-300"
+                onClick={() => setFormError(null)}
+              />
+              <p>{formError}</p>
+            </div>
+          )}
 
           {/* MOBILE: Show 3-dot menu button */}
           <div className="flex-grow flex justify-end md:hidden">
@@ -344,6 +359,20 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             </button>
           </div>
         </div>
+        <button
+          onClick={handleGenerateClick}
+          disabled={mutation.isPending}
+          className="px-6 rounded-3xl z-20 text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed flex-shrink-0"
+        >
+          {mutation.isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Sparkles />
+          )}
+          <span className={mutation.isPending ? "hidden sm:inline" : "inline"}>
+            {mutation.isPending ? "Generating..." : "Generate"}
+          </span>
+        </button>
       </section>
 
       {/* MODAL FOR MOBILE PARAMETERS */}
@@ -384,7 +413,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

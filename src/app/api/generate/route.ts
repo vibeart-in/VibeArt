@@ -1,105 +1,159 @@
+// /api/image/generate/route.ts
 import { createClient } from "@/src/lib/supabase/server";
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
 
-// It's a good practice to validate environment variables at startup
-if (!process.env.REPLICATE_API_TOKEN) {
+// --- Environment Variable Checks ---
+if (!process.env.REPLICATE_API_TOKEN)
   throw new Error("REPLICATE_API_TOKEN is not set");
-}
+if (!process.env.WEBHOOK_HOST) throw new Error("WEBHOOK_HOST is not set");
+if (!process.env.RUNNING_HUB_API_KEY)
+  throw new Error("RUNNING_HUB_API_KEY is not set");
 
-if (!process.env.NGROK_HOST) {
-    throw new Error("NGROK_HOST is not set. The webhook URL for Replicate will not work.");
-}
-
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
-
-const WEBHOOK_HOST = process.env.NGROK_HOST;
+// --- Client Initialization ---
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+const WEBHOOK_HOST = process.env.WEBHOOK_HOST;
 
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    // 1. Authenticate the user
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return NextResponse.json({ error: "You must be logged in to generate images." }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Validate the request body
     const body = await req.json();
-    console.log("Received Request Body:", body);
-    // const parseResult = promptFormSchema.safeParse(body);
-    // console.log("Parsed Request Body:", parseResult.data);
-    // if (!parseResult.success) {
-    //   return NextResponse.json({ error: "Invalid request body", details: parseResult.error.flatten() }, { status: 400 });
-    // }
+    console.log(body);
+    const {
+      parameters,
+      conversationId: initialConversationId,
+      modelIdentifier,
+      modelCredit,
+      modelProvider,
+    } = body;
 
-    const { parameters, conversationId: initialConversationId, model } = body;
-    const totalCreditCost = 2;
+    // --- Credit Check ---
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("subscription_credits, bonus_credits")
+      .eq("user_id", user.id)
+      .single();
 
-    const { data, error } = await supabase.rpc('create_generation_job', {
-        user_id: user.id,
-        total_credit_cost: totalCreditCost,
-        prompt: parameters?.prompt || "",
-        initial_conversation_id: initialConversationId
-    }).single();
-
-    if (error) {
-      if (error.code === 'PGRST116' && error.details.includes('P0001')) { 
-          return NextResponse.json({ error: error.message }, { status: 402 });
-      }
-      throw error;
+    if (
+      !profile ||
+      profile.subscription_credits + profile.bonus_credits < modelCredit
+    ) {
+      return NextResponse.json(
+        { error: "Insufficient credits." },
+        { status: 402 }
+      );
     }
 
-    const { new_job_id: newJobId, returned_conversation_id: currentConversationId } = data;
-
-
-    // 5. Trigger the prediction with Replicate
-    const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJobId}&userId=${user.id}`;
-    const options: any = {
-      model: model,
-      input: parameters,
-      webhook: webhookUrl,
-      webhook_events_filter: ["completed"],
-    };
-
-    const prediction = await replicate.predictions.create(options);
-
-    await supabase
-    .from("jobs")
-    .update({
-      prediction_id: prediction.id,
-      job_status:    prediction.status,
-      parameters: parameters,
-    })
-    .eq("id", newJobId);
-
-    // 7. Create the user message that links to this job
-    const { data: lastMessage } = await supabase
-        .from("messages")
-        .select("sequence_number")
-        .eq("conversation_id", currentConversationId)
-        .order("sequence_number", { ascending: false })
-        .limit(1)
-        .single();
-
-    const nextSequenceNumber = lastMessage ? lastMessage.sequence_number + 1 : 0;
-    
-    await supabase.from("messages").insert({
-        conversation_id: currentConversationId,
-        positive_prompt: parameters.prompt,
-        negative_prompt: "",
-        triggered_job_id: newJobId,
-        sequence_number: nextSequenceNumber,
+    // STEP 1: Create job and message records without deducting credits.
+    const { data, error } = await supabase.rpc("create_job_and_message", {
+      p_user_id: user.id,
+      p_prompt: parameters?.prompt || "",
+      p_model: modelIdentifier,
+      p_parameters: parameters,
+      p_credit_cost: modelCredit,
+      p_initial_conversation_id: initialConversationId,
     });
 
-    // 8. Return a success response
-    return NextResponse.json({ conversationId: currentConversationId }, { status: 200 });
+    if (error) throw error;
 
+    const { conversation_id: currentConversationId, job_id: newJobId } =
+      data[0];
+
+    // --- Provider-specific Logic ---
+    if (modelProvider === "running_hub") {
+      // Define the webhook URL that RunningHub will call upon completion.
+      // We include our internal job ID to easily map the notification back to our system.
+      const webhookUrl = `${WEBHOOK_HOST}/api/webhooks/runninghub?jobId=${newJobId}`;
+
+      // STEP 2: Trigger the prediction with RunningHub.
+      const runningHubResponse = await fetch(
+        "https://www.runninghub.ai/task/openapi/ai-app/run",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            webappId: modelIdentifier,
+            apiKey: process.env.RUNNING_HUB_API_KEY,
+            webhookUrl: webhookUrl, // <-- ADD THIS LINE
+            nodeInfoList: [
+              {
+                nodeId: "3", // As per the provided example, adjust if needed
+                fieldName: "prompt",
+                fieldValue: parameters?.prompt || "",
+                description: null,
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!runningHubResponse.ok) {
+        const errorBody = await runningHubResponse.text();
+        throw new Error(
+          `RunningHub API request failed with status ${runningHubResponse.status}: ${errorBody}`
+        );
+      }
+
+      const runningHubData = await runningHubResponse.json();
+      const taskId = runningHubData?.data?.taskId;
+
+      if (!taskId) {
+        throw new Error(
+          `Could not find taskId in RunningHub response: ${JSON.stringify(
+            runningHubData
+          )}`
+        );
+      }
+
+      // STEP 3: Update our job record with the RunningHub task ID and initial status.
+      await supabase
+        .from("jobs")
+        .update({
+          prediction_id: taskId, // This is the RunningHub taskId
+          job_status: runningHubData?.data?.taskStatus || "RUNNING",
+        })
+        .eq("id", newJobId);
+    } else {
+      // STEP 2: Trigger the prediction with Replicate.
+      const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJobId}`;
+
+      const prediction = await replicate.predictions.create({
+        model: modelIdentifier,
+        input: parameters,
+        webhook: webhookUrl,
+        webhook_events_filter: ["completed"],
+      });
+
+      // STEP 3: Update our job record with the Replicate prediction ID.
+      await supabase
+        .from("jobs")
+        .update({
+          prediction_id: prediction.id,
+          job_status: prediction.status,
+        })
+        .eq("id", newJobId);
+    }
+
+    // --- Common Success Response ---
+    return NextResponse.json(
+      { conversationId: currentConversationId },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error(`[Image Generation Error]: ${error.message}`);
-    return NextResponse.json({ error: "An unexpected error occurred. Please try again later." }, { status: 500 });
+    return NextResponse.json(
+      { error: "An unexpected error occurred. Please try again later." },
+      { status: 500 }
+    );
   }
 }

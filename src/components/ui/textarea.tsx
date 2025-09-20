@@ -24,16 +24,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <textarea
         className={cn(
-          "flex w-full px-6 py-4 text-base",
+          "flex w-full text-base bg-transparent p-2",
           "resize-none",
-          // Custom styling from your request
-          "bg-[#111111]",
-          "border border-white/10",
+          // "border border-white/10",
           "rounded-xl",
-          "shadow-[inset_0px_0px_46.2px_3px_rgba(255,255,255,0.08)]",
-          // States and other utilities
-          "placeholder:text-neutral-500",
-          "placeholder:text-sm",
+          "placeholder:text-white/50",
+          "placeholder:text-base",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className

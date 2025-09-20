@@ -2,10 +2,9 @@
 
 import { NextResponse } from "next/server";
 import { Prediction, validateWebhook } from "replicate";
-import { createClient} from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // Best practice: Create a dedicated admin client module
-// e.g., in /src/lib/supabase/admin.ts
 const getSupabaseAdmin = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -13,6 +12,31 @@ const getSupabaseAdmin = () => {
         throw new Error("Missing Supabase admin credentials.");
     }
     return createClient(supabaseUrl, supabaseServiceRoleKey);
+};
+
+// You can place this helper at the top of your file or in a separate utils file.
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function retry<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000
+): Promise<T> {
+  let lastError: Error | undefined;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      if (i < retries - 1) {
+        // Use exponential backoff for subsequent retries
+        const backoffDelay = delay * Math.pow(2, i);
+        console.log(`Attempt ${i + 1} failed. Retrying in ${backoffDelay}ms...`);
+        await sleep(backoffDelay);
+      }
+    }
+  }
+  throw lastError;
 }
 
 export async function POST(request: Request) {
@@ -24,10 +48,9 @@ export async function POST(request: Request) {
 
   const url = new URL(request.url);
   const jobId = url.searchParams.get("jobId");
-  const userId = url.searchParams.get("userId");
 
-  if (!jobId || !userId) {
-    return NextResponse.json({ detail: "Missing required URL parameters." }, { status: 400 });
+  if (!jobId) {
+    return NextResponse.json({ detail: "Missing 'jobId' URL parameter." }, { status: 400 });
   }
 
   try {
@@ -39,99 +62,121 @@ export async function POST(request: Request) {
     const prediction: Prediction = await request.json();
     const supabaseAdmin = getSupabaseAdmin();
 
-    // Idempotency Check: See if job is already processed.
+    console.log(prediction);
+    console.log(`Received webhook for job ${jobId} with status: ${prediction.status}`);
+
+    // Idempotency Check
     const { data: currentJob } = await supabaseAdmin
       .from("jobs")
       .select("job_status")
       .eq("id", jobId)
       .single();
 
-    if (currentJob && (currentJob.job_status === 'succeeded' || currentJob.job_status === 'failed')) {
+    if (currentJob && ["succeeded", "failed"].includes(currentJob.job_status)) {
         console.log(`Job ${jobId} already processed. Ignoring duplicate webhook.`);
         return NextResponse.json({ detail: "Webhook already processed." }, { status: 200 });
     }
 
     // Handle failed predictions
     if (prediction.status === "failed") {
-        await supabaseAdmin
-            .from("jobs")
-            .update({ job_status: "failed", error_message: prediction.error })
-            .eq("id", jobId);
-        // Here you could also trigger a credit refund.
+        await handleFailedPrediction(jobId, prediction.error, supabaseAdmin);
         return NextResponse.json({ detail: "Processed failed prediction." }, { status: 200 });
     }
 
     // Handle successful predictions
-    if (prediction.status === "succeeded" && Array.isArray(prediction.output)) {
-        await processSuccessfulPrediction({ prediction, userId, jobId, supabaseAdmin });
+     if (prediction.status === "succeeded") {
+        await handleSuccessfulPrediction(jobId, prediction, supabaseAdmin);
     }
 
     return NextResponse.json({ detail: "Webhook processed successfully" }, { status: 200 });
 
   } catch (error: any) {
-    console.error("Error processing webhook:", error.message);
+    console.error(`Error processing webhook for job ${jobId}:`, error.message);
     const supabaseAdmin = getSupabaseAdmin();
-    await supabaseAdmin
-      .from("jobs")
-      .update({ job_status: "failed", error_message: error.message })
-      .eq("id", jobId);
-      
+    await handleFailedPrediction(jobId, error.message, supabaseAdmin);
     return NextResponse.json({ detail: error.message }, { status: 500 });
   }
 }
 
-async function processSuccessfulPrediction({ prediction, userId, jobId, supabaseAdmin }: any) {
-  // BUG FIX: Process all images from the output, not just the last one.
-  const imageProcessingPromises = prediction.output.map(async (imageUrl: string) => {
-    const supabaseImageUrl = await downloadAndStoreImage({
-      imageUrl,
-      predictionId: prediction.id,
-      imageIdentifier: prediction.output.indexOf(imageUrl), // To create unique names
-      supabaseAdmin,
-    });
-
-    // We need the image ID to link it to the job.
-    const { data: newImage, error } = await supabaseAdmin
-      .from("images")
-      .insert({
-        image_url: supabaseImageUrl,
-        is_public: true,
-        user_id: userId,
-      })
-      .select("id")
-      .single();
-
-    if (error) throw new Error(`Failed to store image metadata: ${error.message}`);
-    return newImage.id;
-  });
-
-  const imageIds = await Promise.all(imageProcessingPromises);
-
-  // Use a transaction to link images and update the job status.
-  // This ensures that if linking fails, the whole operation fails.
-  const jobOutputImages = imageIds.map(imageId => ({ image_id: imageId, job_id: jobId }));
-  
-  const { error: linkError } = await supabaseAdmin.from("job_output_images").insert(jobOutputImages);
-  if (linkError) throw new Error(`Failed to link images to job: ${linkError.message}`);
-
-  await supabaseAdmin.from("jobs").update({ job_status: "succeeded" }).eq("id", jobId);
-  console.log(`Successfully processed job ${jobId} with ${imageIds.length} images.`);
+async function handleFailedPrediction(jobId: string, errorMessage: string, supabaseAdmin: SupabaseClient) {
+    // Update job status in the database
+    await supabaseAdmin
+        .from("jobs")
+        .update({ job_status: "failed", error_message: errorMessage })
+        .eq("id", jobId);
+    
+    // Call the database function to refund credits
+    const { error: refundError } = await supabaseAdmin.rpc('refund_job_credits', { p_job_id: jobId });
+    if (refundError) {
+        console.error(`CRITICAL: Failed to refund credits for job ${jobId}:`, refundError.message);
+        // Here you should add monitoring/alerting
+    } else {
+        console.log(`Successfully refunded credits for failed job ${jobId}.`);
+    }
 }
 
-async function downloadAndStoreImage({ imageUrl, predictionId, imageIdentifier, supabaseAdmin }: any) {
-  const response = await fetch(imageUrl);
-  if (!response.ok) throw new Error(`Failed to download image: ${response.statusText}`);
+async function handleSuccessfulPrediction(jobId: string, prediction: Prediction, supabaseAdmin: SupabaseClient) {
+    // --- NORMALIZATION STEP ---
+    // This is the key fix. We ensure imageUrls is always an array.
+    let imageUrls: string[] = [];
+    if (Array.isArray(prediction.output)) {
+        // Handle models that return an array of strings
+        imageUrls = prediction.output;
+    } else if (typeof prediction.output === 'string') {
+        // Handle models that return a single string
+        imageUrls = [prediction.output];
+    }
 
-  const imageBuffer = await response.arrayBuffer();
-  // Ensure a unique filename for each image in a batch
-  const filename = `${predictionId}-${imageIdentifier}.png`;
+    // --- EDGE CASE HANDLING ---
+    // If after normalization, there are no images, the job has failed.
+    if (imageUrls.length === 0) {
+        console.warn(`Job ${jobId} succeeded but had no output. Marking as failed.`);
+        // Re-use the failure logic. This will also trigger a refund if configured.
+        throw new Error("Prediction succeeded but returned no output images.");
+    }
 
-  const { error } = await supabaseAdmin.storage
-    .from("generated-images")
-    .upload(filename, imageBuffer, { contentType: "image/png", upsert: true });
+    // The rest of the function can now proceed with the guarantee that imageUrls is an array.
+    // The retry and streaming logic from before remains the same.
 
-  if (error) throw new Error(`Failed to upload image to storage: ${error.message}`);
+    const downloadAndStoreImage = async (imageUrl: string, index: number): Promise<string> => {
+        const filename = `${prediction.id}-${index}.png`; // Using .png as a standard, Supabase handles content-type
+        try {
+            // Your retry helper function should be defined here or imported
+            return await retry(async () => {
+                const response = await fetch(imageUrl);
+                if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+                if (!response.body) throw new Error("Response body is null.");
 
-  const { data: { publicUrl } } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
-  return publicUrl;
+                const { error: uploadError } = await supabaseAdmin.storage
+                    .from("generated-images")
+                    .upload(filename, response.body, { upsert: true, duplex: 'half' });
+
+                if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+
+                const { data: { publicUrl } } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
+                return publicUrl;
+            });
+        } catch (error: any) {
+            console.error(`Failed to process image ${index} for job ${jobId}. URL: ${imageUrl}`, error);
+            throw error;
+        }
+    };
+
+    // This part is now safe because imageUrls is GUARANTEED to be an array.
+    const downloadPromises = imageUrls.map((url: string, index: number) => 
+        downloadAndStoreImage(url, index)
+    );
+
+    const supabaseImageUrls = await Promise.all(downloadPromises);
+
+    const { error } = await supabaseAdmin.rpc('process_successful_job', {
+        p_job_id: jobId,
+        p_image_urls: supabaseImageUrls,
+    });
+
+    if (error) {
+        throw new Error(`Database transaction failed for job ${jobId}: ${error.message}`);
+    }
+
+    console.log(`Successfully processed and stored ${supabaseImageUrls.length} image(s) for job ${jobId}.`);
 }

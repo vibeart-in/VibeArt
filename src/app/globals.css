@@ -154,14 +154,14 @@
 
 /* This is for each column in the grid */
 .my-masonry-grid_column {
-  padding-left: 10px;
+  padding-left: 15px;
   /* gutter size */
   background-clip: padding-box;
 }
 
 /* This is for each item within a column */
 .my-masonry-grid_column>div {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   /* space between items */
 }
 
@@ -402,4 +402,8 @@
 .scroll-smooth-transition {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+}
+
+.grain-overlay {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgY29sb3JJaW50ZXJwb2xhdGlvbkZpbHRlcnM9InNSR0IiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbnoaXNlKSIvPjwvc3ZnPg==');
 }
