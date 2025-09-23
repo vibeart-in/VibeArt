@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // STEP 1: Create job and message records without deducting credits.
     const { data, error } = await supabase.rpc("create_job_and_message", {
       p_user_id: user.id,
-      p_prompt: parameters?.prompt || "",
+      p_prompt: parameters?.prompt || parameters[0].fieldValue,
       p_model: modelIdentifier,
       p_parameters: parameters,
       p_credit_cost: modelCredit,
@@ -85,14 +85,7 @@ export async function POST(req: Request) {
             webappId: modelIdentifier,
             apiKey: process.env.RUNNING_HUB_API_KEY,
             webhookUrl: webhookUrl, // <-- ADD THIS LINE
-            nodeInfoList: [
-              {
-                nodeId: "3", // As per the provided example, adjust if needed
-                fieldName: "prompt",
-                fieldValue: parameters?.prompt || "",
-                description: null,
-              },
-            ],
+            nodeInfoList: parameters
           }),
         }
       );

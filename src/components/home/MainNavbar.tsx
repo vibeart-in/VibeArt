@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { UserProfileDropdown } from "../ui/UserProfileDropdown";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
 import CreditBadge from "./CreditBadge";
@@ -26,7 +27,6 @@ const navItems = [
     name: "Image",
     icon: <PhotoIcon className="h-6 w-6" />,
     link: "/image/generate",
-    isActive: true,
   },
   {
     name: "Edit",
@@ -89,17 +89,18 @@ const logoVariants: Variants = {
 
 export function MainNavbar() {
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const pathname = usePathname();
 
-  const { data, isLoading } = useNavInfo();
+  const { data } = useNavInfo();
   const { user, navInfo } = data || {};
 
-  console.log(navInfo);
-  console.log(user);
-  const pct = Math.min(
-    100,
-    Math.round(((navInfo?.total_credits ?? 0) / 100) * 100)
-  );
-  const low = (navInfo?.total_credits ?? 0) < 10;
+  // Function to check if a nav item is active based on current route
+  const isActiveRoute = (link: string) => {
+    if (link === "/home") {
+      return pathname === "/" || pathname === "/home";
+    }
+    return pathname.startsWith(link);
+  };
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}
@@ -170,20 +171,23 @@ export function MainNavbar() {
               <Link
                 href={item.link}
                 className={`flex px-4 py-2.5 items-center justify-center rounded-[16px] transition-all duration-300 relative overflow-hidden ${
-                  item.isActive
+                  isActiveRoute(item.link)
                     ? "bg-[#D9E825] text-black shadow-lg"
                     : "hover:bg-gray-700 text-white"
                 }`}
               >
                 <motion.div
-                  whileHover={{ scale: 1.1, rotate: item.isActive ? 0 : 5 }}
+                  whileHover={{
+                    scale: 1.1,
+                    rotate: isActiveRoute(item.link) ? 0 : 5,
+                  }}
                   whileTap={{ scale: 0.95 }}
                 >
                   {item.icon}
                 </motion.div>
 
                 <AnimatePresence>
-                  {(hoveredItem === index || item.isActive) && (
+                  {(hoveredItem === index || isActiveRoute(item.link)) && (
                     <motion.div
                       layout
                       initial={{ opacity: 0, x: 8 }}

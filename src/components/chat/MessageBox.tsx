@@ -1,9 +1,8 @@
 "use client";
 import ImageCard from "@/src/components/ui/ImageCard";
-import { IconCoin, IconCopy, IconRefresh } from "@tabler/icons-react";
+import { IconCopy, IconDiamondFilled } from "@tabler/icons-react";
 import { MessageType } from "@/src/types/BaseType";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
-import { useState } from "react";
 import { motion } from "motion/react";
 
 const getLoadingMessage = (status: string) => {
@@ -24,11 +23,12 @@ interface MessageBoxProps {
 }
 
 export default function MessageBox({ message }: MessageBoxProps) {
-  const { job_status, output_images, parameters, error_message, userPrompt } =
+  const { job_status, output_images, parameters, error_message, userPrompt, credit_cost } =
     message;
+
+  console.log(message)
   const numOfOutputs = parameters?.num_of_output || 1;
   const ratio = parameters?.aspect_ratio;
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div className="w-full flex max-w-5xl">
@@ -40,7 +40,7 @@ export default function MessageBox({ message }: MessageBoxProps) {
           <div className="flex gap-2">
             <IconCopy size={25} className="custom-box" />
             <p className="flex custom-box items-center gap-2 text-xs font-semibold text-white/80">
-              <IconCoin size={20} className="text-white/80" />4
+              <IconDiamondFilled className="w-5 h-5" />{credit_cost}
             </p>
           </div>
           <p className="text-sm tracking-wide text-white/80">

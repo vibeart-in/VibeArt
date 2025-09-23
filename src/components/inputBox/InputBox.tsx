@@ -1,15 +1,21 @@
 "use client";
-import { IconTerminal } from "@tabler/icons-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { Textarea } from "../ui/textarea";
+import { useState, useEffect, useRef } from "react";
 import { Loader2, MoreVertical, Sparkles, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
 import { ModelData } from "@/src/types/BaseType";
-import DynamicParameters from "./DynamicParameters";
 import GradualBlurMemo from "../ui/GradualBlur";
+import {
+  ReplicateParameters,
+  ReplicateParametersHandle,
+} from "./ReplicateParameters";
+import {
+  RunninghubParameters,
+  RunninghubParametersHandle,
+} from "./RunninghubParameters";
+import GenerateButton from "../ui/GenerateButton";
 
 const initialModel: ModelData = {
   id: "1",
@@ -21,127 +27,56 @@ const initialModel: ModelData = {
   model_uploaded: "Updated 4 weeks ago",
   runs: "22.7M runs",
   parameters: {
-    seed: {
-      type: "integer",
-      title: "Seed",
-      "x-order": 10,
-      description: "Random seed. Set for reproducible generation",
-    },
-    steps: {
-      type: "integer",
-      title: "Steps",
-      default: 25,
-      maximum: 50,
-      minimum: 1,
-      "x-order": 5,
-      description: "Number of diffusion steps",
-    },
-    width: {
-      type: "integer",
-      title: "Width",
-      maximum: 1440,
-      minimum: 256,
-      "x-order": 3,
-      description:
-        "Width of the generated image in text-to-image mode. Only used when aspect_ratio=custom. Must be a multiple of 32 (if it's not, it will be rounded to nearest multiple of 32). Note: Ignored in img2img and inpainting modes.",
-    },
-    height: {
-      type: "integer",
-      title: "Height",
-      maximum: 1440,
-      minimum: 256,
-      "x-order": 4,
-      description:
-        "Height of the generated image in text-to-image mode. Only used when aspect_ratio=custom. Must be a multiple of 32 (if it's not, it will be rounded to nearest multiple of 32). Note: Ignored in img2img and inpainting modes.",
-    },
     prompt: {
       type: "string",
       title: "Prompt",
-      "x-order": 0,
-      description: "Text prompt for image generation",
+      description: "Prompt",
     },
-    guidance: {
-      type: "number",
-      title: "Guidance",
-      default: 3,
-      maximum: 5,
-      minimum: 2,
-      "x-order": 6,
-      description:
-        "Controls the balance between adherence to the text prompt and image quality/diversity. Higher values make the output more closely match the prompt but may reduce overall image quality. Lower values allow for more creative freedom but might produce results less relevant to the prompt.",
+    speed_mode: {
+      enum: [
+        "Lightly Juiced 🍊 (more consistent)",
+        "Juiced 🔥 (default)",
+        "Extra Juiced 🔥 (more speed)",
+        "Blink of an eye 👁️",
+      ],
+      type: "string",
+      title: "speed_mode",
+      default: "Juiced 🔥 (default)",
+      description: "Speed optimization level",
     },
-    interval: {
-      type: "number",
-      title: "Interval",
-      default: 2,
-      maximum: 4,
-      minimum: 1,
-      "x-order": 7,
-      description:
-        "Interval is a setting that increases the variance in possible outputs letting the model be a tad more dynamic in what outputs it may produce in terms of composition, color, detail, and prompt interpretation. Setting this value low will ensure strong prompt following with more consistent outputs, setting it higher will produce more dynamic or varied outputs.",
-    },
+    // "input image": {
+    //   type: "string",
+    //   title: "Input Image",
+    //   format: "uri",
+    //   default:
+    //     "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/sign/uploaded-images/11b860f5-54db-44e5-83ff-8fdb911e0b29/f03e2a24-b4a3-4678-8f54-07cdb1bc4083-0.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MzgwNmFmZC1mZDZkLTQ5NDktYjFmNC0yNjRiMDgyNDNjMjkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ1cGxvYWRlZC1pbWFnZXMvMTFiODYwZjUtNTRkYi00NGU1LTgzZmYtOGZkYjkxMWUwYjI5L2YwM2UyYTI0LWI0YTMtNDY3OC04ZjU0LTA3Y2RiMWJjNDA4My0wLndlYnAiLCJpYXQiOjE3NTg2NTM5MDEsImV4cCI6MTc1OTI1ODcwMX0.8xrx1cR2PhjwW-y1vya9SaZIHPSXBiSIZs0LoUKwWOc",
+    //   description:
+    //     "Image to use as reference. Must be jpeg, png, gif, or webp.",
+    // },
     aspect_ratio: {
       enum: [
-        "custom",
         "1:1",
         "16:9",
+        "21:9",
         "3:2",
         "2:3",
         "4:5",
         "5:4",
-        "9:16",
         "3:4",
         "4:3",
+        "9:16",
+        "9:21",
       ],
       type: "string",
       title: "aspect_ratio",
-      description: "Aspect ratio for the generated image",
       default: "1:1",
-      "x-order": 2,
+      description: "Aspect ratio of the output image",
     },
-    image_prompt: {
-      type: "string",
-      title: "Image Prompt",
-      format: "uri",
-      "x-order": 1,
-      description:
-        "Image to use with Flux Redux. This is used together with the text prompt to guide the generation towards the composition of the image_prompt. Must be jpeg, png, gif, or webp.",
-    },
-    output_format: {
-      enum: ["webp", "jpg", "png"],
-      type: "string",
-      title: "output_format",
-      description: "Format of the output images.",
-      default: "webp",
-      "x-order": 11,
-    },
-    output_quality: {
+    "num inference steps": {
       type: "integer",
-      title: "Output Quality",
-      default: 80,
-      maximum: 100,
-      minimum: 0,
-      "x-order": 12,
-      description:
-        "Quality when saving the output images, from 0 to 100. 100 is best quality, 0 is lowest quality. Not relevant for .png outputs",
-    },
-    safety_tolerance: {
-      type: "integer",
-      title: "Safety Tolerance",
-      default: 2,
-      maximum: 6,
-      minimum: 1,
-      "x-order": 8,
-      description:
-        "Safety tolerance, 1 is most strict and 6 is most permissive",
-    },
-    prompt_upsampling: {
-      type: "boolean",
-      title: "Prompt Upsampling",
-      default: false,
-      "x-order": 9,
-      description:
-        "Automatically modify the prompt for more creative generation",
+      title: "Num Inference Steps",
+      default: 28,
+      description: "Number of inference steps",
     },
   },
   cost: 2,
@@ -152,7 +87,9 @@ const initialModel: ModelData = {
   identifier: "black-forest-labs/flux-dev",
   version: "1.0",
   created_at: "",
-  provider: "running_hub",
+  provider: "replicate",
+  is_popular: false,
+  estimated_time: 2,
 };
 
 const validateAndSanitizePrompt = (prompt: string) => {
@@ -168,33 +105,58 @@ const validateAndSanitizePrompt = (prompt: string) => {
 
 interface InputBoxProps {
   conversationId?: string;
+  initialImage?: string;
 }
 
-const InputBox = ({ conversationId }: InputBoxProps) => {
+const InputBox = ({ conversationId, initialImage }: InputBoxProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelData>(initialModel);
-  const [parameters, setParameters] = useState<Record<string, any>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
+  const replicateParamsRef = useRef<ReplicateParametersHandle>(null);
+  const runninghubParamsRef = useRef<RunninghubParametersHandle>(null);
 
   const mutation = useGenerateImage(conversationId);
 
   const handleModelSelect = (model: ModelData) => {
     setSelectedModel(model);
-    localStorage.setItem("lastSelectedModel", JSON.stringify(model));
+    sessionStorage.setItem("lastSelectedModel", JSON.stringify(model));
     setIsDialogOpen(false);
   };
 
-  useEffect(() => {
-    const savedModel = localStorage.getItem("lastSelectedModel");
-    if (savedModel) {
-      try {
-        setSelectedModel(JSON.parse(savedModel));
-      } catch {
-        console.warn("Failed to parse saved model.");
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedModel = sessionStorage.getItem("lastSelectedModel");
+  //   if (savedModel) {
+  //     try {
+  //       setSelectedModel(JSON.parse(savedModel));
+  //     } catch {
+  //       console.warn("Failed to parse saved model.");
+  //     }
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log("CHANGED MODELS..................");
+  //   if (selectedModel.provider === "replicate" && initialImage) {
+  //     const imageInputKey = selectedModel.parameters["image input"]
+  //       ? "image input"
+  //       : "input image";
+
+  //     // Set the default value of the image parameter to initialImage
+  //     if (selectedModel.parameters[imageInputKey]) {
+  //       setSelectedModel((prevModel) => ({
+  //         ...prevModel,
+  //         parameters: {
+  //           ...prevModel.parameters,
+  //           [imageInputKey]: {
+  //             ...prevModel.parameters[imageInputKey],
+  //             default: initialImage,
+  //           },
+  //         },
+  //       }));
+  //     }
+  //   }
+  // }, [selectedModel, initialImage]);
 
   useEffect(() => {
     return () => {
@@ -204,10 +166,33 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   const handleGenerateClick = () => {
     if (mutation.isPending) return;
+    let finalParameters;
+    let promptText = "";
 
-    const { isValid, error } = validateAndSanitizePrompt(
-      parameters.prompt || ""
-    );
+    if (selectedModel.provider === "replicate") {
+      if (!replicateParamsRef.current) {
+        console.error("Replicate parameters component is not ready.");
+        return;
+      }
+      finalParameters = replicateParamsRef.current.getValues();
+      promptText = finalParameters.prompt || "";
+    } else if (selectedModel.provider === "running_hub") {
+      if (!runninghubParamsRef.current) {
+        console.error("Runninghub parameters component is not ready.");
+        return;
+      }
+      finalParameters = runninghubParamsRef.current.getValues();
+
+      const promptParam = finalParameters.find(
+        (p) => p.description === "prompt"
+      );
+      promptText = promptParam?.fieldValue || "";
+    } else {
+      setFormError(`Unsupported provider: ${selectedModel.provider}`);
+      return;
+    }
+
+    const { isValid, error } = validateAndSanitizePrompt(promptText);
     if (!isValid && error) {
       setFormError(error);
       return;
@@ -215,9 +200,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
     setFormError(null);
 
+    console.log(finalParameters);
+
     mutation.mutate(
       {
-        parameters,
+        parameters: finalParameters, // Use the correctly shaped data
         conversationId,
         modelIdentifier: selectedModel.identifier,
         modelCredit: selectedModel.cost,
@@ -225,10 +212,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       },
       {
         onSuccess: () => {
-          setParameters((prev) => ({
-            ...prev,
-            prompt: "",
-          }));
+          // You would need to add a reset method to the imperative handle
+          // on both parameter components if you want to clear the prompt on success.
         },
         onError: (err) => {
           setFormError(`Generation failed: ${err.message}`);
@@ -239,10 +224,6 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   const handleCardClick = () => {
     setIsDialogOpen((prev) => !prev);
-  };
-
-  const handleParametersChange = (values: Record<string, any>) => {
-    setParameters(values);
   };
 
   return (
@@ -297,46 +278,21 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         </div>
 
         <div className="mt-2 flex z-20 flex-col items-center gap-2">
-          <AnimatePresence>
-            {!isDialogOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.1 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full"
-              >
-                <IconTerminal className="absolute top-2 left-4 text-white/80" />
-                <Textarea
-                  value={parameters.prompt || ""}
-                  onChange={(e) =>
-                    setParameters((prev) => ({
-                      ...prev,
-                      prompt: e.target.value,
-                    }))
-                  }
-                  className="pl-12 hide-scrollbar min-w-[400px]"
-                  placeholder="A cute magical flying cat, cinematic, 4k"
-                  maxHeight={100}
-                  disabled={mutation.isPending}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleGenerateClick();
-                    }
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* DESKTOP: Show parameters inline */}
           <div className="hidden md:flex flex-grow justify-center">
-            <DynamicParameters
-              inputParameters={selectedModel.parameters}
-              outputParameters={parameters}
-              onValuesChange={handleParametersChange}
-            />
+            {selectedModel.provider === "replicate" ? (
+              <ReplicateParameters
+                // @ts-ignore
+                parameters={selectedModel.parameters}
+                ref={replicateParamsRef}
+              />
+            ) : (
+              <RunninghubParameters
+                // @ts-ignore
+                parameters={selectedModel.parameters}
+                ref={runninghubParamsRef}
+              />
+            )}
           </div>
           {formError && (
             <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-xl mb-2 text-sm">
@@ -359,20 +315,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             </button>
           </div>
         </div>
-        <button
-          onClick={handleGenerateClick}
-          disabled={mutation.isPending}
-          className="px-6 rounded-3xl z-20 text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed flex-shrink-0"
-        >
-          {mutation.isPending ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <Sparkles />
-          )}
-          <span className={mutation.isPending ? "hidden sm:inline" : "inline"}>
-            {mutation.isPending ? "Generating..." : "Generate"}
-          </span>
-        </button>
+        <GenerateButton
+          handleGenerateClick={handleGenerateClick}
+          mutation={mutation}
+          selectedModel={selectedModel}
+        />
       </section>
 
       {/* MODAL FOR MOBILE PARAMETERS */}
@@ -396,13 +343,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               <h3 className="text-lg font-semibold text-white mb-4">
                 Advanced Settings
               </h3>
-              <div className="mb-6">
-                <DynamicParameters
-                  inputParameters={selectedModel.parameters}
-                  outputParameters={parameters}
-                  onValuesChange={handleParametersChange}
-                />
-              </div>
+              <div className="mb-6"></div>
               <button
                 onClick={() => setIsParamsMenuOpen(false)}
                 className="w-full py-2.5 rounded-lg bg-accent/90 text-black font-bold"

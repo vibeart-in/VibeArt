@@ -46,12 +46,10 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
       <div
         className="absolute inset-0 w-full h-full"
         style={{
-          backgroundImage: `${stripePattern}, ${rainbowPattern}`,
+          backgroundImage: `${stripePattern}`,
           backgroundSize: "300% 200%",
           backgroundPosition: "50% 50%",
-          filter: "blur(10px) opacity(50%) saturate(160%)",
-          maskImage:
-            "radial-gradient(ellipse at 100% 0%, black 40%, transparent 70%)",
+          filter: "blur(30px) opacity(90%) saturate(150%)",
         }}
       >
         <div
@@ -66,8 +64,8 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
 
       {/* Content with Text Shimmer */}
       <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-white text-center px-4">
-        <div className="text-2xl font-semibold mb-4 opacity-90 animate-text-shimmer bg-gradient-to-r from-white/60 via-white to-white/60 bg-clip-text text-transparent">
-          {loadingText}
+        <div className="text-2xl font-semibold mb-2">
+          <AITextLoading text={loadingText} />
         </div>
         {subtitle && (
           <div className="text-sm opacity-70 mb-6 animate-text-shimmer bg-gradient-to-r from-white/50 via-white to-white/50 bg-clip-text text-transparent">
@@ -75,6 +73,26 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+export const AITextLoading: React.FC<{ className?: string; text?: string }> = ({
+  text = "Processing",
+}) => {
+  const letters = Array.from(text);
+  return (
+    <div className="flex gap-0 font-semibold tracking-wide">
+      {letters.map((ch, i) => (
+        <span
+          key={i}
+          className="loader-letter inline-block opacity-80 leading-none"
+          style={{ animationDelay: `${i * 0.06}s` }}
+          aria-hidden
+        >
+          {ch}
+        </span>
+      ))}
     </div>
   );
 };

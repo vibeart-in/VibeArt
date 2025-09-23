@@ -1,24 +1,15 @@
 "use client";
-import { createClient } from "@/src/lib/supabase/client";
 import { HistoryItem } from "@/src/types/BaseType";
-import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import HistoryCard from "./HistoryCard";
 import Link from "next/link";
 import { IconPlus } from "@tabler/icons-react";
-import { usePathname, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useMemo } from "react";
+import { useConversationHistory } from "@/src/hooks/useConversationHistory";
+import { groupHistoryByDate } from "@/src/lib/dateUtils";
 
-const supabase = createClient();
-const CONVERSATION_HISTORY_QUERY_KEY = ["conversationHistory"];
-
-const fetchConversationHistory = async (): Promise<HistoryItem[]> => {
-  const { data, error } = await supabase.rpc("get_conversations_with_details");
-  if (error) throw new Error("Could not fetch conversation history");
-  if (!Array.isArray(data))
-    throw new Error("Unexpected response format from RPC");
-  return data as unknown as HistoryItem[];
-};
-
+// Variants can stay the same as they are well-defined.
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -57,42 +48,39 @@ const SkeletonRow = () => (
 
 const GenerateHistory = () => {
   const params = useParams();
-	console.log(params)
-  const activeId = params.id as string | undefined; // Get the active ID from the URL
+  const activeId = params.id as string | undefined;
 
+  // Use our new custom hook!
   const {
     data: historyData,
     isPending,
-    isLoading, // support older versions
     isError,
     error,
-  } = useQuery<HistoryItem[], Error>({
-    queryKey: CONVERSATION_HISTORY_QUERY_KEY,
-    queryFn: fetchConversationHistory,
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
+  } = useConversationHistory();
 
-  const loading = typeof isPending !== "undefined" ? isPending : !!isLoading;
+  // Memoize the grouped data to prevent re-computation on every render.
+  const groupedHistory = useMemo(() => {
+    return groupHistoryByDate(historyData || []);
+  }, [historyData]);
+  const dateGroups = Object.keys(groupedHistory);
 
   return (
-    <div className="bg-black border-2 p-2 rounded-2xl">
+    <div className="w-[85px] bg-black border-2 p-2 rounded-2xl">
       <Link
         href={"/image/generate"}
         className={`bg-[#292929] w-[66px] h-[66px] flex justify-center items-center rounded-2xl cursor-pointer ${
-						activeId === undefined ? "text-accent" : ""
-				}`}
+          activeId === undefined ? "text-accent" : ""
+        }`}
       >
         <IconPlus stroke={3} className="w-7 h-7" />
       </Link>
 
       <div className="bg-[#292929] h-1.5 rounded-full mx-4 mt-3" />
 
-      <div className="h-[300px] overflow-y-auto overflow-x-visible hide-scrollbar relative pt-3 -mr-[340px]">
-        <AnimatePresence initial={false}>
-          {loading && (
+      {/* Simplified hide-scrollbar logic */}
+      <div className="h-[300px] overflow-y-auto overflow-x-visible hide-scrollbar relative pt-3 pr-[320px]">
+        <AnimatePresence initial={false} mode="wait">
+          {isPending && (
             <motion.div
               key="skeleton"
               className="flex flex-col gap-2"
@@ -107,7 +95,7 @@ const GenerateHistory = () => {
             </motion.div>
           )}
 
-          {!loading && isError && (
+          {isError && (
             <motion.div
               key="error"
               className="text-xs text-red-400 px-1 py-2"
@@ -120,7 +108,7 @@ const GenerateHistory = () => {
             </motion.div>
           )}
 
-          {!loading && !isError && historyData && historyData.length === 0 && (
+          {!isPending && !isError && historyData && historyData.length === 0 && (
             <motion.div
               key="empty"
               className="text-xs text-white/60 px-1 py-2"
@@ -133,32 +121,36 @@ const GenerateHistory = () => {
             </motion.div>
           )}
 
-          {!loading && !isError && historyData && historyData.length > 0 && (
+          {!isPending && !isError && dateGroups.length > 0 && (
             <motion.div
               key="list"
-              className="flex flex-col gap-2"
+              className="flex flex-col" // Removed gap-2 from here
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              exit={{ opacity: 0 }}
             >
-              {historyData.map((history) => (
-                <motion.div
-                  key={history.id}
-                  layout
-                  className="relative overflow-visible"
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                >
-                  <Link href={`/image/generate/${history.id}`} className="block">
-                    <HistoryCard
-                      imageUrl={history.imageUrl}
-                      title={"Image generation"}
-                      prompt={history.prompt}
-                      isActive={activeId === history.id}
-                    />
-                  </Link>
-                </motion.div>
+              {dateGroups.map((group) => (
+                // Use React.Fragment for grouping without adding extra DOM nodes
+                <div key={group}>
+                  <motion.h4
+                    variants={itemVariants} // Animate the header in as well
+                    className="text-[10px] font-bold text-white/50 px-2 pt-2 pb-1 uppercase"
+                  >
+                    {group}
+                  </motion.h4>
+                  <div className="flex flex-col gap-2">
+                     {groupedHistory[group].map((history: HistoryItem) => (
+                        <HistoryCard
+                          key={history.id} // Essential for React and animations
+                          id={history.id}
+                          imageUrl={history.imageUrl}
+                          title={"Image generation"}
+                          prompt={history.prompt}
+                          isActive={activeId === history.id}
+                        />
+                      ))}
+                  </div>
+                </div>
               ))}
             </motion.div>
           )}

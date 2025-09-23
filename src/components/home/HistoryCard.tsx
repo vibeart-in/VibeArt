@@ -1,7 +1,10 @@
 import { motion, AnimatePresence, Variants } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 interface HistoryCardProps {
+  id: string;
   title: string;
   prompt: string;
   imageUrl: string;
@@ -9,6 +12,7 @@ interface HistoryCardProps {
 }
 
 const HistoryCard: React.FC<HistoryCardProps> = ({
+  id,
   title,
   prompt,
   imageUrl,
@@ -33,11 +37,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
     },
   };
 
-  const imgVariants: Variants = {
-    rest: { scale: 1 },
-    hover: { scale: 1.05, transition: { duration: 0.3, ease: "easeOut" } },
-  };
-
   return (
     <motion.div
       className="relative group w-[66px] h-[66px]"
@@ -47,22 +46,30 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
       animate={hovered ? "hover" : "rest"}
       variants={parentVariants}
     >
-      {/* Thumbnail shell (kept separate so flyout won't be clipped) */}
-      <div
-        className={`relative w-[66px] h-[66px] rounded-2xl overflow-hidden transition-colors duration-200 
-                    ${isActive ? "border-2 border-accent" : "border-2 border-transparent"}`}
-      >
-        <motion.img
-          src={imageUrl}
-          alt={prompt}
-          className="absolute inset-0 w-full h-full object-cover"
-          variants={imgVariants}
-        />
-        <motion.div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          variants={overlayVariants}
-        />
-      </div>
+      <Link href={`/image/generate/${id}`}>
+        <div
+          className={`relative w-[66px] h-[66px] rounded-2xl overflow-hidden transition-colors duration-200 
+          ${
+            isActive ? "border-2 border-accent" : "border-2 border-transparent"
+          }`}
+        >
+          <Image
+            src={imageUrl}
+            alt={prompt}
+            width={50}
+            height={50}
+            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out ${
+              hovered ? "scale-105" : "scale-100"
+            }`}
+            priority={false}
+            // variants={imgVariants}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            variants={overlayVariants}
+          />
+        </div>
+      </Link>
 
       {/* Flyout: appears only on hover */}
       <AnimatePresence>

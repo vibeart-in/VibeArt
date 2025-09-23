@@ -16,6 +16,27 @@ export interface MessageType {
   error_message?: string | null;
 }
 
+export type SchemaParam = {
+  type: string;
+  title: string;
+  description?: string;
+  default?: any;
+  enum?: string[];
+  minimum?: number;
+  maximum?: number;
+  format?: string;
+};
+
+export type NodeParam = {
+  nodeId: string;
+  fieldName: string;
+  fieldValue: string;
+  description?: string;
+  fieldData?: string;
+};
+
+export type InputBoxParameter = Record<string, SchemaParam> | NodeParam[];
+
 export interface ModelData {
   id: string;
   created_at: string;
@@ -31,8 +52,10 @@ export interface ModelData {
   runs: string | null;
   link: string | null;
   model_uploaded: string;
-  parameters: Record<string, InputBoxParameter>;
+  parameters: InputBoxParameter;
   provider: "running_hub" | "replicate";
+  is_popular: boolean;
+  estimated_time: number
 }
 
 export interface HistoryItem {
@@ -40,24 +63,13 @@ export interface HistoryItem {
   imageUrl: string;
   title: string;
   prompt: string;
+  created_at: string;
 }
 
 export interface ImageCardType {
   id: number;
   image_url: string;
   prompt: string;
-}
-
-export interface InputBoxParameter {
-  type: string;
-  title: string;
-  description?: string;
-  default?: any;
-  enum?: string[];
-  minimum?: number;
-  maximum?: number;
-  "x-order"?: number;
-  format?: string;
 }
 
 export interface ImageCard3DType {
