@@ -67,7 +67,10 @@ export async function POST(request: Request) {
     }
 
     if (prediction.status === "failed") {
-      await handleFailedPrediction(jobId, prediction.error, supabaseAdmin);
+      const errorMessage = prediction.error
+        ? String(prediction.error)
+        : "Unknown error";
+      await handleFailedPrediction(jobId, errorMessage, supabaseAdmin);
       return NextResponse.json(
         { detail: "Processed failed prediction." },
         { status: 200 }

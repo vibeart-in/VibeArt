@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import { Loader2, MoreVertical, Sparkles, XCircle } from "lucide-react";
+import { MoreVertical, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
@@ -105,10 +105,10 @@ const validateAndSanitizePrompt = (prompt: string) => {
 
 interface InputBoxProps {
   conversationId?: string;
-  initialImage?: string;
+  // initialImage?: string;
 }
 
-const InputBox = ({ conversationId, initialImage }: InputBoxProps) => {
+const InputBox = ({ conversationId }: InputBoxProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelData>(initialModel);
   const [formError, setFormError] = useState<string | null>(null);
@@ -282,13 +282,13 @@ const InputBox = ({ conversationId, initialImage }: InputBoxProps) => {
           <div className="hidden md:flex flex-grow justify-center">
             {selectedModel.provider === "replicate" ? (
               <ReplicateParameters
-                // @ts-ignore
+                // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                 parameters={selectedModel.parameters}
                 ref={replicateParamsRef}
-              />
-            ) : (
-              <RunninghubParameters
-                // @ts-ignore
+                />
+              ) : (
+                <RunninghubParameters
+                // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                 parameters={selectedModel.parameters}
                 ref={runninghubParamsRef}
               />

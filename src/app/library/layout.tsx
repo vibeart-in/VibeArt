@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import SidebarMain from "@/src/components/home/Sidebar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -18,7 +17,7 @@ export default function ImageLayout({
   return (
     <main className="relative flex h-full w-full flex-row">
       <nav className="fixed">
-        <SidebarMain />
+        {/* <SidebarMain /> */}
       </nav>
       <section className="w-full h-full ml-64">{children}</section>
     </main>

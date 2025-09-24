@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { IconUpload, IconPhoto, IconX } from "@tabler/icons-react";
+import { IconUpload, IconX } from "@tabler/icons-react";
 import { supabase } from "@/src/lib/supabase/client";
 
 export default function DragAndDropBox({
@@ -37,7 +37,7 @@ export default function DragAndDropBox({
     e.preventDefault();
     try {
       e.dataTransfer.dropEffect = "copy";
-    } catch (err) {}
+    } catch {}
     setIsDragging(true);
   };
 

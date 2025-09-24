@@ -1,5 +1,4 @@
 "use client";
-import { IconHeart } from "@tabler/icons-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { motion, AnimatePresence, Variants } from "motion/react";

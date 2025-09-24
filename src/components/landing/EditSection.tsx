@@ -1,3 +1,4 @@
+"use client"
 import { IconWand } from "@tabler/icons-react";
 import { GradientComponent } from "./Gradient";
 import { ImageCard3D } from "./3dImageCard";
@@ -68,7 +69,9 @@ const EditSection = () => {
         <div className="z-50 absolute inset-x-0 bottom-0 h-[400px] bg-black/50 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
         <div className="z-50 absolute w-full top-[50%] flex flex-col gap-10 justify-center items-center">
           <div className="w-[300px] h-[200px]">
-            <DragAndDropBox />
+            <DragAndDropBox
+            onUploadSuccess={()=>{}} 
+            />
           </div>
           <InputBox />
         </div>

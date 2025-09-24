@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
 interface AnimatedCounterProps {
-  label?: string;
   initialValue?: number;
   min?: number;
   max?: number;
@@ -11,7 +10,6 @@ interface AnimatedCounterProps {
 }
 
 const AnimatedCounter = ({
-  label = "Batch",
   initialValue = 2,
   min = 0,
   max = 99,

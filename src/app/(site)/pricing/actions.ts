@@ -3,8 +3,6 @@
 import {
   Environment,
   Paddle,
-  Subscription,
-  SubscriptionCollection,
 } from "@paddle/paddle-node-sdk";
 import { createClient } from "@/src/lib/supabase/server";
 

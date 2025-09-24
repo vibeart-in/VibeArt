@@ -1,6 +1,5 @@
 "use client";
 
-import { IconSparkles } from "@tabler/icons-react";
 import ChatView from "@/src/components/chat/ChatView";
 import InputBox from "@/src/components/inputBox/InputBox";
 import { useConversationMessages } from "@/src/hooks/useConversationMessages";

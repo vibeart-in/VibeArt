@@ -1,6 +1,6 @@
 "use client";
 import { supabase } from "@/src/lib/supabase/client";
-import { ImagesIcon, X, CheckCircle2 } from "lucide-react";
+import { ImagesIcon, CheckCircle2 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import * as tus from "tus-js-client";
 
