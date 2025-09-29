@@ -1,6 +1,6 @@
 "use client";
-import { supabase } from "@/src/lib/supabase/client";
-import { ImagesIcon, CheckCircle2 } from "lucide-react";
+import { uploadImage } from "@/src/lib/UploadImage";
+import { ImagesIcon } from "lucide-react";
 import React, { useRef, useState } from "react";
 import * as tus from "tus-js-client";
 
@@ -17,11 +17,10 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleClick = () => {
-    // Don't open file dialog if an upload is in progress or has just succeeded
-    if (isUploading || isSuccess) return;
+    // // Don't open file dialog if an upload is in progress or has just succeeded
+    if (isUploading) return;
     inputRef.current?.click();
   };
 
@@ -29,71 +28,23 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset states before starting a new upload
     setError(null);
-    setIsSuccess(false);
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
-      // 1. Get user session for RLS policy
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const user = session?.user;
-
-      if (!user) {
-        throw new Error("You must be logged in to upload an image.");
-      }
-
-      // 2. Get Supabase project details for TUS client
-      const accessToken = session.access_token;
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const bucketName = "uploaded-images"; // Your bucket name
-      const filePath = `${user.id}/${file.name}`; // File path for RLS
-
-      // 3. Create a new TUS upload instance
-      const upload = new tus.Upload(file, {
-        endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
-        retryDelays: [0, 3000, 5000, 10000, 20000],
-        headers: {
-          authorization: `Bearer ${accessToken}`,
-          "x-upsert": "true", // Ovwrites file with same name
-        },
-        uploadDataDuringCreation: true,
-        metadata: {
-          bucketName: bucketName,
-          objectName: filePath,
-          contentType: file.type,
-        },
-        chunkSize: 6 * 1024 * 1024, // 6MB chunks
+      await uploadImage({
+        file,
+        onProgress: (p) => setUploadProgress(Number(p.toFixed(0))),
         onError: (err) => {
           setError(`Upload failed: ${err.message}`);
           setIsUploading(false);
         },
-        onProgress: (bytesUploaded, bytesTotal) => {
-          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-          setUploadProgress(Number(percentage));
-        },
-        onSuccess: async () => {
-          // 4. On success, create a signed URL for the private file
-          const { data, error: urlError } = await supabase.storage
-            .from(bucketName)
-            .createSignedUrl(filePath, 3600); // URL valid for 1 hour
-
-          if (urlError) {
-            setError(`Failed to get signed URL: ${urlError.message}`);
-          } else {
-            onUploadComplete(data.signedUrl);
-            // setIsSuccess(true);
-          }
+        onSuccess: (url) => {
+          onUploadComplete(url);
           setIsUploading(false);
         },
       });
-
-      // Store the upload instance to allow cancellation
-      tusUploadRef.current = upload;
-      upload.start();
     } catch (err: any) {
       setError(err.message);
       setIsUploading(false);
@@ -106,6 +57,7 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
       setIsUploading(false);
       setUploadProgress(0);
     }
+    sessionStorage.removeItem("initialEditImage");
   };
 
   return (
@@ -115,11 +67,7 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
                  bg-black border border-white/30 
                  shadow-[inset_0px_0px_27.5px_4px_rgba(106,106,106,0.25)] 
                  rounded-[21px] text-white/60 transition-all duration-300
-                 ${
-                   isUploading || isSuccess
-                     ? "cursor-default"
-                     : "cursor-pointer hover:text-white"
-                 }`}
+                 cursor-pointer hover:text-white`}
     >
       <input
         ref={inputRef}
@@ -149,14 +97,14 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
           </>
         )}
 
-        {isSuccess && !isUploading && !error && (
+        {/* {isSuccess && !isUploading && !error && (
           <span className="flex flex-col items-center text-green-400">
             <CheckCircle2 size={24} />
             Done
           </span>
-        )}
+        )} */}
 
-        {!isUploading && !isSuccess && !error && (
+        {!isUploading && !error && (
           <>
             <ImagesIcon size={20} />
             Add image

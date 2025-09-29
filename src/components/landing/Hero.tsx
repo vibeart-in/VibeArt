@@ -11,86 +11,86 @@ import { heroSlides, HeroSlide } from "@/src/lib/heroConfig";
 
 const cardData1: ImageCard3DType[] = [
   {
-    topImageUrl: "/images/landing/cards/prop_game_top.png",
-    bottomImageUrl: "/images/landing/cards/prop_game_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_bottom.webp",
     cardText: "Gaming",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "/images/landing/cards/figurine_trans2.png",
-    bottomImageUrl: "/images/landing/cards/figurine.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine_trans2.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine.webp",
     cardText: "Editing",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/site-dsgin.jpg",
-    bottomImageUrl: "/images/landing/cards/site-desgin.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-dsgin.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-desgin.webp",
     cardText: "Web desgin",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/90s-top.png",
-    bottomImageUrl: "/images/landing/cards/90s-bottom.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-bottom.webp",
     cardText: "90s",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "/images/landing/cards/game-top.png",
-    bottomImageUrl: "/images/landing/cards/game-bottom.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-bottom.webp",
     cardText: "Game",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/concept-top.png",
-    bottomImageUrl: "/images/landing/cards/concept-bottom.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-bottom.webp",
     cardText: "concept",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "/images/landing/cards/emotion-top.png",
-    bottomImageUrl: "/images/landing/cards/emotion-bottom.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-bottom.webp",
     cardText: "concept",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/product-top.png",
-    bottomImageUrl: "/images/landing/cards/product-bottom.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-bottom.webp",
     cardText: "Product",
     topImageScale: 1.05,
   },
   {
-    topImageUrl: "/images/landing/cards/phone-to.png",
-    bottomImageUrl: "/images/landing/cards/phone-bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-to.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-bottom.webp",
     cardText: "Ultra real",
     topImageScale: 1.1
   },
   {
-    topImageUrl: "/images/landing/cards/keys-trans.png",
-    bottomImageUrl: "/images/landing/cards/keys.jpg",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys-trans.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys.webp",
     cardText: "Abstract",
     topImageScale: 1.4,
   },
   {
-    topImageUrl: "/images/landing/cards/anime_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/anime_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_bottom.webp",
     cardText: "Anime",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/goth_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/goth_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_bottom.webp",
     cardText: "Gothic",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "/images/landing/cards/goth_girl2_top.png",
-    bottomImageUrl: "/images/landing/cards/goth_girl2_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "/images/landing/cards/jap_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/jap_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
   },
@@ -98,8 +98,8 @@ const cardData1: ImageCard3DType[] = [
 
 const cardData2: ImageCard3DType[] = [
   {
-    topImageUrl: "/images/landing/cards/guy_top.png",
-    bottomImageUrl: "/images/landing/cards/guy_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_bottom.webp",
     cardText: "Guy",
     topImageScale: 1.1,
     width: 400,
@@ -107,40 +107,40 @@ const cardData2: ImageCard3DType[] = [
     fontSize: 1000
   },
   {
-    topImageUrl: "/images/landing/cards/mirror_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/mirror_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_bottom.webp",
     cardText: "Instagram",
     topImageScale: 1.2,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "/images/landing/cards/prop_top.png",
-    bottomImageUrl: "/images/landing/cards/prop_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.3,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "/images/landing/cards/jap_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/jap_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "/images/landing/cards/prop_top.png",
-    bottomImageUrl: "/images/landing/cards/prop_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.3,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "/images/landing/cards/jap_girl_top.png",
-    bottomImageUrl: "/images/landing/cards/jap_girl_bottom.png",
+    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
     width: 400,
@@ -162,7 +162,7 @@ const Hero = () => {
         setCurrentSlide(heroSlides[nextIndex]);
         return nextIndex;
       });
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [isPaused]);

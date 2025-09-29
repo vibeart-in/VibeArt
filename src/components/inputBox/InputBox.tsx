@@ -5,7 +5,7 @@ import { MoreVertical, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
-import { ModelData } from "@/src/types/BaseType";
+import { ConversationType, ModelData } from "@/src/types/BaseType";
 import GradualBlurMemo from "../ui/GradualBlur";
 import {
   ReplicateParameters,
@@ -16,6 +16,7 @@ import {
   RunninghubParametersHandle,
 } from "./RunninghubParameters";
 import GenerateButton from "../ui/GenerateButton";
+import { usePathname } from "next/navigation";
 
 const initialModel: ModelData = {
   id: "1",
@@ -44,15 +45,15 @@ const initialModel: ModelData = {
       default: "Juiced 🔥 (default)",
       description: "Speed optimization level",
     },
-    // "input image": {
-    //   type: "string",
-    //   title: "Input Image",
-    //   format: "uri",
-    //   default:
-    //     "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/sign/uploaded-images/11b860f5-54db-44e5-83ff-8fdb911e0b29/f03e2a24-b4a3-4678-8f54-07cdb1bc4083-0.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MzgwNmFmZC1mZDZkLTQ5NDktYjFmNC0yNjRiMDgyNDNjMjkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ1cGxvYWRlZC1pbWFnZXMvMTFiODYwZjUtNTRkYi00NGU1LTgzZmYtOGZkYjkxMWUwYjI5L2YwM2UyYTI0LWI0YTMtNDY3OC04ZjU0LTA3Y2RiMWJjNDA4My0wLndlYnAiLCJpYXQiOjE3NTg2NTM5MDEsImV4cCI6MTc1OTI1ODcwMX0.8xrx1cR2PhjwW-y1vya9SaZIHPSXBiSIZs0LoUKwWOc",
-    //   description:
-    //     "Image to use as reference. Must be jpeg, png, gif, or webp.",
-    // },
+    "input image": {
+      type: "string",
+      title: "Input Image",
+      format: "uri",
+      default: "",
+      // "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/sign/uploaded-images/11b860f5-54db-44e5-83ff-8fdb911e0b29/f03e2a24-b4a3-4678-8f54-07cdb1bc4083-0.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MzgwNmFmZC1mZDZkLTQ5NDktYjFmNC0yNjRiMDgyNDNjMjkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ1cGxvYWRlZC1pbWFnZXMvMTFiODYwZjUtNTRkYi00NGU1LTgzZmYtOGZkYjkxMWUwYjI5L2YwM2UyYTI0LWI0YTMtNDY3OC04ZjU0LTA3Y2RiMWJjNDA4My0wLndlYnAiLCJpYXQiOjE3NTg2NTM5MDEsImV4cCI6MTc1OTI1ODcwMX0.8xrx1cR2PhjwW-y1vya9SaZIHPSXBiSIZs0LoUKwWOc",
+      description:
+        "Image to use as reference. Must be jpeg, png, gif, or webp.",
+    },
     aspect_ratio: {
       enum: [
         "1:1",
@@ -105,7 +106,6 @@ const validateAndSanitizePrompt = (prompt: string) => {
 
 interface InputBoxProps {
   conversationId?: string;
-  // initialImage?: string;
 }
 
 const InputBox = ({ conversationId }: InputBoxProps) => {
@@ -116,7 +116,10 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const replicateParamsRef = useRef<ReplicateParametersHandle>(null);
   const runninghubParamsRef = useRef<RunninghubParametersHandle>(null);
 
-  const mutation = useGenerateImage(conversationId);
+  const pathname = usePathname(); 
+  const conversationType = pathname.split("/")[2] as ConversationType
+
+  const mutation = useGenerateImage(conversationType, conversationId);
 
   const handleModelSelect = (model: ModelData) => {
     setSelectedModel(model);
@@ -124,39 +127,16 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     setIsDialogOpen(false);
   };
 
-  // useEffect(() => {
-  //   const savedModel = sessionStorage.getItem("lastSelectedModel");
-  //   if (savedModel) {
-  //     try {
-  //       setSelectedModel(JSON.parse(savedModel));
-  //     } catch {
-  //       console.warn("Failed to parse saved model.");
-  //     }
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log("CHANGED MODELS..................");
-  //   if (selectedModel.provider === "replicate" && initialImage) {
-  //     const imageInputKey = selectedModel.parameters["image input"]
-  //       ? "image input"
-  //       : "input image";
-
-  //     // Set the default value of the image parameter to initialImage
-  //     if (selectedModel.parameters[imageInputKey]) {
-  //       setSelectedModel((prevModel) => ({
-  //         ...prevModel,
-  //         parameters: {
-  //           ...prevModel.parameters,
-  //           [imageInputKey]: {
-  //             ...prevModel.parameters[imageInputKey],
-  //             default: initialImage,
-  //           },
-  //         },
-  //       }));
-  //     }
-  //   }
-  // }, [selectedModel, initialImage]);
+  useEffect(() => {
+    const savedModel = sessionStorage.getItem("lastSelectedModel");
+    if (savedModel) {
+      try {
+        setSelectedModel(JSON.parse(savedModel));
+      } catch {
+        console.warn("Failed to parse saved model.");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -168,7 +148,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     if (mutation.isPending) return;
     let finalParameters;
     let promptText = "";
-
+    
     if (selectedModel.provider === "replicate") {
       if (!replicateParamsRef.current) {
         console.error("Replicate parameters component is not ready.");
@@ -182,7 +162,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         return;
       }
       finalParameters = runninghubParamsRef.current.getValues();
-
+      
       const promptParam = finalParameters.find(
         (p) => p.description === "prompt"
       );
@@ -191,6 +171,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       setFormError(`Unsupported provider: ${selectedModel.provider}`);
       return;
     }
+    console.log(finalParameters)
 
     const { isValid, error } = validateAndSanitizePrompt(promptText);
     if (!isValid && error) {
@@ -204,11 +185,12 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
     mutation.mutate(
       {
-        parameters: finalParameters, // Use the correctly shaped data
+        parameters: finalParameters,
         conversationId,
         modelIdentifier: selectedModel.identifier,
         modelCredit: selectedModel.cost,
         modelProvider: selectedModel.provider,
+        conversationType: conversationType
       },
       {
         onSuccess: () => {
@@ -227,7 +209,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   };
 
   return (
-    <div className="relative w-fit bg-background/80 border border-white/10 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
+    <div className="relative w-fit bg-[#111111]/80 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
       <AnimatePresence>
         {isDialogOpen && (
           <motion.div
@@ -238,7 +220,10 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             transition={{ duration: 0.4, ease: "easeInOut" }}
           >
             <div className="w-full h-full p-2 overflow-y-auto">
-              <DialogBox onSelectModel={handleModelSelect} />
+              <DialogBox
+                conversationType={conversationType}
+                onSelectModel={handleModelSelect}
+              />
             </div>
             <GradualBlurMemo
               target="parent"
@@ -285,9 +270,9 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                 parameters={selectedModel.parameters}
                 ref={replicateParamsRef}
-                />
-              ) : (
-                <RunninghubParameters
+              />
+            ) : (
+              <RunninghubParameters
                 // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                 parameters={selectedModel.parameters}
                 ref={runninghubParamsRef}

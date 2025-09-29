@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       modelIdentifier,
       modelCredit,
       modelProvider,
+      conversationType,
     } = body;
 
     // --- Credit Check ---
@@ -60,6 +61,14 @@ export async function POST(req: Request) {
       p_parameters: parameters,
       p_credit_cost: modelCredit,
       p_initial_conversation_id: initialConversationId,
+      p_conversation_type: conversationType,
+      p_input_image_urls: Array.isArray(
+        parameters?.image_input || parameters?.input_image
+      )
+        ? parameters?.image_input || parameters?.input_image
+        : parameters?.image_input || parameters?.input_image
+        ? [parameters?.image_input || parameters?.input_image]
+        : [],
     });
 
     if (error) throw error;
@@ -85,7 +94,7 @@ export async function POST(req: Request) {
             webappId: modelIdentifier,
             apiKey: process.env.RUNNING_HUB_API_KEY,
             webhookUrl: webhookUrl, // <-- ADD THIS LINE
-            nodeInfoList: parameters
+            nodeInfoList: parameters,
           }),
         }
       );

@@ -1,30 +1,36 @@
 "use client";
 import { IconSearch } from "@tabler/icons-react";
 import { Input } from "../ui/input";
-import { ModelData } from "@/src/types/BaseType";
+import { ConversationType, ModelData } from "@/src/types/BaseType";
 import ModelCard from "../ui/Modelcard";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
 
 type DialogBoxProps = {
+  conversationType: ConversationType;
   onSelectModel: (model: ModelData) => void;
 };
 
-const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
+const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const supabase = createClient();
+
+  console.log("USECASE", conversationType);
 
   const {
     data: models,
     isLoading,
     error,
   } = useQuery<ModelData[], Error>({
-    queryKey: ["allModelsDialog"],
+    queryKey: ["modelsByUsecase", conversationType], // <-- include usecase
     queryFn: async () => {
       const { data, error: rpcError } = await supabase.rpc(
-        "get_all_models_info"
+        "get_models_by_usecase",
+        {
+          p_usecase: conversationType,
+        }
       );
       if (rpcError) {
         throw new Error(rpcError.message);
@@ -32,8 +38,8 @@ const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
       console.log(data);
       return data as unknown as ModelData[];
     },
-    // staleTime: 5 * 60 * 1000, // 5 minutes
-    // refetchOnWindowFocus: false, // Prevents refetching on window focus
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const filteredModels = useMemo(() => {

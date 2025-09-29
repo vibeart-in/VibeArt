@@ -12,15 +12,15 @@ const EditShowcase = () => {
     <div className="h-screen flex w-full justify-center gap-32 items-center">
       <div className="flex flex-col gap-12">
         <ImageCard3D
-          topImageUrl="/images/landing/edit/cane6_top.png"
-          bottomImageUrl="/images/landing/edit/cane6_bottom.png"
+          topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane6_top.webp"
+          bottomImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane6_bottom.webp"
           width={300}
           height={300}
           cardText="Cane Floating"
         />
         <ImageCard3D
-          topImageUrl="/images/landing/edit/cane5_top.png"
-          bottomImageUrl="/images/landing/edit/cane5_bottom.png"
+          topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane5_top.webp"
+          bottomImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane5_bottom.webp"
           width={300}
           height={300}
           cardText="Cane"
@@ -35,8 +35,8 @@ const EditShowcase = () => {
         />
       </div>
       <ImageCard3D
-        topImageUrl="/images/landing/edit/cane_women_top.png"
-        bottomImageUrl="/images/landing/edit/cane_women.jpg"
+        topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane_women_top.webp"
+        bottomImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane_women.webp"
         width={600}
         height={600}
         cardText="Cane"

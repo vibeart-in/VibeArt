@@ -17,20 +17,20 @@ const goldRing = {
 };
 
 const imageList1 = [
-  "/images/landing/edit/edit_image1.jpg",
-  "/images/landing/edit/edit_image2.jpg",
-  "/images/landing/edit/edit_image3.jpg",
-  "/images/landing/edit/edit_image4.jpg",
-  "/images/landing/edit/edit_image5.jpg",
-  "/images/landing/edit/edit_image6.jpg",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image1.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image2.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image3.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image4.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image5.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image6.webp",
 ];
 const imageList2 = [
-  "/images/landing/edit/edit_image7.jpg",
-  "/images/landing/edit/edit_image8.jpg",
-  "/images/landing/edit/edit_image9.jpg",
-  "/images/landing/edit/edit_image10.jpg",
-  "/images/landing/edit/edit_image11.jpg",
-  "/images/landing/edit/edit_image12.jpg",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image7.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image8.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image9.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image10.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image11.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/edit_image12.webp",
 ];
 
 const EditSection = () => {
@@ -46,8 +46,8 @@ const EditSection = () => {
       <div className="relative grid grid-rows-2 [grid-template-columns:40%_60%]  gap-8 items-center p-4 ">
         <div className="row-start-1 row-end-3">
           <ImageCard3D
-            topImageUrl="/images/landing/cards/goth_girl2_top.png"
-            bottomImageUrl="/images/landing/cards/goth_girl2_bottom.png"
+            topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_top.webp"
+            bottomImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_bottom.webp"
             cardText=""
             topImageScale={1.2}
             width={500}

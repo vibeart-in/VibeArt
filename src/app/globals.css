@@ -463,3 +463,26 @@
     background-position: 100% 100%, 0 0, 0 100%;
   }
 }
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: linear-gradient(100deg, #2a2a2a 40%, #3a3a3a 50%, #2a2a2a 60%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.2s ease-out infinite;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+@keyframes skeleton-sweep {
+  0% { background-position-x: 200%; }
+  100% { background-position-x: 0%; }
+}
+
+.mask-gradient-vertical {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; }
+}

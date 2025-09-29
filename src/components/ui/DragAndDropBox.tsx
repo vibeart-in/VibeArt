@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { IconUpload, IconX } from "@tabler/icons-react";
-import { supabase } from "@/src/lib/supabase/client";
+import { uploadImage } from "@/src/lib/UploadImage";
 
 export default function DragAndDropBox({
   onUploadSuccess,
@@ -78,44 +78,20 @@ export default function DragAndDropBox({
     setError(null);
 
     try {
-      // 1. Get the current authenticated user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const result = await uploadImage({
+        file,
+        onProgress: (p) => console.log("Progress:", p.toFixed(0) + "%"),
+        onError: (err) => setError(err.message),
+        onSuccess: (url) => {
+          setUploadedImageUrl(url);
+          sessionStorage.setItem("initialEditImage", url);
+          onUploadSuccess(url);
+        },
+      });
 
-      // 2. Ensure the user is logged in before uploading
-      if (!user) {
-        throw new Error("You must be logged in to upload an image.");
-      }
-
-      // 3. Construct the file path using the user's ID as a folder
-      // This matches your RLS policy: (storage.foldername(name))[1]
-      const filePath = `${user.id}/${file.name}`;
-
-      // 4. Upload the file to the 'uploaded-images' bucket with the new path
-      const { error: uploadError } = await supabase.storage
-        .from("uploaded-images") // Use your bucket_id from the policy
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // 5. Get the public URL for the file from the correct path
-      const { data, error: signedUrlError } = await supabase.storage
-        .from("uploaded-images")
-        .createSignedUrl(filePath, 3600); // The URL will be valid for 3600 seconds (1 hour)
-
-      if (signedUrlError) {
-        throw signedUrlError;
-      }
-
-      console.log(data.signedUrl);
-
-      setUploadedImageUrl(data.signedUrl);
-      onUploadSuccess(data.signedUrl);
-    } catch (error: any) {
-      setError(error.message);
+      console.log("Uploaded URL:", result.signedUrl);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setUploading(false);
     }
@@ -124,12 +100,13 @@ export default function DragAndDropBox({
   const handleRemoveImage = () => {
     setUploadedImageUrl(null);
     onUploadSuccess("");
+    sessionStorage.removeItem("initialEditImage");
   };
 
   return (
     <>
       {uploadedImageUrl ? (
-        <div className="relative w-full h-[65vh]">
+        <div className="relative w-full h-[60vh]">
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
@@ -139,7 +116,7 @@ export default function DragAndDropBox({
             onClick={handleRemoveImage}
             className="absolute -top-6 -right-8"
           >
-            <IconX size={32} className="custom-box hover:text-accent"/>
+            <IconX size={32} className="custom-box hover:text-accent" />
           </button>
         </div>
       ) : (

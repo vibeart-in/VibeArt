@@ -166,8 +166,8 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
           <motion.div
             className="fixed h-screen w-screen inset-0 z-50 flex flex-col p-4 md:p-8"
             style={{
-              background: "rgba(9, 9, 9, 0.81)",
-              backdropFilter: "blur(5px)",
+              background: "rgba(9, 9, 9, 0.7)",
+              backdropFilter: "blur(10px)",
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

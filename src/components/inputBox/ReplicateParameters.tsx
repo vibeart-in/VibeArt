@@ -93,21 +93,32 @@ export const ReplicateParameters = forwardRef<
   const [values, setValues] = useState<Record<string, any>>(initialValues);
 
   useEffect(() => {
-    setValues(initialValues);
-
-    // Reset image states when parameters change
     const imageInputKey = parameters["image input"]
       ? "image input"
       : "input image";
     const imageParam = parameters[imageInputKey];
+    const initialImage = sessionStorage.getItem("initialEditImage");
 
-    if (imageParam?.type === "string") {
-      setSingleImageUrl(imageParam.default || null);
+    if (!imageParam) return;
+
+    // if (initialImage) {
+    //   // const updatedParam = { ...imageParam, default: initialImage };
+    // }
+
+    if (imageParam.type === "string") {
+      setSingleImageUrl(initialImage || null);
+      console.log("INITIAL IMAGE", initialImage);
+      handleChange(imageInputKey, initialImage);
     } else if (imageParam?.type === "array") {
-      setMultiImages(
-        Array.isArray(imageParam.default) ? imageParam.default : []
-      );
+      setMultiImages((prev) => {
+        const newImages = initialImage ? [initialImage, ...prev] : prev;
+        console.log("multiImages", newImages);
+        handleChange(imageInputKey, newImages);
+        return newImages;
+      });
     }
+
+    setValues(initialValues);
   }, [initialValues, parameters]);
 
   useImperativeHandle(ref, () => ({
@@ -115,9 +126,9 @@ export const ReplicateParameters = forwardRef<
   }));
 
   const handleChange = useCallback(
-    (rawKey: string, v: any) => {
+    (rawKey: string, value: any) => {
       const key = normalizeKey(rawKey);
-      setValues((prev) => ({ ...prev, [key]: v }));
+      setValues((prev) => ({ ...prev, [key]: value }));
     },
     [setValues]
   );
@@ -160,17 +171,23 @@ export const ReplicateParameters = forwardRef<
   });
 
   const addImage = (imageLink: string) => {
-    const newImages = [...multiImages, imageLink].slice(0, 5);
     const key = parameters["image input"] ? "image input" : "input image";
-    setMultiImages(newImages);
-    handleChange(key, newImages);
+    setMultiImages((prev) => {
+      const newImages = imageLink ? [...prev, imageLink] : prev;
+      console.log("multiImages", newImages);
+      handleChange(key, newImages);
+      return newImages;
+    });
   };
 
   const removeImage = (index: number) => {
     const key = parameters["image input"] ? "image input" : "input image";
-    const newImages = multiImages.filter((_, i) => i !== index);
-    setMultiImages(newImages);
-    handleChange(key, newImages); // keep parent in sync
+    setMultiImages((prev) => {
+      const newImages = prev.filter((_, i) => i !== index);
+      handleChange(key, newImages);
+      return newImages;
+    });
+    sessionStorage.removeItem("initialEditImage");
   };
 
   return (
@@ -277,7 +294,10 @@ export const ReplicateParameters = forwardRef<
                 className="w-full h-full object-cover object-top rounded-[20px]"
               />
               <button
-                onClick={() => setSingleImageUrl(null)}
+                onClick={() => {
+                  setSingleImageUrl(null);
+                  sessionStorage.removeItem("initialEditImage");
+                }}
                 className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1 
                          text-white opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Remove image"

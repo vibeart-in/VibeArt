@@ -32,7 +32,7 @@ const PrivacySection = () => {
         {/* 2. Wrap the bottom image with a ParallaxItem */}
         <MouseParallaxItem strength={15}>
           <TexturedImage
-            src={"/images/landing/privacy_bottom.png"}
+            src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/privacy/privacy_bottom.webp"
             borderRadius="200px"
             baseFrequency={0.16}
             numOctaves={2}
@@ -62,7 +62,7 @@ const PrivacySection = () => {
           className="w-full rounded-[200px] absolute left-0 -top-24"
         >
           <Image
-            src={"/images/landing/privacy_top.png"}
+            src={"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/privacy/Privacy_top.webp"}
             quality={100}
             width={800}
             height={800}

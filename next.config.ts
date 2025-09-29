@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "www.searchyour.ai",
-      }
+      },
     ],
   },
 };

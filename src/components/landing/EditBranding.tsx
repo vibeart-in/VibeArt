@@ -72,7 +72,7 @@ const EditBranding = () => {
           {/* We wrap the custom component in a motion.div to animate it */}
           <motion.div variants={imageScaleUp}>
             <BackgroundImage
-              src={"/images/landing/edit/cane.png"}
+              src={"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane.webp"}
               width={400}
               height={800}
               className="z-10 !relative"

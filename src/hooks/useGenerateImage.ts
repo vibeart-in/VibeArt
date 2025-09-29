@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { MessageType } from "../types/BaseType";
+import { ConversationType, MessageType } from "../types/BaseType";
 
 type GenerationParams = {
   parameters: Record<string, any>;
@@ -8,6 +8,7 @@ type GenerationParams = {
   modelIdentifier: string;
   modelCredit: number;
   modelProvider: "running_hub" | "replicate";
+  conversationType: ConversationType;
 };
 
 const generateImage = async (formData: GenerationParams) => {
@@ -27,7 +28,7 @@ const generateImage = async (formData: GenerationParams) => {
   return result;
 };
 
-export function useGenerateImage(conversationId?: string) {
+export function useGenerateImage(conversationType: ConversationType, conversationId?: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const queryKey = ["messages", conversationId];
@@ -42,6 +43,7 @@ export function useGenerateImage(conversationId?: string) {
         id: crypto.randomUUID(),
         userPrompt: newGeneration.parameters.prompt,
         job_status: "pending",
+        input_images: [],
         output_images: [],
         parameters: newGeneration,
         credit_cost: 2,
@@ -63,7 +65,7 @@ export function useGenerateImage(conversationId?: string) {
     },
     onSettled: (data) => {
       if (!conversationId && data?.conversationId) {
-        router.push(`/image/generate/${data.conversationId}`);
+        router.push(`/image/${conversationType}/${data.conversationId}`);
       } else {
         queryClient.invalidateQueries({ queryKey });
       }

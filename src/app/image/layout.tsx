@@ -22,9 +22,7 @@ export default function ImageLayout({
         {/* <SidebarMain /> */}
         <MainNavbar />
       </nav>
-      <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20">
-        <GenerateHistory />
-      </div>
+      <GenerateHistory />
       <section className="w-full h-full">{children}</section>
     </main>
   );

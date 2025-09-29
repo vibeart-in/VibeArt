@@ -1,31 +1,28 @@
-// src/components/ImageCardPro.tsx
+"use client";
 
-"use client"; // This component uses hooks, so it must be a client component.
-
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import {
   motion,
   useMotionValue,
   useSpring,
   useTransform,
-  useMotionTemplate,
-  MotionValue,
+  useReducedMotion,
 } from "motion/react";
 
 interface ImageCard3DProps {
   bottomImageUrl: string;
   topImageUrl: string;
   cardText: string;
-  scrollVelocity?: MotionValue<number>;
+  scrollVelocity?: ReturnType<typeof useMotionValue<number>>;
   rotateDepth?: number;
   parallaxDepth?: number;
-  width?: number;
-  height?: number;
+  width?: number; // kept for compatibility, but CSS is preferred
+  height?: number; // kept for compatibility, but CSS is preferred
   topImageScale?: number;
   fontSize?: number;
 }
 
-export const ImageCard3D = ({
+export const ImageCard3D = React.memo(function ImageCard3D({
   bottomImageUrl,
   topImageUrl,
   cardText,
@@ -36,148 +33,163 @@ export const ImageCard3D = ({
   height = 700,
   topImageScale = 1.1,
   fontSize = 20,
-}: ImageCard3DProps) => {
-  const [windowWidth, setWindowWidth] = useState(0);
+}: ImageCard3DProps) {
+  const prefersReducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    handleResize(); // Set initial value
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Responsive dimensions based on screen size
-  const isMobile = windowWidth < 768;
-  const isTablet = windowWidth >= 768 && windowWidth < 1024;
-  
-  const responsiveWidth = isMobile 
-    ? Math.min(width * 0.5, 280) 
-    : isTablet 
-    ? Math.min(width * 0.8, 400) 
-    : width;
-    
-  const responsiveHeight = isMobile 
-    ? Math.min(height * 0.5, 380) 
-    : isTablet 
-    ? Math.min(height * 0.8, 560) 
-    : height;
-    
-  const responsiveFontSize = isMobile 
-    ? Math.max(fontSize * 0.9, 12) 
-    : isTablet 
-    ? Math.max(fontSize * 1, 16) 
-    : fontSize;
-  const ref = useRef<HTMLDivElement>(null);
-
-  // --- MOUSE-BASED Motion Logic (existing) ---
+  // Motion values for pointer
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 20 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 20 });
+  const xSpring = useSpring(x, { stiffness: 300, damping: 20 });
+  const ySpring = useSpring(y, { stiffness: 300, damping: 20 });
 
-  // Transform for Card Rotation based on MOUSE position (output numbers)
+  // Pointer-driven tilt
   const mouseRotateX = useTransform(
-    mouseYSpring,
+    ySpring,
     [-0.5, 0.5],
     [rotateDepth, -rotateDepth]
   );
   const mouseRotateY = useTransform(
-    mouseXSpring,
+    xSpring,
     [-0.5, 0.5],
     [-rotateDepth, rotateDepth]
   );
 
-    const scrollVelocitySpring = useSpring(scrollVelocity ?? x, {
-      stiffness: 400,
-      damping: 50,
-    });
+  // Scroll-driven tilt (spring wrapped)
+  const defaultScrollVelocity = useMotionValue(0);
+  const scrollVel = useSpring(scrollVelocity ?? defaultScrollVelocity, {
+    stiffness: 400,
+    damping: 50,
+  });
+  const scrollRotateY = useTransform(scrollVel, [-50, 50], [-12, 12]);
 
-  // 4. Transform the smoothed velocity into a Y-axis rotation value
-  const scrollRotateY = useTransform(
-    scrollVelocitySpring,
-    [-50, 50], // Input range: from fast left scroll to fast right scroll
-    [-12, 12] // Output range: tilt the card up to 12 degrees
+  // Compose rotateY so only one rotateY is applied
+  const combinedRotateY = useTransform(
+    [mouseRotateY, scrollRotateY],
+    (values: number[]) => values[0] + values[1]
   );
 
-  // --- COMBINED Transform ---
-  // 5. Use useMotionTemplate to combine mouse and scroll rotations into one transform string.
-  // This is the cleanest way to apply multiple, independent transforms.
-  const transform = useMotionTemplate`perspective(1200px) rotateX(${mouseRotateX}deg) rotateY(${mouseRotateY}deg) rotateY(${scrollRotateY}deg)`;
-
-  // ... (Parallax and Glare logic remains the same)
+  // Parallax for top image and text
+  const effParallax = prefersReducedMotion ? 0 : parallaxDepth;
   const topImageTranslateX = useTransform(
-    mouseXSpring,
+    xSpring,
     [-0.5, 0.5],
-    [`-${parallaxDepth}px`, `${parallaxDepth}px`]
+    [`-${effParallax}px`, `${effParallax}px`]
   );
   const topImageTranslateY = useTransform(
-    mouseYSpring,
+    ySpring,
     [-0.5, 0.5],
-    [`-${parallaxDepth}px`, `${parallaxDepth}px`]
+    [`-${effParallax}px`, `${effParallax}px`]
   );
   const textTranslateX = useTransform(
-    mouseXSpring,
+    xSpring,
     [-0.5, 0.5],
-    [`-${parallaxDepth * 1.5}px`, `${parallaxDepth * 1.5}px`]
+    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`]
   );
   const textTranslateY = useTransform(
-    mouseYSpring,
+    ySpring,
     [-0.5, 0.5],
-    [`-${parallaxDepth * 1.5}px`, `${parallaxDepth * 1.5}px`]
+    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`]
   );
 
-  const glareX = useTransform(mouseXSpring, [-0.7, 0.7], [0, 100]);
-  const glareY = useTransform(mouseYSpring, [-0.7, 0.7], [0, 100]);
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 1) 0%, transparent 30%)`;
+  // Glare
+  const glareX = useTransform(xSpring, [-0.7, 0.7], [0, 100]);
+  const glareY = useTransform(ySpring, [-0.7, 0.7], [0, 100]);
+  const glareBackground = useTransform(
+    [glareX, glareY],
+    ([gx, gy]) =>
+      `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.2) 0%, transparent 30%)`
+  );
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const xPct = (e.clientX - rect.left) / rect.width - 0.5;
-    const yPct = (e.clientY - rect.top) / rect.height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
-  };
+  const ref = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
 
-  const handleMouseLeave = () => {
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!ref.current || prefersReducedMotion) return;
+      const rect = ref.current.getBoundingClientRect();
+      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+      const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        x.set(xPct);
+        y.set(yPct);
+      });
+    },
+    [x, y, prefersReducedMotion]
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     x.set(0);
     y.set(0);
-  };
+  }, [x, y]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // Prefer CSS for responsive sizing (clamp) to avoid resize-driven renders.
+  // width/height props remain as upper bounds for flexibility.
+  const maxW = `${width}px`;
+  const maxH = `${height}px`;
 
   return (
-    <div className="flex items-center justify-center">
+    <div
+      className="flex items-center justify-center"
+      // Enable 3D for children once, instead of recomputing perspective in transform
+      style={{ perspective: 1200 }}
+    >
       <motion.div
         ref={ref}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        // Use transform props, not a template string
         style={{
-          transform: transform,
-          width: `${responsiveWidth}px`,
-          height: `${responsiveHeight}px`,
+          rotateX: prefersReducedMotion ? 0 : mouseRotateX,
+          rotateY: prefersReducedMotion ? 0 : combinedRotateY,
+          transformStyle: "preserve-3d",
+          // Let CSS clamp handle responsive sizing; max bounds come from props
+          width: `min(${maxW}, 90vw)`,
+          height: `min(${maxH}, 90vh)`,
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+          touchAction: "none",
         }}
-        whileHover={{ scale: 1.05, transition: { type: "spring" } }}
-        className="relative rounded-[16px] md:rounded-[26px] [transform-style:preserve-3d]"
+        whileHover={
+          prefersReducedMotion
+            ? undefined
+            : { scale: 1.05, transition: { type: "spring" } }
+        }
+        className="relative rounded-[16px] md:rounded-[26px]"
       >
-
-        {/* Layer 1: Bottom Image (Static) */}
+        {/* Layer 1: Bottom Image */}
         <div
           className="absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] bg-cover bg-center"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
             boxShadow:
               "rgba(0, 0, 0, 0.1) 0px 10px 5px 0px, rgba(0, 0, 0, 0.1) 0px 10px 3px 0px",
+            willChange: "transform",
           }}
         />
 
-        {/* Layer 2: Top Image (Parallax) */}
+        {/* Layer 2: Top Image (Parallax). Use z for real depth instead of invalid transform strings */}
         <motion.div
           className="absolute inset-0 w-full h-full bg-contain bg-no-repeat bg-center [filter:drop-shadow(4px_4px_10px_rgba(0,0,0,0.5))]"
           style={{
             backgroundImage: `url(${topImageUrl})`,
-            translateX: topImageTranslateX,
-            translateY: topImageTranslateY,
-            scale: topImageScale,
-            z: 40,
+            x: topImageTranslateX,
+            y: topImageTranslateY,
+            scale: prefersReducedMotion ? 1 : topImageScale,
+            z: 40, // replaces transform: '40px' with actual 3D depth
+            willChange: "transform",
+            backfaceVisibility: "hidden",
           }}
         />
 
@@ -185,22 +197,28 @@ export const ImageCard3D = ({
         <motion.p
           className="absolute bottom-0 -right-1/2 w-full font-gothic font-medium text-white"
           style={{
-            translateX: textTranslateX,
-            translateY: textTranslateY,
-            scale: 1.2,
-            z: 60,
-            fontSize: `${responsiveFontSize}px`,
+            x: textTranslateX,
+            y: textTranslateY,
+            scale: prefersReducedMotion ? 1 : 1.2,
+            z: 60, // replaces transform: '60px' with actual 3D depth
+            fontSize: `clamp(12px, ${fontSize}px, ${Math.max(16, fontSize)}px)`,
+            willChange: "transform",
+            backfaceVisibility: "hidden",
           }}
         >
           {cardText}
         </motion.p>
 
-        {/* Layer 4: Glare Effect */}
-        <motion.div
-          className="pointer-events-none absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] mix-blend-soft-light"
-          style={{ background: glareBackground }}
-        />
+        {/* Layer 4: Glare */}
+        {!prefersReducedMotion && (
+          <motion.div
+            className="pointer-events-none absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] mix-blend-soft-light"
+            style={{ background: glareBackground }}
+          />
+        )}
       </motion.div>
     </div>
   );
-};
+});
+
+ImageCard3D.displayName = "ImageCard3D";

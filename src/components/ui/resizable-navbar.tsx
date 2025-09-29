@@ -246,14 +246,11 @@ export const NavbarLogo = () => {
 
 export const NavbarButton = ({
   href,
-  as: Tag = "a",
   children,
   className,
   variant = "primary",
-  ...props
 }: {
   href?: string;
-  as?: React.ElementType;
   children: React.ReactNode;
   className?: string;
   variant?: "primary" | "secondary";
@@ -272,12 +269,12 @@ export const NavbarButton = ({
   };
 
   return (
-    <Tag
-      href={href || undefined}
+    <Link
+      href={href || ""}
       className={cn(baseStyles, variantStyles[variant], className)}
-      {...props}
+      prefetch
     >
       {children}
-    </Tag>
+    </Link>
   );
 };

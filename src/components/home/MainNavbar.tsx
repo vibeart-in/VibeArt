@@ -20,32 +20,32 @@ import CreditBadge from "./CreditBadge";
 const navItems = [
   {
     name: "Home",
-    icon: <HomeIcon className="h-6 w-6" />,
+    icon: <HomeIcon className="h-5 w-5" />,
     link: "/home",
   },
   {
     name: "Image",
-    icon: <PhotoIcon className="h-6 w-6" />,
+    icon: <PhotoIcon className="h-5 w-5" />,
     link: "/image/generate",
   },
   {
     name: "Edit",
-    icon: <PencilSquareIcon className="h-6 w-6" />,
+    icon: <PencilSquareIcon className="h-5 w-5" />,
     link: "/image/edit",
   },
   {
     name: "AI Apps",
-    icon: <PuzzlePieceIcon className="h-6 w-6" />,
+    icon: <PuzzlePieceIcon className="h-5 w-5" />,
     link: "/apps",
   },
   {
     name: "Gallery",
-    icon: <Squares2X2Icon className="h-6 w-6" />,
+    icon: <Squares2X2Icon className="h-5 w-5" />,
     link: "/gallery",
   },
   {
     name: "Store",
-    icon: <ShoppingBagIcon className="h-6 w-6" />,
+    icon: <ShoppingBagIcon className="h-5 w-5" />,
     link: "/store",
   },
 ];
@@ -142,7 +142,7 @@ export function MainNavbar() {
 
       {/* Navigation Links */}
       <motion.div
-        className="box-border flex items-center rounded-[24px] border border-solid border-white/30 bg-black/50 backdrop-blur-sm"
+        className="box-border flex items-center rounded-2xl border border-solid border-white/30 bg-black/50 backdrop-blur-sm"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -154,7 +154,7 @@ export function MainNavbar() {
       >
         <motion.ul
           layout
-          className="flex w-full px-3 py-2 items-center justify-start gap-2"
+          className="flex w-full px-2 py-1 items-center justify-start gap-2"
         >
           {navItems.map((item, index) => (
             <motion.li
@@ -169,8 +169,9 @@ export function MainNavbar() {
               }}
             >
               <Link
+                prefetch
                 href={item.link}
-                className={`flex px-4 py-2.5 items-center justify-center rounded-[16px] transition-all duration-300 relative overflow-hidden ${
+                className={`flex px-4 py-2 items-center justify-center rounded-[16px] transition-all duration-300 relative overflow-hidden ${
                   isActiveRoute(item.link)
                     ? "bg-[#D9E825] text-black shadow-lg"
                     : "hover:bg-gray-700 text-white"
@@ -210,24 +211,22 @@ export function MainNavbar() {
 
       {/* User Profile Section */}
       <div className="flex gap-4 shrink-0 items-center">
-        {navInfo?.subscription_tier === "free" ? (
-          <motion.button
-            className="w-[108px] h-8 bg-black/20 border border-[#D9E825]/30 shadow-[0px_0px_8px_rgba(217,232,37,0.38)] rounded-xl flex items-center justify-center font-bold text-[13px] leading-4 text-accent"
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0px 0px 12px rgba(217, 232, 37, 0.5)",
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            Upgrade
-          </motion.button>
-        ) : (
-          <CreditBadge
-            credits={navInfo?.total_credits ?? 0}
-            lowThreshold={100}
-          />
+        {navInfo?.subscription_tier === "free" && (
+          <Link href="/pricing">
+            <motion.button
+              className="w-[108px] h-8 bg-black/20 border border-[#D9E825]/30 shadow-[0px_0px_8px_rgba(217,232,37,0.38)] rounded-xl flex items-center justify-center font-bold text-[13px] leading-4 text-accent"
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0px 0px 12px rgba(217, 232, 37, 0.5)",
+              }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              Upgrade
+            </motion.button>
+          </Link>
         )}
+        <CreditBadge credits={navInfo?.total_credits ?? 0} lowThreshold={100} />
         <motion.div>
           {/* <UserProfile /> */}
           <UserProfileDropdown navInfo={navInfo ?? null} user={user ?? null} />
