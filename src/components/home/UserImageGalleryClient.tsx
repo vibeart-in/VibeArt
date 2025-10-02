@@ -73,7 +73,7 @@ export default function UserImageGalleryClient({
   }
 
   return (
-    <div className="p-2 mt-16">
+    <div className="p-2 mx-12 mt-16">
       <p className="p-2 ml-3 mb-2 flex font-medium">Library</p>
       <ImageGallery images={images} />
     </div>

@@ -4,44 +4,51 @@ import BackgroundImage from "@/src/components/home/BackgroundImage";
 import InputBox from "@/src/components/inputBox/InputBox";
 import ImageGallery from "@/src/components/home/ImageGrid";
 
-const page = async () => {
-  const supabase = createClient();
+const Page = async () => {
+  const supabase = await createClient();
 
-  const { data: images, error } = await (
-    await supabase
-  ).rpc("get_random_images", {
+  const { data: images, error } = await supabase.rpc("get_random_images", {
     limit_count: 15,
   });
 
   if (error) {
     console.error("Error fetching random images:", error);
     return (
-      <p className="text-center">
+      <p className="text-center text-white">
         Failed to load images. Please try again later.
       </p>
     );
   }
+
   return (
     <div className="relative w-full h-screen flex flex-col bg-black overflow-y-scroll items-center">
+      {/* Background Image */}
       <BackgroundImage
-        className="mt-24"
-        src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/background/generate_background.webp"
-        width={600}
-        height={600}
-        // roatation={16}
+        className="mt-2"
+        src="https://i.pinimg.com/originals/24/e1/b5/24e1b51dcfaf8b9d7aeb5d49e91be623.gif"
+        width={1000}
+        height={1000}
       />
-      <div className="z-10 my-8 mt-44 flex flex-col justify-center items-center">
-        <h1 className="flex items-center gap-2 font-semibold text-2xl mb-6">
+
+      {/* Hero Section */}
+      <div className="z-10 my-8 mt-56 flex flex-col justify-center items-center">
+        <h1 className="flex items-center gap-2 font-semibold text-2xl mb-6 text-white">
           <IconSparkles /> Generate images from text and references
         </h1>
         <InputBox />
       </div>
-      <div className="p-2 mt-16 mx-32">
-        <p className="p-2 ml-3 mb-1 flex font-medium">Examples</p>
-        <ImageGallery images={images} />
+
+      {/* Examples / Image Gallery */}
+      <div className="p-2 mt-28 px-32 w-full">
+        <p className="p-2 ml-3 mb-1 flex font-medium text-white">Examples</p>
+        {images && images.length > 0 ? (
+          <ImageGallery images={images} />
+        ) : (
+          <p className="text-center text-white">No images available.</p>
+        )}
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

@@ -79,7 +79,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             className="absolute inset-0 rounded-2xl pointer-events-none"
             variants={overlayVariants}
           />
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,rgba(0,0,0,0.4),rgba(0,0,0,0))]" />
         </div>
       </Link>
 

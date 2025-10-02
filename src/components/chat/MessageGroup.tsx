@@ -12,13 +12,13 @@ export default function MessageGroup({ group }: MessageGroupProps) {
   const { input_images, turns } = group;
 
   return (
-    <div className="w-full flex max-w-screen justify-center">
+    <div className="w-full flex justify-center pl-20">
       {/* 1. RENDER SHARED INPUT IMAGES (IF THEY EXIST) */}
       {input_images && input_images.length > 0 && (
-        <div className="sticky top-8 flex items-center gap-8 mr-8 self-start">
+        <div className="sticky top-8 flex items-center gap-4 mr-4 self-start">
           <div className="flex gap-4 flex-wrap max-w-[350px]">
             {input_images.map((image) => (
-              <div key={image.id} className="max-w-[350px]">
+              <div key={image.id} className="w-[350px]">
                 <Image
                   className="rounded-3xl border-2 border-white/20 w-full"
                   src={image.imageUrl}

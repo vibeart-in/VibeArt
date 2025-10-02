@@ -21,7 +21,7 @@ export default function GenerateButton({
       whileHover={{ scale: 1.05, boxShadow: "0px 0px 12px rgba(0,0,0,0.2)" }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="flex flex-col items-center justify-center z-20 px-12 py-3 rounded-3xl font-bold text-base bg-accent text-black border-2 border-black disabled:bg-gray-500 disabled:cursor-not-allowed"
+      className="flex flex-col items-center max-h-[100px] justify-center z-20 px-12 py-3 rounded-3xl font-bold text-base bg-accent text-black border-2 border-black disabled:bg-gray-500 disabled:cursor-not-allowed"
     >
       <motion.span
         className="flex gap-1 items-center"

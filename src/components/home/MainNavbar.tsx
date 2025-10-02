@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { UserProfileDropdown } from "../ui/UserProfileDropdown";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
 import CreditBadge from "./CreditBadge";
+import { FireIcon } from "@phosphor-icons/react";
 
 const navItems = [
   {
@@ -34,19 +35,19 @@ const navItems = [
     link: "/image/edit",
   },
   {
+    name: "Make",
+    icon: <FireIcon className="h-5 w-5" weight="fill" />,
+    link: "/image/advance_generate",
+  },
+  {
     name: "AI Apps",
     icon: <PuzzlePieceIcon className="h-5 w-5" />,
-    link: "/apps",
+    link: "/image/ai-apps",
   },
   {
     name: "Gallery",
     icon: <Squares2X2Icon className="h-5 w-5" />,
-    link: "/gallery",
-  },
-  {
-    name: "Store",
-    icon: <ShoppingBagIcon className="h-5 w-5" />,
-    link: "/store",
+    link: "/image/gallery",
   },
 ];
 
@@ -57,19 +58,6 @@ const containerVariants: Variants = {
     transition: {
       staggerChildren: 0.1,
       delayChildren: 0.3,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { y: -20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 10,
     },
   },
 };
@@ -85,6 +73,65 @@ const logoVariants: Variants = {
       damping: 15,
     },
   },
+};
+
+const NavItem = ({
+  item,
+  isActive,
+  isHovered,
+  onHoverStart,
+  onHoverEnd,
+}: {
+  item: { name: string; icon: React.ReactNode; link: string };
+  isActive: boolean;
+  isHovered: boolean;
+  onHoverStart: () => void;
+  onHoverEnd: () => void;
+}) => {
+  const isExpanded = isHovered || isActive;
+
+  return (
+    <motion.li
+      layout // Animates the change in size and position
+      className="relative"
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}
+    >
+      <Link
+        prefetch
+        href={item.link}
+        className={`flex px-2 py-2 items-center justify-center rounded-2xl transition-colors duration-300 relative overflow-hidden ${
+          isActive
+            ? "bg-[#D9E825] text-black shadow-lg"
+            : "text-white hover:bg-white/10"
+        }`}
+      >
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: isActive ? 0 : 5 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {item.icon}
+        </motion.div>
+
+        {/* ✨ 2. The main fix: Animate width instead of using AnimatePresence */}
+        <motion.div
+          className="ml-2 overflow-hidden" // overflow-hidden is crucial
+          initial={{ width: 0 }}
+          animate={{ width: isExpanded ? "auto" : 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            duration: 0.3,
+          }}
+        >
+          {/* whitespace-nowrap prevents text from wrapping during animation */}
+          <span className="font-medium whitespace-nowrap">{item.name}</span>
+        </motion.div>
+      </Link>
+    </motion.li>
+  );
 };
 
 export function MainNavbar() {
@@ -112,13 +159,13 @@ export function MainNavbar() {
         stiffness: 100,
         damping: 20,
       }}
-      className="fixed z-50 w-full flex items-center justify-between py-2 px-8"
+      className="fixed z-20 w-full flex items-center justify-between py-2 px-8"
     >
       {/* Logo Section */}
       <motion.div variants={logoVariants} initial="hidden" animate="visible">
         <Link
           href="/"
-          className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black group"
+          className="relative z-10 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black group"
         >
           <motion.div>
             <Image
@@ -142,7 +189,7 @@ export function MainNavbar() {
 
       {/* Navigation Links */}
       <motion.div
-        className="box-border flex items-center rounded-2xl border border-solid border-white/30 bg-black/50 backdrop-blur-sm"
+        className="flex items-center rounded-2xl border border-solid border-white/30 bg-black/50 backdrop-blur-sm"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -153,58 +200,18 @@ export function MainNavbar() {
         transition={{ duration: 0.3 }}
       >
         <motion.ul
-          layout
+          layout // ✨ Still needed to animate siblings moving
           className="flex w-full px-2 py-1 items-center justify-start gap-2"
         >
           {navItems.map((item, index) => (
-            <motion.li
-              layout
+            <NavItem
               key={item.name}
-              variants={itemVariants}
-              className="relative"
+              item={item}
+              isActive={isActiveRoute(item.link)}
+              isHovered={hoveredItem === index}
               onHoverStart={() => setHoveredItem(index)}
               onHoverEnd={() => setHoveredItem(null)}
-              transition={{
-                layout: { type: "spring", stiffness: 300, damping: 24 },
-              }}
-            >
-              <Link
-                prefetch
-                href={item.link}
-                className={`flex px-4 py-2 items-center justify-center rounded-[16px] transition-all duration-300 relative overflow-hidden ${
-                  isActiveRoute(item.link)
-                    ? "bg-[#D9E825] text-black shadow-lg"
-                    : "hover:bg-gray-700 text-white"
-                }`}
-              >
-                <motion.div
-                  whileHover={{
-                    scale: 1.1,
-                    rotate: isActiveRoute(item.link) ? 0 : 5,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {item.icon}
-                </motion.div>
-
-                <AnimatePresence>
-                  {(hoveredItem === index || isActiveRoute(item.link)) && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 8 }}
-                      transition={{
-                        type: "tween",
-                      }}
-                      className="ml-2"
-                    >
-                      <span className="font-medium">{item.name}</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Link>
-            </motion.li>
+            />
           ))}
         </motion.ul>
       </motion.div>

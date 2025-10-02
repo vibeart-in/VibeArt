@@ -18,7 +18,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
       {/* Badge Button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className={`relative flex items-center justify-center w-10 h-10 rounded-lg border transition-colors
+        className={`relative flex items-center justify-center w-10 h-10 rounded-2xl border transition-colors
           ${low ? "bg-red-600 border-red-500 text-white" : "bg-black border-white/10 text-white"}`}
         whileHover={{
           scale: 1.08,

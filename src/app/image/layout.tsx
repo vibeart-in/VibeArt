@@ -19,7 +19,6 @@ export default function ImageLayout({
   return (
     <main className="relative flex h-full w-full flex-row">
       <nav className="">
-        {/* <SidebarMain /> */}
         <MainNavbar />
       </nav>
       <GenerateHistory />

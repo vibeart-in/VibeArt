@@ -7,7 +7,7 @@ interface BackgroundImageProps {
   src: string;
   width: number;
   height: number;
-  roatation?: number;
+  rotation?: number;
   className?: string;
 }
 
@@ -15,7 +15,7 @@ const BackgroundImage = ({
   src,
   width,
   height,
-  roatation = 0,
+  rotation = 0,
   className = "",
 }: BackgroundImageProps) => {
   const mouseX = useMotionValue(0);
@@ -49,10 +49,10 @@ const BackgroundImage = ({
       style={{
         x: backgroundX,
         y: backgroundY,
-        rotate: roatation,
+        rotate: rotation,
       }}
     >
-      <Image src={src} alt="Background Image" width={width} height={height} />
+      <Image src={src} alt="Background Image" width={width} height={height} unoptimized />
     </motion.div>
   );
 };

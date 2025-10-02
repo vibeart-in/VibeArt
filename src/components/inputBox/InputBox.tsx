@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { MoreVertical, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, Variants } from "motion/react";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 import GradualBlurMemo from "../ui/GradualBlur";
 import {
@@ -17,6 +17,7 @@ import {
 } from "./RunninghubParameters";
 import GenerateButton from "../ui/GenerateButton";
 import { usePathname } from "next/navigation";
+import { PencilSimpleIcon } from "@phosphor-icons/react";
 
 const initialModel: ModelData = {
   id: "1",
@@ -104,6 +105,30 @@ const validateAndSanitizePrompt = (prompt: string) => {
   return { isValid: true, sanitized: trimmed };
 };
 
+const popVariants: Variants = {
+  initial: { opacity: 0, scale: 0.9, y: -6 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      opacity: { duration: 0.12, ease: "easeOut" },
+      scale: { type: "spring", stiffness: 520, damping: 24, mass: 0.9 },
+      y: { type: "spring", stiffness: 520, damping: 24, mass: 0.9 },
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.9,
+    y: -6,
+    transition: {
+      opacity: { duration: 0.12, ease: "easeIn" },
+      scale: { duration: 0.12, ease: "easeIn" },
+      y: { duration: 0.12, ease: "easeIn" },
+    },
+  },
+};
+
 interface InputBoxProps {
   conversationId?: string;
 }
@@ -116,8 +141,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const replicateParamsRef = useRef<ReplicateParametersHandle>(null);
   const runninghubParamsRef = useRef<RunninghubParametersHandle>(null);
 
-  const pathname = usePathname(); 
-  const conversationType = pathname.split("/")[2] as ConversationType
+  const pathname = usePathname();
+  const conversationType = pathname.split("/")[2] as ConversationType;
 
   const mutation = useGenerateImage(conversationType, conversationId);
 
@@ -148,7 +173,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     if (mutation.isPending) return;
     let finalParameters;
     let promptText = "";
-    
+
     if (selectedModel.provider === "replicate") {
       if (!replicateParamsRef.current) {
         console.error("Replicate parameters component is not ready.");
@@ -162,7 +187,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         return;
       }
       finalParameters = runninghubParamsRef.current.getValues();
-      
+
       const promptParam = finalParameters.find(
         (p) => p.description === "prompt"
       );
@@ -171,7 +196,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       setFormError(`Unsupported provider: ${selectedModel.provider}`);
       return;
     }
-    console.log(finalParameters)
+    console.log(finalParameters);
 
     const { isValid, error } = validateAndSanitizePrompt(promptText);
     if (!isValid && error) {
@@ -190,7 +215,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         modelIdentifier: selectedModel.identifier,
         modelCredit: selectedModel.cost,
         modelProvider: selectedModel.provider,
-        conversationType: conversationType
+        conversationType: conversationType,
       },
       {
         onSuccess: () => {
@@ -209,137 +234,159 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   };
 
   return (
-    <div className="relative w-fit bg-[#111111]/80 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
-      <AnimatePresence>
-        {isDialogOpen && (
-          <motion.div
-            className=" w-full mb-2 overflow-hidden"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "24rem" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          >
-            <div className="w-full h-full p-2 overflow-y-auto">
-              <DialogBox
-                conversationType={conversationType}
-                onSelectModel={handleModelSelect}
-              />
-            </div>
-            <GradualBlurMemo
-              target="parent"
-              position="bottom"
-              height="12rem"
-              strength={2}
-              divCount={5}
-              zIndex={1}
-              className="!bottom-2 p-2"
-              curve="bezier"
-              exponential={true}
-              opacity={1}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <section className="flex gap-4">
-        <div
-          onClick={handleCardClick}
-          className="w-[120px] h-[95px] z-20 rounded-3xl relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0"
-        >
-          <div className="absolute inset-0 shadow-[inset_0_4px_18px_rgba(0,0,0,0.9)] rounded-3xl pointer-events-none"></div>
-
-          <Image
-            className="object-cover w-full h-full"
-            src={selectedModel.cover_image}
-            alt={selectedModel.model_name}
-            width={150}
-            height={95}
-          />
-
-          <div className="absolute inset-0 bg-black/20 flex justify-center items-center p-1 text-center">
-            <p className="text-accent font-gothic text-base font-medium leading-tight">
-              {selectedModel.model_name}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-2 flex z-20 flex-col items-center gap-2">
-          {/* DESKTOP: Show parameters inline */}
-          <div className="hidden md:flex flex-grow justify-center">
-            {selectedModel.provider === "replicate" ? (
-              <ReplicateParameters
-                // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
-                parameters={selectedModel.parameters}
-                ref={replicateParamsRef}
-              />
-            ) : (
-              <RunninghubParameters
-                // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
-                parameters={selectedModel.parameters}
-                ref={runninghubParamsRef}
-              />
-            )}
-          </div>
-          {formError && (
-            <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-xl mb-2 text-sm">
-              <XCircle
-                size={16}
-                className="cursor-pointer hover:text-red-300"
-                onClick={() => setFormError(null)}
-              />
-              <p>{formError}</p>
-            </div>
-          )}
-
-          {/* MOBILE: Show 3-dot menu button */}
-          <div className="flex-grow flex justify-end md:hidden">
-            <button
-              onClick={() => setIsParamsMenuOpen(true)}
-              className="h-[75px] w-[60px] rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center text-white/70 hover:bg-black/40"
-            >
-              <MoreVertical />
-            </button>
-          </div>
-        </div>
-        <GenerateButton
-          handleGenerateClick={handleGenerateClick}
-          mutation={mutation}
-          selectedModel={selectedModel}
-        />
-      </section>
-
-      {/* MODAL FOR MOBILE PARAMETERS */}
-      <AnimatePresence>
-        {isParamsMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsParamsMenuOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
+    <>
+      <div className="relative w-fit bg-[#111111]/80 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
+        <AnimatePresence>
+          {isDialogOpen && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#181818] rounded-2xl border border-white/10 p-6 shadow-2xl"
+              className=" w-full mb-2 overflow-hidden"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "24rem" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Advanced Settings
-              </h3>
-              <div className="mb-6"></div>
-              <button
-                onClick={() => setIsParamsMenuOpen(false)}
-                className="w-full py-2.5 rounded-lg bg-accent/90 text-black font-bold"
-              >
-                Done
-              </button>
+              <div className="w-full h-full p-2 overflow-y-auto">
+                <DialogBox
+                  conversationType={conversationType}
+                  onSelectModel={handleModelSelect}
+                />
+              </div>
+              <GradualBlurMemo
+                target="parent"
+                position="bottom"
+                height="12rem"
+                strength={2}
+                divCount={5}
+                zIndex={1}
+                className="!bottom-2 p-2"
+                curve="bezier"
+                exponential={true}
+                opacity={1}
+              />
             </motion.div>
+          )}
+        </AnimatePresence>
+        <section className="flex gap-4">
+          <div
+            onClick={handleCardClick}
+            className="w-[120px] h-[95px] z-20 rounded-3xl relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0 group"
+          >
+            {/* Inner shadow */}
+            <div className="absolute inset-0 shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)] rounded-3xl pointer-events-none"></div>
+
+            {/* Image */}
+            <Image
+              className="object-cover w-full h-full rounded-3xl transition-all duration-300 group-hover:brightness-90"
+              src={selectedModel.cover_image}
+              alt={selectedModel.model_name}
+              width={150}
+              height={95}
+            />
+
+            {/* Model name (now fades out on hover) */}
+            <div className="absolute bottom-2 left-2 right-2 bg-black/30 rounded-md p-1 text-center transition-opacity group-hover:opacity-0">
+              <p className="text-accent font-gothic text-sm font-medium truncate">
+                {selectedModel.model_name}
+              </p>
+            </div>
+
+            {/* Hover-only "Click to change" hint (fades in on hover) */}
+            <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-xs text-white/90 bg-black/50 px-2 py-1 rounded-xl">
+                <PencilSimpleIcon size={20} weight="fill" />
+              </span>
+            </div>
+          </div>
+
+          <div className="flex z-20 flex-col items-center gap-2">
+            {/* DESKTOP: Show parameters inline */}
+            <div className="hidden md:flex flex-grow justify-center">
+              {selectedModel.provider === "replicate" ? (
+                <ReplicateParameters
+                  // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
+                  parameters={selectedModel.parameters}
+                  ref={replicateParamsRef}
+                />
+              ) : (
+                <RunninghubParameters
+                  // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
+                  parameters={selectedModel.parameters}
+                  ref={runninghubParamsRef}
+                />
+              )}
+            </div>
+
+            {/* MOBILE: Show 3-dot menu button */}
+            <div className="flex-grow flex justify-end md:hidden">
+              <button
+                onClick={() => setIsParamsMenuOpen(true)}
+                className="h-[75px] w-[60px] rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center text-white/70 hover:bg-black/40"
+              >
+                <MoreVertical />
+              </button>
+            </div>
+          </div>
+          <GenerateButton
+            handleGenerateClick={handleGenerateClick}
+            mutation={mutation}
+            selectedModel={selectedModel}
+          />
+        </section>
+
+        {/* MODAL FOR MOBILE PARAMETERS */}
+        <AnimatePresence>
+          {isParamsMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsParamsMenuOpen(false)}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm bg-[#181818] rounded-2xl border border-white/10 p-6 shadow-2xl"
+              >
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Advanced Settings
+                </h3>
+                <div className="mb-6"></div>
+                <button
+                  onClick={() => setIsParamsMenuOpen(false)}
+                  className="w-full py-2.5 rounded-lg bg-accent/90 text-black font-bold"
+                >
+                  Done
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <AnimatePresence mode="popLayout">
+        {formError && (
+          <motion.div
+            key="form-error"
+            variants={popVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="flex items-center gap-2 text-red-400 bg-red-900/70 p-2 rounded-xl mb-2 text-sm"
+            role="alert"
+          >
+            <XCircle
+              size={16}
+              className="cursor-pointer hover:text-red-300"
+              onClick={() => setFormError(null)}
+            />
+            <p>{formError}</p>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 

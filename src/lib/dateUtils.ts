@@ -11,7 +11,7 @@ export const formatDateGroup = (dateStr: string): string => {
     return format(date, 'eeee'); // e.g., "Friday"
   }
   // For older dates, show the full date.
-  return format(date, 'MMMM d, yyyy');
+  return format(date, 'MMM d'); // Sep 15
 };
 
 // This function takes the raw history array and groups it into an object.

@@ -43,8 +43,12 @@ const GenerateHistory = () => {
   const activeId = params.id as string | undefined;
   const conversationType = pathname.split("/")[2] as ConversationType;
 
-  const { data: historyData, isPending, isError, error } =
-    useConversationHistory(conversationType);
+  const {
+    data: historyData,
+    isPending,
+    isError,
+    error,
+  } = useConversationHistory(conversationType);
 
   const groupedHistory = useMemo(() => {
     return groupHistoryByDate(historyData || []);
@@ -123,18 +127,21 @@ const GenerateHistory = () => {
                 </motion.div>
               )}
 
-              {!isPending && !isError && historyData && historyData.length === 0 && (
-                <motion.div
-                  key="empty"
-                  className="text-xs text-white/60 px-1 py-2"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  No history found.
-                </motion.div>
-              )}
+              {!isPending &&
+                !isError &&
+                historyData &&
+                historyData.length === 0 && (
+                  <motion.div
+                    key="empty"
+                    className="text-xs text-white/60 px-1 py-2"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    No history found.
+                  </motion.div>
+                )}
 
               {!isPending && !isError && dateGroups.length > 0 && (
                 <motion.div
@@ -146,14 +153,10 @@ const GenerateHistory = () => {
                   layout
                 >
                   {dateGroups.map((group) => (
-                    <div key={group} className="pb-2">
-                      <motion.h4
-                        variants={itemVariants}
-                        className="text-[10px] font-bold text-white/50 px-2 pt-2 pb-1 uppercase tracking-wide"
-                        layout="position"
-                      >
+                    <div key={group} className="">
+                      <p className="text-[10px] text-nowrap font-bold w-full text-white/50 pb-1 tracking-wide">
                         {group}
-                      </motion.h4>
+                      </p>
                       <div className="flex flex-col gap-2" data-section={group}>
                         {groupedHistory[group].map((history: HistoryItem) => (
                           <HistoryCard

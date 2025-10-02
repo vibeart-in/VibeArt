@@ -36,6 +36,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.searchyour.ai",
       },
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "64.media.tumblr.com",
+      },
+      {
+        protocol: "https",
+        hostname: "rh-images.xiaoyaoyou.com",
+      },
     ],
   },
 };

@@ -24,7 +24,7 @@ const page = async () => {
   if (error) {
     console.error("Error fetching user images on server:", error);
     return (
-      <div className="relative flex h-full w-full flex-col items-center justify-center overflow-y-scroll bg-background">
+      <div className="relative flex h-full w-full flex-col items-center justify-center overflow-y-scroll bg-black">
         <BackgroundImage
           src="/images/library_bg.png"
           width={900}
@@ -42,7 +42,7 @@ const page = async () => {
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-y-scroll bg-background">
-      <BackgroundImage src="/images/library_bg.png" width={900} height={900} />
+      <BackgroundImage src="https://i.pinimg.com/736x/0c/f6/4f/0cf64fe66dcfa95b51dc197b61f360cd.jpg" width={900} height={900} />
       <div className="z-10 my-8 mt-44 flex flex-col items-center justify-center">
         <h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
           <IconSparkles /> All of your generated, edited images in one place

@@ -165,9 +165,30 @@
   /* space between items */
 }
 
+/* This is the main container for the masonry grid */
+.app-masonry-grid {
+  display: flex;
+  margin-left: 0px;
+  /* gutter size offset */
+  width: auto;
+}
+
+/* This is for each column in the grid */
+.app-masonry-grid_column {
+  padding-left: 25px;
+  /* gutter size */
+  background-clip: padding-box;
+}
+
+/* This is for each item within a column */
+.app-masonry-grid_column>div {
+  margin-bottom: 25px;
+  /* space between items */
+}
+
 .custom-box {
   position: relative;
-  padding: 0.25rem;
+  padding: 0.5rem;
   background-color: #131312;
   border: 1px solid #313131;
   border-radius: 12px;
