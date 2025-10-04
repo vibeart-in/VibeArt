@@ -230,15 +230,19 @@ export const MobileNavToggle = ({
   );
 };
 
-export const NavbarLogo = () => {
+export const NavbarLogo = ({ className }: { className?: string }) => {
   return (
     <Link
       href="/"
-      className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
+      className={cn(
+        "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black",
+        className
+      )}
     >
       <img src="/images/newlogo.png" alt="logo" width={30} height={30} />
       <p className="text-2xl font-bold text-white">
-        Aura<span className="text-accent">.</span>ai
+        {/* Vibeart */}
+        Myric<span className="text-accent">.</span>art
       </p>
     </Link>
   );

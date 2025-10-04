@@ -1,53 +1,24 @@
-"use client"
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createClient } from "@/src/lib/supabase/client";
-import { useEffect } from "react";
+// src/hooks/useConversationMessages.ts
 
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/src/lib/supabase/client";
+
+// The hook is now just a simple useQuery call.
+// The RealtimeProvider handles invalidation when a job in this conversation updates.
 export function useConversationMessages(conversationId: string) {
   const supabase = createClient();
-  const queryClient = useQueryClient();
-  const queryKey = ["messages", conversationId];
 
-  const { data: messages = [], isLoading, isError } = useQuery({
-    queryKey: queryKey,
+  return useQuery({
+    queryKey: ["messages", conversationId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_conversation_messages", {
         p_conversation_id: conversationId,
       });
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
       return data || [];
     },
     staleTime: 5 * 60 * 1000,
+    enabled: !!conversationId, // Only run if conversationId is present
   });
-
-  useEffect(() => {
-    let mounted = true;
-    const channel = supabase
-      .channel(`conversation_updates:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "jobs",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        () => {
-          if (mounted) {
-            console.log("Real-time update received, invalidating query:", queryKey);
-            queryClient.invalidateQueries({ queryKey });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId, supabase, queryClient, queryKey]);
-
-  return { messages, isLoading, isError };
 }

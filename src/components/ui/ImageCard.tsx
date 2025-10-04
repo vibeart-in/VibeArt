@@ -287,7 +287,7 @@ const ImageCard = ({
             {...imagePlaceholderProps}
           />
 
-          <div className="absolute inset-0 rounded-3xl border-2 border-white/30 pointer-events-none z-10" />
+          <div className="absolute inset-0 rounded-3xl border-2 border-white/30 pointer-events-none" />
         </div>
 
         {/* Hover overlay: always mounted, animated via variants */}

@@ -1,25 +1,32 @@
 "use client";
 import { uploadImage } from "@/src/lib/UploadImage";
-import { ImagesIcon } from "lucide-react";
+import { ImagesIcon, XIcon } from "lucide-react";
+import Image from "next/image";
 import React, { useRef, useState } from "react";
 import * as tus from "tus-js-client";
 
-// Define the props for the component, including the callback
 interface ImageUploadBoxProps {
-  onUploadComplete: (url: string) => void;
+  onUploadComplete: (permanentPath: string, displayUrl: string) => void;
+  showImage?: boolean;
+  imageDescription?: string;
 }
 
-const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
+const ImageUploadBox = ({
+  onUploadComplete,
+  showImage = false,
+  imageDescription = "Add Image",
+}: ImageUploadBoxProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tusUploadRef = useRef<tus.Upload | null>(null);
 
-  // State management for the upload process
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [uploadedDisplayUrl, setUploadedDisplayUrl] = useState<string | null>(
+    null
+  );
 
   const handleClick = () => {
-    // // Don't open file dialog if an upload is in progress or has just succeeded
     if (isUploading) return;
     inputRef.current?.click();
   };
@@ -31,20 +38,26 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
     setError(null);
     setIsUploading(true);
     setUploadProgress(0);
+    setUploadedDisplayUrl(null);
 
     try {
-      await uploadImage({
+      const result = await uploadImage({
         file,
         onProgress: (p) => setUploadProgress(Number(p.toFixed(0))),
         onError: (err) => {
           setError(`Upload failed: ${err.message}`);
           setIsUploading(false);
         },
-        onSuccess: (url) => {
-          onUploadComplete(url);
+        onSuccess: (permanentPath, displayUrl) => {
+          onUploadComplete(permanentPath, displayUrl);
+          setUploadedDisplayUrl(displayUrl);
           setIsUploading(false);
         },
       });
+      if (!uploadedDisplayUrl) {
+        setUploadedDisplayUrl(result.displayUrl);
+        onUploadComplete(result.permanentPath, result.displayUrl);
+      }
     } catch (err: any) {
       setError(err.message);
       setIsUploading(false);
@@ -58,14 +71,14 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
       setUploadProgress(0);
     }
     sessionStorage.removeItem("initialEditImage");
+    setUploadedDisplayUrl(null);
   };
 
   return (
     <div
       onClick={handleClick}
-      className={`w-[100px] h-full relative flex items-center justify-center 
-                 bg-black border border-white/30 
-                 shadow-[inset_0px_0px_27.5px_4px_rgba(106,106,106,0.25)] 
+      className={`w-[100px] h-[100px] relative flex items-center justify-center
+                 bg-black border border-white/30
                  rounded-[21px] text-white/60 transition-all duration-300
                  cursor-pointer hover:text-white`}
     >
@@ -76,7 +89,7 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
         className="hidden"
         onChange={handleFileChange}
       />
-      <div className="text-xs flex flex-col justify-center items-center text-center p-2">
+      <div className="text-xs w-full h-full flex flex-col justify-center items-center text-center p-2">
         {error && <span className="text-red-500">{error}</span>}
 
         {isUploading && !error && (
@@ -89,7 +102,10 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
               ></div>
             </div>
             <button
-              onClick={handleCancel}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCancel();
+              }}
               className="mt-2 text-red-400 hover:text-red-300"
             >
               Cancel
@@ -97,18 +113,38 @@ const ImageUploadBox = ({ onUploadComplete }: ImageUploadBoxProps) => {
           </>
         )}
 
-        {/* {isSuccess && !isUploading && !error && (
-          <span className="flex flex-col items-center text-green-400">
-            <CheckCircle2 size={24} />
-            Done
-          </span>
-        )} */}
+        {!isUploading &&
+          !error &&
+          uploadedDisplayUrl &&
+          showImage && ( // Use uploadedDisplayUrl
+            <div className="w-full h-full group">
+              <Image
+                src={uploadedDisplayUrl} // Use the display URL here
+                alt="Uploaded preview"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover object-top rounded-xl"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUploadedDisplayUrl(null);
+                  onUploadComplete("","");
+                }}
+                className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1
+                                   text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Remove image"
+              >
+                <XIcon size={16} />
+              </button>
+            </div>
+          )}
 
-        {!isUploading && !error && (
-          <>
+        {!isUploading && !error && (!showImage || !uploadedDisplayUrl) && (
+          <div className="text-white flex flex-col justify-center items-center gap-1 font-semibold">
             <ImagesIcon size={20} />
-            Add image
-          </>
+            <p>{imageDescription}</p>
+          </div>
         )}
       </div>
     </div>

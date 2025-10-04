@@ -1,15 +1,13 @@
+// src/lib/UploadImage.ts
+
 import { supabase } from "@/src/lib/supabase/client";
 import * as tus from "tus-js-client";
-
-interface UploadResult {
-  signedUrl: string;
-}
 
 interface UploadOptions {
   file: File;
   onProgress?: (progress: number) => void;
   onError?: (err: Error) => void;
-  onSuccess?: (signedUrl: string) => void;
+  onSuccess?: (permanentPath: string, displayUrl: string) => void;
 }
 
 export const uploadImage = async ({
@@ -17,21 +15,22 @@ export const uploadImage = async ({
   onProgress,
   onError,
   onSuccess,
-}: UploadOptions): Promise<UploadResult> => {
-  // 1. Get session
+}: UploadOptions): Promise<{ permanentPath: string; displayUrl: string }> => {
+
   const {
     data: { session },
+    error: sessionError,
   } = await supabase.auth.getSession();
-  const user = session?.user;
 
-  if (!user) {
+  if (sessionError || !session || !session.user) {
     throw new Error("You must be logged in to upload an image.");
   }
-
+  const user = session.user;
   const accessToken = session.access_token;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const bucketName = "uploaded-images";
-  const filePath = `${user.id}/${file.name}`;
+
+  const filePath = `${user.id}/${Date.now()}_${file.name.replace(/\s/g, "_")}`;
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
@@ -57,20 +56,25 @@ export const uploadImage = async ({
         onProgress?.(percentage);
       },
       onSuccess: async () => {
-        const { data, error } = await supabase.storage
-          .from(bucketName)
-          .createSignedUrl(filePath, 3600);
+        const fullPermanentPath = `${bucketName}/${filePath}`; // e.g., "uploaded-images/user-id/123_image.png"
 
-        if (error) {
-          onError?.(error);
-          reject(error);
-        } else {
-          onSuccess?.(data.signedUrl);
-          resolve({ signedUrl: data.signedUrl });
+        // Generate a short-lived signed URL for client-side display
+        const { data: signedUrlData, error: signedUrlError } =
+          await supabase.storage.from(bucketName).createSignedUrl(filePath, 3600);
+
+        if (signedUrlError || !signedUrlData) {
+          onError?.(signedUrlError);
+          reject(signedUrlError);
+          return;
         }
+
+        onSuccess?.(fullPermanentPath, signedUrlData.signedUrl); // Pass both to callback
+        resolve({
+          permanentPath: fullPermanentPath,
+          displayUrl: signedUrlData.signedUrl,
+        });
       },
     });
-
     upload.start();
   });
 };

@@ -5,19 +5,19 @@ import { SparkleIcon, SpinnerBallIcon } from "@phosphor-icons/react";
 
 type Props = {
   handleGenerateClick: () => void;
-  mutation: { isPending: boolean };
-  selectedModel: { cost: number };
+  isPending: boolean;
+  cost: number;
 };
 
 export default function GenerateButton({
   handleGenerateClick,
-  mutation,
-  selectedModel,
+  isPending,
+  cost,
 }: Props) {
   return (
     <motion.button
       onClick={handleGenerateClick}
-      disabled={mutation.isPending}
+      disabled={isPending}
       whileHover={{ scale: 1.05, boxShadow: "0px 0px 12px rgba(0,0,0,0.2)" }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -28,8 +28,8 @@ export default function GenerateButton({
         layout
         transition={{ type: "spring", stiffness: 250, damping: 20 }}
       >
-        {mutation.isPending ? "Generating..." : "Generate"}
-        {mutation.isPending ? (
+        {isPending ? "Generating..." : "Generate"}
+        {isPending ? (
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -48,7 +48,7 @@ export default function GenerateButton({
         )}
       </motion.span>
       <span className="font-medium text-xs">
-        ({selectedModel.cost} Credits)
+        ({cost} Credits)
       </span>
     </motion.button>
   );

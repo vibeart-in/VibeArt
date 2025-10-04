@@ -70,15 +70,7 @@ export default function AuthTemplate({
           </Link>
         </motion.div>
 
-        <div className="relative flex items-center justify-center w-full h-full">
-          <GlassModal
-            width={modalWidth}
-            height={modalHeight}
-            count={modalCount}
-            className="z-10"
-          />
-          <div className="absolute z-20">{children}</div>
-        </div>
+        {children}
       </div>
 
       <motion.div

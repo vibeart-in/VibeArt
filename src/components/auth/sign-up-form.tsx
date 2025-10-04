@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import SignInWithGoogleButton from "./google-login";
+import GlassModal from "../ui/GlassModal";
 
 export function SignUpForm({
   className,
@@ -50,57 +51,62 @@ export function SignUpForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <h2 className="font-semibold text-center text-xl">Sign Up</h2>
-      <SignInWithGoogleButton />
-      <div className="border-b border-gray-500"></div>
-      <form onSubmit={handleSignUp}>
-        <div className="flex flex-col gap-6">
-          <div>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email address"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <Input
-              id="repeat-password"
-              type="password"
-              placeholder="Repeat Password"
-              required
-              value={repeatPassword}
-              onChange={(e) => setRepeatPassword(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-64" disabled={isLoading}>
-            {isLoading ? "Creating an account..." : "Sign up"}
-          </Button>
+    <div className="relative flex items-center justify-center w-full h-full">
+      <GlassModal width={36} height={500} count={16} className="z-10" />
+      <div className="absolute z-20">
+        <div className={cn("flex flex-col gap-6", className)} {...props}>
+          <h2 className="font-semibold text-center text-xl">Sign Up</h2>
+          <SignInWithGoogleButton />
+          <div className="border-b border-gray-500"></div>
+          <form onSubmit={handleSignUp}>
+            <div className="flex flex-col gap-6">
+              <div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Email address"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div>
+                <Input
+                  id="repeat-password"
+                  type="password"
+                  placeholder="Repeat Password"
+                  required
+                  value={repeatPassword}
+                  onChange={(e) => setRepeatPassword(e.target.value)}
+                />
+              </div>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button type="submit" className="w-64" disabled={isLoading}>
+                {isLoading ? "Creating an account..." : "Sign up"}
+              </Button>
+            </div>
+            <div className="mt-4 text-center text-sm ">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="inline-block text-sm underline-offset-4 underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
+              >
+                Login
+              </Link>
+            </div>
+          </form>
         </div>
-        <div className="mt-4 text-center text-sm ">
-          Already have an account?{" "}
-          <Link
-            href="/auth/login"
-            className="inline-block text-sm underline-offset-4 underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
-          >
-            Login
-          </Link>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

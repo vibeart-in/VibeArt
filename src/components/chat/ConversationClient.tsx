@@ -12,7 +12,7 @@ export default function ConversationClient({
 }: {
   conversationId: string;
 }) {
-  const { messages, isLoading, isError } =
+  const { data: messages, isLoading, isError } =
     useConversationMessages(conversationId);
 
   // The core grouping logic

@@ -1,3 +1,4 @@
+// /api/webhook/runninghub/route.ts
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 

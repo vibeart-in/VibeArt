@@ -24,7 +24,7 @@ const Switch = React.forwardRef<
       ref={ref}
       className={cn(
         // Base container styles
-        "inline-flex items-center justify-center gap-2 rounded-xl border p-2",
+        "inline-flex items-center justify-center gap-2 rounded-xl border p-3",
         "cursor-pointer select-none transition-all duration-200 ease-in-out",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 
@@ -48,7 +48,7 @@ const Switch = React.forwardRef<
       />
       <span
         className={cn(
-          "text-xs font-medium", // Base text styles
+          "text-sm font-medium", // Base text styles
           {
             "text-accent": checked, // Your 'text-accent'
             "text-white": !checked,

@@ -25,7 +25,7 @@ const fetchUserData = async (): Promise<UseNavInfoReturn> => {
   }
 
   const { data, error } = await supabase
-    .rpc("get_nav_info", { p_user_id: user.id })
+    .rpc("get_user_credit_info", { p_user_id: user.id })
     .single();
 
   if (error) {

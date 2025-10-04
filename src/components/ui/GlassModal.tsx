@@ -12,9 +12,9 @@ const GlassModal: React.FC<GlassModalProps> = ({
   className = "",
 }) => {
   const glassItemClasses = [
-    "bg-[linear-gradient(90deg,rgba(22,22,24,0.3)_0%,rgba(0,0,0,0.3)_17%,rgba(26,26,29,0.01)_100%)]",
+    "bg-[linear-gradient(270deg,rgba(22,22,24,0.4)_1%,rgba(0,0,0,0.4)_17%,rgba(26,26,29,0.01)_98%)]",
     "shadow-[inset_0_2px_4px_rgba(255,255,255,0.16)]",
-    "backdrop-blur-[20px]",
+    "backdrop-blur-[40px]",
   ].join(" ");
 
   const listItems = Array.from({ length: count }, (_, index) => {

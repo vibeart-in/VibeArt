@@ -18,6 +18,7 @@ import {
 import GenerateButton from "../ui/GenerateButton";
 import { usePathname } from "next/navigation";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
+import LoginModal from "../auth/LoginModal";
 
 const initialModel: ModelData = {
   id: "1",
@@ -138,6 +139,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const [selectedModel, setSelectedModel] = useState<ModelData>(initialModel);
   const [formError, setFormError] = useState<string | null>(null);
   const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const replicateParamsRef = useRef<ReplicateParametersHandle>(null);
   const runninghubParamsRef = useRef<RunninghubParametersHandle>(null);
 
@@ -223,7 +225,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           // on both parameter components if you want to clear the prompt on success.
         },
         onError: (err) => {
-          setFormError(`Generation failed: ${err.message}`);
+          if (err.message === "Unauthorized") {
+            setIsLoginModalOpen(true);
+          } else {
+            setFormError(`Generation failed: ${err.message}`);
+          }
         },
       }
     );
@@ -328,8 +334,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           </div>
           <GenerateButton
             handleGenerateClick={handleGenerateClick}
-            mutation={mutation}
-            selectedModel={selectedModel}
+            isPending={mutation.isPending}
+            cost={selectedModel.cost}
           />
         </section>
 
@@ -386,6 +392,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </>
   );
 };

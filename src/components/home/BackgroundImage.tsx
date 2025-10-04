@@ -43,6 +43,8 @@ const BackgroundImage = ({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
+  const isVideo = src.endsWith(".mp4");
+
   return (
     <motion.div
       className={`absolute top-0 z-0 ml-0 ${className}`}
@@ -52,7 +54,25 @@ const BackgroundImage = ({
         rotate: rotation,
       }}
     >
-      <Image src={src} alt="Background Image" width={width} height={height} unoptimized />
+      {isVideo ? (
+        <video
+          src={src}
+          width={width}
+          height={height}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+      ) : (
+        <Image
+          src={src}
+          alt="Background Image"
+          width={width}
+          height={height}
+          unoptimized
+        />
+      )}
     </motion.div>
   );
 };

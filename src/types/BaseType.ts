@@ -84,6 +84,7 @@ export interface HistoryItem {
   title: string;
   prompt: string;
   created_at: string;
+  appId?: string;
 }
 
 export interface ImageCardType {
@@ -107,5 +108,6 @@ export interface ImageCard3DType {
 export enum ConversationType {
   GENERATE = "generate",
   EDIT = "edit",
-  BOTH = "both"
+  BOTH = "both",
+  APP = "ai-apps"  
 }

@@ -26,8 +26,10 @@ async function fetchApps(): Promise<AiApp[]> {
 
 export default function AppGridClient({
   initialApps,
+  compact = false
 }: {
-  initialApps: AiApp[];
+  initialApps?: AiApp[];
+  compact?: boolean
 }) {
   const breakpointColumnsObj = {
     default: 5,
@@ -90,6 +92,7 @@ export default function AppGridClient({
             id={app.id}
             appName={app.app_name}
             previewUrl={app.cover_image}
+            compact={compact}
           />
         ))}
       </Masonry>

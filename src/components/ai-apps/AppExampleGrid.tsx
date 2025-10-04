@@ -14,8 +14,8 @@ const AppExampleGrid = ({ images }: AppExampleGridProps) => {
 
   const breakpointColumnsObj = {
     default: 2,
-    1500: 1,
-    1100: 1,
+    1500: 2,
+    1100: 2,
     700: 1,
   };
 

@@ -1,70 +1,115 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
 
-// This provider doesn't render anything, it just sets up the listener.
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<null | { id: string }>(null);
   const queryClient = useQueryClient();
+  const supabase = createClient();
 
   useEffect(() => {
-    const supabase = createClient();
-    let user: User | null = null;
+    // Get the current session / user
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setUser(data.session.user);
+      } else {
+        setUser(null);
+      }
+    });
 
-    const setupSubscription = async () => {
-      // First, get the current user
-      const { data } = await supabase.auth.getUser();
-      user = data.user;
+    // Also listen for auth state changes (login / logout)
+    const {
+      data: { subscription: authSub },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+      }
+    });
 
-      if (!user) return; // Only subscribe if a user is logged in
-
-      console.log(`Setting up Realtime subscription for user: ${user.id}`);
-
-      // Listen for UPDATE events on the 'profiles' table for the current user.
-      const channel = supabase
-        .channel("profiles-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "profiles",
-            filter: `user_id=eq.${user.id}`,
-          },
-          (payload) => {
-            const newRow = payload?.new; // depending on SDK version
-            const oldRow = payload?.old;
-
-            // If oldRow is null it's probably an INSERT — handle accordingly.
-            // Only proceed when one of the two tracked columns actually changed:
-            const changed =
-              !oldRow ||
-              newRow.subscription_credits !== oldRow.subscription_credits ||
-              newRow.bonus_credits !== oldRow.bonus_credits;
-
-            if (!changed) return; // ignore updates that didn't touch these columns
-
-            console.log({
-              subscription_credits: newRow.subscription_credits,
-              bonus_credits: newRow.bonus_credits,
-            });
-
-            queryClient.invalidateQueries({ queryKey: ["user", "nav-info"] });
-          }
-        )
-        .subscribe();
-
-      // Return a cleanup function to remove the channel when the component unmounts
-      return () => {
-        console.log("Removing Realtime subscription.");
-        supabase.removeChannel(channel);
-      };
+    return () => {
+      authSub.unsubscribe();
     };
+  }, [supabase]);
 
-    setupSubscription();
-  }, [queryClient]);
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+    console.log(`Setting up Realtime channel for user ${userId}`);
+    const channel = supabase
+      .channel(`user-updates:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log("Profile changed:", payload);
+          queryClient.invalidateQueries({ queryKey: ["user", "nav-info"] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "conversations",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log("Convo changed:", payload);
+          queryClient.invalidateQueries({ queryKey: ["conversationHistory"] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "jobs",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log("Job changed:", payload);
+          const updatedJob = payload.new as {
+            conversation_id?: string;
+            ai_app_id?: string;
+            job_status?: string;
+          };
+
+          if (updatedJob.conversation_id) {
+            queryClient.invalidateQueries({
+              queryKey: ["messages", updatedJob.conversation_id],
+            });
+          }
+          if (
+            updatedJob.ai_app_id &&
+            updatedJob.job_status === "succeeded"
+          ) {
+            queryClient.invalidateQueries({
+              queryKey: ["appGenerations", updatedJob.ai_app_id],
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Subscribed to user-updates channel");
+        }
+      });
+
+    return () => {
+      console.log("Unsubscribing realtime channel");
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient, supabase]);
 
   return <>{children}</>;
 }

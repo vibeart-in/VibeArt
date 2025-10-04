@@ -12,12 +12,20 @@ interface HistoryCardProps {
   imageUrl: string;
   isActive?: boolean;
   conversationType: ConversationType;
+  appId?: string;
 }
 
 const parentVariants: Variants = {
   rest: { scale: 1, opacity: 1 },
-  hover: { scale: 1.02, opacity: 1, transition: { type: "spring", stiffness: 500, damping: 26 } },
-  press: { scale: 0.98, transition: { type: "spring", stiffness: 600, damping: 30 } },
+  hover: {
+    scale: 1.02,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 500, damping: 26 },
+  },
+  press: {
+    scale: 0.98,
+    transition: { type: "spring", stiffness: 600, damping: 30 },
+  },
 };
 
 const overlayVariants: Variants = {
@@ -32,6 +40,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   imageUrl,
   isActive = false,
   conversationType,
+  appId,
 }) => {
   const [hovered, setHovered] = React.useState(false);
   const router = useRouter();
@@ -53,7 +62,14 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
       variants={parentVariants}
       layout
     >
-      <Link href={`/image/${conversationType}/${id}`} aria-label={title}>
+      <Link
+        href={
+          conversationType === "ai-apps"
+            ? `/image/ai-apps/${appId}?convo=${id}`
+            : `/image/${conversationType}/${id}`
+        }
+        aria-label={title}
+      >
         <div
           className={`relative w-[55px] h-[55px] rounded-2xl overflow-hidden
             border-2 transition-colors duration-200
@@ -99,7 +115,9 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           >
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">{title}</div>
-              <div className="mt-0.5 text-xs text-white/70 line-clamp-2">{prompt}</div>
+              <div className="mt-0.5 text-xs text-white/70 line-clamp-2">
+                {prompt}
+              </div>
             </div>
           </motion.div>
         )}

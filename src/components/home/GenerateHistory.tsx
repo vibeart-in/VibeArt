@@ -8,6 +8,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { useConversationHistory } from "@/src/hooks/useConversationHistory";
 import { groupHistoryByDate } from "@/src/lib/dateUtils";
+import { useNavInfo } from "@/src/hooks/useNavInfo";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -42,6 +43,10 @@ const GenerateHistory = () => {
   const pathname = usePathname();
   const activeId = params.id as string | undefined;
   const conversationType = pathname.split("/")[2] as ConversationType;
+  console.log(conversationType);
+  // Check if user is authenticated
+  const { data: navData } = useNavInfo();
+  const user = navData?.user;
 
   const {
     data: historyData,
@@ -55,10 +60,15 @@ const GenerateHistory = () => {
   }, [historyData]);
   const dateGroups = Object.keys(groupedHistory);
 
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <>
       <div
-        className="absolute top-1/2 left-4 -translate-y-1/2 z-20"
+        className="fixed top-1/2 left-4 -translate-y-1/2 z-20"
         aria-label="History rail"
       >
         <div
@@ -74,7 +84,11 @@ const GenerateHistory = () => {
             transition={{ type: "spring", stiffness: 500, damping: 28 }}
           >
             <Link
-              href={`/image/${conversationType}`}
+              href={
+                conversationType === "ai-apps"
+                  ? "/image/ai-apps"
+                  : `/image/${conversationType}`
+              }
               className={`w-full h-[55px] flex justify-center items-center rounded-2xl
                 bg-[linear-gradient(145deg,_#1a1a1a,_#101010)]
                 hover:bg-[linear-gradient(145deg,_#1c1c1c,_#0f0f0f)]
@@ -167,6 +181,7 @@ const GenerateHistory = () => {
                             prompt={history.prompt}
                             isActive={activeId === history.id}
                             conversationType={conversationType}
+                            appId={history.appId}
                           />
                         ))}
                       </div>

@@ -1,16 +1,8 @@
 import Image from "next/image";
-import * as motion from "motion/react-client"; // Using your specified motion import
-import {
-  Twitter,
-  Instagram,
-  Linkedin,
-  Github,
-  MessageSquare,
-} from "lucide-react";
-
-// --- YOUR ORIGINAL COMPONENTS (used as-is) ---
+import * as motion from "motion/react-client";
 import GlassPaneBG from "./GlassPaneBG";
 import { GradientComponent } from "./Gradient";
+import { DiscordLogoIcon, GithubLogoIcon, InstagramLogoIcon, LinkedinLogoIcon, TwitterLogoIcon } from "@phosphor-icons/react/dist/ssr";
 
 // --- DATA FOR EASY UPDATES ---
 // This makes managing links simple. Just edit this list.
@@ -37,11 +29,11 @@ const footerLinks = [
 ];
 
 const socialLinks = [
-  { icon: Twitter, href: "#", name: "Twitter" },
-  { icon: Instagram, href: "#", name: "Instagram" },
-  { icon: Linkedin, href: "#", name: "LinkedIn" },
-  { icon: Github, href: "#", name: "GitHub" },
-  { icon: MessageSquare, href: "#", name: "Community" }, // A good generic icon for Discord/Slack
+  { icon: TwitterLogoIcon, href: "#", name: "Twitter" },
+  { icon: InstagramLogoIcon, href: "#", name: "Instagram" },
+  { icon: LinkedinLogoIcon, href: "#", name: "LinkedIn" },
+  { icon: GithubLogoIcon, href: "#", name: "GitHub" },
+  { icon: DiscordLogoIcon, href: "#", name: "Community" },
 ];
 
 // Re-using the gradient colors from your original snippet
@@ -148,7 +140,7 @@ const Footer = () => {
         {/* It's hidden on smaller screens to prevent clutter */}
         <div className="absolute bottom-0 right-0 z-10">
           <Image
-            src={"/images/landing/footer/footerMain.png"}
+            src={"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/footer/footerMain.webp"}
             width={500}
             height={500}
             alt="Decorative abstract graphic"

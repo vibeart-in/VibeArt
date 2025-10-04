@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SignInWithGoogleButton from "./google-login";
+import GlassModal from "../ui/GlassModal";
+import { NavbarLogo } from "../ui/resizable-navbar";
 
 export function LoginForm({
   className,
@@ -40,56 +42,71 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <h2 className="font-semibold text-center text-xl">Login Now</h2>
-      <SignInWithGoogleButton />
-      <div className="border-b border-gray-500"></div>
-      <form onSubmit={handleLogin}>
-        <div className="flex flex-col gap-6">
-          <div className="">
-            {/* <Label htmlFor="email">Email</Label> */}
+    <div className="relative flex items-center justify-center w-full h-full">
+      <GlassModal width={40} height={550} count={16} className="z-50" />
+
+      <div className="absolute z-50">
+        <div
+          className={cn(
+            "flex flex-col gap-6 items-center text-center max-w-sm w-full",
+            className
+          )}
+          {...props}
+        >
+          <NavbarLogo />
+          <div>
+            <h2 className="font-bold text-2xl">Start Creating 🔥</h2>
+            <p className="text-gray-400 text-sm mt-1">
+              Log in to generate, edit and bring your vison to life
+            </p>
+          </div>
+
+          <SignInWithGoogleButton />
+
+          <div className="relative w-full flex items-center">
+            <span className="flex-grow border-t border-gray-500"></span>
+            <span className="mx-2 text-xs text-gray-400">or</span>
+            <span className="flex-grow border-t border-gray-500"></span>
+          </div>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
             <Input
               id="email"
               type="email"
-              placeholder="Email address"
+              placeholder="Your email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-          </div>
-          <div className="">
-            <div className="flex items-center">
-              {/* <Label htmlFor="password">Password</Label> */}
-            </div>
             <Input
               id="password"
               type="password"
               required
+              placeholder="Your password"
               value={password}
-              placeholder="Password"
               onChange={(e) => setPassword(e.target.value)}
             />
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login & Start Creating"}
+            </Button>
+          </form>
+          <div className="mt-2 text-sm flex justify-center gap-4">
+            <Link
+              href="/auth/signup"
+              className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
+            >
+              Sign up
+            </Link>
+            <Link
+              href="/forgot-password"
+              className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-64" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Login"}
-          </Button>
         </div>
-        <div className="mt-4 text-center text-sm flex justify-center gap-4">
-          <Link
-            href="/auth/signup"
-            className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
-          >
-            Sign up
-          </Link>
-          <Link
-            href="/forgot-password"
-            className="inline-block text-sm underline-offset-4 hover:underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
-          >
-            Forgot your password?
-          </Link>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

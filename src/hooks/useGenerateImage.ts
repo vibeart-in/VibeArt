@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ConversationType, MessageType } from "../types/BaseType";
+import { ConversationType, InputBoxParameter, MessageType } from "../types/BaseType";
 
 type GenerationParams = {
-  parameters: Record<string, any>;
+  parameters: InputBoxParameter;
   conversationId?: string;
   modelIdentifier: string;
   modelCredit: number;
@@ -39,9 +39,22 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
       await queryClient.cancelQueries({ queryKey });
       const previousMessages = queryClient.getQueryData<MessageType[]>(queryKey);
 
+      // Extract prompt based on parameter type
+      let userPrompt = "";
+      if (Array.isArray(newGeneration.parameters)) {
+        // NodeParam[] case (running_hub)
+        const promptParam = newGeneration.parameters.find(
+          (p) => p.description === "prompt"
+        );
+        userPrompt = promptParam?.fieldValue || "";
+      } else {
+        // Record<string, SchemaParam> case (replicate)
+        userPrompt = (newGeneration.parameters as any).prompt || "";
+      }
+
       const optimisticMessage: MessageType = {
         id: crypto.randomUUID(),
-        userPrompt: newGeneration.parameters.prompt,
+        userPrompt,
         job_status: "pending",
         input_images: [],
         output_images: [],
