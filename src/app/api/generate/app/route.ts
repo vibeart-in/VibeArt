@@ -13,12 +13,10 @@ type NodeParam = {
 };
 
 // --- Environment Variables ---
-const RUNNING_HUB_API_ENDPOINT =
-  "https://www.runninghub.ai/task/openapi/ai-app/run";
+const RUNNING_HUB_API_ENDPOINT = "https://www.runninghub.ai/task/openapi/ai-app/run";
 const RUNNING_HUB_API_KEY = process.env.RUNNING_HUB_API_KEY;
 // For local development, this might be `http://localhost:3000`. For Vercel, it's auto-set.
-const WEBHOOK_HOST =
-  process.env.WEBHOOK_HOST || process.env.NEXT_PUBLIC_VERCEL_URL;
+const WEBHOOK_HOST = process.env.WEBHOOK_HOST || process.env.NEXT_PUBLIC_VERCEL_URL;
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -31,16 +29,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const {
-      appId,
-      parameters: clientParameters,
-    }: { appId: string; parameters: NodeParam[] } = await req.json();
+    const { appId, parameters: clientParameters }: { appId: string; parameters: NodeParam[] } =
+      await req.json();
 
     if (!appId || !clientParameters) {
-      return NextResponse.json(
-        { message: "Missing appId or parameters" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing appId or parameters" }, { status: 400 });
     }
 
     // 1. Fetch AI App details (cost, webappId, base parameters)
@@ -52,10 +45,7 @@ export async function POST(req: NextRequest) {
 
     if (aiAppError || !aiApp) {
       console.error("AI App not found or database error:", aiAppError);
-      return NextResponse.json(
-        { message: "AI App not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "AI App not found" }, { status: 404 });
     }
 
     // Merge app's default parameters with client's overridden parameters.
@@ -92,27 +82,20 @@ export async function POST(req: NextRequest) {
 
         if (imageInsertError || !newImage) {
           console.error("Error inserting input image:", imageInsertError);
-          return NextResponse.json(
-            { message: "Failed to store input image" },
-            { status: 500 }
-          );
+          return NextResponse.json({ message: "Failed to store input image" }, { status: 500 });
         }
         inputImagesToLink.push(newImage.id); // Store ID for linking later
 
         // Generate a signed URL for the external AI service (RunningHub)
-        const { data: signedUrlData, error: signedUrlError } =
-          await supabase.storage
-            .from(bucketName)
-            .createSignedUrl(filePathInBucket, 3600); // 1 hour expiry for the AI service
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from(bucketName)
+          .createSignedUrl(filePathInBucket, 3600); // 1 hour expiry for the AI service
 
         if (signedUrlError || !signedUrlData) {
-          console.error(
-            "Error generating signed URL for input image:",
-            signedUrlError
-          );
+          console.error("Error generating signed URL for input image:", signedUrlError);
           return NextResponse.json(
             { message: "Failed to generate signed URL for input image" },
-            { status: 500 }
+            { status: 500 },
           );
         }
 
@@ -155,10 +138,7 @@ export async function POST(req: NextRequest) {
 
       if (newConvError || !newConversation) {
         console.error("Error creating conversation:", newConvError);
-        return NextResponse.json(
-          { message: "Failed to create conversation" },
-          { status: 500 }
-        );
+        return NextResponse.json({ message: "Failed to create conversation" }, { status: 500 });
       }
       conversationId = newConversation.id;
     } else {
@@ -179,10 +159,7 @@ export async function POST(req: NextRequest) {
 
     if (messageError || !newMessage) {
       console.error("Error creating message:", messageError);
-      return NextResponse.json(
-        { message: "Failed to create message" },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: "Failed to create message" }, { status: 500 });
     }
     const messageId = newMessage.id;
 
@@ -193,9 +170,7 @@ export async function POST(req: NextRequest) {
         message_id: messageId,
         image_id: imageId,
       }));
-      const { error: linkError } = await supabase
-        .from("message_input_images")
-        .insert(links);
+      const { error: linkError } = await supabase.from("message_input_images").insert(links);
       if (linkError) {
         console.error("Error linking input images to message:", linkError);
         // This is non-critical for job execution but important for history, log it.
@@ -220,10 +195,7 @@ export async function POST(req: NextRequest) {
 
     if (jobError || !newJob) {
       console.error("Error creating job:", jobError);
-      return NextResponse.json(
-        { message: "Failed to create job" },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: "Failed to create job" }, { status: 500 });
     }
     const newJobId = newJob.id;
 
@@ -251,7 +223,7 @@ export async function POST(req: NextRequest) {
         .eq("id", newJobId);
       return NextResponse.json(
         { message: "Server configuration error: Missing API Key" },
-        { status: 500 }
+        { status: 500 },
       );
     }
     if (!WEBHOOK_HOST) {
@@ -265,7 +237,7 @@ export async function POST(req: NextRequest) {
         .eq("id", newJobId);
       return NextResponse.json(
         { message: "Server configuration error: Missing Webhook Host" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -298,11 +270,9 @@ export async function POST(req: NextRequest) {
         .eq("id", newJobId);
       return NextResponse.json(
         {
-          message: `External AI service error: ${
-            rhErrorData.message || "Unknown error"
-          }`,
+          message: `External AI service error: ${rhErrorData.message || "Unknown error"}`,
         },
-        { status: rhRes.status }
+        { status: rhRes.status },
       );
     }
 
@@ -322,7 +292,7 @@ export async function POST(req: NextRequest) {
     console.error("Unhandled API error:", error);
     return NextResponse.json(
       { message: error.message || "An unexpected error occurred" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

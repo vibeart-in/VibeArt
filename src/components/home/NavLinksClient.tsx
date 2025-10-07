@@ -1,11 +1,9 @@
-// src/components/home/NavLinksClient.tsx
 "use client";
 
-import { useMemo, useRef, useState, useLayoutEffect, memo } from "react";
+import { useMemo, useState, memo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-// Layout animations require domMax; scoping to this island keeps impact local.
 import { LazyMotion, domMax } from "motion/react";
 import * as m from "motion/react-m";
 
@@ -13,10 +11,10 @@ import {
   HomeIcon,
   PencilSquareIcon,
   PuzzlePieceIcon,
-  Squares2X2Icon,
   PhotoIcon,
+  VideoCameraIcon,
 } from "@heroicons/react/24/solid";
-import { FireIcon } from "@phosphor-icons/react";
+import { FireIcon, VideoIcon } from "@phosphor-icons/react";
 
 type NavItemT = {
   name: string;
@@ -42,14 +40,14 @@ const NAV_ITEMS: NavItemT[] = [
     link: "/image/advance_generate",
   },
   {
+    name: "Video",
+    icon: <VideoCameraIcon className="h-5 w-5" />,
+    link: "/image/video",
+  },
+  {
     name: "AI Apps",
     icon: <PuzzlePieceIcon className="h-5 w-5" />,
     link: "/image/ai-apps",
-  },
-  {
-    name: "Gallery",
-    icon: <Squares2X2Icon className="h-5 w-5" />,
-    link: "/image/gallery",
   },
 ];
 
@@ -81,13 +79,7 @@ function HoverPrefetchLink({
   );
 }
 
-const NavButton = memo(function NavButton({
-  item,
-  active,
-}: {
-  item: NavItemT;
-  active: boolean;
-}) {
+const NavButton = memo(function NavButton({ item, active }: { item: NavItemT; active: boolean }) {
   const [hovered, setHovered] = useState(false);
   const show = active || hovered;
 
@@ -102,10 +94,8 @@ const NavButton = memo(function NavButton({
     >
       <HoverPrefetchLink
         href={item.link}
-        className={`flex px-2 py-2 items-center justify-center rounded-2xl transition-colors duration-200 relative overflow-hidden ${
-          active
-            ? "bg-[#D9E825] text-black shadow-lg"
-            : "text-white hover:bg-white/10"
+        className={`relative flex items-center justify-center overflow-hidden rounded-2xl px-2 py-2 transition-colors duration-200 ${
+          active ? "bg-[#D9E825] text-black shadow-lg" : "text-white hover:bg-white/10"
         }`}
       >
         <m.div
@@ -124,7 +114,7 @@ const NavButton = memo(function NavButton({
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
           {/* The span now just needs to prevent text wrapping */}
-          <span className="font-medium whitespace-nowrap">{item.name}</span>
+          <span className="whitespace-nowrap font-medium">{item.name}</span>
         </m.div>
       </HoverPrefetchLink>
     </m.li>
@@ -141,16 +131,9 @@ export function NavLinksClient() {
         className="flex items-center rounded-2xl border border-solid border-white/30 bg-black/50 backdrop-blur-sm"
         whileHover={{}}
       >
-        <m.ul
-          layout
-          className="flex w-full px-2 py-1 items-center justify-start gap-2"
-        >
+        <m.ul layout className="flex w-full items-center justify-start gap-2 px-2 py-1">
           {items.map((item) => (
-            <NavButton
-              key={item.name}
-              item={item}
-              active={isActiveRoute(pathname, item.link)}
-            />
+            <NavButton key={item.name} item={item} active={isActiveRoute(pathname, item.link)} />
           ))}
         </m.ul>
       </m.div>

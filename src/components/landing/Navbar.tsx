@@ -78,8 +78,8 @@ export function NavbarLander() {
         <div className="flex items-center gap-4">
           {loading ? (
             <div className="flex items-center gap-4">
-              <div className="h-9 w-16 bg-gray-200 animate-pulse rounded"></div>
-              <div className="h-9 w-24 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-9 w-16 animate-pulse rounded bg-gray-200"></div>
+              <div className="h-9 w-24 animate-pulse rounded bg-gray-200"></div>
             </div>
           ) : user ? (
             <>
@@ -112,10 +112,7 @@ export function NavbarLander() {
           />
         </MobileNavHeader>
 
-        <MobileNavMenu
-          isOpen={isMobileMenuOpen}
-          onClose={() => setIsMobileMenuOpen(false)}
-        >
+        <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
           {navItems.map((item, idx) => (
             <a
               key={`mobile-link-${idx}`}
@@ -129,8 +126,8 @@ export function NavbarLander() {
           <div className="flex w-full flex-col gap-4">
             {loading ? (
               <>
-                <div className="h-9 w-full bg-gray-200 animate-pulse rounded"></div>
-                <div className="h-9 w-full bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-9 w-full animate-pulse rounded bg-gray-200"></div>
+                <div className="h-9 w-full animate-pulse rounded bg-gray-200"></div>
               </>
             ) : user ? (
               <>

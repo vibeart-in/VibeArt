@@ -11,12 +11,7 @@ export const UserProfile = ({
   user: User | null;
 }) => {
   return (
-    <div
-      className={cn(
-        "flex items-center justify-start gap-2 group/sidebar",
-        className
-      )}
-    >
+    <div className={cn("group/sidebar flex items-center justify-start gap-2", className)}>
       <Avatar>
         <AvatarImage src={user?.user_metadata?.avatar_url} />
         <AvatarFallback>

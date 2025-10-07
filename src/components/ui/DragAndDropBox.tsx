@@ -8,7 +8,7 @@ import { uploadImage } from "@/src/lib/UploadImage";
 export default function DragAndDropBox({
   onUploadSuccess,
 }: {
-  onUploadSuccess: (url: string) => void;
+  onUploadSuccess: (paths: { permanentPath: string; displayUrl: string }) => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -24,7 +24,7 @@ export default function DragAndDropBox({
       x: Math.random() * 400 - 200,
       y: Math.random() * 400 - 200,
       delay: Math.random() * 0.6,
-    }))
+    })),
   );
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -82,14 +82,18 @@ export default function DragAndDropBox({
         file,
         onProgress: (p) => console.log("Progress:", p.toFixed(0) + "%"),
         onError: (err) => setError(err.message),
-        onSuccess: (url) => {
-          setUploadedImageUrl(url);
-          sessionStorage.setItem("initialEditImage", url);
-          onUploadSuccess(url);
+        onSuccess: (permanentPath, displayUrl) => {
+          setUploadedImageUrl(displayUrl);
+          sessionStorage.setItem(
+            "initialEditImage",
+            JSON.stringify({
+              permanentPath: permanentPath,
+              displayUrl: displayUrl,
+            }),
+          );
+          onUploadSuccess({ permanentPath, displayUrl });
         },
       });
-
-      console.log("Uploaded URL:", result.signedUrl);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -99,29 +103,26 @@ export default function DragAndDropBox({
 
   const handleRemoveImage = () => {
     setUploadedImageUrl(null);
-    onUploadSuccess("");
+    onUploadSuccess({ displayUrl: "", permanentPath: "" });
     sessionStorage.removeItem("initialEditImage");
   };
 
   return (
     <>
       {uploadedImageUrl ? (
-        <div className="relative w-full h-[60vh]">
+        <div className="relative h-[60vh] w-full">
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
-            className=" object-cover w-full h-full rounded-3xl border-2 border-white/20"
+            className="h-full w-full rounded-3xl border-2 border-white/20 object-cover"
           />
-          <button
-            onClick={handleRemoveImage}
-            className="absolute -top-6 -right-8"
-          >
+          <button onClick={handleRemoveImage} className="absolute -right-8 -top-6">
             <IconX size={32} className="custom-box hover:text-accent" />
           </button>
         </div>
       ) : (
         <motion.div
-          className="relative w-[400px] h-[420px] cursor-pointer"
+          className="relative h-[420px] w-[400px] cursor-pointer"
           onClick={handleClick}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
@@ -134,7 +135,7 @@ export default function DragAndDropBox({
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           <div
-            className="absolute inset-0 z-10 overflow-hidden pointer-events-none opacity-60"
+            className="pointer-events-none absolute inset-0 z-10 overflow-hidden opacity-60"
             style={{
               backgroundImage: "url(/images/landing/grain.png)",
               backgroundSize: "200px 200px",
@@ -143,12 +144,8 @@ export default function DragAndDropBox({
             }}
           />
 
-          <div className="absolute w-full h-full z-20 inset-0 flex items-center justify-center pointer-events-none">
-            <svg
-              viewBox="0 0 400 420"
-              className="absolute inset-0 w-full h-full"
-              aria-hidden
-            >
+          <div className="pointer-events-none absolute inset-0 z-20 flex h-full w-full items-center justify-center">
+            <svg viewBox="0 0 400 420" className="absolute inset-0 h-full w-full" aria-hidden>
               <rect
                 x="4"
                 y="4"
@@ -164,24 +161,20 @@ export default function DragAndDropBox({
                   opacity: isDragging || isHovered ? 1 : 0.6,
                 }}
                 className={
-                  isDragging
-                    ? "text-accent"
-                    : isHovered
-                    ? "text-gray-100"
-                    : "text-gray-200"
+                  isDragging ? "text-accent" : isHovered ? "text-gray-100" : "text-gray-200"
                 }
               />
             </svg>
           </div>
 
           <motion.div
-            className="w-full h-full rounded-[62px] flex flex-col items-center justify-center overflow-hidden relative"
+            className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[62px]"
             animate={{
               backgroundColor: isDragging
                 ? "rgba(0, 0, 0, 0.4)"
                 : isHovered
-                ? "rgba(0, 0, 0, 0.25)"
-                : "rgba(0, 0, 0, 0.2)",
+                  ? "rgba(0, 0, 0, 0.25)"
+                  : "rgba(0, 0, 0, 0.2)",
             }}
             style={{ backdropFilter: "blur(2px)" }}
             transition={{ duration: 0.25 }}
@@ -192,7 +185,7 @@ export default function DragAndDropBox({
                   {particles.current.map((p, i) => (
                     <motion.div
                       key={i}
-                      className="absolute w-2 h-2 bg-white/30 rounded-full"
+                      className="absolute h-2 w-2 rounded-full bg-white/30"
                       initial={{ opacity: 0, scale: 0, x: p.x, y: p.y }}
                       animate={{
                         opacity: [0, 1, 0],
@@ -213,47 +206,41 @@ export default function DragAndDropBox({
             </AnimatePresence>
 
             {uploading ? (
-              <div className="text-white text-lg text-center flex flex-col gap-4">
+              <div className="flex flex-col gap-4 text-center text-lg text-white">
                 <div className="upload-loader"></div>
                 <p>Uploading...</p>
               </div>
             ) : error ? (
-              <div className="text-red-500 text-center">{error}</div>
+              <div className="text-center text-red-500">{error}</div>
             ) : (
               <>
                 <motion.div
-                  className="absolute mb-8 pointer-events-none"
+                  className="pointer-events-none absolute mb-8"
                   animate={{
                     y: isDragging ? -20 : isHovered ? -10 : 0,
                     scale: isDragging ? 1.2 : isHovered ? 1.1 : 1,
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <IconUpload className="w-12 h-12 text-white/70 mb-4" />
+                  <IconUpload className="mb-4 h-12 w-12 text-white/70" />
                 </motion.div>
 
                 <motion.div
-                  className="text-center pointer-events-none mt-12"
+                  className="pointer-events-none mt-12 text-center"
                   animate={{ y: isDragging ? 20 : isHovered ? 10 : 0 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <motion.p
-                    className="text-white text-lg font-medium mb-2"
+                    className="mb-2 text-lg font-medium text-white"
                     animate={{
-                      color: isDragging
-                        ? "#ffffff"
-                        : isHovered
-                        ? "#f3f4f6"
-                        : "#e5e7eb",
+                      color: isDragging ? "#ffffff" : isHovered ? "#f3f4f6" : "#e5e7eb",
                     }}
                   >
-                    {isDragging
-                      ? "Drop files here"
-                      : "Click or drag & drop files here"}
+                    {isDragging ? "Drop files here" : "Click or drag & drop files here"}
                   </motion.p>
 
                   <motion.p
-                    className="text-white/50 text-sm"
+                    className="text-sm text-white/50"
                     initial={{ opacity: 0 }}
                     animate={{
                       opacity: isHovered ? 1 : 0,

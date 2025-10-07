@@ -11,86 +11,114 @@ import { heroSlides, HeroSlide } from "@/src/lib/heroConfig";
 
 const cardData1: ImageCard3DType[] = [
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_game_bottom.webp",
     cardText: "Gaming",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine_trans2.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine_trans2.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/figurine.webp",
     cardText: "Editing",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-dsgin.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-desgin.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-dsgin.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/site-desgin.webp",
     cardText: "Web desgin",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/90s-bottom.webp",
     cardText: "90s",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/game-bottom.webp",
     cardText: "Game",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/concept-bottom.webp",
     cardText: "concept",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/emotion-bottom.webp",
     cardText: "concept",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/product-bottom.webp",
     cardText: "Product",
     topImageScale: 1.05,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-to.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-to.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/phone-bottom.webp",
     cardText: "Ultra real",
-    topImageScale: 1.1
+    topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys-trans.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys-trans.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/keys.webp",
     cardText: "Abstract",
     topImageScale: 1.4,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/anime_girl_bottom.webp",
     cardText: "Anime",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl_bottom.webp",
     cardText: "Gothic",
     topImageScale: 1.2,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.1,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
   },
@@ -98,49 +126,61 @@ const cardData1: ImageCard3DType[] = [
 
 const cardData2: ImageCard3DType[] = [
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/guy_bottom.webp",
     cardText: "Guy",
     topImageScale: 1.1,
     width: 400,
     height: 600,
-    fontSize: 1000
+    fontSize: 1000,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/mirror_girl_bottom.webp",
     cardText: "Instagram",
     topImageScale: 1.2,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.3,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/prop_bottom.webp",
     cardText: "Dark",
     topImageScale: 1.3,
     width: 400,
     height: 600,
   },
   {
-    topImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
-    bottomImageUrl: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
+    topImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_top.webp",
+    bottomImageUrl:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/jap_girl_bottom.webp",
     cardText: "Kawaii",
     topImageScale: 1.2,
     width: 400,
@@ -174,7 +214,7 @@ const Hero = () => {
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Hero Section */}
-      <div className="group relative -mt-10 h-[90vh] sm:h-[105vh] min-h-[500px]">
+      <div className="group relative -mt-10 h-[90vh] min-h-[500px] sm:h-[105vh]">
         {/* Animated Images */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -200,10 +240,10 @@ const Hero = () => {
         </AnimatePresence>
 
         {/* Gradient Overlay */}
-        <div className="z-10 absolute inset-x-0 bottom-0 h-[200px] sm:h-[400px] bg-black/5 [mask-image:linear-gradient(to_top,white,transparent)] backdrop-blur-md" />
+        <div className="absolute inset-x-0 bottom-0 z-10 h-[200px] bg-black/5 backdrop-blur-md [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[400px]" />
 
         {/* Hero Content */}
-        <div className="absolute inset-x-0 bottom-6 sm:bottom-16 z-10 w-full flex flex-col justify-center items-center px-2">
+        <div className="absolute inset-x-0 bottom-6 z-10 flex w-full flex-col items-center justify-center px-2 sm:bottom-16">
           <AnimatePresence mode="wait">
             <motion.h1
               key={`title-${currentSlide.id}`}
@@ -215,7 +255,7 @@ const Hero = () => {
                 delay: 0.3,
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
-              className="font-gothic text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-center mb-3 sm:mb-6 max-w-4xl leading-tight"
+              className="mb-3 max-w-4xl text-center font-gothic text-2xl font-medium leading-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl"
             >
               {currentSlide.title}
             </motion.h1>
@@ -233,22 +273,15 @@ const Hero = () => {
         <motion.button
           onClick={() => {
             const prevIndex =
-              currentSlideIndex === 0
-                ? heroSlides.length - 1
-                : currentSlideIndex - 1;
+              currentSlideIndex === 0 ? heroSlides.length - 1 : currentSlideIndex - 1;
             setCurrentSlideIndex(prevIndex);
             setCurrentSlide(heroSlides[prevIndex]);
           }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 opacity-0 hover:opacity-100 group-hover:opacity-100"
+          className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-2 opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:opacity-100 group-hover:opacity-100"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <svg
-            className="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -264,27 +297,17 @@ const Hero = () => {
             setCurrentSlideIndex(nextIndex);
             setCurrentSlide(heroSlides[nextIndex]);
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 opacity-0 hover:opacity-100 group-hover:opacity-100"
+          className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-2 opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:opacity-100 group-hover:opacity-100"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <svg
-            className="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </motion.button>
 
         {/* Slide Indicators with Progress */}
-        <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+        <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 space-x-2 sm:bottom-4">
           {heroSlides.map((_, index) => (
             <motion.button
               key={index}
@@ -292,20 +315,20 @@ const Hero = () => {
                 setCurrentSlideIndex(index);
                 setCurrentSlide(heroSlides[index]);
               }}
-              className="relative group"
+              className="group relative"
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
             >
               <div
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                className={`h-2 w-2 rounded-full transition-all duration-300 ${
                   index === currentSlideIndex
-                    ? "bg-white/80 w-6"
+                    ? "w-6 bg-white/80"
                     : "bg-white/40 group-hover:bg-white/60"
                 }`}
               />
               {index === currentSlideIndex && !isPaused && (
                 <motion.div
-                  className="absolute inset-0 bg-white/60 rounded-full"
+                  className="absolute inset-0 rounded-full bg-white/60"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 5, ease: "linear" }}
@@ -318,7 +341,7 @@ const Hero = () => {
       </div>
 
       {/* Background Gradient - Fixed Position with Animated Colors */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 z-[-1]">
+      <div className="absolute -top-32 left-1/2 z-[-1] -translate-x-1/2">
         <AnimatePresence mode="wait">
           <motion.div
             key={`gradient-${currentSlide.id}`}
@@ -338,8 +361,8 @@ const Hero = () => {
       {/* Cards Section */}
       <div className="relative w-full">
         <GlassPaneBG paneWidth={50}>
-          <div className="flex flex-col items-center ">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-accent text-center mt-4 sm:mt-6 mb-6 sm:mb-8 max-w-4xl leading-tight">
+          <div className="flex flex-col items-center">
+            <h2 className="mb-6 mt-4 max-w-4xl text-center text-2xl leading-tight text-accent sm:mb-8 sm:mt-6 sm:text-3xl md:text-4xl lg:text-5xl">
               Generate anything in any style and with any models
             </h2>
 

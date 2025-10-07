@@ -32,10 +32,7 @@ const AppCard = ({
       initial="rest"
       whileHover="hover"
       animate="rest"
-      className={cn(
-        "relative z-20 cursor-pointer overflow-hidden flex-shrink-0",
-        roundedClass
-      )}
+      className={cn("relative z-20 flex-shrink-0 cursor-pointer overflow-hidden", roundedClass)}
       variants={{
         rest: { scale: 1 },
         hover: { scale: 0.99 },
@@ -45,7 +42,7 @@ const AppCard = ({
       <Link href={`/image/ai-apps/${id}`}>
         {/* Media (Image or Video) */}
         <motion.div
-          className="w-full h-full"
+          className="h-full w-full"
           variants={{
             rest: { scale: 1 },
             hover: { scale: 0.98 },
@@ -55,7 +52,7 @@ const AppCard = ({
           {isVideo ? (
             <video
               src={previewUrl}
-              className={cn("object-cover w-full h-full", roundedClass)}
+              className={cn("h-full w-full object-cover", roundedClass)}
               autoPlay
               muted
               loop
@@ -63,7 +60,7 @@ const AppCard = ({
             />
           ) : (
             <Image
-              className={cn("object-cover w-full h-full", roundedClass)}
+              className={cn("h-full w-full object-cover", roundedClass)}
               src={previewUrl}
               alt={appName}
               width={300}
@@ -75,8 +72,8 @@ const AppCard = ({
         {/* Hover overlay */}
         <motion.div
           className={cn(
-            "absolute inset-0 shadow-[inset_0_4px_38px_rgba(0,0,0,0.8)] bg-black/20",
-            roundedClass
+            "absolute inset-0 bg-black/20 shadow-[inset_0_4px_38px_rgba(0,0,0,0.8)]",
+            roundedClass,
           )}
           variants={{
             rest: { opacity: 0 },
@@ -87,7 +84,7 @@ const AppCard = ({
 
         {/* App name */}
         <motion.div
-          className="absolute inset-0 flex justify-center items-center"
+          className="absolute inset-0 flex items-center justify-center"
           variants={{
             rest: { opacity: 0, y: 20 },
             hover: { opacity: 1, y: 0 },
@@ -96,8 +93,8 @@ const AppCard = ({
         >
           <p
             className={cn(
-              "text-white font-bold text-center drop-shadow-lg px-2 py-1",
-              textSizeClass
+              "px-2 py-1 text-center font-bold text-white drop-shadow-lg",
+              textSizeClass,
             )}
           >
             {appName}

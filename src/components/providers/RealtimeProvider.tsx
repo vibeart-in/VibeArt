@@ -53,7 +53,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           console.log("Profile changed:", payload);
           queryClient.invalidateQueries({ queryKey: ["user", "nav-info"] });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -66,7 +66,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           console.log("Convo changed:", payload);
           queryClient.invalidateQueries({ queryKey: ["conversationHistory"] });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -89,15 +89,12 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
               queryKey: ["messages", updatedJob.conversation_id],
             });
           }
-          if (
-            updatedJob.ai_app_id &&
-            updatedJob.job_status === "succeeded"
-          ) {
+          if (updatedJob.ai_app_id && updatedJob.job_status === "succeeded") {
             queryClient.invalidateQueries({
               queryKey: ["appGenerations", updatedJob.ai_app_id],
             });
           }
-        }
+        },
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {

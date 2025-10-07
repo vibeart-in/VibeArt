@@ -48,18 +48,11 @@ interface AppInputBoxProps {
   appCover: string;
 }
 
-const AppInputBox = ({
-  appId,
-  appParameters,
-  appCost,
-  appCover,
-}: AppInputBoxProps) => {
+const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxProps) => {
   const [values, setValues] = useState<NodeParam[]>(appParameters);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [inputImagePreview, setInputImagePreview] = useState<string | null>(
-    null
-  );
+  const [inputImagePreview, setInputImagePreview] = useState<string | null>(null);
 
   const { mutate, isPending, error: apiError } = useGenerateAppImage();
 
@@ -67,25 +60,20 @@ const AppInputBox = ({
     setIsDialogOpen((prev) => !prev);
   };
 
-  const handleChange = useCallback(
-    (nodeId: string, newFieldValue: any, previewUrl?: string) => {
-      setValues((currentParams) =>
-        currentParams.map((param) =>
-          param.nodeId === nodeId
-            ? { ...param, fieldValue: String(newFieldValue) }
-            : param
-        )
-      );
-      // If a preview URL was provided (meaning it was an image upload), store it
-      if (previewUrl) {
-        setInputImagePreview(previewUrl);
-      }
-    },
-    []
-  );
+  const handleChange = useCallback((nodeId: string, newFieldValue: any, previewUrl?: string) => {
+    setValues((currentParams) =>
+      currentParams.map((param) =>
+        param.nodeId === nodeId ? { ...param, fieldValue: String(newFieldValue) } : param,
+      ),
+    );
+    // If a preview URL was provided (meaning it was an image upload), store it
+    if (previewUrl) {
+      setInputImagePreview(previewUrl);
+    }
+  }, []);
 
   const handleGenerateClick = () => {
-    setFormError(null); // Clear any previous form errors
+    setFormError(null);
     console.log(values);
     // Basic client-side validation based on common inputs
     const imageParam = values.find((p) => p.fieldName === "image");
@@ -107,17 +95,17 @@ const AppInputBox = ({
 
   return (
     <>
-      <div className="relative w-fit bg-[#111111]/80 backdrop-blur-md rounded-[28px] p-2 md:p-3 mb-2">
+      <div className="relative mb-2 w-fit rounded-[28px] bg-[#111111]/80 p-2 backdrop-blur-md md:p-3">
         <AnimatePresence>
           {isDialogOpen && (
             <motion.div
-              className=" w-full mb-2 overflow-hidden"
+              className="mb-2 w-full overflow-hidden"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "28rem" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <div className="w-full h-full p-2 overflow-y-auto">
+              <div className="h-full w-full overflow-y-auto p-2">
                 <AppGridClient compact={true} />
               </div>
               <GradualBlurMemo
@@ -138,14 +126,14 @@ const AppInputBox = ({
         <section className="flex gap-4">
           <div
             onClick={handleCardClick}
-            className="w-[120px] h-[95px] z-20 rounded-3xl relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0 group"
+            className="group relative z-20 h-[95px] w-[120px] flex-shrink-0 cursor-pointer overflow-hidden rounded-3xl transition-transform hover:scale-105 active:scale-100"
           >
             {/* Inner shadow */}
-            <div className="absolute inset-0 shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)] rounded-3xl pointer-events-none"></div>
+            <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
             {isVideo ? (
               <video
                 src={appCover}
-                className="object-cover w-full h-full rounded-3xl"
+                className="h-full w-full rounded-3xl object-cover"
                 autoPlay
                 muted
                 loop
@@ -153,7 +141,7 @@ const AppInputBox = ({
               />
             ) : (
               <Image
-                className="object-cover w-full h-full rounded-3xl transition-all duration-300 group-hover:brightness-90"
+                className="h-full w-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
                 src={appCover}
                 alt={"app card small"}
                 width={150}
@@ -161,20 +149,18 @@ const AppInputBox = ({
               />
             )}
 
-            <div className="absolute bottom-2 left-2 right-2 bg-black/30 rounded-md p-1 text-center transition-opacity group-hover:opacity-0">
-              <p className="text-accent font-gothic text-sm font-medium truncate">
-                Quick Change
-              </p>
+            <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+              <p className="truncate font-gothic text-sm font-medium text-accent">Quick Change</p>
             </div>
-            <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-xs text-white/90 bg-black/50 px-2 py-1 rounded-xl">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
                 <SwapIcon size={30} weight="bold" />
               </span>
             </div>
           </div>
 
-          <div className="flex z-20 flex-col items-center gap-2">
-            <div className="flex gap-2 h-full items-start">
+          <div className="z-20 flex flex-col items-center gap-2">
+            <div className="flex h-full items-start gap-2">
               {values.map((param) => {
                 const key = param.nodeId;
 
@@ -184,10 +170,13 @@ const AppInputBox = ({
                       {" "}
                       {/* Add key here */}
                       <ImageUploadBox
-                        onUploadComplete={(permanentPath, displayUrl) => {
+                        onImageUploaded={({ permanentPath, displayUrl }) => {
                           handleChange(param.nodeId, permanentPath, displayUrl);
                         }}
-                        showImage={true}
+                        onImageRemoved={() => {
+                          handleChange(param.nodeId, "");
+                          sessionStorage.removeItem("initialEditImage");
+                        }}
                         imageDescription={param.description}
                       />
                     </div>
@@ -196,13 +185,8 @@ const AppInputBox = ({
 
                 if (param.fieldName === "boolean") {
                   return (
-                    <div
-                      key={key}
-                      className="flex flex-col h-full  justify-between gap-2 py-2"
-                    >
-                      <span className="text-xs font-semibold text-center">
-                        {param.description}
-                      </span>
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-xs font-semibold">{param.description}</span>
                       <div className="px-2">
                         <Switch
                           checked={param.fieldValue === "true"}
@@ -215,24 +199,16 @@ const AppInputBox = ({
                   );
                 }
 
-                if (
-                  param.fieldName === "prompt" ||
-                  param.fieldName === "text"
-                ) {
+                if (param.fieldName === "prompt" || param.fieldName === "text") {
                   return (
-                    <div
-                      key={key}
-                      className="w-full h-full flex justify-center items-center"
-                    >
+                    <div key={key} className="flex h-full w-full items-center justify-center">
                       {" "}
                       {/* Add key here */}
-                      <IconTerminal className="absolute top-2 left-4 text-white/80" />
+                      <IconTerminal className="absolute left-4 top-2 text-white/80" />
                       <Textarea
                         value={param.fieldValue as string}
-                        onChange={(e) =>
-                          handleChange(param.nodeId, e.target.value)
-                        }
-                        className="pl-4 hide-scrollbar max-h-full min-w-[200px] border"
+                        onChange={(e) => handleChange(param.nodeId, e.target.value)}
+                        className="hide-scrollbar max-h-full min-w-[200px] border pl-4"
                         maxHeight={100}
                         placeholder={param.description}
                       />
@@ -258,7 +234,7 @@ const AppInputBox = ({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex items-center gap-2 text-red-400 bg-red-900/70 p-2 rounded-xl mb-2 text-sm"
+            className="mb-2 flex items-center gap-2 rounded-xl bg-red-900/70 p-2 text-sm text-red-400"
             role="alert"
           >
             <XCircle
@@ -277,7 +253,7 @@ const AppInputBox = ({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex items-center gap-2 text-red-400 bg-red-900/70 p-2 rounded-xl mb-2 text-sm"
+            className="mb-2 flex items-center gap-2 rounded-xl bg-red-900/70 p-2 text-sm text-red-400"
             role="alert"
           >
             <XCircle

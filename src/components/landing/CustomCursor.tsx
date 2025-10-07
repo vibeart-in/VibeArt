@@ -31,7 +31,7 @@ export const CustomCursor = ({ isVisible }: CustomCursorProps) => {
   }, [mouseX, mouseY]);
 
   // 4. Variants for animating visibility (fade in/out, scale up/down)
-  const cursorVariants:Variants = {
+  const cursorVariants: Variants = {
     hidden: {
       opacity: 0,
       scale: 0.5,
@@ -56,15 +56,7 @@ export const CustomCursor = ({ isVisible }: CustomCursorProps) => {
         translateY: springY,
       }}
       // --- Styling for Glassmorphism ---
-      className="
-        fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 
-        w-24 h-24 rounded-full 
-        flex items-center justify-center 
-        bg-white/10 backdrop-blur-sm 
-        border border-white/20 
-        pointer-events-none 
-        text-white font-semibold text-base z-50
-      "
+      className="pointer-events-none fixed left-0 top-0 z-50 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-base font-semibold text-white backdrop-blur-sm"
     >
       Drag me
     </motion.div>

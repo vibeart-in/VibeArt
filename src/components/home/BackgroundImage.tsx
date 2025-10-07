@@ -55,23 +55,9 @@ const BackgroundImage = ({
       }}
     >
       {isVideo ? (
-        <video
-          src={src}
-          width={width}
-          height={height}
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
+        <video src={src} width={width} height={height} autoPlay muted loop playsInline />
       ) : (
-        <Image
-          src={src}
-          alt="Background Image"
-          width={width}
-          height={height}
-          unoptimized
-        />
+        <Image src={src} alt="Background Image" width={width} height={height} unoptimized />
       )}
     </motion.div>
   );

@@ -34,7 +34,7 @@ const itemVariants: Variants = {
 
 const SkeletonRow = () => (
   <motion.div layout variants={itemVariants}>
-    <div className="skeleton-shimmer w-[55px] h-[55px] rounded-2xl mb-2" />
+    <div className="skeleton-shimmer mb-2 h-[55px] w-[55px] rounded-2xl" />
   </motion.div>
 );
 
@@ -48,18 +48,12 @@ const GenerateHistory = () => {
   const { data: navData } = useNavInfo();
   const user = navData?.user;
 
-  const {
-    data: historyData,
-    isPending,
-    isError,
-    error,
-  } = useConversationHistory(conversationType);
+  const { data: historyData, isPending, isError, error } = useConversationHistory(conversationType);
 
   const groupedHistory = useMemo(() => {
     return groupHistoryByDate(historyData || []);
   }, [historyData]);
   const dateGroups = Object.keys(groupedHistory);
-
 
   if (!user) {
     return null;
@@ -67,17 +61,8 @@ const GenerateHistory = () => {
 
   return (
     <>
-      <div
-        className="fixed top-1/2 left-4 -translate-y-1/2 z-20"
-        aria-label="History rail"
-      >
-        <div
-          className="
-            w-[75px] rounded-2xl p-2
-            bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515]
-            ring-1 ring-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.4)]
-          "
-        >
+      <div className="fixed left-4 top-1/2 z-20 -translate-y-1/2" aria-label="History rail">
+        <div className="w-[75px] rounded-2xl bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515] p-2 shadow-[0_2px_8px_rgba(0,0,0,0.4)] ring-1 ring-white/5">
           <motion.div
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.96 }}
@@ -85,29 +70,19 @@ const GenerateHistory = () => {
           >
             <Link
               href={
-                conversationType === "ai-apps"
-                  ? "/image/ai-apps"
-                  : `/image/${conversationType}`
+                conversationType === "ai-apps" ? "/image/ai-apps" : `/image/${conversationType}`
               }
-              className={`w-full h-[55px] flex justify-center items-center rounded-2xl
-                bg-[linear-gradient(145deg,_#1a1a1a,_#101010)]
-                hover:bg-[linear-gradient(145deg,_#1c1c1c,_#0f0f0f)]
-                active:bg-[linear-gradient(145deg,_#0f0f0f,_#1c1c1c)]
-                ring-1 ring-white/10
-                ${activeId === undefined ? "text-accent" : "text-white/90"}`}
+              className={`flex h-[55px] w-full items-center justify-center rounded-2xl bg-[linear-gradient(145deg,_#1a1a1a,_#101010)] ring-1 ring-white/10 hover:bg-[linear-gradient(145deg,_#1c1c1c,_#0f0f0f)] active:bg-[linear-gradient(145deg,_#0f0f0f,_#1c1c1c)] ${activeId === undefined ? "text-accent" : "text-white/90"}`}
               aria-label="New"
             >
-              <IconPlus stroke={3} className="w-7 h-7" />
+              <IconPlus stroke={3} className="h-7 w-7" />
             </Link>
           </motion.div>
 
-          <div className="bg-white/10 h-1.5 rounded-full mx-4 mt-3" />
+          <div className="mx-4 mt-3 h-1.5 rounded-full bg-white/10" />
 
           <div
-            className="
-              max-h-[300px] overflow-y-auto overflow-x-visible relative pt-3 pr-[320px] hide-scrollbar
-              mask-gradient-vertical
-            "
+            className="hide-scrollbar mask-gradient-vertical relative max-h-[300px] overflow-y-auto overflow-x-visible pr-[320px] pt-3"
             aria-live="polite"
             aria-busy={isPending ? "true" : "false"}
           >
@@ -130,7 +105,7 @@ const GenerateHistory = () => {
               {isError && (
                 <motion.div
                   key="error"
-                  className="text-xs text-red-400 px-1 py-2"
+                  className="px-1 py-2 text-xs text-red-400"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
@@ -141,21 +116,18 @@ const GenerateHistory = () => {
                 </motion.div>
               )}
 
-              {!isPending &&
-                !isError &&
-                historyData &&
-                historyData.length === 0 && (
-                  <motion.div
-                    key="empty"
-                    className="text-xs text-white/60 px-1 py-2"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    No history found.
-                  </motion.div>
-                )}
+              {!isPending && !isError && historyData && historyData.length === 0 && (
+                <motion.div
+                  key="empty"
+                  className="px-1 py-2 text-xs text-white/60"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  No history found.
+                </motion.div>
+              )}
 
               {!isPending && !isError && dateGroups.length > 0 && (
                 <motion.div
@@ -168,7 +140,7 @@ const GenerateHistory = () => {
                 >
                   {dateGroups.map((group) => (
                     <div key={group} className="">
-                      <p className="text-[10px] text-nowrap font-bold w-full text-white/50 pb-1 tracking-wide">
+                      <p className="w-full text-nowrap pb-1 text-[10px] font-bold tracking-wide text-white/50">
                         {group}
                       </p>
                       <div className="flex flex-col gap-2" data-section={group}>

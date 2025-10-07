@@ -6,10 +6,12 @@ import { ConversationType, HistoryItem } from "@/src/types/BaseType";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchConversationHistory = async (
-  conversationType: ConversationType
+  conversationType: ConversationType,
 ): Promise<HistoryItem[]> => {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data, error } = await supabase.rpc("get_conversations_with_details", {

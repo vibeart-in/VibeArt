@@ -21,8 +21,8 @@ export default function ImageLayout({
       <nav className="">
         <MainNavbar />
       </nav>
-        <GenerateHistory />
-        <section className="w-full h-full">{children}</section>
+      <GenerateHistory />
+      <section className="h-full w-full">{children}</section>
     </main>
   );
 }

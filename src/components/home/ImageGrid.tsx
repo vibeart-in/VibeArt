@@ -1,17 +1,21 @@
 "use client";
 import Masonry from "react-masonry-css";
-import ImageCard from "../ui/ImageCard";
-import { ImageCardType } from "@/src/types/BaseType";
+import ImageCard from "../ui/imageCard/ImageCard";
+import { Database } from "@/supabase/database.types";
+
+type ExampleImageType =
+  Database["public"]["Functions"]["get_example_generations"]["Returns"][number];
 
 type ImageGalleryProps = {
-  images: ImageCardType[] | null;
+  images: ExampleImageType[] | null;
+  columnCount?: number;
 };
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images, columnCount = 4 }: ImageGalleryProps) => {
   if (!images || images.length === 0) return <p>No images to show.</p>;
 
   const breakpointColumnsObj = {
-    default: 4,
+    default: columnCount,
     1500: 3,
     1100: 2,
     700: 1,
@@ -26,10 +30,10 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
       {images.map((image) => (
         <ImageCard
           key={image.id}
-          imageUrl={image.image_url}
+          mediaUrl={image.media_url}
           prompt={image.prompt}
-          width={800}
-          height={800}
+          width={image.width || 800}
+          height={image.height || 800}
         />
       ))}
     </Masonry>

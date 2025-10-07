@@ -54,7 +54,7 @@ export const GradientComponent = ({
     <>
       <style>{animationStyles}</style>
       <div
-        className="relative rounded-full aspect-square"
+        className="relative aspect-square rounded-full"
         style={{
           width: `${sizeVW}vmax`,
           height: `${sizeVW}vmax`,
@@ -62,7 +62,7 @@ export const GradientComponent = ({
       >
         {/* Grain overlay on top */}
         <div
-          className="absolute inset-0 z-10 rounded-full overflow-hidden pointer-events-none"
+          className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-full"
           style={{
             backgroundImage: "url(/images/landing/grain.png)",
             backgroundSize: "100px 100px",

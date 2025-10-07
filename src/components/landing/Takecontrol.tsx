@@ -111,11 +111,11 @@ const cardData3: ImageCard3DType[] = [
 
 const Takecontrol = () => {
   return (
-    <section className="relative mt-48 mb-20">
+    <section className="relative mb-20 mt-48">
       <GlassPaneBG paneWidth={60}>
-        <MouseParallaxProvider className="relative flex h-screen w-screen items-center justify-center py-16 px-4">
+        <MouseParallaxProvider className="relative flex h-screen w-screen items-center justify-center px-4 py-16">
           <div
-            className="absolute inset-0 z-20 overflow-hidden pointer-events-none opacity-60"
+            className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-60"
             style={{
               backgroundImage: "url(/images/landing/grain.png)",
               backgroundSize: "100px 100px",
@@ -126,7 +126,7 @@ const Takecontrol = () => {
           />
           <MouseParallaxItem
             strength={5}
-            className="absolute inset-0 z-10 h-full w-[1000px] mx-auto mt-16"
+            className="absolute inset-0 z-10 mx-auto mt-16 h-full w-[1000px]"
           >
             <Image
               alt="Abstract background"
@@ -149,19 +149,19 @@ const Takecontrol = () => {
               className="h-auto"
             />
           </MouseParallaxItem>
-          <p className="z-20 absolute top-12 left-0 ml-12 text-[80px] text-accent font-bold">
+          <p className="absolute left-0 top-12 z-20 ml-12 text-[80px] font-bold text-accent">
             TAKE CONTROL <span className="!z-50">OVER</span>
           </p>
-          <p className="z-50 absolute bottom-0 right-0 ml-12 text-[80px] text-white font-bold">
+          <p className="absolute bottom-0 right-0 z-50 ml-12 text-[80px] font-bold text-white">
             YOUR IMAGE GENERATION
           </p>
-          <div className="z-10 absolute inset-x-0 -bottom-20 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
+          <div className="absolute inset-x-0 -bottom-20 z-10 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
         </MouseParallaxProvider>
       </GlassPaneBG>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[-1]">
+      <div className="absolute left-1/2 top-0 z-[-1] -translate-x-1/2">
         <GradientComponent colors={blue} sizeVW={150} />
       </div>
-      <div className="mt-40 flex gap-4 items-center ml-12">
+      <div className="ml-12 mt-40 flex items-center gap-4">
         <Image
           src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/control_depth.jpg"
           width={400}
@@ -174,10 +174,8 @@ const Takecontrol = () => {
           <CardScroll cardData={cardData1} scrollHeight="h-[550px]" />
         </ul>
       </div>
-      <p className="text-center w-full text-[50px]">
-        3d concept to final image in seconds
-      </p>
-      <div className="mt-4 flex gap-4 items-center justify-center">
+      <p className="w-full text-center text-[50px]">3d concept to final image in seconds</p>
+      <div className="mt-4 flex items-center justify-center gap-4">
         <Image
           src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/earth_girl5.png"
           width={800}
@@ -195,7 +193,7 @@ const Takecontrol = () => {
           height={450}
         />
       </div>
-      <div className="mt-12 flex gap-4 items-center ml-12">
+      <div className="ml-12 mt-12 flex items-center gap-4">
         <Image
           src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/street_ref.jpg"
           width={400}
@@ -208,10 +206,8 @@ const Takecontrol = () => {
           <CardScroll cardData={cardData2} scrollHeight="h-[550px]" />
         </ul>
       </div>
-      <p className="text-center w-full text-[50px]">
-        Reference to final image in seconds
-      </p>
-      <div className="mt-12 flex gap-4 items-center ml-12">
+      <p className="w-full text-center text-[50px]">Reference to final image in seconds</p>
+      <div className="ml-12 mt-12 flex items-center gap-4">
         <Image
           src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/crown_girl_ref.jpg"
           width={400}
@@ -224,8 +220,8 @@ const Takecontrol = () => {
           <CardScroll cardData={cardData3} scrollHeight="h-[550px]" />
         </ul>
       </div>
-      <div className="z-50 absolute inset-x-0 -bottom-24 h-[400px] bg-black/50 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-      <p className="z-50 text-[35px] text-center absolute inset-x-0 -bottom-8 px-96">
+      <div className="absolute inset-x-0 -bottom-24 z-50 h-[400px] bg-black/50 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
+      <p className="absolute inset-x-0 -bottom-8 z-50 px-96 text-center text-[35px]">
         Guide the AI with your sketch, image, or 3D model — it’s your{" "}
         <span className="text-accent">creation</span>, not the algorithm’s.
       </p>

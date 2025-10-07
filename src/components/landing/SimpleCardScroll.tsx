@@ -47,15 +47,9 @@ export const InfiniteImageScroll = ({
   const getDirection = () => {
     if (containerRef.current) {
       if (direction === "left" || direction === "up") {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "forwards"
-        );
+        containerRef.current.style.setProperty("--animation-direction", "forwards");
       } else {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "reverse"
-        );
+        containerRef.current.style.setProperty("--animation-direction", "reverse");
       }
     }
   };
@@ -84,31 +78,32 @@ export const InfiniteImageScroll = ({
           "[mask-image:linear-gradient(to_bottom,transparent,white_20%,white_80%,transparent)]":
             orientation === "vertical",
         },
-        className
+        className,
       )}
     >
       <div
         ref={scrollerRef}
         className={cn(
-          "flex min-w-full shrink-0 gap-12 py-4 w-max flex-nowrap",
+          "flex w-max min-w-full shrink-0 flex-nowrap gap-12 py-4",
           // Apply animation and layout based on orientation
           {
             "flex-row": orientation === "horizontal",
             "flex-col": orientation === "vertical",
           },
           // Apply animation only when mounted and started
-          mounted && start && {
-            "animate-scroll-x": orientation === "horizontal",
-            "animate-scroll-y": orientation === "vertical",
-          },
+          mounted &&
+            start && {
+              "animate-scroll-x": orientation === "horizontal",
+              "animate-scroll-y": orientation === "vertical",
+            },
           // Conditionally apply start and pause-on-hover classes
           !mounted && "opacity-0", // Hide until component is mounted to avoid hydration mismatch
-          pauseOnHover && "hover:[animation-play-state:paused]"
+          pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
         {images.map((src, idx) => (
           <div
-            className="w-[250px] relative rounded-2xl flex-shrink-0"
+            className="relative w-[250px] flex-shrink-0 rounded-2xl"
             style={{
               // For vertical scroll, ensure images have consistent width
               width: orientation === "vertical" ? "100%" : "250px",
@@ -118,7 +113,7 @@ export const InfiniteImageScroll = ({
             <Image
               width={250}
               height={350}
-              className="rounded-2xl object-cover h-full w-full"
+              className="h-full w-full rounded-2xl object-cover"
               src={src}
               alt={`Scrolling image ${idx + 1}`}
             />

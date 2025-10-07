@@ -39,12 +39,12 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl shadow-md border-2 border-white/10"
+      className="relative overflow-hidden rounded-3xl border-2 border-white/10 shadow-md"
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       {/* Background Gradient Layer */}
       <div
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 h-full w-full"
         style={{
           backgroundImage: `${stripePattern}`,
           backgroundSize: "300% 200%",
@@ -53,7 +53,7 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
         }}
       >
         <div
-          className="absolute inset-0 animate-rainbow-flow mix-blend-difference"
+          className="animate-rainbow-flow absolute inset-0 mix-blend-difference"
           style={{
             backgroundImage: `${stripePattern}, ${rainbowPattern}`,
             backgroundSize: "200% 100%",
@@ -63,12 +63,12 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
       </div>
 
       {/* Content with Text Shimmer */}
-      <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-white text-center px-4">
-        <div className="text-2xl font-semibold mb-2">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4 text-center text-white">
+        <div className="mb-2 text-2xl font-semibold">
           <AITextLoading text={loadingText} />
         </div>
         {subtitle && (
-          <div className="text-sm opacity-70 mb-6 animate-text-shimmer bg-gradient-to-r from-white/50 via-white to-white/50 bg-clip-text text-transparent">
+          <div className="animate-text-shimmer mb-6 bg-gradient-to-r from-white/50 via-white to-white/50 bg-clip-text text-sm text-transparent opacity-70">
             {subtitle}
           </div>
         )}
@@ -86,7 +86,7 @@ export const AITextLoading: React.FC<{ className?: string; text?: string }> = ({
       {letters.map((ch, i) => (
         <span
           key={i}
-          className="loader-letter inline-block opacity-80 leading-none"
+          className="loader-letter inline-block leading-none opacity-80"
           style={{ animationDelay: `${i * 0.06}s` }}
           aria-hidden
         >

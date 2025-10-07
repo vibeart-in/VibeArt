@@ -31,9 +31,7 @@ export const RaycastComponent = () => {
 
   return (
     <div
-      className={cn(
-        "relative w-full min-h-screen overflow-hidden"
-      )}
+      className={cn("relative min-h-screen w-full overflow-hidden")}
       role="region"
       aria-label="Hero"
       style={{ height: height || "100vh" }}
@@ -52,21 +50,21 @@ export const RaycastComponent = () => {
         ariaLabel="Unicorn Studio canvas scene for the AI image agent hero"
         className="absolute inset-0 z-0"
       />
-  
+
       {/* Contrast overlay for text readability */}
       <div
-        className="absolute inset-0 z-[4] pointer-events-none bg-gradient-to-t from-black/50 via-black/20 to-transparent"
+        className="pointer-events-none absolute inset-0 z-[4] bg-gradient-to-t from-black/50 via-black/20 to-transparent"
         aria-hidden="true"
       />
-  
+
       {/* Content overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-white pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-white">
         <SplitText
           text="The First Multi-Model AI Image Agent!"
           // className="text-2xl font-semibold text-center"
           className={cn(
-            "text-center font-gothic font-medium text-wrap",
-            "text-4xl sm:text-6xl lg:text-7xl xl:text-8xl"
+            "text-wrap text-center font-gothic font-medium",
+            "text-4xl sm:text-6xl lg:text-7xl xl:text-8xl",
           )}
           delay={100}
           duration={0.4}
@@ -79,32 +77,34 @@ export const RaycastComponent = () => {
           textAlign="center"
           // onLetterAnimationComplete={handleAnimationComplete}
         />
-  
-        <p className="mt-10 max-w-2xl text-center text-base sm:text-lg text-white/90">
-          From idea to gallery-ready visuals in seconds—automatic model selection, expert prompt enhancement, and one‑click upscaling.
+
+        <p className="mt-10 max-w-2xl text-center text-base text-white/90 sm:text-lg">
+          From idea to gallery-ready visuals in seconds—automatic model selection, expert prompt
+          enhancement, and one‑click upscaling.
         </p>
-  
-        <div className="mt-12 flex items-center gap-3 pointer-events-auto">
-          <button className="px-6 py-3 rounded-lg border border-white/30 text-white font-medium hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+
+        <div className="pointer-events-auto mt-12 flex items-center gap-3">
+          <button className="rounded-lg border border-white/30 px-6 py-3 font-medium text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
             See How It Works
           </button>
         </div>
-  
-        <div className="mt-10 flex items-center gap-3 text-white/70 text-sm">
-          <span className="px-2 py-1 rounded bg-white/10">Flux</span>
-          <span className="px-2 py-1 rounded bg-white/10">Imagen 4</span>
-          <span className="px-2 py-1 rounded bg-white/10">Seedream 4</span>
-          <span className="px-2 py-1 rounded bg-white/10">Nano Banana</span>
-          <span className="px-2 py-1 rounded bg-white/10">More</span>
+
+        <div className="mt-10 flex items-center gap-3 text-sm text-white/70">
+          <span className="rounded bg-white/10 px-2 py-1">Flux</span>
+          <span className="rounded bg-white/10 px-2 py-1">Imagen 4</span>
+          <span className="rounded bg-white/10 px-2 py-1">Seedream 4</span>
+          <span className="rounded bg-white/10 px-2 py-1">Nano Banana</span>
+          <span className="rounded bg-white/10 px-2 py-1">More</span>
         </div>
-  
-        <ul className="mt-8 grid gap-3 text-white/85 text-sm sm:text-base">
-          <li>Auto Model Orchestration — selects the optimal model for style, fidelity, and speed.</li>
+
+        <ul className="mt-8 grid gap-3 text-sm text-white/85 sm:text-base">
+          <li>
+            Auto Model Orchestration — selects the optimal model for style, fidelity, and speed.
+          </li>
           <li>Prompt Intelligence — turns simple ideas into production‑grade prompts.</li>
           <li>Instant Finishing — one‑click upscale and cleanup for publish‑ready assets.</li>
         </ul>
       </div>
     </div>
   );
-  
 };

@@ -56,14 +56,14 @@ const EditBranding = () => {
       <GlassPaneBG paneWidth={55}>
         {/* Main animation container */}
         <motion.div
-          className="relative mx-auto m-4 flex justify-center items-center p-10 max-w-[1500px]"
+          className="relative m-4 mx-auto flex max-w-[1500px] items-center justify-center p-10"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible" // Triggers animation when the component enters the viewport
           viewport={{ once: true, amount: 0.3 }} // Animation runs once, triggers at 30% visibility
         >
           <motion.p
-            className="z-1 absolute top-12 left-0 ml-12 text-[120px] text-accent font-bold"
+            className="z-1 absolute left-0 top-12 ml-12 text-[120px] font-bold text-accent"
             variants={textSlideDown} // Apply the "slide down" variant
           >
             EDIT WITH
@@ -72,23 +72,25 @@ const EditBranding = () => {
           {/* We wrap the custom component in a motion.div to animate it */}
           <motion.div variants={imageScaleUp}>
             <BackgroundImage
-              src={"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane.webp"}
+              src={
+                "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane.webp"
+              }
               width={400}
               height={800}
-              className="z-10 !relative"
+              className="!relative z-10"
               // The !relative from your original code is now on the wrapper
             />
           </motion.div>
 
           <motion.p
-            className="z-20 absolute bottom-0 right-0 text-[100px] font-bold"
+            className="absolute bottom-0 right-0 z-20 text-[100px] font-bold"
             variants={textSlideUp} // Apply the "slide up" variant
           >
             CONSISTENT BRANDING
           </motion.p>
 
           <motion.div
-            className="z-10 absolute inset-x-0 -bottom-4 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm"
+            className="absolute inset-x-0 -bottom-4 z-10 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]"
             variants={textSlideUp} // Reuse the slide up variant for a fade-in effect
           />
         </motion.div>

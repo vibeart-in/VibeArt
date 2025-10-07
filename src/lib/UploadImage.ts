@@ -16,7 +16,6 @@ export const uploadImage = async ({
   onError,
   onSuccess,
 }: UploadOptions): Promise<{ permanentPath: string; displayUrl: string }> => {
-
   const {
     data: { session },
     error: sessionError,
@@ -59,8 +58,9 @@ export const uploadImage = async ({
         const fullPermanentPath = `${bucketName}/${filePath}`; // e.g., "uploaded-images/user-id/123_image.png"
 
         // Generate a short-lived signed URL for client-side display
-        const { data: signedUrlData, error: signedUrlError } =
-          await supabase.storage.from(bucketName).createSignedUrl(filePath, 3600);
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from(bucketName)
+          .createSignedUrl(filePath, 3600);
 
         if (signedUrlError || !signedUrlData) {
           onError?.(signedUrlError);

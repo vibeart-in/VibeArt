@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { IconWand } from "@tabler/icons-react";
 import { GradientComponent } from "./Gradient";
 import { ImageCard3D } from "./3dImageCard";
@@ -36,14 +36,14 @@ const imageList2 = [
 const EditSection = () => {
   return (
     <section className="relative mt-32">
-      <p className="flex gap-3 text-[45px] justify-center items-center">
+      <p className="flex items-center justify-center gap-3 text-[45px]">
         <IconWand size={40} />
         Edit anything in seconds
       </p>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[-1]">
+      <div className="absolute left-1/2 top-0 z-[-1] -translate-x-1/2">
         <GradientComponent colors={goldRing} sizeVW={150} />
       </div>
-      <div className="relative grid grid-rows-2 [grid-template-columns:40%_60%]  gap-8 items-center p-4 ">
+      <div className="relative grid grid-rows-2 items-center gap-8 p-4 [grid-template-columns:40%_60%]">
         <div className="row-start-1 row-end-3">
           <ImageCard3D
             topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/cards/goth_girl2_top.webp"
@@ -66,12 +66,10 @@ const EditSection = () => {
           direction="right"
           pauseOnHover={false}
         />
-        <div className="z-50 absolute inset-x-0 bottom-0 h-[400px] bg-black/50 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-        <div className="z-50 absolute w-full top-[50%] flex flex-col gap-10 justify-center items-center">
-          <div className="w-[300px] h-[200px]">
-            <DragAndDropBox
-            onUploadSuccess={()=>{}} 
-            />
+        <div className="absolute inset-x-0 bottom-0 z-50 h-[400px] bg-black/50 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
+        <div className="absolute top-[50%] z-50 flex w-full flex-col items-center justify-center gap-10">
+          <div className="h-[200px] w-[300px]">
+            <DragAndDropBox onUploadSuccess={() => {}} />
           </div>
           <InputBox />
         </div>

@@ -43,9 +43,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
       let userPrompt = "";
       if (Array.isArray(newGeneration.parameters)) {
         // NodeParam[] case (running_hub)
-        const promptParam = newGeneration.parameters.find(
-          (p) => p.description === "prompt"
-        );
+        const promptParam = newGeneration.parameters.find((p) => p.description === "prompt");
         userPrompt = promptParam?.fieldValue || "";
       } else {
         // Record<string, SchemaParam> case (replicate)
@@ -64,10 +62,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
         jobId: null,
       };
 
-      queryClient.setQueryData<MessageType[]>(queryKey, (old = []) => [
-        optimisticMessage,
-        ...old,
-      ]);
+      queryClient.setQueryData<MessageType[]>(queryKey, (old = []) => [optimisticMessage, ...old]);
 
       return { previousMessages };
     },
@@ -85,8 +80,8 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
     },
     // Add retry logic for network errors
     retry: (failureCount, error) => {
-      return error.message === 'network' && failureCount < 3;
+      return error.message === "network" && failureCount < 3;
     },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }

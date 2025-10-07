@@ -10,10 +10,7 @@ import { Button } from "../ui/button";
 import SignInWithGoogleButton from "./google-login";
 import GlassModal from "../ui/GlassModal";
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -51,11 +48,11 @@ export function SignUpForm({
   };
 
   return (
-    <div className="relative flex items-center justify-center w-full h-full">
+    <div className="relative flex h-full w-full items-center justify-center">
       <GlassModal width={36} height={500} count={16} className="z-10" />
       <div className="absolute z-20">
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-          <h2 className="font-semibold text-center text-xl">Sign Up</h2>
+          <h2 className="text-center text-xl font-semibold">Sign Up</h2>
           <SignInWithGoogleButton />
           <div className="border-b border-gray-500"></div>
           <form onSubmit={handleSignUp}>
@@ -95,11 +92,11 @@ export function SignUpForm({
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm ">
+            <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
               <Link
                 href="/auth/login"
-                className="inline-block text-sm underline-offset-4 underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
+                className="inline-block text-sm text-[#95A4FC] underline underline-offset-4 transition-colors hover:text-[#7b8be6]"
               >
                 Login
               </Link>

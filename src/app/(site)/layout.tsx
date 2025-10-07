@@ -20,7 +20,7 @@ export default function SiteLayout({
     <main className="relative overflow-hidden">
       <NavbarLander />
       {children}
-      <Footer/>
+      <Footer />
     </main>
   );
 }

@@ -9,7 +9,7 @@ const imageList = [
 
 const EditShowcase = () => {
   return (
-    <div className="h-screen flex w-full justify-center gap-32 items-center">
+    <div className="flex h-screen w-full items-center justify-center gap-32">
       <div className="flex flex-col gap-12">
         <ImageCard3D
           topImageUrl="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane6_top.webp"

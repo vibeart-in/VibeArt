@@ -7,11 +7,7 @@ const gradientTransparent =
   "bg-[linear-gradient(268.66deg,_rgba(22,22,24,0.01)_1.07%,_rgba(0,0,0,0.01)_17.36%,_rgba(26,26,29,0.0001)_98.79%)]";
 const gradientOpaque =
   "bg-[linear-gradient(268.66deg,_rgba(22,22,24,0.39)_1.07%,_rgba(0,0,0,0.39)_17.36%,_rgba(26,26,29,0.0039)_98.79%)]";
-const blurOptions = [
-  "backdrop-blur-[5px]",
-  "backdrop-blur-[10px]",
-  "backdrop-blur-[15px]",
-];
+const blurOptions = ["backdrop-blur-[5px]", "backdrop-blur-[10px]", "backdrop-blur-[15px]"];
 const rotate90 = "rotate-90";
 
 // Seeded random function for consistent server/client rendering
@@ -30,14 +26,10 @@ const getRandomStyle = (seed: number) => {
 interface PixelCensorProps {
   matrix: number[][];
   squareSize?: number;
-	className?: string; 
+  className?: string;
 }
 
-const PixelCensor: React.FC<PixelCensorProps> = ({
-  matrix,
-  squareSize = 30,
-	className= ""
-}) => {
+const PixelCensor: React.FC<PixelCensorProps> = ({ matrix, squareSize = 30, className = "" }) => {
   const rows = matrix.length;
   const cols = matrix[0]?.length || 0;
 
@@ -60,7 +52,7 @@ const PixelCensor: React.FC<PixelCensorProps> = ({
               key={`${rowIndex}-${colIndex}`}
               className={clsx(
                 "absolute",
-                isVisible ? getRandomStyle(rowIndex * cols + colIndex) : "opacity-0"
+                isVisible ? getRandomStyle(rowIndex * cols + colIndex) : "opacity-0",
               )}
               style={{
                 width: squareSize,
@@ -77,7 +69,7 @@ const PixelCensor: React.FC<PixelCensorProps> = ({
               }}
             />
           );
-        })
+        }),
       )}
     </div>
   );

@@ -1,18 +1,7 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useRef,
-  type ReactNode,
-} from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
+import React, { createContext, useContext, useRef, type ReactNode } from "react";
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "motion/react";
 
 // 1. Define the shape of the context data
 interface ParallaxContextType {
@@ -58,15 +47,8 @@ export const MouseParallaxProvider = ({
   };
 
   return (
-    <div
-      ref={ref}
-      onMouseMove={handleMouse}
-      onMouseLeave={handleMouseLeave}
-      className={className}
-    >
-      <ParallaxContext.Provider value={{ x, y }}>
-        {children}
-      </ParallaxContext.Provider>
+    <div ref={ref} onMouseMove={handleMouse} onMouseLeave={handleMouseLeave} className={className}>
+      <ParallaxContext.Provider value={{ x, y }}>{children}</ParallaxContext.Provider>
     </div>
   );
 };
@@ -87,9 +69,7 @@ export const MouseParallaxItem = ({
 }) => {
   const context = useContext(ParallaxContext);
   if (!context) {
-    throw new Error(
-      "MouseParallaxItem must be used within a MouseParallaxProvider"
-    );
+    throw new Error("MouseParallaxItem must be used within a MouseParallaxProvider");
   }
 
   const { x, y } = context;
@@ -103,10 +83,7 @@ export const MouseParallaxItem = ({
   const smoothItemY = useSpring(itemY, springConfig);
 
   return (
-    <motion.div
-      style={{ x: smoothItemX, y: smoothItemY }}
-      className={className}
-    >
+    <motion.div style={{ x: smoothItemX, y: smoothItemY }} className={className}>
       {children}
     </motion.div>
   );

@@ -10,8 +10,8 @@ import {
 
 export function QualitySelect() {
   return (
-    <div className="flex flex-col justify-center items-center ml-2 gap-4">
-      <p className="text-sm text-gray-300 font-medium tracking-wide">Quality</p>
+    <div className="ml-2 flex flex-col items-center justify-center gap-4">
+      <p className="text-sm font-medium tracking-wide text-gray-300">Quality</p>
       <Select>
         <SelectTrigger className="w-[80px]">
           <SelectValue placeholder="Quality" />

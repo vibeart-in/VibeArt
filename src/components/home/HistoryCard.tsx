@@ -53,7 +53,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
   return (
     <motion.div
-      className="relative group w-[66px] h-[66px]"
+      className="group relative h-[66px] w-[66px]"
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       initial="rest"
@@ -71,13 +71,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
         aria-label={title}
       >
         <div
-          className={`relative w-[55px] h-[55px] rounded-2xl overflow-hidden
-            border-2 transition-colors duration-200
-            bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)]
-            ring-1 ring-white/10
-            ${isActive ? "border-accent" : "border-transparent"}
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20
-          `}
+          className={`relative h-[55px] w-[55px] overflow-hidden rounded-2xl border-2 bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)] ring-1 ring-white/10 transition-colors duration-200 ${isActive ? "border-accent" : "border-transparent"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20`}
           tabIndex={0}
         >
           <Image
@@ -86,13 +80,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             width={55}
             height={55}
             sizes="55px"
-            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out
-              ${hovered ? "scale-[1.06]" : "scale-100"}
-            `}
+            className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${hovered ? "scale-[1.06]" : "scale-100"} `}
             priority={false}
           />
           <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
+            className="pointer-events-none absolute inset-0 rounded-2xl"
             variants={overlayVariants}
           />
         </div>
@@ -106,18 +98,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             animate={{ opacity: 1, x: 10, scale: 1 }}
             exit={{ opacity: 0, x: 4, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className="
-              absolute left-[76px] top-0 h-[66px] min-w-[220px] max-w-[320px]
-              rounded-2xl bg-neutral-900/95 text-white shadow-lg ring-1 ring-white/10
-              flex items-center px-4
-            "
+            className="absolute left-[76px] top-0 flex h-[66px] min-w-[220px] max-w-[320px] items-center rounded-2xl bg-neutral-900/95 px-4 text-white shadow-lg ring-1 ring-white/10"
             role="status"
           >
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{title}</div>
-              <div className="mt-0.5 text-xs text-white/70 line-clamp-2">
-                {prompt}
-              </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-medium">{title}</div>
+              <div className="mt-0.5 line-clamp-2 text-xs text-white/70">{prompt}</div>
             </div>
           </motion.div>
         )}

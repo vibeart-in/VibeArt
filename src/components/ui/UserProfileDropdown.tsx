@@ -51,7 +51,7 @@ const UserProfileDropdown = ({
     <div className="relative">
       <button
         onClick={toggleDropdown}
-        className="w-full flex justify-center items-center bg-transparent hover:bg-accent/50 border-none rounded-xl"
+        className="flex w-full items-center justify-center rounded-xl border-none bg-transparent hover:bg-accent/50"
       >
         <UserProfile user={user} />
       </button>
@@ -63,7 +63,7 @@ const UserProfileDropdown = ({
             animate={{ y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ y: -5, scale: 0.95, opacity: 0, filter: "blur(10px)" }}
             transition={{ duration: 0.6, ease: "circInOut", type: "spring" }}
-            className="absolute z-10 w-48 right-1 mb-2 p-1 bg-[#111111] rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.2)] backdrop-blur-md flex flex-col gap-2"
+            className="absolute right-1 z-10 mb-2 flex w-48 flex-col gap-2 rounded-xl bg-[#111111] p-1 shadow-[0_0_20px_rgba(0,0,0,0.2)] backdrop-blur-md"
           >
             {options && options.length > 0 ? (
               options.map((option, index) => (
@@ -103,14 +103,14 @@ const UserProfileDropdown = ({
                   }}
                   key={option.label}
                   onClick={option.onClick}
-                  className="px-2 py-3 cursor-pointer text-white text-sm rounded-lg w-full text-left flex items-center gap-x-2"
+                  className="flex w-full cursor-pointer items-center gap-x-2 rounded-lg px-2 py-3 text-left text-sm text-white"
                 >
                   {option.Icon}
                   {option.label}
                 </motion.button>
               ))
             ) : (
-              <div className="px-4 py-2 text-white text-xs">No options</div>
+              <div className="px-4 py-2 text-xs text-white">No options</div>
             )}
           </motion.div>
         )}

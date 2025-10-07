@@ -45,8 +45,8 @@ export default function AuthTemplate({
   }, [mouseX, mouseY]);
 
   return (
-    <section className="bg-[#0C0C0C] overflow-hidden w-screen h-screen relative">
-      <div className="flex flex-col items-center min-h-screen">
+    <section className="relative h-screen w-screen overflow-hidden bg-[#0C0C0C]">
+      <div className="flex min-h-screen flex-col items-center">
         <motion.div
           whileTap={{ scale: 0.92 }}
           whileHover={{ scale: 1.03 }}
@@ -60,13 +60,7 @@ export default function AuthTemplate({
               height={100}
               className=""
             />
-            <Image
-              src="/images/aura.png"
-              alt="Auth Image"
-              width={300}
-              height={250}
-              className=""
-            />
+            <Image src="/images/aura.png" alt="Auth Image" width={300} height={250} className="" />
           </Link>
         </motion.div>
 
@@ -91,12 +85,7 @@ export default function AuthTemplate({
           damping: 30,
         }}
       >
-        <Image
-          src="/images/glass_image.png"
-          alt="Auth Image"
-          width={850}
-          height={500}
-        />
+        <Image src="/images/glass_image.png" alt="Auth Image" width={850} height={500} />
       </motion.div>
     </section>
   );

@@ -1,11 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import Image from "next/image";
 import clsx from "clsx";
 
@@ -59,27 +54,17 @@ export default function ImageMagnifyCard({
   const focusLeft = useTransform(smoothMouseX, (val) => `${val}%`);
   const focusTop = useTransform(smoothMouseY, (val) => `${val}%`);
 
-  const bgPosX = useTransform(
-    smoothMouseX,
-    (val) => `${val + focus.widthPct / 2}%`
-  );
-  const bgPosY = useTransform(
-    smoothMouseY,
-    (val) => `${val + focus.heightPct / 2}%`
-  );
-  const backgroundPosition = useTransform(
-    [bgPosX, bgPosY],
-    ([x, y]) => `${x} ${y}`
-  );
+  const bgPosX = useTransform(smoothMouseX, (val) => `${val + focus.widthPct / 2}%`);
+  const bgPosY = useTransform(smoothMouseY, (val) => `${val + focus.heightPct / 2}%`);
+  const backgroundPosition = useTransform([bgPosX, bgPosY], ([x, y]) => `${x} ${y}`);
 
   const focusVariants = {
     hidden: { opacity: 0, scale: 0.85 },
     visible: { opacity: 1, scale: 1 },
   };
 
-  const clamp = (v: number, min: number, max: number) =>
-    Math.max(min, Math.min(max, v));
-    
+  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+
   // NEW: Function to calculate and update the connector line's style
   const updateLine = useCallback(() => {
     if (!focusRef.current || !previewRef.current || !containerRef.current) return;
@@ -97,7 +82,7 @@ export default function ImageMagnifyCard({
       x: previewRect.left - containerRect.left + previewRect.width / 2,
       y: previewRect.top - containerRect.top + previewRect.height / 2,
     };
-    
+
     // Calculate distance and angle between the two center points
     const dx = previewCenter.x - focusCenter.x;
     const dy = previewCenter.y - focusCenter.y;
@@ -119,17 +104,16 @@ export default function ImageMagnifyCard({
     const unsubscribeY = smoothMouseY.on("change", updateLine);
 
     // Also update on resize
-    window.addEventListener('resize', updateLine);
+    window.addEventListener("resize", updateLine);
     // Initial calculation
     updateLine();
 
     return () => {
       unsubscribeX();
       unsubscribeY();
-      window.removeEventListener('resize', updateLine);
+      window.removeEventListener("resize", updateLine);
     };
   }, [smoothMouseX, smoothMouseY, updateLine]);
-
 
   function handleMouseMove(e: React.MouseEvent) {
     setIsHovered(true); // Show focus box and line
@@ -166,7 +150,7 @@ export default function ImageMagnifyCard({
         ref={leftRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative rounded-3xl overflow-hidden border-2 border-white/30"
+        className="relative overflow-hidden rounded-3xl border-2 border-white/30"
         style={{
           width: mainSize.w,
           height: mainSize.h,
@@ -178,7 +162,7 @@ export default function ImageMagnifyCard({
           height={520}
           src={src}
           alt="source"
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           draggable={false}
           priority
         />
@@ -207,8 +191,8 @@ export default function ImageMagnifyCard({
       <motion.div
         ref={previewRef} // <-- Add ref here
         className={clsx(
-          "rounded-2xl overflow-hidden border-2 border-white/30 bg-black absolute",
-          className
+          "absolute overflow-hidden rounded-2xl border-2 border-white/30 bg-black",
+          className,
         )}
         style={{
           width: previewSize.w,
@@ -223,19 +207,18 @@ export default function ImageMagnifyCard({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       />
-      
+
       {/* NEW: Connector Line */}
       <motion.div
-        className="absolute h-[2px] bg-gradient-to-r from-white/0 via-white/40 to-white/0 pointer-events-none"
+        className="pointer-events-none absolute h-[2px] bg-gradient-to-r from-white/0 via-white/40 to-white/0"
         style={{
           ...lineStyle,
-          transformOrigin: 'left center', // Rotate from the start of the line
+          transformOrigin: "left center", // Rotate from the start of the line
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
         transition={{ duration: 0.2 }}
       />
-
     </div>
   );
 }

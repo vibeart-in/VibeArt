@@ -26,10 +26,10 @@ async function fetchApps(): Promise<AiApp[]> {
 
 export default function AppGridClient({
   initialApps,
-  compact = false
+  compact = false,
 }: {
   initialApps?: AiApp[];
-  compact?: boolean
+  compact?: boolean;
 }) {
   const breakpointColumnsObj = {
     default: 5,
@@ -50,29 +50,22 @@ export default function AppGridClient({
   });
 
   if (isLoading) return <p className="mt-8 text-white">Loading apps...</p>;
-  if (error)
-    return (
-      <p className="mt-8 text-red-500">Error fetching apps: {error.message}</p>
-    );
+  if (error) return <p className="mt-8 text-red-500">Error fetching apps: {error.message}</p>;
 
   const allTags = Array.from(new Set(apps?.flatMap((app) => app.tags) || []));
 
-  const filteredApps = selectedTag
-    ? apps?.filter((app) => app.tags.includes(selectedTag))
-    : apps;
+  const filteredApps = selectedTag ? apps?.filter((app) => app.tags.includes(selectedTag)) : apps;
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2 my-4">
+      <div className="my-4 flex flex-wrap gap-2">
         {allTags.map((tag: string, index: number) => (
           <button
             key={tag}
-            onClick={() =>
-              setSelectedTag((prev) => (prev === tag ? null : tag))
-            }
-            className={`px-3 py-1 rounded-full border transition-colors ${
+            onClick={() => setSelectedTag((prev) => (prev === tag ? null : tag))}
+            className={`rounded-full border px-3 py-1 transition-colors ${
               selectedTag === tag
-                ? "bg-accent text-black font-semibold border-accent"
+                ? "border-accent bg-accent font-semibold text-black"
                 : `bg-gray-800/50 hover:bg-gray-700/50 ${getTagColor(index)}`
             }`}
           >

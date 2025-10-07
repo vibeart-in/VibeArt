@@ -6,7 +6,6 @@ import ImageGallery from "@/src/components/home/ImageGrid"; // Your ImageGrid co
 import { createClient } from "@/src/lib/supabase/client"; // Client-side Supabase client
 import { ImageCardType } from "@/src/types/BaseType";
 
-
 // Define a unique query key for Tanstack Query
 const USER_IMAGES_QUERY_KEY = ["userImages"];
 
@@ -50,7 +49,7 @@ export default function UserImageGalleryClient({
 
   if (isLoading) {
     return (
-      <div className="p-2 mt-16 text-center text-neutral-400">
+      <div className="mt-16 p-2 text-center text-neutral-400">
         <p>Loading your images...</p>
       </div>
     );
@@ -58,7 +57,7 @@ export default function UserImageGalleryClient({
 
   if (isError) {
     return (
-      <div className="p-2 mt-16 text-center text-red-400">
+      <div className="mt-16 p-2 text-center text-red-400">
         <p>Error loading images: {error?.message}</p>
       </div>
     );
@@ -66,15 +65,15 @@ export default function UserImageGalleryClient({
 
   if (!images || images.length === 0) {
     return (
-      <div className="p-2 mt-16 text-center text-neutral-400">
+      <div className="mt-16 p-2 text-center text-neutral-400">
         <p>You haven t generated any images yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="p-2 mx-12 mt-16">
-      <p className="p-2 ml-3 mb-2 flex font-medium">Library</p>
+    <div className="mx-12 mt-16 p-2">
+      <p className="mb-2 ml-3 flex p-2 font-medium">Library</p>
       <ImageGallery images={images} />
     </div>
   );

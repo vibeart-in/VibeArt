@@ -18,7 +18,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/30 z-20 flex items-center justify-center p-4"
+          className="fixed inset-0 z-20 flex items-center justify-center bg-black/30 p-4"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -31,7 +31,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <LoginForm />
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 rounded-full p-2 text-white/70 hover:text-white z-50"
+              className="absolute right-4 top-4 z-50 rounded-full p-2 text-white/70 hover:text-white"
               aria-label="Remove image"
             >
               <XIcon size={25} weight="bold" />

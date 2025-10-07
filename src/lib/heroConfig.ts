@@ -16,7 +16,8 @@ export interface HeroSlide {
 export const heroSlides: HeroSlide[] = [
   {
     id: "blue-hero",
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/hero1.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/hero1.webp",
     gradient: {
       primary: "#1A2B5E", // Deep blue base
       secondary: "#5E94FF", // Main blue glow
@@ -28,9 +29,10 @@ export const heroSlides: HeroSlide[] = [
     },
     title: "Unleash celestial beauty with vivid AI art!",
   },
-{
+  {
     id: "dark-blue-hero", // Changed to better reflect its content - now a golden fairy
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl.webp",
     gradient: {
       primary: "#1A2B5E", // Deep dark blue
       secondary: "#2C4A8C", // Medium dark blue
@@ -44,7 +46,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "black-hero", // Changed to better reflect its content - now a monochromatic aesthetic
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/dark_girl.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/dark_girl.webp",
     gradient: {
       primary: "#000000", // Pure black
       secondary: "#333333", // Dark grey
@@ -58,7 +61,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "buger-hero",
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/buger.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/buger.webp",
     gradient: {
       primary: "#FFD700", // Cheese/dominant yellow
       secondary: "#FF9800", // Warm orange/bun
@@ -72,7 +76,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "realistic-portrait-hero", // Renamed for clarity
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl3.webp", // This image is a realistic woman, not anime.
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl3.webp", // This image is a realistic woman, not anime.
     gradient: {
       primary: "#FFD700",
       secondary: "#FFE066",
@@ -86,7 +91,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "red-saree-hero", // Renamed for clarity
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/desi1.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/desi1.webp",
     gradient: {
       primary: "#B22222", // Deep saree red
       secondary: "#FFD700", // Gold accents/bokeh
@@ -100,7 +106,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "blue-saree-hero", // Renamed for clarity
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/desi2.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/desi2.webp",
     gradient: {
       primary: "#2A488B", // Deep saree blue
       secondary: "#4169E1", // Brighter blue
@@ -114,7 +121,8 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "glowing-silhouette-hero", // Renamed for clarity
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl4.webp",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/hero/anime_girl4.webp",
     gradient: {
       primary: "#1A0D2E", // Dark purple background
       secondary: "#4A1A5C", // Deep purple in silhouette

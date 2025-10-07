@@ -1,7 +1,4 @@
-import {
-  MouseParallaxItem,
-  MouseParallaxProvider,
-} from "@/src/components/landing/MouseParallax";
+import { MouseParallaxItem, MouseParallaxProvider } from "@/src/components/landing/MouseParallax";
 import { Tabs, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 import { PhoneCall } from "lucide-react";
 import Image from "next/image";
@@ -85,10 +82,10 @@ const page = async () => {
   return (
     <main className="relative overflow-hidden">
       <div className="relative">
-        <MouseParallaxProvider className="relative pb-4 overflow-hidden">
+        <MouseParallaxProvider className="relative overflow-hidden pb-4">
           <MouseParallaxItem strength={0} className="absolute inset-0 z-0">
             <div
-              className="absolute inset-0 z-10 pointer-events-none opacity-60"
+              className="pointer-events-none absolute inset-0 z-10 opacity-60"
               style={{
                 backgroundImage: "url(/images/landing/grain.png)",
                 backgroundSize: "100px 100px",
@@ -106,14 +103,14 @@ const page = async () => {
               className="w-full"
               priority
             />
-            <div className="z-10 absolute inset-x-0 bottom-1/3 h-[100px] sm:h-[200px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] backdrop-blur-md" />
-            <div className="z-10 absolute inset-x-0 bottom-1/3 h-[100px] sm:h-[200px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] backdrop-blur-md" />
-            <div className="z-10 absolute inset-x-0 bottom-1/3 h-[100px] sm:h-[200px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] backdrop-blur-md" />
+            <div className="absolute inset-x-0 bottom-1/3 z-10 h-[100px] bg-black/20 backdrop-blur-md [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[200px]" />
+            <div className="absolute inset-x-0 bottom-1/3 z-10 h-[100px] bg-black/20 backdrop-blur-md [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[200px]" />
+            <div className="absolute inset-x-0 bottom-1/3 z-10 h-[100px] bg-black/20 backdrop-blur-md [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[200px]" />
           </MouseParallaxItem>
           <div>
             <MouseParallaxItem strength={40} className="absolute inset-0 z-10">
               <div
-                className="absolute w-[197px] h-[578px] blur-[40px] -rotate-[8deg] bg-cyan-400/20"
+                className="absolute h-[578px] w-[197px] -rotate-[8deg] bg-cyan-400/20 blur-[40px]"
                 style={{
                   left: "980px",
                   top: "-180px",
@@ -124,7 +121,7 @@ const page = async () => {
             </MouseParallaxItem>
             <MouseParallaxItem strength={30} className="absolute inset-0 z-10">
               <div
-                className="absolute w-[251px] h-[545px] blur-[40px] bg-cyan-400/20"
+                className="absolute h-[545px] w-[251px] bg-cyan-400/20 blur-[40px]"
                 style={{
                   left: "calc(50% - 125.5px)",
                   top: "0px",
@@ -135,7 +132,7 @@ const page = async () => {
             </MouseParallaxItem>
             <MouseParallaxItem strength={35} className="absolute inset-0 z-10">
               <div
-                className="absolute w-[205px] h-[578px] blur-[40px] rotate-[8deg] bg-cyan-400/20"
+                className="absolute h-[578px] w-[205px] rotate-[8deg] bg-cyan-400/20 blur-[40px]"
                 style={{
                   left: "280px",
                   top: "-80px",
@@ -151,7 +148,7 @@ const page = async () => {
             viewBox="0 0 1287 624"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute inset-0 w-full h-auto z-10 pointer-events-none"
+            className="pointer-events-none absolute inset-0 z-10 h-auto w-full"
           >
             <path
               d="M491.105 515.524H802.053M0.654756 -12.6318L0.654726 624M42.1145 -12.6318L42.1145 624M83.5742 -12.6318L83.5742 624M125.034 -12.6318L125.034 624M166.494 -12.6318L166.494 624M207.953 -12.6318L207.953 624M249.413 -12.6318L249.413 624M290.873 -12.6318L290.873 624M332.333 -12.6318L332.333 624M0.183594 598.659H1285.44M373.792 -12.6318L373.792 624M0.183594 559.537H1285.44M415.252 -12.6318L415.252 624M0.183594 520.414H1285.44M456.712 -12.6318L456.712 624M0.183594 481.291H1285.44M498.172 -12.6318L498.172 624M0.183594 442.169H1285.44M539.631 -12.6318L539.631 624M0.183594 403.046H1285.44M581.091 -12.6318L581.091 624M0.183594 363.923H1285.44M622.551 -12.6318L622.551 624M0.183594 324.801H1285.44M664.011 -12.6318L664.011 624M0.183594 285.678H1285.44M705.47 -12.6318L705.47 624M0.183594 246.556H1285.44M746.93 -12.6318L746.93 624M0.183594 207.433H1285.44M788.39 -12.6318L788.39 624M0.183594 168.31H1285.44M829.85 -12.6318L829.85 624M0.183594 129.188H1285.44M871.309 -12.6318L871.309 624M0.183594 90.0651H1285.44M912.769 -12.6318L912.769 624M0.183594 50.9425H1285.44M954.229 -12.6318L954.229 624M0.183594 11.8199H1285.44M995.689 -12.6318V624M0.183594 -27.3027L1285.44 -27.3027M1037.15 -12.6318V624M1078.61 -12.6318V624M1120.07 -12.6318V624M1161.53 -12.6318V624M1202.99 -12.6318V624M1244.45 -12.6318V624M1285.91 -12.6318V624"
@@ -172,18 +169,17 @@ const page = async () => {
               </radialGradient>
             </defs>
           </svg>
-          <div className="absolute left-1/2 top-0 mt-32 gap-10 z-20 -translate-x-1/2 flex flex-col justify-center items-center">
-            <div className="z-20 flex flex-row border bg-[#2BFFFF]/20 border-[#2BFFFF]/50 justify-center items-center px-3 py-1.5 gap-2.5 w-[250px] h-7 rounded-full backdrop-blur-[12px]">
-              <span className="w-[226px] h-4 font-bold text-xs leading-4 text-center tracking-[0.02em] text-black/70">
+          <div className="absolute left-1/2 top-0 z-20 mt-32 flex -translate-x-1/2 flex-col items-center justify-center gap-10">
+            <div className="z-20 flex h-7 w-[250px] flex-row items-center justify-center gap-2.5 rounded-full border border-[#2BFFFF]/50 bg-[#2BFFFF]/20 px-3 py-1.5 backdrop-blur-[12px]">
+              <span className="h-4 w-[226px] text-center text-xs font-bold leading-4 tracking-[0.02em] text-black/70">
                 Bring your creativity to best scale
               </span>
             </div>
             <div
-              className="z-20 w-[650px]  font-normal text-[70px] leading-[80px] text-center tracking-[-0.04em]"
+              className="z-20 w-[650px] text-center text-[70px] font-normal leading-[80px] tracking-[-0.04em]"
               style={{
                 fontFamily: "'Space Grotesk'",
-                background:
-                  "linear-gradient(180deg, #FFFFFF 50%, #e4f13e 100%)",
+                background: "linear-gradient(180deg, #FFFFFF 50%, #e4f13e 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -191,31 +187,31 @@ const page = async () => {
             >
               The Smartest AI Image Generation, Period
             </div>
-            <p className="text-white w-[600px] text-center">
-              Generate more for less – the cheapest per-image generation
-              compared to any other service. Pick a plan that fits your needs.
+            <p className="w-[600px] text-center text-white">
+              Generate more for less – the cheapest per-image generation compared to any other
+              service. Pick a plan that fits your needs.
             </p>
           </div>
-          <div className="w-[600px] h-[250px] bg-black blur-[200px] rounded-full absolute top-40 left-1/3 -translate-x-12 z-10"></div>
+          <div className="absolute left-1/3 top-40 z-10 h-[250px] w-[600px] -translate-x-12 rounded-full bg-black blur-[200px]"></div>
 
           {/* Pricing Cards Container */}
-          <div className="relative pt-[500px] z-30 px-8">
-            <Tabs defaultValue="monthly" className="w-full max-w-7xl mx-auto">
+          <div className="relative z-30 px-8 pt-[500px]">
+            <Tabs defaultValue="monthly" className="mx-auto w-full max-w-7xl">
               {/* Billing Toggle */}
-              <div className="flex justify-center mb-12">
-                <TabsList className="bg-white/10 backdrop-blur-md border border-white/20 p-1 rounded-xl">
+              <div className="mb-12 flex justify-center">
+                <TabsList className="rounded-xl border border-white/20 bg-white/10 p-1 backdrop-blur-md">
                   <TabsTrigger
                     value="monthly"
-                    className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white rounded-lg transition-all"
+                    className="rounded-lg text-white transition-all data-[state=active]:bg-white/20 data-[state=active]:text-white"
                   >
                     Monthly
                   </TabsTrigger>
                   <TabsTrigger
                     value="yearly"
-                    className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white rounded-lg transition-all"
+                    className="rounded-lg text-white transition-all data-[state=active]:bg-white/20 data-[state=active]:text-white"
                   >
                     Yearly
-                    <span className="ml-2 bg-cyan-400 text-black text-xs px-2 py-0.5 rounded-full font-semibold">
+                    <span className="ml-2 rounded-full bg-cyan-400 px-2 py-0.5 text-xs font-semibold text-black">
                       Save 20%
                     </span>
                   </TabsTrigger>
@@ -223,7 +219,7 @@ const page = async () => {
               </div>
               <PricingHero userSubscriptionDetails={userSubscriptionStatus} />
             </Tabs>
-            <div className="w-full flex justify-center items-center mb-12">
+            <div className="mb-12 flex w-full items-center justify-center">
               <EnterpriseCTA />
             </div>
             <FeatureComparison />
@@ -231,31 +227,27 @@ const page = async () => {
         </MouseParallaxProvider>
       </div>
       <TrustedBy />
-      <div className="relative py-20 px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-16 items-start">
-            <div className="flex gap-10 flex-col lg:flex-1">
-              <div className="flex gap-4 flex-col">
+      <div className="relative px-8 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col items-start gap-16 lg:flex-row">
+            <div className="flex flex-col gap-10 lg:flex-1">
+              <div className="flex flex-col gap-4">
                 <div>
                   <Badge variant="outline">FAQ</Badge>
                 </div>
-                <div className="flex gap-2 flex-col">
-                  <h4 className="text-3xl md:text-5xl tracking-tighter max-w-xl text-left font-regular">
+                <div className="flex flex-col gap-2">
+                  <h4 className="font-regular max-w-xl text-left text-3xl tracking-tighter md:text-5xl">
                     This is the start of something new
                   </h4>
-                  <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
-                    Managing a small business today is already tough. Avoid
-                    further complications by ditching outdated, tedious trade
-                    methods. Our goal is to streamline SMB trade, making it
-                    easier and faster than ever.
+                  <p className="max-w-xl text-left text-lg leading-relaxed tracking-tight text-muted-foreground lg:max-w-lg">
+                    Managing a small business today is already tough. Avoid further complications by
+                    ditching outdated, tedious trade methods. Our goal is to streamline SMB trade,
+                    making it easier and faster than ever.
                   </p>
                 </div>
                 <div className="">
-                  <Button
-                    className="flex justify-center items-center gap-4"
-                    variant="secondary"
-                  >
-                    Any questions? Reach out <PhoneCall className="w-4 h-4" />
+                  <Button className="flex items-center justify-center gap-4" variant="secondary">
+                    Any questions? Reach out <PhoneCall className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

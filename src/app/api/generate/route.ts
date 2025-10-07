@@ -54,8 +54,8 @@ export async function POST(req: Request) {
     const inputImageArray = Array.isArray(parameters?.image_input || parameters?.input_image)
       ? parameters?.image_input || parameters?.input_image
       : parameters?.image_input || parameters?.input_image
-      ? [parameters?.image_input || parameters?.input_image]
-      : [];
+        ? [parameters?.image_input || parameters?.input_image]
+        : [];
 
     const { data, error } = await supabase.rpc("create_job_and_message", {
       p_user_id: user.id,
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     console.error(`[Image Generation Error]: ${error.message}`);
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again later." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

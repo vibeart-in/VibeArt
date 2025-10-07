@@ -110,8 +110,8 @@ const CardScroll = ({
   return (
     <div
       className={cn(
-        "relative w-screen mometum-scroll smooth-scroll-x overflow-x-auto md:cursor-none",
-        scrollHeight
+        "mometum-scroll smooth-scroll-x relative w-screen overflow-x-auto md:cursor-none",
+        scrollHeight,
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -119,10 +119,10 @@ const CardScroll = ({
       {mounted && <CustomCursor isVisible={isCursorVisible} />}
 
       {/* Gradient overlays - responsive widths */}
-      <div className="absolute left-0 top-0 w-16 md:w-32 h-full bg-gradient-to-r from-black/30 to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 w-16 md:w-32 h-full bg-gradient-to-l from-black/30 to-transparent z-10 pointer-events-none" />
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-black/30 to-transparent md:w-32" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-black/30 to-transparent md:w-32" />
 
-      <div className="embla w-full h-full" ref={emblaRef}>
+      <div className="embla h-full w-full" ref={emblaRef}>
         <div className="embla__container h-full items-center">
           {cardData.map((card, index) => (
             <div

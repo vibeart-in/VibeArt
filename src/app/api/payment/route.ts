@@ -43,11 +43,7 @@ export async function POST(req: Request) {
       return new Response("Webhook Error: Invalid request", { status: 400 });
     }
 
-    const eventData = await paddle.webhooks.unmarshal(
-      rawRequestBody,
-      secretKey,
-      signature
-    );
+    const eventData = await paddle.webhooks.unmarshal(rawRequestBody, secretKey, signature);
 
     const supabase = getSupabaseAdmin();
 
@@ -55,16 +51,15 @@ export async function POST(req: Request) {
       // CORRECT: Grouped SubscriptionActivated and SubscriptionUpdated to share logic
       case EventName.SubscriptionActivated:
       case EventName.SubscriptionUpdated: {
-        console.log(
-          `Subscription ${eventData.data.id} was ${eventData.eventType}.`
-        );
+        console.log(`Subscription ${eventData.data.id} was ${eventData.eventType}.`);
 
         const item = eventData.data.items[0];
         const product = item.product;
 
         // A robust way to get the plan ID
-        const tier = (product?.customData as { plan_id?: string })?.plan_id || product?.name?.toLowerCase();
-        
+        const tier =
+          (product?.customData as { plan_id?: string })?.plan_id || product?.name?.toLowerCase();
+
         const newCredits = getCreditsForTier(tier);
 
         const { error } = await supabase
@@ -84,16 +79,14 @@ export async function POST(req: Request) {
           console.error(`Error on ${eventData.eventType}:`, error);
         } else {
           console.log(
-            `Successfully processed ${eventData.eventType} for sub ${eventData.data.id}.`
+            `Successfully processed ${eventData.eventType} for sub ${eventData.data.id}.`,
           );
         }
         break;
       }
 
       case EventName.SubscriptionCanceled: {
-        console.log(
-          `Subscription ${eventData.data.id} was canceled. Downgrading to free tier.`
-        );
+        console.log(`Subscription ${eventData.data.id} was canceled. Downgrading to free tier.`);
 
         const nextRenewalDate = new Date();
         nextRenewalDate.setMonth(nextRenewalDate.getMonth() + 1);
@@ -114,9 +107,7 @@ export async function POST(req: Request) {
         if (error) {
           console.error("Error downgrading user to free tier:", error.message);
         } else {
-          console.log(
-            `Successfully downgraded user from sub ${eventData.data.id}.`
-          );
+          console.log(`Successfully downgraded user from sub ${eventData.data.id}.`);
         }
         break;
       }
@@ -142,15 +133,15 @@ export async function POST(req: Request) {
 
       // Placeholder for bonus credit purchases
       case EventName.TransactionCompleted: {
-          // This event fires for every payment, including renewals.
-          // You need to check if this was a one-time product purchase.
-          // const customData = eventData.data.items[0].price?.customData;
-          // if (customData?.type === 'bonus_credit_purchase') {
-          //     console.log('Bonus credit purchase detected. Add logic here.');
-          //     // Add bonus credits to the user's profile
-          // } else {
-          //     console.log(`Transaction ${eventData.data.id} was paid (likely a renewal).`);
-          // }
+        // This event fires for every payment, including renewals.
+        // You need to check if this was a one-time product purchase.
+        // const customData = eventData.data.items[0].price?.customData;
+        // if (customData?.type === 'bonus_credit_purchase') {
+        //     console.log('Bonus credit purchase detected. Add logic here.');
+        //     // Add bonus credits to the user's profile
+        // } else {
+        //     console.log(`Transaction ${eventData.data.id} was paid (likely a renewal).`);
+        // }
         break;
       }
 

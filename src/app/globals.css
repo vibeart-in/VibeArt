@@ -160,7 +160,7 @@
 }
 
 /* This is for each item within a column */
-.my-masonry-grid_column>div {
+.my-masonry-grid_column > div {
   margin-bottom: 15px;
   /* space between items */
 }
@@ -181,7 +181,7 @@
 }
 
 /* This is for each item within a column */
-.app-masonry-grid_column>div {
+.app-masonry-grid_column > div {
   margin-bottom: 25px;
   /* space between items */
 }
@@ -198,11 +198,14 @@
 
 .custom-box:hover {
   transform: translateY(-5px);
-  box-shadow: inset 0px 0px 16px -4px rgba(200, 200, 200, 0.35), 0px 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    inset 0px 0px 16px -4px rgba(200, 200, 200, 0.35),
+    0px 4px 12px rgba(0, 0, 0, 0.15);
   border-color: #414141;
 }
 @keyframes fade-and-scale {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale3d(0.4, 0.4, 1);
   }
@@ -225,11 +228,15 @@
 
 @keyframes rainbow-flow {
   from {
-    background-position: 50% 50%, 50% 50%;
+    background-position:
+      50% 50%,
+      50% 50%;
   }
 
   to {
-    background-position: 350% 50%, 350% 50%;
+    background-position:
+      350% 50%,
+      350% 50%;
   }
 }
 
@@ -244,7 +251,6 @@
 }
 
 @keyframes pulse-dot {
-
   0%,
   100% {
     opacity: 0.6;
@@ -292,12 +298,16 @@
   /* Adjust zoom level here */
   background-repeat: no-repeat;
   /* cursor: zoom-in; */
-  cursor: url(/cursors/zoom-in.svg) 16 16, auto;
+  cursor:
+    url(/cursors/zoom-in.svg) 16 16,
+    auto;
 }
 
 .loupe-container.is-zoomed {
   cursor: zoom-out;
-  cursor: url(/cursors/zoom-out.svg) 16 16, auto;
+  cursor:
+    url(/cursors/zoom-out.svg) 16 16,
+    auto;
 }
 
 .loupe-container.is-zoomed .loupe-image {
@@ -431,7 +441,7 @@
 }
 
 .grain-overlay {
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgY29sb3JJaW50ZXJwb2xhdGlvbkZpbHRlcnM9InNSR0IiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbnoaXNlKSIvPjwvc3ZnPg==');
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgY29sb3JJaW50ZXJwb2xhdGlvbkZpbHRlcnM9InNSR0IiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbnoaXNlKSIvPjwvc3ZnPg==");
 }
 
 @keyframes loader-letter-anim {
@@ -457,31 +467,46 @@
   will-change: transform, opacity;
 }
 
-
 /* HTML: <div class="loader"></div> */
 .upload-loader {
   width: 65px;
   aspect-ratio: 1;
-  --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+  --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%)
+    no-repeat;
   background: var(--g), var(--g), var(--g);
   background-size: 30px 30px;
   animation: l10 1.5s infinite;
 }
 @keyframes l10 {
   0% {
-    background-position: 0 0, 0 100%, 100% 100%;
+    background-position:
+      0 0,
+      0 100%,
+      100% 100%;
   }
   25% {
-    background-position: 100% 0, 0 100%, 100% 100%;
+    background-position:
+      100% 0,
+      0 100%,
+      100% 100%;
   }
   50% {
-    background-position: 100% 0, 0 0, 100% 100%;
+    background-position:
+      100% 0,
+      0 0,
+      100% 100%;
   }
   75% {
-    background-position: 100% 0, 0 0, 0 100%;
+    background-position:
+      100% 0,
+      0 0,
+      0 100%;
   }
   100% {
-    background-position: 100% 100%, 0 0, 0 100%;
+    background-position:
+      100% 100%,
+      0 0,
+      0 100%;
   }
 }
 
@@ -495,8 +520,12 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 @keyframes skeleton-sweep {
-  0% { background-position-x: 200%; }
-  100% { background-position-x: 0%; }
+  0% {
+    background-position-x: 200%;
+  }
+  100% {
+    background-position-x: 0%;
+  }
 }
 
 .mask-gradient-vertical {
@@ -505,5 +534,41 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-shimmer { animation: none; }
+  .skeleton-shimmer {
+    animation: none;
+  }
+}
+
+/* Animate background position for a gentle drift */
+@keyframes gradient-xy {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Utility if animate-gradient-xy isn't already defined */
+.animate-gradient-xy {
+  background-size: 200% 200%;
+  animation: gradient-xy 5s ease-in-out infinite;
+}
+
+/* Noise overlay using inline SVG turbulence (fast, no requests) */
+.noise-texture {
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>\
+  <filter id='n'>\
+    <feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' seed='3'/>\
+    <feColorMatrix type='saturate' values='0'/>\
+  </filter>\
+  <rect width='100%' height='100%' filter='url(%23n)'/>\
+</svg>");
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  filter: contrast(140%) brightness(110%);
 }

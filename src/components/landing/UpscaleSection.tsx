@@ -29,9 +29,9 @@ const imageFocus4: FocusRect = {
 const UpscaleSection = () => {
   return (
     <section className="relative mt-56">
-      <MouseParallaxProvider className="relative flex h-[1500px] w-screen items-center justify-center py-16 px-4">
+      <MouseParallaxProvider className="relative flex h-[1500px] w-screen items-center justify-center px-4 py-16">
         <div
-          className="absolute inset-0 z-50 overflow-hidden pointer-events-none opacity-60 animate-manga-lines"
+          className="animate-manga-lines pointer-events-none absolute inset-0 z-50 overflow-hidden opacity-60"
           style={{
             backgroundImage: "url(/images/landing/upscale/manga_lines.svg)",
             backgroundSize: "500px 500px",
@@ -43,7 +43,7 @@ const UpscaleSection = () => {
         />
         <MouseParallaxItem
           strength={5}
-          className="absolute inset-0 z-10 w-[1000px] h-[1500px] mx-auto"
+          className="absolute inset-0 z-10 mx-auto h-[1500px] w-[1000px]"
         >
           <Image
             alt="Abstract background"
@@ -66,55 +66,57 @@ const UpscaleSection = () => {
             className="h-auto"
           />
         </MouseParallaxItem>
-        <p className="z-20 absolute top-12 left-0 ml-12 text-[80px] text-accent font-bold">
+        <p className="absolute left-0 top-12 z-20 ml-12 text-[80px] font-bold text-accent">
           PUSH PAST PIXELES
         </p>
-        <p className="z-50 absolute bottom-0 right-36 ml-12 text-[100px] text-white font-bold">
+        <p className="absolute bottom-0 right-36 z-50 ml-12 text-[100px] font-bold text-white">
           UPSCALE TO 4K
         </p>
-        <div className="z-10 absolute inset-x-0 -bottom-20 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
+        <div className="absolute inset-x-0 -bottom-20 z-10 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
       </MouseParallaxProvider>
-      <div className="flex justify-between w-full items-end mt-32">
-          <ImageMagnifyCard 
-            src="/images/landing/upscale/upscale3.jpg"
-            focus={imageFocus1}
-            scale={6}
-            className="left-[110%]"
-           />
-          <ImageMagnifyCard 
-            src="/images/landing/upscale/upscale2.jpg"
-            focus={imageFocus2}
-            scale={6}
-            className="right-[110%] bottom-0"
-           />
+      <div className="mt-32 flex w-full items-end justify-between">
+        <ImageMagnifyCard
+          src="/images/landing/upscale/upscale3.jpg"
+          focus={imageFocus1}
+          scale={6}
+          className="left-[110%]"
+        />
+        <ImageMagnifyCard
+          src="/images/landing/upscale/upscale2.jpg"
+          focus={imageFocus2}
+          scale={6}
+          className="bottom-0 right-[110%]"
+        />
       </div>
-      <p className="w-full text-[40px] font-bold text-center my-4">Ultimate image enhancement and upscaler</p>
-      <div className="flex justify-between w-full items-start mt-3">
-          <ImageMagnifyCard 
-            src="/images/landing/upscale/upscale4.jpg"
-            mainSize={{ w: 500, h: 600 }}
-            previewSize={{ w: 350, h: 260 }}
-            focus={imageFocus3}
-            scale={5}
-            className="left-[110%]"
-            />
-          <ImageMagnifyCard 
-            src="/images/landing/upscale/upscale5.jpg"
-            mainSize={{ w: 554, h: 810 }}
-            previewSize={{ w: 400, h: 300 }}
-            focus={imageFocus4}
-            scale={3}
-            className="right-[105%] bottom-1/4"
-           />
+      <p className="my-4 w-full text-center text-[40px] font-bold">
+        Ultimate image enhancement and upscaler
+      </p>
+      <div className="mt-3 flex w-full items-start justify-between">
+        <ImageMagnifyCard
+          src="/images/landing/upscale/upscale4.jpg"
+          mainSize={{ w: 500, h: 600 }}
+          previewSize={{ w: 350, h: 260 }}
+          focus={imageFocus3}
+          scale={5}
+          className="left-[110%]"
+        />
+        <ImageMagnifyCard
+          src="/images/landing/upscale/upscale5.jpg"
+          mainSize={{ w: 554, h: 810 }}
+          previewSize={{ w: 400, h: 300 }}
+          focus={imageFocus4}
+          scale={3}
+          className="bottom-1/4 right-[105%]"
+        />
       </div>
       {/* <BlurEffect position="top" intensity={100}  className="z-10 absolute inset-x-0 -bottom-20 h-[400px] bg-gradient-to-b from-black/30 to-transparent"/> */}
-      <div className="z-50 absolute inset-x-0 -bottom-2 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-      <div className="z-50 absolute inset-x-0 -bottom-2 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-      <div className="z-50 absolute inset-x-0 -bottom-2 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-      <p className="z-50 text-[40px] text-center absolute inset-x-0 bottom-2 px-56">
-        Create <span className="text-accent">ultrarealistic</span> images with natural skin, lighting and camera
+      <div className="absolute inset-x-0 -bottom-2 z-50 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
+      <div className="absolute inset-x-0 -bottom-2 z-50 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
+      <div className="absolute inset-x-0 -bottom-2 z-50 h-[400px] bg-black/20 !backdrop-blur-sm [mask-image:linear-gradient(to_top,white,transparent)]" />
+      <p className="absolute inset-x-0 bottom-2 z-50 px-56 text-center text-[40px]">
+        Create <span className="text-accent">ultrarealistic</span> images with natural skin,
+        lighting and camera
       </p>
-
     </section>
   );
 };

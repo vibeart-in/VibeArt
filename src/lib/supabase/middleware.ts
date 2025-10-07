@@ -15,18 +15,16 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Do not run code between createServerClient and
@@ -42,8 +40,7 @@ export async function updateSession(request: NextRequest) {
   // If user is authenticated and trying to access auth pages (except callback, confirm, error pages)
   if (
     user &&
-    (request.nextUrl.pathname === "/auth/login" ||
-      request.nextUrl.pathname === "/auth/signup")
+    (request.nextUrl.pathname === "/auth/login" || request.nextUrl.pathname === "/auth/signup")
   ) {
     // redirect authenticated users away from login/signup pages
     const url = request.nextUrl.clone();

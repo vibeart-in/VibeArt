@@ -4,7 +4,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { IconSparkles } from "@tabler/icons-react";
 import UserImageGalleryClient from "@/src/components/home/UserImageGalleryClient";
 import { redirect } from "next/navigation";
-import { ImageCardType } from "@/src/types/BaseType";
+import { ExampleImageType } from "@/src/types/BaseType";
 
 const page = async () => {
   const supabase = await createClient();
@@ -25,11 +25,7 @@ const page = async () => {
     console.error("Error fetching user images on server:", error);
     return (
       <div className="relative flex h-full w-full flex-col items-center justify-center overflow-y-scroll bg-black">
-        <BackgroundImage
-          src="/images/library_bg.png"
-          width={900}
-          height={900}
-        />
+        <BackgroundImage src="/images/library_bg.png" width={900} height={900} />
         <div className="z-10 my-8 mt-44 flex flex-col items-center justify-center text-red-400">
           <p>Failed to load your images. Please try again later.</p>
         </div>
@@ -37,12 +33,16 @@ const page = async () => {
     );
   }
 
-  const images = data as unknown as ImageCardType[];
-  const initialImages: ImageCardType[] = images || [];
+  const images = data as unknown as ExampleImageType[];
+  const initialImages: ExampleImageType[] = images || [];
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-y-scroll bg-background">
-      <BackgroundImage src="https://i.pinimg.com/736x/0c/f6/4f/0cf64fe66dcfa95b51dc197b61f360cd.jpg" width={900} height={900} />
+      <BackgroundImage
+        src="https://i.pinimg.com/736x/0c/f6/4f/0cf64fe66dcfa95b51dc197b61f360cd.jpg"
+        width={900}
+        height={900}
+      />
       <div className="z-10 my-8 mt-44 flex flex-col items-center justify-center">
         <h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
           <IconSparkles /> All of your generated, edited images in one place

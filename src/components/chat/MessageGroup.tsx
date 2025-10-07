@@ -11,21 +11,34 @@ interface MessageGroupProps {
 export default function MessageGroup({ group }: MessageGroupProps) {
   const { input_images, turns } = group;
 
+  console.log("IN", input_images);
+
   return (
-    <div className="w-full flex justify-center pl-20">
+    <div className="flex w-full justify-center pl-20">
       {/* 1. RENDER SHARED INPUT IMAGES (IF THEY EXIST) */}
       {input_images && input_images.length > 0 && (
-        <div className="sticky top-8 flex items-center gap-4 mr-4 self-start">
-          <div className="flex gap-4 flex-wrap max-w-[350px]">
+        <div className="sticky top-8 mr-4 flex items-center gap-4 self-start">
+          <div className="flex max-w-[350px] flex-wrap gap-4">
             {input_images.map((image) => (
               <div key={image.id} className="w-[350px]">
+                {/* {image.imageUrl.endsWith(".mp4") ? ( */}
+                {/* <video
+                    src={image.imageUrl}
+                    className="rounded-3xl border-2 border-white/20 w-full"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : ( */}
                 <Image
-                  className="rounded-3xl border-2 border-white/20 w-full"
-                  src={image.imageUrl}
+                  className="w-full rounded-3xl border-2 border-white/20"
+                  src={image.signedUrl}
                   width={300}
                   height={300}
                   alt="INPUT IMAGE"
                 />
+                {/* )} */}
               </div>
             ))}
           </div>

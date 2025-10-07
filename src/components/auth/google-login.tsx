@@ -18,13 +18,13 @@ const SignInWithGoogleButton = () => {
   return (
     <Button
       type="button"
-      className="p-6 w-full flex items-center justify-center rounded-xl gap-4 text-sm text-white bg-black/90 border border-[#313131] focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+      className="flex w-full items-center justify-center gap-4 rounded-xl border border-[#313131] bg-black/90 p-6 text-sm text-white focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
       onClick={signInWithGoogle}
     >
       <Image
         src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/Google_Favicon_2025.webp"
         alt="Google logo"
-        className="w-4 h-4"
+        className="h-4 w-4"
         width={25}
         height={25}
       />

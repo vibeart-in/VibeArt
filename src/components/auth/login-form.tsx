@@ -11,10 +11,7 @@ import SignInWithGoogleButton from "./google-login";
 import GlassModal from "../ui/GlassModal";
 import { NavbarLogo } from "../ui/resizable-navbar";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,34 +39,31 @@ export function LoginForm({
   };
 
   return (
-    <div className="relative flex items-center justify-center w-full h-full">
+    <div className="relative flex h-full w-full items-center justify-center">
       <GlassModal width={40} height={550} count={16} className="z-50" />
 
       <div className="absolute z-50">
         <div
-          className={cn(
-            "flex flex-col gap-6 items-center text-center max-w-sm w-full",
-            className
-          )}
+          className={cn("flex w-full max-w-sm flex-col items-center gap-6 text-center", className)}
           {...props}
         >
           <NavbarLogo />
           <div>
-            <h2 className="font-bold text-2xl">Start Creating 🔥</h2>
-            <p className="text-gray-400 text-sm mt-1">
+            <h2 className="text-2xl font-bold">Start Creating 🔥</h2>
+            <p className="mt-1 text-sm text-gray-400">
               Log in to generate, edit and bring your vison to life
             </p>
           </div>
 
           <SignInWithGoogleButton />
 
-          <div className="relative w-full flex items-center">
+          <div className="relative flex w-full items-center">
             <span className="flex-grow border-t border-gray-500"></span>
             <span className="mx-2 text-xs text-gray-400">or</span>
             <span className="flex-grow border-t border-gray-500"></span>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
+          <form onSubmit={handleLogin} className="flex w-full flex-col gap-4">
             <Input
               id="email"
               type="email"
@@ -91,16 +85,16 @@ export function LoginForm({
               {isLoading ? "Logging in..." : "Login & Start Creating"}
             </Button>
           </form>
-          <div className="mt-2 text-sm flex justify-center gap-4">
+          <div className="mt-2 flex justify-center gap-4 text-sm">
             <Link
               href="/auth/signup"
-              className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
+              className="text-[#95A4FC] underline-offset-4 transition-colors hover:text-[#7b8be6] hover:underline"
             >
               Sign up
             </Link>
             <Link
               href="/forgot-password"
-              className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
+              className="text-[#95A4FC] underline-offset-4 transition-colors hover:text-[#7b8be6] hover:underline"
             >
               Forgot password?
             </Link>

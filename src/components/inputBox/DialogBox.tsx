@@ -1,11 +1,10 @@
 "use client";
 import { IconSearch } from "@tabler/icons-react";
 import { Input } from "../ui/input";
-import { ConversationType, ModelData } from "@/src/types/BaseType";
 import ModelCard from "../ui/Modelcard";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/src/lib/supabase/client";
+import { ConversationType, ModelData } from "@/src/types/BaseType";
+import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 
 type DialogBoxProps = {
   conversationType: ConversationType;
@@ -15,101 +14,60 @@ type DialogBoxProps = {
 const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const supabase = createClient();
-
-  console.log("USECASE", conversationType);
-
-  const {
-    data: models,
-    isLoading,
-    error,
-  } = useQuery<ModelData[], Error>({
-    queryKey: ["modelsByUsecase", conversationType], // <-- include usecase
-    queryFn: async () => {
-      const { data, error: rpcError } = await supabase.rpc(
-        "get_models_by_usecase",
-        {
-          p_usecase: conversationType,
-        }
-      );
-      if (rpcError) {
-        throw new Error(rpcError.message);
-      }
-      console.log(data);
-      return data as unknown as ModelData[];
-    },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  // ✅ Reusable query hook
+  const { data: models, isLoading, error } = useModelsByUsecase(conversationType);
 
   const filteredModels = useMemo(() => {
-    if (!models) {
-      return [];
-    }
-    if (!searchTerm) {
-      return models; // If no search term, return all loaded models
-    }
-    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    if (!models) return [];
+    if (!searchTerm) return models;
+
+    const lower = searchTerm.toLowerCase();
     return models.filter(
       (model) =>
-        model.model_name.toLowerCase().includes(lowercasedSearchTerm) ||
-        (model.description &&
-          model.description.toLowerCase().includes(lowercasedSearchTerm)) ||
-        model.identifier.toLowerCase().includes(lowercasedSearchTerm) ||
-        (model.usecase &&
-          model.usecase.toLowerCase().includes(lowercasedSearchTerm))
+        model.model_name.toLowerCase().includes(lower) ||
+        model.description?.toLowerCase().includes(lower) ||
+        model.identifier.toLowerCase().includes(lower) ||
+        model.usecase?.toLowerCase().includes(lower),
     );
   }, [models, searchTerm]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
   if (isLoading) {
-    return (
-      <div className="w-full text-center py-8 text-white">
-        Loading models...
-      </div>
-    );
+    return <div className="w-full py-8 text-center text-white">Loading models...</div>;
   }
 
   if (error) {
     return (
-      <div className="w-full text-center py-8 text-red-500">
+      <div className="w-full py-8 text-center text-red-500">
         Error loading models: {error.message}
       </div>
     );
   }
 
   if (!models || models.length === 0) {
-    return (
-      <div className="w-full text-center py-8 text-gray-400">
-        No models available.
-      </div>
-    );
+    return <div className="w-full py-8 text-center text-gray-400">No models available.</div>;
   }
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <p className="text-nowrap text-white text-lg font-semibold text-center sm:text-left">
+      <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <p className="text-nowrap text-center text-lg font-semibold text-white sm:text-left">
           Change model/checkpoint
         </p>
         <div className="relative w-full sm:w-auto">
           <Input
             placeholder="Search..."
-            // Make search bar full-width on mobile to be easily tappable
-            className="rounded-2xl w-full min-w-52 py-1.5 pr-8 bg-[#161616] text-white placeholder-gray-400"
+            className="w-full min-w-52 rounded-2xl bg-[#161616] py-1.5 pr-8 text-white placeholder-gray-400"
             value={searchTerm}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <IconSearch
             size={16}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-white/60"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60"
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-14 mt-6 gap-4">
+
+      <div className="mb-14 mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {filteredModels.length > 0 ? (
           filteredModels.map((model) => (
             <ModelCard key={model.id} model={model} onSelect={onSelectModel} />

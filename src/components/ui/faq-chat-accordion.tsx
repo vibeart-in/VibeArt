@@ -33,9 +33,7 @@ export function FaqAccordion({
 
   return (
     <div className={cn("p-4", className)}>
-      {timestamp && (
-        <div className="mb-4 text-sm text-muted-foreground">{timestamp}</div>
-      )}
+      {timestamp && <div className="mb-4 text-sm text-muted-foreground">{timestamp}</div>}
 
       <Accordion.Root
         type="single"
@@ -44,32 +42,26 @@ export function FaqAccordion({
         onValueChange={(value) => setOpenItem(value)}
       >
         {data.map((item) => (
-          <Accordion.Item 
-            value={item.id.toString()} 
-            key={item.id} 
-            className="mb-2"
-          >
+          <Accordion.Item value={item.id.toString()} key={item.id} className="mb-2">
             <Accordion.Header>
               <Accordion.Trigger className="flex w-full items-center justify-start gap-x-4">
                 <div
                   className={cn(
                     "relative flex items-center space-x-2 rounded-xl p-2 transition-colors",
-                    openItem === item.id.toString() 
-                      ? "bg-primary/20 text-primary" 
+                    openItem === item.id.toString()
+                      ? "bg-primary/20 text-primary"
                       : "bg-muted hover:bg-primary/10",
-                    questionClassName
+                    questionClassName,
                   )}
                 >
                   {item.icon && (
                     <span
                       className={cn(
                         "absolute bottom-6",
-                        item.iconPosition === "right" ? "right-0" : "left-0"
+                        item.iconPosition === "right" ? "right-0" : "left-0",
                       )}
                       style={{
-                        transform: item.iconPosition === "right" 
-                          ? "rotate(7deg)" 
-                          : "rotate(-4deg)",
+                        transform: item.iconPosition === "right" ? "rotate(7deg)" : "rotate(-4deg)",
                       }}
                     >
                       {item.icon}
@@ -78,10 +70,10 @@ export function FaqAccordion({
                   <span className="font-medium">{item.question}</span>
                 </div>
 
-                <span 
+                <span
                   className={cn(
                     "text-muted-foreground",
-                    openItem === item.id.toString() && "text-primary"
+                    openItem === item.id.toString() && "text-primary",
                   )}
                 >
                   {openItem === item.id.toString() ? (
@@ -107,7 +99,7 @@ export function FaqAccordion({
                   <div
                     className={cn(
                       "relative max-w-xs rounded-2xl bg-primary px-4 py-2 text-primary-foreground",
-                      answerClassName
+                      answerClassName,
                     )}
                   >
                     {item.answer}

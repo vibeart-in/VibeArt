@@ -40,11 +40,11 @@ const FeatureItem = ({ feature }: { feature: string }) => {
       variants={featureItemVariants}
       className="flex items-center gap-3 border-b border-white/10 py-3 last:border-b-0"
     >
-      <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
+      <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-accent" />
       <span className="text-white/80">
         {isCreditsFeature ? (
           <span className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-accent" />
+            <Coins className="h-4 w-4 text-accent" />
             <span className="font-medium text-white">{feature}</span>
           </span>
         ) : (
@@ -77,23 +77,18 @@ export const PricingCard = ({
   const planOrder = ["free", "basic", "pro", "creator"];
   const currentTier = userSubscriptionDetails?.subscription_tier || "free";
   const currentSubscriptionType = userSubscriptionDetails?.subscription_type;
-  const  subscription_id = userSubscriptionDetails?.subscription_id;
+  const subscription_id = userSubscriptionDetails?.subscription_id;
 
   // KEY FIX 1: "isCurrent" must check both tier AND billing cycle.
   const isActuallyCurrentPlan =
     plan.id === currentTier &&
-    (isYearly
-      ? currentSubscriptionType === "year"
-      : currentSubscriptionType === "month");
+    (isYearly ? currentSubscriptionType === "year" : currentSubscriptionType === "month");
 
   // A downgrade action is either moving to a lower tier OR attempting to switch from yearly to monthly.
-  const isDowngradeTier =
-    planOrder.indexOf(plan.id) < planOrder.indexOf(currentTier);
-  const isForbiddenYearlyToMonthlySwitch =
-    currentSubscriptionType === "year" && !isYearly;
+  const isDowngradeTier = planOrder.indexOf(plan.id) < planOrder.indexOf(currentTier);
+  const isForbiddenYearlyToMonthlySwitch = currentSubscriptionType === "year" && !isYearly;
 
-  const isConsideredDowngrade =
-    isDowngradeTier || isForbiddenYearlyToMonthlySwitch;
+  const isConsideredDowngrade = isDowngradeTier || isForbiddenYearlyToMonthlySwitch;
 
   // KEY FIX 2: The button is disabled only if it's the *exact* current plan or a downgrade action.
   const isButtonDisabled = isActuallyCurrentPlan || isConsideredDowngrade;
@@ -144,9 +139,9 @@ export const PricingCard = ({
           successUrl: `${window.location.origin}/success`,
         },
       });
-    } else if(subscription_id){
-        updateSubscription(plan.monthPriceId, subscription_id)
-        console.log("subscription_id", subscription_id);
+    } else if (subscription_id) {
+      updateSubscription(plan.monthPriceId, subscription_id);
+      console.log("subscription_id", subscription_id);
     }
   };
 
@@ -156,10 +151,10 @@ export const PricingCard = ({
     <motion.div
       variants={cardVariants}
       layout
-      className={`relative rounded-2xl p-0.5 bg-black transition-shadow duration-300 ${plan.borderGradient} ${plan.glowEffect}`}
+      className={`relative rounded-2xl bg-black p-0.5 transition-shadow duration-300 ${plan.borderGradient} ${plan.glowEffect}`}
     >
       <article
-        className={`relative flex flex-col h-full p-6 w-full rounded-[15px] bg-gradient-to-br ${plan.cardBgGradient}`}
+        className={`relative flex h-full w-full flex-col rounded-[15px] bg-gradient-to-br p-6 ${plan.cardBgGradient}`}
       >
         {plan.popular && !isActuallyCurrentPlan && (
           <motion.span
@@ -181,7 +176,7 @@ export const PricingCard = ({
           </motion.span>
         )}
 
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex flex-1 flex-col gap-6">
           <h3 className="text-2xl font-semibold text-white">{plan.name}</h3>
 
           <div className="flex flex-col gap-4">
@@ -198,9 +193,7 @@ export const PricingCard = ({
                   {price}
                 </motion.span>
               </AnimatePresence>
-              {plan.priceSubtext && (
-                <span className="text-white">{plan.priceSubtext}</span>
-              )}
+              {plan.priceSubtext && <span className="text-white">{plan.priceSubtext}</span>}
             </div>
             <button
               disabled={isButtonDisabled}
@@ -215,9 +208,9 @@ export const PricingCard = ({
                 const priceId = isYearly ? plan.yearPriceId : plan.monthPriceId;
                 handleCheckout(priceId);
               }}
-              className={`relative flex flex-row justify-center items-center px-3.5 py-3 gap-2.5 w-full h-11 rounded-xl transition-all duration-300 shadow-md before:absolute before:inset-0 before:blur-md before:rounded-xl before:-z-10 ${
+              className={`relative flex h-11 w-full flex-row items-center justify-center gap-2.5 rounded-xl px-3.5 py-3 shadow-md transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:rounded-xl before:blur-md ${
                 isButtonDisabled
-                  ? "bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-75"
+                  ? "cursor-not-allowed bg-zinc-700 text-zinc-400 opacity-75"
                   : plan.buttonClasses
               }`}
             >
@@ -225,14 +218,14 @@ export const PricingCard = ({
             </button>
           </div>
           {isYearly && plan.priceAnnually !== plan.priceMonthly && (
-            <span className="text-xs text-white/60 -mt-4">Billed yearly</span>
+            <span className="-mt-4 text-xs text-white/60">Billed yearly</span>
           )}
 
           <motion.ul
             variants={featureListVariants}
             initial="hidden"
             animate="show"
-            className="flex flex-col gap-1 text-sm mt-4"
+            className="mt-4 flex flex-col gap-1 text-sm"
           >
             {plan.features.map((feature: string, index: number) => (
               <FeatureItem key={index} feature={feature} />

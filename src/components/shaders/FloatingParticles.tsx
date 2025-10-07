@@ -7,8 +7,7 @@ export const FloatingParticles = ({ count = 100 }) => {
 
   useEffect(() => {
     const generatedParticles = Array.from({ length: count }).map((_, index) => {
-      const random = (max: number, min: number = 0): number =>
-        Math.random() * (max - min) + min;
+      const random = (max: number, min: number = 0): number => Math.random() * (max - min) + min;
 
       const startY = -random(20, 10);
       const endY = random(20) + 100;
@@ -37,11 +36,11 @@ export const FloatingParticles = ({ count = 100 }) => {
   if (particles.length === 0) return null;
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+    <div className="pointer-events-none absolute left-0 top-0 h-full w-full overflow-hidden">
       {particles.map((p) => (
         <div
           key={p.id}
-          className="absolute top-0 left-0"
+          className="absolute left-0 top-0"
           style={
             {
               width: `${p.size}px`,
@@ -57,7 +56,7 @@ export const FloatingParticles = ({ count = 100 }) => {
           }
         >
           <div
-            className="w-full h-full rounded-full mix-blend-screen"
+            className="h-full w-full rounded-full mix-blend-screen"
             style={{
               backgroundImage:
                 "radial-gradient(hsl(180, 100%, 40%), hsl(180, 100%, 40%) 10%, hsla(180, 100%, 80%, 0) 46%)",

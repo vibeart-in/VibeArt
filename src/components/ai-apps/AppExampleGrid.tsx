@@ -3,7 +3,7 @@ import Masonry from "react-masonry-css";
 import Image from "next/image";
 import { useState } from "react";
 import { motion } from "motion/react";
-import ImageCard from "../ui/ImageCard";
+import ImageCard from "../ui/imageCard/ImageCard";
 
 type AppExampleGridProps = {
   images: string[]; // array of URLs
@@ -50,7 +50,7 @@ const AppExampleGrid = ({ images }: AppExampleGridProps) => {
               transition={{ duration: 0.4 }}
             >
               <ImageCard
-                imageUrl={url}
+                mediaUrl={url}
                 prompt=""
                 // alt={`example-${idx}`}
                 width={300}
@@ -62,16 +62,16 @@ const AppExampleGrid = ({ images }: AppExampleGridProps) => {
 
         {/* Blur overlay only when collapsed */}
         {!showAll && (
-          <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none backdrop-blur-sm" />
+          <div className="pointer-events-none absolute bottom-0 left-0 h-16 w-full bg-gradient-to-t from-black via-black/70 to-transparent backdrop-blur-sm" />
         )}
       </motion.div>
 
       {/* Toggle button */}
-      <div className="flex justify-center mt-3">
+      <div className="mt-3 flex justify-center">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAll((prev) => !prev)}
-          className="px-4 py-1.5 text-sm bg-black/40 border border-white/20 rounded-full hover:bg-black/60 transition"
+          className="rounded-full border border-white/20 bg-black/40 px-4 py-1.5 text-sm transition hover:bg-black/60"
         >
           {showAll ? "Show less" : "View more"}
         </motion.button>

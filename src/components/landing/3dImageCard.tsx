@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useRef, useCallback, useEffect } from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useReducedMotion,
-} from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "motion/react";
 
 interface ImageCard3DProps {
   bottomImageUrl: string;
@@ -43,16 +37,8 @@ export const ImageCard3D = React.memo(function ImageCard3D({
   const ySpring = useSpring(y, { stiffness: 300, damping: 20 });
 
   // Pointer-driven tilt
-  const mouseRotateX = useTransform(
-    ySpring,
-    [-0.5, 0.5],
-    [rotateDepth, -rotateDepth]
-  );
-  const mouseRotateY = useTransform(
-    xSpring,
-    [-0.5, 0.5],
-    [-rotateDepth, rotateDepth]
-  );
+  const mouseRotateX = useTransform(ySpring, [-0.5, 0.5], [rotateDepth, -rotateDepth]);
+  const mouseRotateY = useTransform(xSpring, [-0.5, 0.5], [-rotateDepth, rotateDepth]);
 
   // Scroll-driven tilt (spring wrapped)
   const defaultScrollVelocity = useMotionValue(0);
@@ -65,7 +51,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
   // Compose rotateY so only one rotateY is applied
   const combinedRotateY = useTransform(
     [mouseRotateY, scrollRotateY],
-    (values: number[]) => values[0] + values[1]
+    (values: number[]) => values[0] + values[1],
   );
 
   // Parallax for top image and text
@@ -73,22 +59,22 @@ export const ImageCard3D = React.memo(function ImageCard3D({
   const topImageTranslateX = useTransform(
     xSpring,
     [-0.5, 0.5],
-    [`-${effParallax}px`, `${effParallax}px`]
+    [`-${effParallax}px`, `${effParallax}px`],
   );
   const topImageTranslateY = useTransform(
     ySpring,
     [-0.5, 0.5],
-    [`-${effParallax}px`, `${effParallax}px`]
+    [`-${effParallax}px`, `${effParallax}px`],
   );
   const textTranslateX = useTransform(
     xSpring,
     [-0.5, 0.5],
-    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`]
+    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`],
   );
   const textTranslateY = useTransform(
     ySpring,
     [-0.5, 0.5],
-    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`]
+    [`-${effParallax * 1.5}px`, `${effParallax * 1.5}px`],
   );
 
   // Glare
@@ -97,7 +83,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
   const glareBackground = useTransform(
     [glareX, glareY],
     ([gx, gy]) =>
-      `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.2) 0%, transparent 30%)`
+      `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.2) 0%, transparent 30%)`,
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -116,7 +102,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
         y.set(yPct);
       });
     },
-    [x, y, prefersReducedMotion]
+    [x, y, prefersReducedMotion],
   );
 
   const handlePointerLeave = useCallback(() => {
@@ -162,26 +148,23 @@ export const ImageCard3D = React.memo(function ImageCard3D({
           touchAction: "none",
         }}
         whileHover={
-          prefersReducedMotion
-            ? undefined
-            : { scale: 1.05, transition: { type: "spring" } }
+          prefersReducedMotion ? undefined : { scale: 1.05, transition: { type: "spring" } }
         }
         className="relative rounded-[16px] md:rounded-[26px]"
       >
         {/* Layer 1: Bottom Image */}
         <div
-          className="absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] bg-cover bg-center"
+          className="absolute inset-0 h-full w-full rounded-[16px] bg-cover bg-center md:rounded-[26px]"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
-            boxShadow:
-              "rgba(0, 0, 0, 0.1) 0px 10px 5px 0px, rgba(0, 0, 0, 0.1) 0px 10px 3px 0px",
+            boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 5px 0px, rgba(0, 0, 0, 0.1) 0px 10px 3px 0px",
             willChange: "transform",
           }}
         />
 
         {/* Layer 2: Top Image (Parallax). Use z for real depth instead of invalid transform strings */}
         <motion.div
-          className="absolute inset-0 w-full h-full bg-contain bg-no-repeat bg-center [filter:drop-shadow(4px_4px_10px_rgba(0,0,0,0.5))]"
+          className="absolute inset-0 h-full w-full bg-contain bg-center bg-no-repeat [filter:drop-shadow(4px_4px_10px_rgba(0,0,0,0.5))]"
           style={{
             backgroundImage: `url(${topImageUrl})`,
             x: topImageTranslateX,
@@ -195,7 +178,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
 
         {/* Layer 3: Text (Parallax) */}
         <motion.p
-          className="absolute bottom-0 -right-1/2 w-full font-gothic font-medium text-white"
+          className="absolute -right-1/2 bottom-0 w-full font-gothic font-medium text-white"
           style={{
             x: textTranslateX,
             y: textTranslateY,
@@ -212,7 +195,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
         {/* Layer 4: Glare */}
         {!prefersReducedMotion && (
           <motion.div
-            className="pointer-events-none absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] mix-blend-soft-light"
+            className="pointer-events-none absolute inset-0 h-full w-full rounded-[16px] mix-blend-soft-light md:rounded-[26px]"
             style={{ background: glareBackground }}
           />
         )}

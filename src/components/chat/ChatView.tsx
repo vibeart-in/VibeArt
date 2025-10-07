@@ -8,11 +8,10 @@ interface ChatViewProps {
 }
 
 export default function ChatView({ messageGroups }: ChatViewProps) {
-
   return (
     <div
       // ref={scrollContainerRef}
-      className="w-full flex flex-col-reverse items-center h-full overflow-y-auto gap-12 pb-48 pt-32 px-4"
+      className="flex h-full w-full flex-col-reverse items-center gap-12 overflow-y-auto px-4 pb-48 pt-32"
     >
       {messageGroups.map((group) => (
         <MessageGroup key={group.id} group={group} />

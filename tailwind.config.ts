@@ -11,20 +11,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        gothic: ['var(--font-gothic)', 'sans-serif'],
+        gothic: ["var(--font-gothic)", "sans-serif"],
       },
       scrollBehavior: {
-        smooth: 'smooth',
-        auto: 'auto',
+        smooth: "smooth",
+        auto: "auto",
       },
       animation: {
-        'smooth-bounce': 'smooth-bounce 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        "smooth-bounce": "smooth-bounce 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
         scroll: "scroll 40s linear infinite",
       },
       keyframes: {
-        'smooth-bounce': {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-4px)' },
+        "smooth-bounce": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-4px)" },
         },
         scroll: {
           "0%": { transform: "translateX(0)" },

@@ -16,6 +16,8 @@
 //   error_message?: string | null;
 // }
 
+import { Database } from "@/supabase/database.types";
+
 // Your existing MessageType
 export interface MessageType {
   id: string;
@@ -23,7 +25,7 @@ export interface MessageType {
   input_images: { id: string; imageUrl: string }[];
   output_images: { id: string; imageUrl: string }[];
   jobId: string | null;
-  job_status: 'pending' | 'starting' | 'processing' | 'succeeded' | 'failed' | null;
+  job_status: "pending" | "starting" | "processing" | "succeeded" | "failed" | null;
   parameters: any;
   credit_cost: number;
   error_message: string | null;
@@ -58,7 +60,7 @@ export type NodeParam = {
 export type InputBoxParameter = Record<string, SchemaParam> | NodeParam[];
 
 export interface ModelData {
-  id: string;
+  id: number;
   created_at: string;
   model_name: string;
   identifier: string;
@@ -75,8 +77,10 @@ export interface ModelData {
   parameters: InputBoxParameter;
   provider: "running_hub" | "replicate";
   is_popular: boolean;
-  estimated_time: number
+  estimated_time: number;
 }
+
+export type DBModelData = Database["public"]["Functions"]["get_initial_model"]["Returns"][number];
 
 export interface HistoryItem {
   id: string;
@@ -87,10 +91,23 @@ export interface HistoryItem {
   appId?: string;
 }
 
-export interface ImageCardType {
+export interface ExampleImageType {
   id: number;
-  image_url: string;
+  media_url: string;
   prompt: string;
+  media_type: "image" | "video";
+  showcase_for: ConversationType;
+  width?: number;
+  height?: number;
+}
+
+export enum ConversationType {
+  GENERATE = "generate",
+  EDIT = "edit",
+  BOTH = "both",
+  APP = "app", // ✅ changed from "ai-apps" to "app"
+  VIDEO = "video",
+  ADVANCE = "advance_generate",
 }
 
 export interface ImageCard3DType {
@@ -103,11 +120,4 @@ export interface ImageCard3DType {
   height?: number;
   topImageScale?: number;
   fontSize?: number;
-}
-
-export enum ConversationType {
-  GENERATE = "generate",
-  EDIT = "edit",
-  BOTH = "both",
-  APP = "ai-apps"  
 }

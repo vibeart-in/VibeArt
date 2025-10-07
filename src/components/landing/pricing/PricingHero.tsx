@@ -56,8 +56,7 @@ const pricingPlans: PricingPlan[] = [
       "Commercial License",
     ],
     cardBgGradient: "from-[#FFDEDE]/15 via-zinc-900/90 to-[#FFDEDE]/15",
-    borderGradient:
-      "bg-gradient-to-br from-[#FFDEDE]/50 via-transparent to-[#FFDEDE]/50",
+    borderGradient: "bg-gradient-to-br from-[#FFDEDE]/50 via-transparent to-[#FFDEDE]/50",
     glowEffect: "hover:shadow-[0_0_24px_#FFDEDE40]",
     buttonClasses:
       "bg-gradient-to-b from-[#FFDEDE] to-[#936C6C] text-black hover:brightness-110 before:bg-[#FFDEDE]/50",
@@ -79,8 +78,7 @@ const pricingPlans: PricingPlan[] = [
       "Commercial License",
     ],
     cardBgGradient: "from-[#00C8FF]/15 via-zinc-900/90 to-[#00C8FF]/15",
-    borderGradient:
-      "bg-gradient-to-br from-[#00C8FF]/50 via-transparent to-[#00C8FF]/50",
+    borderGradient: "bg-gradient-to-br from-[#00C8FF]/50 via-transparent to-[#00C8FF]/50",
     glowEffect: "hover:shadow-[0_0_24px_#00C8FF40]",
     buttonClasses:
       "bg-gradient-to-b from-[#00C8FF] to-[#016789] text-black hover:brightness-110 before:bg-[#00C8FF]/50",
@@ -104,8 +102,7 @@ const pricingPlans: PricingPlan[] = [
       "Highest Queue Priority",
     ],
     cardBgGradient: "from-[#FFAA33]/20 via-zinc-900/90 to-[#FFAA33]/20",
-    borderGradient:
-      "bg-gradient-to-br from-[#FFAA33]/50 via-transparent to-[#FFAA33]",
+    borderGradient: "bg-gradient-to-br from-[#FFAA33]/50 via-transparent to-[#FFAA33]",
     glowEffect: "hover:shadow-[0_0_24px_#FFAA3340]",
     buttonClasses:
       "bg-gradient-to-b from-[#FFAA33] to-[#734E03] text-black hover:brightness-110 before:bg-[#FFAA33]/50",
@@ -124,7 +121,6 @@ const gridVariants: Variants = {
     },
   },
 };
-
 
 export const PricingHero = ({
   userSubscriptionDetails,
@@ -209,7 +205,7 @@ const AnimatedGrid = ({
       variants={gridVariants}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+      className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
     >
       {plans.map((plan) => (
         <PricingCard

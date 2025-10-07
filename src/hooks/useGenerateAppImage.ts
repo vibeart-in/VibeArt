@@ -16,11 +16,11 @@ interface GenerateAppImageResponse {
 }
 
 async function generateAppImage(
-  payload: GenerateAppImagePayload
+  payload: GenerateAppImagePayload,
 ): Promise<GenerateAppImageResponse> {
   // We don't send the preview URL to the API, so we can omit it here.
   const { inputImagePreviewUrl, ...apiPayload } = payload;
-  
+
   const response = await fetch("/api/generate/app", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,13 +34,19 @@ async function generateAppImage(
   return response.json();
 }
 
+// Define the context type for the mutation
+interface MutationContext {
+  previousGenerations: GenerationWithSignedUrls[] | undefined;
+  queryKey: string[];
+}
+
 /**
  * Tanstack Query hook for generating AI App images with optimistic updates.
  */
 export function useGenerateAppImage() {
   const queryClient = useQueryClient();
 
-  return useMutation<GenerateAppImageResponse, Error, GenerateAppImagePayload>({
+  return useMutation<GenerateAppImageResponse, Error, GenerateAppImagePayload, MutationContext>({
     mutationFn: generateAppImage,
 
     // --- OPTIMISTIC UPDATE LOGIC ---
@@ -56,7 +62,7 @@ export function useGenerateAppImage() {
       // 3. Create our optimistic "pending" generation object
       const optimisticGeneration: GenerationWithSignedUrls = {
         id: `temp-${Date.now()}`, // A temporary unique ID
-        status: 'pending',
+        status: "pending",
         parameters: newGeneration.parameters,
         inputImageUrl: newGeneration.inputImagePreviewUrl || null,
         outputImageUrls: [], // No output images yet
@@ -65,9 +71,9 @@ export function useGenerateAppImage() {
       // 4. Optimistically update to the new value
       queryClient.setQueryData<GenerationWithSignedUrls[]>(
         queryKey,
-        (old = []) => [optimisticGeneration, ...old] // Add the new pending item to the top of the list
+        (old = []) => [optimisticGeneration, ...old], // Add the new pending item to the top of the list
       );
-      
+
       // Smooth scroll to the history section immediately
       document.getElementById("appGenerationHistory")?.scrollIntoView({ behavior: "smooth" });
 

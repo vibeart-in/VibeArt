@@ -7,7 +7,7 @@ import { NodeParam } from "@/src/types/BaseType";
 // Define the final shape of our data after processing
 export type GenerationWithSignedUrls = {
   id: string;
-  status?: 'pending' | 'succeeded'; // <-- ADD THIS STATUS
+  status?: "pending" | "succeeded"; // <-- ADD THIS STATUS
   parameters: NodeParam[];
   outputImageUrls: string[];
   inputImageUrl: string | null;
@@ -33,13 +33,16 @@ export function useAppGenerations(appId: string) {
   const queryKey = ["appGenerations", appId];
 
   const fetchAndProcessGenerations = async (): Promise<GenerationWithSignedUrls[]> => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return []; // Return empty if no user is logged in
 
     // 1. Fetch the raw generation data (with image paths)
     const { data: generations, error } = await supabase
       .from("jobs")
-      .select(`
+      .select(
+        `
         id,
         parameters,
         job_output_images!inner (
@@ -47,7 +50,8 @@ export function useAppGenerations(appId: string) {
             image_url
           )
         )
-      `)
+      `,
+      )
       .eq("user_id", user.id)
       .eq("ai_app_id", appId)
       .eq("job_status", "succeeded")
@@ -97,13 +101,13 @@ export function useAppGenerations(appId: string) {
           outputImageUrls: outputImagePaths,
           inputImageUrl: inputSignedUrl,
         };
-      })
+      }),
     );
-    
+
     return processedGenerations;
   };
 
-   return useQuery({
+  return useQuery({
     queryKey,
     queryFn: fetchAndProcessGenerations,
     staleTime: 5 * 60 * 1000,

@@ -14,7 +14,7 @@ export function UserSectionClient() {
   // If user is not logged in, show login/signup buttons
   if (!user) {
     return (
-      <div className="flex gap-4 shrink-0 items-center">
+      <div className="flex shrink-0 items-center gap-4">
         <NavbarButton href="/auth/login" variant="secondary">
           Login
         </NavbarButton>
@@ -27,10 +27,10 @@ export function UserSectionClient() {
 
   // If user is logged in, show the existing authenticated UI
   return (
-    <div className="flex gap-4 shrink-0 items-center">
+    <div className="flex shrink-0 items-center gap-4">
       {navInfo?.subscription_tier === "free" && (
         <Link href="/pricing">
-          <button className="w-[108px] h-8 bg-black/20 border border-[#D9E825]/30 shadow-[0px_0px_8px_rgba(217,232,37,0.38)] rounded-xl flex items-center justify-center font-bold text-[13px] leading-4 text-accent">
+          <button className="flex h-8 w-[108px] items-center justify-center rounded-xl border border-[#D9E825]/30 bg-black/20 text-[13px] font-bold leading-4 text-accent shadow-[0px_0px_8px_rgba(217,232,37,0.38)]">
             Upgrade
           </button>
         </Link>

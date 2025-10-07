@@ -14,15 +14,13 @@ export default async function Page() {
   }
 
   return (
-    <div className="relative w-full h-screen bg-black">
+    <div className="relative h-screen w-full bg-black">
       <div className="pt-20">
-        <h1 className="text-[60px] font-medium text-accent font-gothic">
-          Creative Hub
-        </h1>
+        <h1 className="font-gothic text-[60px] font-medium text-accent">Creative Hub</h1>
         <p className="w-[70vw] text-xl font-medium text-white">
-          Create professional-grade content in one click — from 4K images and
-          viral video effects to polished commercials, motion graphics, and even
-          interior renders. No editing, no hassle — just instant results.
+          Create professional-grade content in one click — from 4K images and viral video effects to
+          polished commercials, motion graphics, and even interior renders. No editing, no hassle —
+          just instant results.
         </p>
       </div>
 

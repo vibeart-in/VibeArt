@@ -40,10 +40,10 @@ export default function NotFound() {
         opacity={1}
         zIndex={10}
       />
-      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex flex-wrap justify-center gap-3 sm:gap-4 z-20 px-4">
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-wrap justify-center gap-3 px-4 sm:gap-4 md:bottom-8">
         <Button onClick={handleGoBack}>Go Back</Button>
         <Link href={"/library"}>
-        <Button variant="secondary">Gallery</Button>
+          <Button variant="secondary">Gallery</Button>
         </Link>
       </div>
     </section>

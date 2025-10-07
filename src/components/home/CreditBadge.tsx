@@ -18,26 +18,18 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
       {/* Badge Button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className={`relative flex items-center justify-center w-10 h-10 rounded-2xl border transition-colors
-          ${low ? "bg-red-600 border-red-500 text-white" : "bg-black border-white/10 text-white"}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-2xl border transition-colors ${low ? "border-red-500 bg-red-600 text-white" : "border-white/10 bg-black text-white"}`}
         whileHover={{
           scale: 1.08,
-          boxShadow: low
-            ? "0px 0px 12px rgba(255,0,0,0.6)"
-            : "0px 0px 12px rgba(217,232,37,0.5)",
+          boxShadow: low ? "0px 0px 12px rgba(255,0,0,0.6)" : "0px 0px 12px rgba(217,232,37,0.5)",
         }}
-        animate={
-          low
-            ? { scale: [1, 1.06, 1] }
-            : {}
-        }
+        animate={low ? { scale: [1, 1.06, 1] } : {}}
         transition={low ? { duration: 1.2, repeat: Infinity } : { duration: 0.2 }}
       >
-        <IconDiamondFilled className="w-5 h-5" />
+        <IconDiamondFilled className="h-5 w-5" />
         {/* Small pill badge */}
         <span
-          className={`absolute -top-1 -right-1 px-1 text-[10px] rounded-full font-bold
-            ${low ? "bg-white text-red-600" : "bg-accent text-black"}`}
+          className={`absolute -right-1 -top-1 rounded-full px-1 text-[10px] font-bold ${low ? "bg-white text-red-600" : "bg-accent text-black"}`}
         >
           {credits}
         </span>
@@ -51,7 +43,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-52 rounded-xl bg-black/90 border border-white/10 shadow-lg p-3 text-sm z-50"
+            className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-white/10 bg-black/90 p-3 text-sm shadow-lg"
           >
             <div className="flex items-center justify-between">
               <span className="text-white/80">Total Credits</span>
@@ -59,7 +51,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
             </div>
 
             <button
-              className="mt-3 w-full py-2 rounded-lg bg-accent text-black font-semibold hover:bg-accent/90 transition-colors"
+              className="mt-3 w-full rounded-lg bg-accent py-2 font-semibold text-black transition-colors hover:bg-accent/90"
               onClick={() => {
                 // 🔗 handle Buy More flow
                 alert("Redirect to Buy more credits!");

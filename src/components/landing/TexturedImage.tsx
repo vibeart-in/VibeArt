@@ -15,7 +15,7 @@ interface TexturedImageProps {
 export const TexturedImage: React.FC<TexturedImageProps> = ({
   src,
   alt = "Textured Image",
-	borderRadius = "0px",
+  borderRadius = "0px",
   baseFrequency = 0.05,
   numOctaves = 2,
   scale = 6,
@@ -63,7 +63,7 @@ export const TexturedImage: React.FC<TexturedImageProps> = ({
           width: "100%",
           height: "100%",
           objectFit: "cover",
-					borderRadius
+          borderRadius,
         }}
       />
     </div>

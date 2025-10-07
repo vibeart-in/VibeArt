@@ -1,6 +1,6 @@
 import { NodeParam } from "@/src/types/BaseType";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
-import ImageCard from "../ui/ImageCard";
+import ImageCard from "../ui/imageCard/ImageCard";
 import { motion, Variants } from "motion/react";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 
@@ -42,25 +42,23 @@ const AppGenerationCard = ({
   outputImageUrl,
 }: AppGenerationCardProps) => {
   // Filter out parameters where the fieldName is 'image'
-  const visibleParameters = parameters.filter(
-    (param) => param.fieldName.toLowerCase() !== "image"
-  );
+  const visibleParameters = parameters.filter((param) => param.fieldName.toLowerCase() !== "image");
 
   return (
     <motion.div
       initial="rest"
       whileHover="hover"
       animate="rest"
-      className="flex flex-col gap-0 p-6 w-full h-fit bg-[#111111] rounded-[40px] overflow-hidden"
+      className="flex h-fit w-full flex-col gap-0 overflow-hidden rounded-[40px] bg-[#111111] p-6"
     >
       {/* Top section with Images */}
-      <div className="flex gap-2 items-center justify-between w-full">
+      <div className="flex w-full items-center justify-between gap-2">
         {/* Input Section */}
-        <div className="w-full h-full flex flex-col gap-2">
+        <div className="flex h-full w-full flex-col gap-2">
           <p className="text-center text-neutral-400">Input</p>
           {inputImageUrl ? ( // Check if the URL exists
             <ImageCard
-              imageUrl={inputImageUrl}
+              mediaUrl={inputImageUrl}
               width={500}
               height={500}
               prompt="Input Image" // A more descriptive prompt
@@ -75,7 +73,7 @@ const AppGenerationCard = ({
         <ArrowRightIcon size={40} className="flex-shrink-0 text-neutral-500" />
 
         {/* Output Section */}
-        <div className="w-full h-full flex flex-col gap-2">
+        <div className="flex h-full w-full flex-col gap-2">
           <p className="text-center text-neutral-400">Output</p>
           {status === "pending" ? (
             // If the status is pending, show the loading skeleton
@@ -83,7 +81,7 @@ const AppGenerationCard = ({
           ) : outputImageUrl ? (
             // Otherwise, if it succeeded, show the image
             <ImageCard
-              imageUrl={outputImageUrl}
+              mediaUrl={outputImageUrl}
               width={500}
               height={500}
               prompt="Generated Output" // A more descriptive prompt
@@ -101,21 +99,17 @@ const AppGenerationCard = ({
       {visibleParameters.length > 0 && (
         <motion.div variants={paramsContainerVariants}>
           <div className="flex h-full flex-col justify-center gap-2 rounded-2xl bg-neutral-900/50 p-4">
-            <h3 className="text-center font-semibold text-neutral-300 mb-2">
-              Parameters
-            </h3>
+            <h3 className="mb-2 text-center font-semibold text-neutral-300">Parameters</h3>
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               {visibleParameters.map((param) => (
                 <div
                   key={param.nodeId + param.fieldName}
                   className="flex justify-between gap-2 border-b border-neutral-800 py-1"
                 >
-                  <span className="text-neutral-400 capitalize">
+                  <span className="capitalize text-neutral-400">
                     {param.description?.replace(/_/g, " ")}:
                   </span>
-                  <span className="font-medium text-neutral-200 truncate">
-                    {param.fieldValue}
-                  </span>
+                  <span className="truncate font-medium text-neutral-200">{param.fieldValue}</span>
                 </div>
               ))}
             </div>

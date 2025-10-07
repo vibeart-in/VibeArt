@@ -17,15 +17,30 @@ const SectionLoader = () => <div className="min-h-screen w-full" />;
 // --- DYNAMICALLY IMPORT "BELOW THE FOLD" COMPONENTS ---
 // `next/dynamic` creates a separate JavaScript chunk for each of these components.
 // The `loading` option specifies our placeholder to show while the chunk is downloaded.
-const PrivacySection = dynamic(() => import("../../components/landing/PrivacySection"), { loading: () => <SectionLoader /> });
-const EditSection = dynamic(() => import("../../components/landing/EditSection"), { loading: () => <SectionLoader /> });
-const EditBranding = dynamic(() => import("../../components/landing/EditBranding"), { loading: () => <SectionLoader /> });
-const EditShowcase = dynamic(() => import("../../components/landing/EditShowcase"), { loading: () => <SectionLoader /> });
-const Takecontrol = dynamic(() => import("../../components/landing/Takecontrol"), { loading: () => <SectionLoader /> });
-const UpscaleSection = dynamic(() => import("../../components/landing/UpscaleSection"), { loading: () => <SectionLoader /> });
-const ContactUs = dynamic(() => import("../../components/landing/ContactUs"), { loading: () => <SectionLoader /> });
-const EndSection = dynamic(() => import("../../components/landing/EndSection"), { loading: () => <SectionLoader /> });
-
+const PrivacySection = dynamic(() => import("../../components/landing/PrivacySection"), {
+  loading: () => <SectionLoader />,
+});
+const EditSection = dynamic(() => import("../../components/landing/EditSection"), {
+  loading: () => <SectionLoader />,
+});
+const EditBranding = dynamic(() => import("../../components/landing/EditBranding"), {
+  loading: () => <SectionLoader />,
+});
+const EditShowcase = dynamic(() => import("../../components/landing/EditShowcase"), {
+  loading: () => <SectionLoader />,
+});
+const Takecontrol = dynamic(() => import("../../components/landing/Takecontrol"), {
+  loading: () => <SectionLoader />,
+});
+const UpscaleSection = dynamic(() => import("../../components/landing/UpscaleSection"), {
+  loading: () => <SectionLoader />,
+});
+const ContactUs = dynamic(() => import("../../components/landing/ContactUs"), {
+  loading: () => <SectionLoader />,
+});
+const EndSection = dynamic(() => import("../../components/landing/EndSection"), {
+  loading: () => <SectionLoader />,
+});
 
 const Page = () => {
   // --- DEFINE ANIMATION VARIANTS ---
@@ -46,13 +61,13 @@ const Page = () => {
 
   return (
     <main>
-      <div className="relative smooth-scroll overflow-hidden">
+      <div className="smooth-scroll relative overflow-hidden">
         {/* === PART 1: STATIC CONTENT (LOADS IMMEDIATELY) === */}
         <Hero />
         <div className="relative">
-          <div className="w-screen h-56 bg-gradient-to-t from-black to-transparent z-10"></div>
+          <div className="z-10 h-56 w-screen bg-gradient-to-t from-black to-transparent"></div>
           <RaycastComponent />
-          <div className="w-screen h-56 bg-gradient-to-t from-[#0a0b08] to-black z-10"></div>
+          <div className="z-10 h-56 w-screen bg-gradient-to-t from-[#0a0b08] to-black"></div>
         </div>
 
         {/* === PART 2: LAZY-LOADED & ANIMATED CONTENT === */}
@@ -127,7 +142,7 @@ const Page = () => {
         >
           <ContactUs />
         </motion.div>
-        
+
         <motion.div
           variants={sectionVariants}
           initial="hidden"

@@ -8,11 +8,7 @@ interface GlassModalProps {
   className?: string;
 }
 
-const GlassPaneBG: React.FC<GlassModalProps> = ({
-  children,
-  paneWidth = 40,
-  className = "",
-}) => {
+const GlassPaneBG: React.FC<GlassModalProps> = ({ children, paneWidth = 40, className = "" }) => {
   const [paneCount, setPaneCount] = useState(0);
   const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,29 +38,28 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
     "backdrop-blur-[20px]",
   ].join(" ");
 
-  const glassPanes = mounted ? Array.from({ length: paneCount }, (_, index) => {
-    return (
-      <li
-        key={index}
-        // CRITICAL CHANGE: We use `h-full` to make the pane stretch
-        // to the height of its parent `<ul>`. No inline style for height.
-        className={`${glassItemClasses} h-full`}
-        style={{ width: `${paneWidth}px` }}
-      ></li>
-    );
-  }) : [];
+  const glassPanes = mounted
+    ? Array.from({ length: paneCount }, (_, index) => {
+        return (
+          <li
+            key={index}
+            // CRITICAL CHANGE: We use `h-full` to make the pane stretch
+            // to the height of its parent `<ul>`. No inline style for height.
+            className={`${glassItemClasses} h-full`}
+            style={{ width: `${paneWidth}px` }}
+          ></li>
+        );
+      })
+    : [];
 
   return (
     // 1. The main container is `relative` and its height is determined
     //    by the `children` inside it.
-    <div
-      ref={containerRef}
-      className={`relative w-full  ${className}`}
-    >
+    <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* 2. The glass panes are in an absolute-positioned `<ul>` that stretches
           to the full size of the relative parent (`inset-0` is a shortcut
            for top/right/bottom/left-0). */}
-      <ul className="absolute inset-0 flex z-0" aria-hidden="true">
+      <ul className="absolute inset-0 z-0 flex" aria-hidden="true">
         {glassPanes}
       </ul>
 
