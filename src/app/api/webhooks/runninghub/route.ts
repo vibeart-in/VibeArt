@@ -2,6 +2,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import path from "path";
+import sharp from "sharp";
 
 const getSupabaseAdmin = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,14 +37,16 @@ export async function POST(req: Request) {
     console.log(`[RunningHub Webhook] Received for jobId: ${jobId}`);
 
     // Get the job from our database to find the RunningHub taskId (stored as prediction_id)
-    const { data: currentJob, error: jobError } = await supabaseAdmin
+    const { data: currentJob, error: jobFetchError } = await supabaseAdmin
       .from("jobs")
-      .select("job_status")
+      .select("job_status, user_id")
       .eq("id", jobId)
       .single();
 
-    if (jobError || !currentJob) {
-      throw new Error(`Job with ID ${jobId} not found.`);
+    if (jobFetchError) {
+      console.error(`Job lookup failed for ${jobId}:`, jobFetchError.message || jobFetchError);
+      // If job not found, respond 404 (do not proceed)
+      return NextResponse.json({ detail: "Job not found" }, { status: 404 });
     }
 
     if (currentJob && ["succeeded", "failed"].includes(currentJob.job_status)) {
@@ -56,7 +59,8 @@ export async function POST(req: Request) {
     }
 
     if (eventData.msg === "success") {
-      await handleSuccessfulPrediction(jobId, fileUrls, supabaseAdmin);
+      const userId: string = currentJob.user_id;
+      await handleSuccessfulPrediction(jobId, fileUrls, supabaseAdmin, userId);
     }
 
     return NextResponse.json({ detail: "Webhook processed successfully" }, { status: 200 });
@@ -89,72 +93,84 @@ async function handleFailedPrediction(
   }
 }
 
+async function processAndStoreMedia(
+  mediaUrl: string,
+  index: number,
+  userId: string,
+  jobId: string,
+  supabaseAdmin: SupabaseClient,
+): Promise<{ imageUrl: string; thumbnailUrl: string }> {
+  // Derive a base file name
+  const urlPath = new URL(mediaUrl).pathname;
+  const ext = path.extname(urlPath) || ".webp";
+  const baseFileName = `${index}${ext}`;
+
+  // Define structured paths for original and thumbnail
+  const originalFilePath = `${userId}/${jobId}/${baseFileName}`;
+  const thumbnailFilePath = `${userId}/${jobId}/thumbnail/${baseFileName}`;
+
+  try {
+    // 1. Download the remote file into a buffer
+    const response = await fetch(mediaUrl);
+    if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
+    const contentType = response.headers.get("content-type") || "image/webp";
+
+    // 2. Generate thumbnail buffer using sharp
+    const thumbnailBuffer = await sharp(imageBuffer)
+      .resize({ width: 256 }) // Resize to 256px width, auto height
+      .webp({ quality: 80 }) // Convert to WebP for efficiency
+      .toBuffer();
+
+    // 3. Upload both files in parallel
+    const [originalUploadResult, thumbnailUploadResult] = await Promise.all([
+      supabaseAdmin.storage.from("generated-media").upload(originalFilePath, imageBuffer, {
+        contentType,
+        upsert: true,
+      }),
+      supabaseAdmin.storage.from("generated-media").upload(thumbnailFilePath, thumbnailBuffer, {
+        contentType: "image/webp",
+        upsert: true,
+      }),
+    ]);
+
+    if (originalUploadResult.error) throw originalUploadResult.error;
+    if (thumbnailUploadResult.error) throw thumbnailUploadResult.error;
+
+    // 4. Return the public paths of the uploaded files
+    return {
+      imageUrl: originalUploadResult.data.path,
+      thumbnailUrl: thumbnailUploadResult.data.path,
+    };
+  } catch (error: any) {
+    console.error(`❌ Failed to process file ${index} for job ${jobId}. URL: ${mediaUrl}`, error);
+    throw error;
+  }
+}
+
 async function handleSuccessfulPrediction(
   jobId: string,
-  fileUrl: string[],
+  fileUrls: string[],
   supabaseAdmin: SupabaseClient,
+  userId: string,
 ) {
-  if (fileUrl.length === 0) {
+  if (fileUrls.length === 0) {
     console.warn(`Job ${jobId} succeeded but had no output. Marking as failed.`);
     throw new Error("Prediction succeeded but returned no output images.");
   }
 
-  const downloadAndStoreMedia = async (mediaUrl: string, index: number): Promise<string> => {
-    // Derive extension from URL (fallback to .bin)
-    const urlPath = new URL(mediaUrl).pathname;
-    const ext = path.extname(urlPath) || ".bin";
-    const filename = `${jobId}-${index}${ext}`;
-
-    try {
-      // 1. Download the remote file
-      const response = await fetch(mediaUrl);
-      if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
-      if (!response.body) throw new Error("Response body is null.");
-
-      // Detect MIME type from response headers
-      const contentType = response.headers.get("content-type") || "application/octet-stream";
-
-      // 2. Generate a signed upload URL (true streaming, no re-encoding)
-      const { data, error: signedUrlError } = await supabaseAdmin.storage
-        .from("generated-images")
-        .createSignedUploadUrl(filename);
-
-      if (signedUrlError) throw signedUrlError;
-
-      // 3. Pipe stream directly to Supabase Storage (no buffering)
-      const uploadResponse = await fetch(data.signedUrl, {
-        method: "PUT",
-        headers: { "Content-Type": contentType },
-        body: response.body,
-        duplex: "half", // Required in Node for streaming PUT
-      });
-
-      if (!uploadResponse.ok) throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-
-      // 4. Construct the public URL
-      const {
-        data: { publicUrl },
-      } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
-
-      return publicUrl;
-    } catch (error: any) {
-      console.error(`❌ Failed to process file ${index} for job ${jobId}. URL: ${mediaUrl}`, error);
-      throw error;
-    }
-  };
-
-  // This part is now safe because imageUrls is GUARANTEED to be an array.
-  const downloadPromises = fileUrl.map((url: string, index: number) =>
-    downloadAndStoreMedia(url, index),
+  // Create an array of promises, each processing and storing one media file
+  const processingPromises = fileUrls.map((url, index) =>
+    processAndStoreMedia(url, index, userId, jobId, supabaseAdmin),
   );
 
-  const supabaseImageUrls = await Promise.all(downloadPromises);
+  // Await all promises to complete
+  const imageRecords = await Promise.all(processingPromises);
 
-  await supabaseAdmin.functions.invoke("fetch-and-upload");
-
+  // Call the updated database function with the structured data
   const { error } = await supabaseAdmin.rpc("process_successful_job", {
     p_job_id: jobId,
-    p_image_urls: supabaseImageUrls,
+    p_images_data: imageRecords, // <-- Pass the array of objects
   });
 
   if (error) {
@@ -162,6 +178,6 @@ async function handleSuccessfulPrediction(
   }
 
   console.log(
-    `Successfully processed and stored ${supabaseImageUrls.length} image(s) for job ${jobId}.`,
+    `Successfully processed and stored ${imageRecords.length} image(s) and thumbnail(s) for job ${jobId}.`,
   );
 }

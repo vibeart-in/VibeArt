@@ -5,8 +5,7 @@ import { createClient } from "@/src/lib/supabase/client";
 import { useState } from "react";
 import Masonry from "react-masonry-css";
 import AppCard from "./AppCard";
-import { getTagColor } from "@/src/lib/utils";
-
+import { getTagColor } from "@/src/utils/server/utils";
 interface AiApp {
   id: string;
   app_name: string;

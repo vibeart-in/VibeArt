@@ -1,5 +1,5 @@
+import { HistoryItem } from "@/src/types/BaseType";
 import { format, isToday, isYesterday, isThisWeek, parseISO } from "date-fns";
-import { HistoryItem } from "../types/BaseType";
 
 // This function will categorize a date string into human-readable groups.
 export const formatDateGroup = (dateStr: string): string => {

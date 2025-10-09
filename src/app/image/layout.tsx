@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import GenerateHistory from "@/src/components/home/GenerateHistory";
 import MainNavbar from "@/src/components/home/MainNavbar";
+import GenerationHistory from "@/src/components/home/GenerationHistory";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -21,7 +21,7 @@ export default function ImageLayout({
       <nav className="">
         <MainNavbar />
       </nav>
-      <GenerateHistory />
+      <GenerationHistory />
       <section className="h-full w-full">{children}</section>
     </main>
   );

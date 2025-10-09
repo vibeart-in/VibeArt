@@ -9,7 +9,7 @@ interface HistoryCardProps {
   id: string;
   title: string;
   prompt: string;
-  imageUrl: string;
+  imageUrl: string | null;
   isActive?: boolean;
   conversationType: ConversationType;
   appId?: string;
@@ -32,6 +32,9 @@ const overlayVariants: Variants = {
   rest: { opacity: 0.1, boxShadow: "inset 0 6px 24px rgba(0,0,0,0.5)" },
   hover: { opacity: 0, transition: { duration: 0.25, ease: "easeOut" } },
 };
+
+// Helper to detect if the URL is a video file
+const isVideoUrl = (url: string) => /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
 
 const HistoryCard: React.FC<HistoryCardProps> = ({
   id,
@@ -74,15 +77,38 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           className={`relative h-[55px] w-[55px] overflow-hidden rounded-2xl border-2 bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)] ring-1 ring-white/10 transition-colors duration-200 ${isActive ? "border-accent" : "border-transparent"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20`}
           tabIndex={0}
         >
-          <Image
-            src={imageUrl}
-            alt={prompt}
-            width={55}
-            height={55}
-            sizes="55px"
-            className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${hovered ? "scale-[1.06]" : "scale-100"} `}
-            priority={false}
-          />
+          {imageUrl ? (
+            isVideoUrl(imageUrl) ? (
+              <video
+                src={imageUrl}
+                muted
+                loop
+                playsInline
+                className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${
+                  hovered ? "scale-[1.06]" : "scale-100"
+                }`}
+              />
+            ) : (
+              <Image
+                src={imageUrl}
+                alt={prompt}
+                width={55}
+                height={55}
+                sizes="55px"
+                className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${
+                  hovered ? "scale-[1.06]" : "scale-100"
+                }`}
+                priority={false}
+              />
+            )
+          ) : (
+            <div
+              className={`absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-900 transition-transform duration-300 ease-out ${
+                hovered ? "scale-[1.06]" : "scale-100"
+              }`}
+            />
+          )}
+
           <motion.div
             className="pointer-events-none absolute inset-0 rounded-2xl"
             variants={overlayVariants}

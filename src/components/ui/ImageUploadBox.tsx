@@ -1,19 +1,16 @@
 // src/components/ui/ImageUploadBox.tsx
 "use client";
-import { uploadImage } from "@/src/lib/UploadImage";
+import { uploadImage } from "@/src/utils/server/UploadImage";
 import { ImagesIcon, XIcon } from "lucide-react";
 import Image from "next/image";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, memo } from "react";
 
 interface ImageUploadBoxProps {
-  // NEW: Callbacks to inform the parent of changes
   onImageUploaded: (paths: { permanentPath: string; displayUrl: string }) => void;
   onImageRemoved: () => void;
-
-  // NEW: Prop to set an initial image from the parent
   initialImage?: { permanentPath: string; displayUrl: string } | null;
-
   imageDescription?: string;
+  resetOnSuccess?: boolean;
 }
 
 const ImageUploadBox = ({
@@ -21,24 +18,20 @@ const ImageUploadBox = ({
   onImageRemoved,
   initialImage = null,
   imageDescription = "Add Image",
+  resetOnSuccess = false,
 }: ImageUploadBoxProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-
-  // This is the key change: the component now owns its image state
   const [image, setImage] = useState(initialImage);
-  console.log(image);
 
-  // Effect to sync with the parent if the initial image prop changes
   useEffect(() => {
     setImage(initialImage);
   }, [initialImage]);
 
   const handleClick = () => {
-    if (isUploading || image) return; // Don't re-trigger if uploading or image exists
+    if (isUploading || image) return;
     inputRef.current?.click();
   };
 
@@ -49,18 +42,29 @@ const ImageUploadBox = ({
     setError(null);
     setIsUploading(true);
     setUploadProgress(0);
-    setImage(null);
 
     try {
-      // The upload function now calls our internal success/error handlers
       await uploadImage({
         file,
         onProgress: (p) => setUploadProgress(Number(p.toFixed(0))),
         onSuccess: (permanentPath, displayUrl) => {
           const newImage = { permanentPath, displayUrl };
-          setImage(newImage);
-          onImageUploaded(newImage); // Inform the parent
+
+          // Inform the parent first
+          onImageUploaded(newImage);
           setIsUploading(false);
+
+          // THE FIX: Conditionally reset the internal state
+          if (resetOnSuccess) {
+            setImage(null);
+            // Also clear the file input so the same file can be re-selected immediately
+            if (inputRef.current) {
+              inputRef.current.value = "";
+            }
+          } else {
+            // This is for the single-image uploader behavior
+            setImage(newImage);
+          }
         },
         onError: (err) => {
           setError(`Upload failed: ${err.message}`);
@@ -74,10 +78,9 @@ const ImageUploadBox = ({
   };
 
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation(); // Prevent the main div's click handler
+    e.stopPropagation();
     setImage(null);
-    onImageRemoved(); // Inform the parent
-    // Also clear the file input so the same file can be re-selected
+    onImageRemoved();
     if (inputRef.current) {
       inputRef.current.value = "";
     }
@@ -147,4 +150,4 @@ const ImageUploadBox = ({
   );
 };
 
-export default ImageUploadBox;
+export default memo(ImageUploadBox);

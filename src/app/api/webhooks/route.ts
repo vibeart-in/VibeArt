@@ -3,6 +3,8 @@
 import { NextResponse } from "next/server";
 import { Prediction, validateWebhook } from "replicate";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import path from "path";
+import sharp from "sharp";
 
 const getSupabaseAdmin = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -39,11 +41,18 @@ export async function POST(request: Request) {
     console.log(prediction);
     console.log(`Received webhook for job ${jobId} with status: ${prediction.status}`);
 
-    const { data: currentJob } = await supabaseAdmin
+    // Fetch the job record including user_id so we never expose user_id in the webhook
+    const { data: currentJob, error: jobFetchError } = await supabaseAdmin
       .from("jobs")
-      .select("job_status")
+      .select("job_status, user_id")
       .eq("id", jobId)
       .single();
+
+    if (jobFetchError) {
+      console.error(`Job lookup failed for ${jobId}:`, jobFetchError.message || jobFetchError);
+      // If job not found, respond 404 (do not proceed)
+      return NextResponse.json({ detail: "Job not found" }, { status: 404 });
+    }
 
     if (currentJob && ["succeeded", "failed"].includes(currentJob.job_status)) {
       console.log(`Job ${jobId} already processed. Ignoring duplicate webhook.`);
@@ -57,15 +66,24 @@ export async function POST(request: Request) {
     }
 
     if (prediction.status === "succeeded") {
-      await handleSuccessfulPrediction(jobId, prediction, supabaseAdmin);
+      let imageUrls: string[] = [];
+      if (Array.isArray(prediction.output)) {
+        imageUrls = prediction.output;
+      } else if (typeof prediction.output === "string") {
+        imageUrls = [prediction.output];
+      }
+
+      // Pass the user_id from the DB (NOT from the webhook)
+      const userId: string = currentJob.user_id;
+      await handleSuccessfulPrediction(jobId, imageUrls, supabaseAdmin, userId);
     }
 
     return NextResponse.json({ detail: "Webhook processed successfully" }, { status: 200 });
   } catch (error: any) {
-    console.error(`Error processing webhook for job ${jobId}:`, error.message);
+    console.error(`Error processing webhook for job ${jobId}:`, error?.message || error);
     const supabaseAdmin = getSupabaseAdmin();
-    await handleFailedPrediction(jobId, error.message, supabaseAdmin);
-    return NextResponse.json({ detail: error.message }, { status: 500 });
+    await handleFailedPrediction(jobId, error?.message ?? "internal error", supabaseAdmin);
+    return NextResponse.json({ detail: error?.message ?? "internal error" }, { status: 500 });
   }
 }
 
@@ -74,86 +92,99 @@ async function handleFailedPrediction(
   errorMessage: string,
   supabaseAdmin: SupabaseClient,
 ) {
-  // Update job status in the database
   await supabaseAdmin
     .from("jobs")
     .update({ job_status: "failed", error_message: errorMessage })
     .eq("id", jobId);
 
-  // Call the database function to refund credits
   const { error: refundError } = await supabaseAdmin.rpc("refund_job_credits", {
     p_job_id: jobId,
   });
   if (refundError) {
     console.error(`CRITICAL: Failed to refund credits for job ${jobId}:`, refundError.message);
-    // Here you should add monitoring/alerting
   } else {
     console.log(`Successfully refunded credits for failed job ${jobId}.`);
   }
 }
 
+async function processAndStoreMedia(
+  mediaUrl: string,
+  index: number,
+  userId: string,
+  jobId: string,
+  supabaseAdmin: SupabaseClient,
+): Promise<{ imageUrl: string; thumbnailUrl: string }> {
+  // Derive a base file name
+  const urlPath = new URL(mediaUrl).pathname;
+  const ext = path.extname(urlPath) || ".webp";
+  const baseFileName = `${index}${ext}`;
+
+  // Define structured paths for original and thumbnail
+  const originalFilePath = `${userId}/${jobId}/${baseFileName}`;
+  const thumbnailFilePath = `${userId}/${jobId}/thumbnail/${baseFileName}`;
+
+  try {
+    // 1. Download the remote file into a buffer
+    const response = await fetch(mediaUrl);
+    if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
+    const contentType = response.headers.get("content-type") || "image/webp";
+
+    // 2. Generate thumbnail buffer using sharp
+    const thumbnailBuffer = await sharp(imageBuffer)
+      .resize({ width: 256 }) // Resize to 256px width, auto height
+      .webp({ quality: 80 }) // Convert to WebP for efficiency
+      .toBuffer();
+
+    // 3. Upload both files in parallel
+    const [originalUploadResult, thumbnailUploadResult] = await Promise.all([
+      supabaseAdmin.storage.from("generated-media").upload(originalFilePath, imageBuffer, {
+        contentType,
+        upsert: true,
+      }),
+      supabaseAdmin.storage.from("generated-media").upload(thumbnailFilePath, thumbnailBuffer, {
+        contentType: "image/webp",
+        upsert: true,
+      }),
+    ]);
+
+    if (originalUploadResult.error) throw originalUploadResult.error;
+    if (thumbnailUploadResult.error) throw thumbnailUploadResult.error;
+
+    // 4. Return the public paths of the uploaded files
+    return {
+      imageUrl: originalUploadResult.data.path,
+      thumbnailUrl: thumbnailUploadResult.data.path,
+    };
+  } catch (error: any) {
+    console.error(`❌ Failed to process file ${index} for job ${jobId}. URL: ${mediaUrl}`, error);
+    throw error;
+  }
+}
+
 async function handleSuccessfulPrediction(
   jobId: string,
-  prediction: Prediction,
+  fileUrls: string[],
   supabaseAdmin: SupabaseClient,
+  userId: string,
 ) {
-  // --- NORMALIZATION STEP ---
-  // This is the key fix. We ensure imageUrls is always an array.
-  let imageUrls: string[] = [];
-  if (Array.isArray(prediction.output)) {
-    // Handle models that return an array of strings
-    imageUrls = prediction.output;
-  } else if (typeof prediction.output === "string") {
-    // Handle models that return a single string
-    imageUrls = [prediction.output];
-  }
-
-  // --- EDGE CASE HANDLING ---
-  // If after normalization, there are no images, the job has failed.
-  if (imageUrls.length === 0) {
+  if (fileUrls.length === 0) {
     console.warn(`Job ${jobId} succeeded but had no output. Marking as failed.`);
-    // Re-use the failure logic. This will also trigger a refund if configured.
     throw new Error("Prediction succeeded but returned no output images.");
   }
 
-  // The rest of the function can now proceed with the guarantee that imageUrls is an array.
-  // The retry and streaming logic from before remains the same.
-
-  const downloadAndStoreImage = async (imageUrl: string, index: number): Promise<string> => {
-    const filename = `${prediction.id}-${index}.png`; // Using .png as a standard, Supabase handles content-type
-    try {
-      // Your retry helper function should be defined here or imported
-
-      const response = await fetch(imageUrl);
-      if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
-      if (!response.body) throw new Error("Response body is null.");
-
-      const { error: uploadError } = await supabaseAdmin.storage
-        .from("generated-images")
-        .upload(filename, response.body, { upsert: true, duplex: "half" });
-
-      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
-
-      const {
-        data: { publicUrl },
-      } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
-      return publicUrl;
-    } catch (error: any) {
-      console.error(`Failed to process image ${index} for job ${jobId}. URL: ${imageUrl}`, error);
-      throw error;
-    }
-  };
-
-  // This part is now safe because imageUrls is GUARANTEED to be an array.
-  const downloadPromises = imageUrls.map((url: string, index: number) =>
-    downloadAndStoreImage(url, index),
+  // Create an array of promises, each processing and storing one media file
+  const processingPromises = fileUrls.map((url, index) =>
+    processAndStoreMedia(url, index, userId, jobId, supabaseAdmin),
   );
 
-  const supabaseImageUrls = await Promise.all(downloadPromises);
+  // Await all promises to complete
+  const imageRecords = await Promise.all(processingPromises);
 
+  // Call the updated database function with the structured data
   const { error } = await supabaseAdmin.rpc("process_successful_job", {
     p_job_id: jobId,
-    p_image_urls: supabaseImageUrls,
+    p_images_data: imageRecords, // <-- Pass the array of objects
   });
 
   if (error) {
@@ -161,6 +192,6 @@ async function handleSuccessfulPrediction(
   }
 
   console.log(
-    `Successfully processed and stored ${supabaseImageUrls.length} image(s) for job ${jobId}.`,
+    `Successfully processed and stored ${imageRecords.length} image(s) and thumbnail(s) for job ${jobId}.`,
   );
 }

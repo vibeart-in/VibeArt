@@ -1,13 +1,14 @@
 "use client";
 import { Minus, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 interface AnimatedCounterProps {
   initialValue?: number;
   min?: number;
   max?: number;
   incrementStep?: number;
-  onChange?: (value: number) => void;
+  onChange?: (key: string, value: number) => void;
+  paramKey: string;
 }
 
 const AnimatedCounter = ({
@@ -16,6 +17,7 @@ const AnimatedCounter = ({
   max = 10,
   incrementStep = 1,
   onChange = () => {},
+  paramKey,
 }: AnimatedCounterProps) => {
   const [count, setCount] = useState<number>(initialValue);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -37,7 +39,7 @@ const AnimatedCounter = ({
     if (newValue <= max) {
       setIsAnimating(true);
       setCount(newValue);
-      onChange(newValue);
+      onChange(paramKey, newValue);
       setTimeout(() => setIsAnimating(false), 200);
     }
   };
@@ -48,12 +50,14 @@ const AnimatedCounter = ({
     if (newValue >= min) {
       setIsAnimating(true);
       setCount(newValue);
-      onChange(newValue);
+      onChange(paramKey, newValue);
       setTimeout(() => setIsAnimating(false), 200);
     }
   };
 
   const displayValue = count.toFixed(decimalPlaces);
+
+  console.log("AnimatedCounter render:", { count, initialValue });
 
   return (
     <div className="ml-2 flex flex-col items-center justify-center gap-4">
@@ -104,4 +108,4 @@ const AnimatedCounter = ({
   );
 };
 
-export default AnimatedCounter;
+export default memo(AnimatedCounter);

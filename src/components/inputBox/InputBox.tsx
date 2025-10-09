@@ -11,7 +11,7 @@ import { ReplicateParameters, ReplicateParametersHandle } from "./ReplicateParam
 import { RunninghubParameters, RunninghubParametersHandle } from "./RunninghubParameters";
 import GenerateButton from "../ui/GenerateButton";
 import { usePathname } from "next/navigation";
-import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon, SwapIcon } from "@phosphor-icons/react";
 import LoginModal from "../auth/LoginModal";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 
@@ -141,6 +141,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const handleGenerateClick = () => {
     if (mutation.isPending) return;
     let finalParameters;
+    let inputImagePermanentPaths;
     let promptText = "";
 
     if (selectedModel?.provider === "replicate") {
@@ -148,14 +149,20 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         console.error("Replicate parameters component is not ready.");
         return;
       }
-      finalParameters = replicateParamsRef.current.getValues();
+      const { values, inputImages } = replicateParamsRef.current.getValues();
+      console.log("Input Images Permanent Paths:", inputImages);
+      finalParameters = values;
+      inputImagePermanentPaths = inputImages;
       promptText = finalParameters.prompt || "";
     } else if (selectedModel?.provider === "running_hub") {
       if (!runninghubParamsRef.current) {
         console.error("Runninghub parameters component is not ready.");
         return;
       }
-      finalParameters = runninghubParamsRef.current.getValues();
+      const { values, inputImages } = runninghubParamsRef.current.getValues();
+      console.log("Input Images Permanent Paths:", inputImages);
+      finalParameters = values;
+      inputImagePermanentPaths = inputImages;
 
       const promptParam = finalParameters.find((p) => p.description === "prompt");
       promptText = promptParam?.fieldValue || "";
@@ -163,7 +170,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       setFormError(`Unsupported provider: ${selectedModel?.provider}`);
       return;
     }
-    console.log(finalParameters);
+    console.log("finalParameters", finalParameters);
 
     const { isValid, error } = validateAndSanitizePrompt(promptText);
     if (!isValid && error) {
@@ -179,10 +186,12 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
       {
         parameters: finalParameters,
         conversationId,
+        modelName: selectedModel.model_name,
         modelIdentifier: selectedModel.identifier,
         modelCredit: selectedModel.cost,
         modelProvider: selectedModel.provider,
         conversationType: conversationType,
+        inputImagePermanentPaths,
       },
       {
         onSuccess: () => {
@@ -206,7 +215,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   return (
     <>
-      <div className="relative mb-2 w-fit rounded-[28px] bg-[#111111]/80 p-2 backdrop-blur-md md:p-3">
+      <div className="relative mb-2 w-fit rounded-[28px] border border-white/10 bg-[#0C0C0C]/80 p-2 backdrop-blur-lg md:p-3">
         <AnimatePresence>
           {isDialogOpen && (
             <motion.div
@@ -217,14 +226,14 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               }}
               animate={{
                 opacity: 1,
-                height: "24rem",
+                height: "32rem",
               }}
               exit={{
                 opacity: 0,
                 height: 0,
               }}
               transition={{
-                duration: 0.4,
+                duration: 0.5,
                 ease: "easeInOut",
               }}
             >
@@ -246,7 +255,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             </motion.div>
           )}
         </AnimatePresence>
-        <section className="flex gap-4">
+        <section className="flex justify-between gap-4">
           {selectedModel ? (
             <div
               onClick={handleCardClick}
@@ -268,7 +277,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                   src={selectedModel.cover_image}
                   alt={selectedModel.model_name}
                   width={150}
-                  height={95}
+                  height={150}
                 />
               )}
 
@@ -280,7 +289,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                 <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-                  <PencilSimpleIcon size={20} weight="fill" />
+                  <SwapIcon size={20} weight="bold" />
                 </span>
               </div>
             </div>
@@ -305,12 +314,14 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                   <ReplicateParameters
                     // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                     parameters={selectedModel?.parameters}
+                    modelName={selectedModel?.model_name}
                     ref={replicateParamsRef}
                   />
                 ) : (
                   <RunninghubParameters
                     // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
                     parameters={selectedModel?.parameters}
+                    modelName={selectedModel?.model_name}
                     ref={runninghubParamsRef}
                   />
                 )}

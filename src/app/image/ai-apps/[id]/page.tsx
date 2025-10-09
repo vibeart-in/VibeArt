@@ -7,7 +7,8 @@ import AppInputBox from "@/src/components/ai-apps/AppInputBox";
 import AppExampleGrid from "@/src/components/ai-apps/AppExampleGrid";
 import AppGenerationHistory from "@/src/components/ai-apps/AppGenerationHistory";
 import { createClient } from "@/src/lib/supabase/server";
-import { getTagColor } from "@/src/lib/utils";
+import { getTagColor } from "@/src/utils/server/utils";
+import { cn } from "@/src/lib/utils";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -55,9 +56,10 @@ export default async function Page({ params }: { params: { id: string } }) {
                 {app.tags?.map((tag: string, idx: number) => (
                   <p
                     key={idx}
-                    className={`h-fit w-fit rounded-full border border-accent/80 bg-[#1A1A1A] p-1.5 px-4 text-xs text-accent ${getTagColor(
-                      idx,
-                    )}`}
+                    className={cn(
+                      "h-fit w-fit rounded-full border border-accent/80 bg-[#1A1A1A] p-1.5 px-4 text-xs text-accent",
+                      getTagColor(idx),
+                    )}
                   >
                     {tag}
                   </p>
@@ -72,7 +74,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             {/* examples */}
             <div className="mr-8">
               <p className="mb-2">Examples:</p>
-              <AppExampleGrid images={app.examples_images || []} />
+              <AppExampleGrid images={(app.examples_images as string[]) || []} />
             </div>
           </div>
 

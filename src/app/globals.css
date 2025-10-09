@@ -226,17 +226,21 @@
   }
 }
 
+.animate-rainbow-flow {
+  animation: rainbow-flow 45s linear infinite;
+}
+
 @keyframes rainbow-flow {
   from {
     background-position:
-      50% 50%,
-      50% 50%;
+      350% 50%,
+      350% 50%;
   }
 
   to {
     background-position:
-      350% 50%,
-      350% 50%;
+      50% 50%,
+      50% 50%;
   }
 }
 
@@ -261,10 +265,6 @@
     opacity: 1;
     transform: scale(1.2);
   }
-}
-
-.animate-rainbow-flow {
-  animation: rainbow-flow 60s linear infinite;
 }
 
 .animate-shimmer {
@@ -571,4 +571,19 @@
   background-size: 200px 200px;
   background-repeat: repeat;
   filter: contrast(140%) brightness(110%);
+}
+
+.blob-rotating {
+  animation: fill 7s ease-out infinite;
+}
+
+@keyframes fill {
+  from {
+    top: 200px;
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    top: -50px;
+    transform: translateX(-50%) rotate(360deg);
+  }
 }

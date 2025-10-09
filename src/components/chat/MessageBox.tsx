@@ -1,7 +1,7 @@
 "use client";
 import ImageCard from "@/src/components/ui/imageCard/ImageCard";
 import { IconCopy, IconDiamondFilled } from "@tabler/icons-react";
-import { MessageType } from "@/src/types/BaseType";
+import { conversationData } from "@/src/types/BaseType";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -21,7 +21,7 @@ const getLoadingMessage = (status: string) => {
 };
 
 interface MessageBoxProps {
-  message: MessageType;
+  message: conversationData;
 }
 
 export default function MessageBox({ message }: MessageBoxProps) {
@@ -33,6 +33,7 @@ export default function MessageBox({ message }: MessageBoxProps) {
     userPrompt,
     credit_cost,
     input_images,
+    model_name,
   } = message;
 
   console.log(message);
@@ -69,7 +70,8 @@ export default function MessageBox({ message }: MessageBoxProps) {
               </p>
             </div>
             <p className="text-sm tracking-wide text-white/80">
-              <span className="font-medium">Model:</span> Image 2.1
+              <span className="font-medium">Model:</span>
+              {model_name}
             </p>
           </div>
         </div>

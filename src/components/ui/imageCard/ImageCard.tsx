@@ -2,9 +2,9 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { MediaCardView } from "./ImageCardView";
+import dynamic from "next/dynamic";
 import { MediaModal } from "./ImageModal";
 
-// Define the options for video playback
 export interface VideoOptions {
   autoPlay?: boolean;
   muted?: boolean;
@@ -14,15 +14,15 @@ export interface VideoOptions {
 }
 
 export interface ImageCardProps {
-  mediaUrl: string; // Renamed from imageUrl
+  mediaUrl: string;
+  thumbnailUrl?: string | null;
   prompt: string;
-  width: number; // Still useful as a fallback/placeholder
+  width: number;
   height: number;
-  sizes?: string;
-  isVideo?: boolean; // Explicitly tell the component it's a video
+  isVideo?: boolean;
   videoOptions?: {
-    card?: VideoOptions; // Specific options for the card view
-    modal?: VideoOptions; // Specific options for the modal view
+    card?: VideoOptions;
+    modal?: VideoOptions;
   };
 }
 
@@ -30,17 +30,18 @@ const DEFAULT_SIZES = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 
 const ImageCard = ({
   mediaUrl,
+  thumbnailUrl,
   prompt,
   width,
   height,
-  sizes = DEFAULT_SIZES,
   isVideo,
   videoOptions,
 }: ImageCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // const MediaModal = dynamic(() => import("./ImageModal"), { ssr: false, loading: () => <div /> });
 
   // Use the explicit isVideo prop if provided, otherwise detect automatically.
-  const isMediaVideo = isVideo ?? mediaUrl.endsWith(".mp4") ?? mediaUrl.endsWith(".webm");
+  const isMediaVideo = isVideo ?? /(?:\.mp4|\.webm)(?:\?|$)/i.test(mediaUrl);
 
   const openModal = useCallback(() => {
     setIsModalOpen(true);
@@ -55,32 +56,33 @@ const ImageCard = ({
   const cardContainerId = `card-container-${encodeURIComponent(mediaUrl)}`;
 
   return (
-    <>
+    <div>
       <MediaCardView
         mediaUrl={mediaUrl}
         altText={altText}
         width={width}
         height={height}
-        sizes={sizes}
         onOpen={openModal}
         cardContainerId={cardContainerId}
         isMediaVideo={isMediaVideo}
         videoOptions={videoOptions?.card}
+        thumbnailUrl={thumbnailUrl}
       />
-
-      <MediaModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        mediaUrl={mediaUrl}
-        prompt={prompt}
-        width={width}
-        height={height}
-        altText={altText}
-        cardContainerId={cardContainerId}
-        isMediaVideo={isMediaVideo}
-        videoOptions={videoOptions?.modal}
-      />
-    </>
+      {isModalOpen && (
+        <MediaModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          mediaUrl={mediaUrl}
+          prompt={prompt}
+          width={width}
+          height={height}
+          altText={altText}
+          cardContainerId={cardContainerId}
+          isMediaVideo={isMediaVideo}
+          videoOptions={videoOptions?.modal}
+        />
+      )}
+    </div>
   );
 };
 

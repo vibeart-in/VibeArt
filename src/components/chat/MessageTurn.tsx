@@ -2,18 +2,24 @@
 import { useState } from "react";
 import ImageCard from "@/src/components/ui/imageCard/ImageCard";
 import { IconCopy, IconDiamondFilled, IconCheck } from "@tabler/icons-react";
-import { MessageType } from "@/src/types/BaseType";
+import { conversationData } from "@/src/types/BaseType";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
+import ErrorBox from "./MessageError";
 
 // Helper function remains the same
 const getLoadingMessage = (status: string) => {
   switch (status) {
     case "pending":
       return "Queued...";
+    case "QUEUED":
+      return "Higres-Generation...";
     case "starting":
       return "Starting...";
     case "processing":
+      return "Generating...";
+    case "RUNNING":
       return "Generating...";
     default:
       return "Loading...";
@@ -21,12 +27,20 @@ const getLoadingMessage = (status: string) => {
 };
 
 interface MessageTurnProps {
-  message: MessageType;
+  message: conversationData;
 }
 
 // Renamed from MessageBox to MessageTurn
 export default function MessageTurn({ message }: MessageTurnProps) {
-  const { job_status, output_images, parameters, error_message, userPrompt, credit_cost } = message;
+  const {
+    job_status,
+    output_images,
+    parameters,
+    error_message,
+    userPrompt,
+    credit_cost,
+    model_name,
+  } = message;
 
   const numOfOutputs = parameters?.num_of_output || 1;
   const ratio = parameters?.aspect_ratio;
@@ -43,52 +57,62 @@ export default function MessageTurn({ message }: MessageTurnProps) {
     }
   };
 
+  console.log("OUT", output_images);
+
   return (
     <div className="flex">
-      <div>
-        <motion.div className="hide-scrollbar h-fit max-h-[200px] w-[300px] overflow-x-auto rounded-3xl bg-[#161618] p-4">
-          <p className="cursor-pointer text-base leading-relaxed">{userPrompt}</p>
-        </motion.div>
+      <div className="h-fit w-[320px] overflow-hidden rounded-3xl bg-[#111111]">
+        <div className="p-4">
+          <div className="hide-scrollbar max-h-[200px] w-full overflow-y-auto">
+            <p className="text-base font-light leading-relaxed text-white/95">{userPrompt}</p>
+          </div>
+        </div>
 
-        <div className="mt-2 flex w-full items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+        {/* Footer with a divider and inner glow */}
+        <div className="relative flex items-center justify-between bg-black/20 p-3 px-4">
+          <div className="absolute left-0 top-0 h-[1px] w-full bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
+
+          {/* Left side: Copy & Credits */}
+          <div className="flex items-center gap-4">
             <div
               onClick={handleCopy}
-              className="custom-box relative flex cursor-pointer items-center justify-center"
+              title="Copy prompt"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {copied ? (
                   <motion.div
                     key="check"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   >
                     <IconCheck className="h-4 w-4 text-green-400" />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="copy"
-                    initial={{ scale: 0.8, opacity: 0 }}
+                    initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
                   >
-                    <IconCopy className="h-4 w-4 text-white/80" />
+                    <IconCopy className="h-4 w-4 text-white/70 transition-colors hover:text-accent" />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <p className="custom-box flex items-center gap-2 text-xs font-semibold text-white/80">
-              <IconDiamondFilled className="h-4 w-4" />
+            <p className="flex select-none items-center gap-1.5 text-xs font-medium text-white/70">
+              <IconDiamondFilled className="h-4 w-4 text-accent/80" />
               {credit_cost}
             </p>
           </div>
 
-          <p className="text-sm tracking-wide text-white/80">
-            <span className="font-medium">Model:</span> Image 2.1
+          {/* Right side: Model Name */}
+          <p className="text-sm tracking-wide text-white/70">
+            <span className="font-semibold">{model_name}</span>
           </p>
         </div>
       </div>
@@ -97,26 +121,35 @@ export default function MessageTurn({ message }: MessageTurnProps) {
         <div className="flex flex-wrap gap-4">
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image) => (
-              <div key={image.id} className="max-w-[350px]">
-                <ImageCard mediaUrl={image.imageUrl} width={800} height={800} prompt={userPrompt} />
+              <div key={image.id} className="max-w-[500px]">
+                <ImageCard
+                  thumbnailUrl={image.thumbnailUrl}
+                  mediaUrl={image.imageUrl}
+                  width={800}
+                  height={800}
+                  prompt={userPrompt}
+                />
               </div>
             ))
           ) : job_status === "pending" ||
             job_status === "processing" ||
+            job_status === "QUEUED" ||
+            job_status === "RUNNING" ||
             job_status === "starting" ? (
             [...Array(numOfOutputs)].map((_, index) => (
               <ImageCardLoading
                 key={index}
                 ratio={ratio}
-                width={360}
+                width={500}
                 loadingText={getLoadingMessage(job_status)}
-                variant="cool"
+                variant="warm"
               />
             ))
           ) : job_status === "failed" ? (
-            <p className="max-w-[350px] font-semibold text-red-500">
-              ❌ Generation failed: {error_message || "Unknown error."}
-            </p>
+            <ErrorBox
+              src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/chibi_anime_girl_bowing_polite.webp"
+              error={error_message || "Unknown error."}
+            />
           ) : null}
         </div>
       </div>

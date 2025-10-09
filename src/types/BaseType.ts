@@ -1,41 +1,11 @@
-// export interface MessageType {
-//   id: string;
-//   userPrompt: string;
-//   output_images: { imageUrl: string }[];
-//   jobId?: string | null;
-//   input_images?: { imageUrl: string }[];
-//   job_status:
-//     | "pending"
-//     | "processing"
-//     | "succeeded"
-//     | "failed"
-//     | "starting"
-//     | null;
-//   parameters?: any;
-//   credit_cost: number;
-//   error_message?: string | null;
-// }
-
 import { Database } from "@/supabase/database.types";
 
 // Your existing MessageType
-export interface MessageType {
-  id: string;
-  userPrompt: string;
-  input_images: { id: string; imageUrl: string }[];
-  output_images: { id: string; imageUrl: string }[];
-  jobId: string | null;
-  job_status: "pending" | "starting" | "processing" | "succeeded" | "failed" | null;
-  parameters: any;
-  credit_cost: number;
-  error_message: string | null;
-}
 
 // The new type for a group
 export interface MessageGroupType {
-  id: string; // A unique ID for the group
-  input_images: { id: string; imageUrl: string }[];
-  turns: MessageType[]; // The array of messages within this group
+  input_images: conversationImageObject[];
+  turns: conversationData[]; // The array of messages within this group
 }
 
 export type SchemaParam = {
@@ -86,26 +56,20 @@ export interface HistoryItem {
   id: string;
   imageUrl: string;
   title: string;
-  prompt: string;
   created_at: string;
   appId?: string;
+  conversation_type: ConversationType;
 }
 
-export interface ExampleImageType {
-  id: number;
-  media_url: string;
-  prompt: string;
-  media_type: "image" | "video";
-  showcase_for: ConversationType;
-  width?: number;
-  height?: number;
-}
+export type ExampleImageType =
+  Database["public"]["Functions"]["get_example_generations"]["Returns"][number];
 
 export enum ConversationType {
   GENERATE = "generate",
   EDIT = "edit",
   BOTH = "both",
   APP = "app", // ✅ changed from "ai-apps" to "app"
+  AIAPP = "ai-apps", // ✅ changed from "ai-apps" to "app"
   VIDEO = "video",
   ADVANCE = "advance_generate",
 }
@@ -121,3 +85,30 @@ export interface ImageCard3DType {
   topImageScale?: number;
   fontSize?: number;
 }
+
+export type conversationImageObject = {
+  id: string;
+  imageUrl: string;
+  thumbnailUrl?: string | null;
+};
+
+export type conversationData = {
+  credit_cost: number;
+  error_message: string | null;
+  id: string;
+  input_images: conversationImageObject[];
+  job_status:
+    | "pending"
+    | "starting"
+    | "processing"
+    | "succeeded"
+    | "failed"
+    | "QUEUED"
+    | "RUNNING"
+    | null;
+  jobId: string | null;
+  output_images: conversationImageObject[];
+  parameters: InputBoxParameter;
+  userPrompt: string;
+  model_name: string;
+};

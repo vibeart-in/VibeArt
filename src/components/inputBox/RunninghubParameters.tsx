@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { IconTerminal } from "@tabler/icons-react";
@@ -29,58 +30,165 @@ import {
 import { DotsThreeVerticalIcon, MinusCircleIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { Switch } from "../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import ImageUploadBox from "../ui/ImageUploadBox";
+import { ImageObject } from "./ReplicateParameters";
+import { DicesIcon } from "lucide-react";
+import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 
 interface RunninghubParametersProps {
   parameters: NodeParam[];
+  modelName?: string;
 }
 
 export interface RunninghubParametersHandle {
-  getValues: () => NodeParam[];
+  getValues: () => {
+    values: NodeParam[];
+    inputImages: string[];
+  };
 }
 
 export const RunninghubParameters = forwardRef<
   RunninghubParametersHandle,
   RunninghubParametersProps
->(({ parameters }, ref) => {
+>(({ parameters, modelName }, ref) => {
   const [values, setValues] = useState<NodeParam[]>(parameters);
   const [showNegativePrompt, setShowNegativePrompt] = useState(false);
   const [enableLoraStrength, setEnableLoraStrength] = useState(false);
+  const [imageObjects, setImageObjects] = useState<Record<string, ImageObject | null>>({});
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   useEffect(() => {
-    setValues(parameters);
+    // 1. Start with clean parameters, ensuring any initial image values are cleared
+    const initialValues = parameters.map((p) =>
+      p.fieldName === "image" ? { ...p, fieldValue: "" } : p,
+    );
+
+    // 2. Clear out any previous image object state
+    setImageObjects({});
+
+    // 3. Get image from session storage
+    const initialImageData = sessionStorage.getItem("initialEditImage");
+    const sessionImg: ImageObject | null = initialImageData ? JSON.parse(initialImageData) : null;
+
+    if (!sessionImg) {
+      setValues(initialValues);
+      return;
+    }
+
+    // 4. Find the first available image parameter to apply the session image to
+    const firstImageParam = initialValues.find((p) => p.fieldName === "image");
+    if (!firstImageParam) {
+      setValues(initialValues);
+      return;
+    }
+
+    // 5. Populate BOTH states correctly
+    //  a. Set the full image object in our dedicated state
+    setImageObjects({ [firstImageParam.nodeId]: sessionImg });
+    //  b. Set the main values array with the displayUrl
+    const updatedValues = initialValues.map((p) =>
+      p.nodeId === firstImageParam.nodeId
+        ? { ...p, fieldValue: sessionImg.displayUrl } // Set displayUrl in data
+        : p,
+    );
+    setValues(updatedValues);
   }, [parameters]);
 
   useImperativeHandle(
     ref,
     () => ({
-      getValues: () => values,
+      getValues: () => {
+        // Derive the permanent paths from our dedicated `imageObjects` state
+        const inputImages = Object.values(imageObjects)
+          .filter((img): img is ImageObject => img !== null) // Filter out nulls
+          .map((img) => img.permanentPath); // Extract the permanent path
+
+        return {
+          values: values, // This array contains the displayUrl for images
+          inputImages: inputImages, // This array contains ONLY the permanentPath
+        };
+      },
     }),
-    [values],
+    [values, imageObjects], // Depend on both states
   );
 
   const handleChange = useCallback((nodeId: string, newFieldValue: any) => {
     setValues((currentParams) =>
       currentParams.map((param) =>
-        param.nodeId === nodeId ? { ...param, fieldValue: String(newFieldValue) } : param,
+        param.nodeId === nodeId ? { ...param, fieldValue: String(newFieldValue ?? "") } : param,
       ),
     );
   }, []);
 
   const promptParam = useMemo(() => values.find((p) => p.description === "prompt"), [values]);
-
   const loraParam = useMemo(() => values.find((p) => p.fieldName === "lora_name"), [values]);
 
-  const otherParams = useMemo(() => values.filter((p) => p.description !== "prompt"), [values]);
+  // FIX: Ensure this uses .filter() to return an array, which has the .map method
+  const imageParams = useMemo(() => values.filter((p) => p.fieldName === "image"), [values]);
 
+  const otherParams = useMemo(
+    () => values.filter((p) => p.description !== "prompt" && p.fieldName !== "image"),
+    [values],
+  );
   const hasNegativePromptParam = useMemo(
     () => values.some((p) => p.description === "negtive_prompt"),
     [values],
   );
-
   const hasLoraStrengthParam = useMemo(
     () => values.some((p) => p.description === "lora_strength"),
     [values],
   );
+  const handleImageUploaded = useCallback(
+    (nodeId: string, image: ImageObject) => {
+      // Update the main values array with the displayUrl
+      handleChange(nodeId, image.displayUrl);
+      // Update our dedicated state with the full image object
+      setImageObjects((prev) => ({ ...prev, [nodeId]: image }));
+    },
+    [handleChange],
+  );
+
+  const handleImageRemoved = useCallback(
+    (nodeId: string) => {
+      // Clear the value in the main array
+      handleChange(nodeId, "");
+      // Clear the object in our dedicated state
+      setImageObjects((prev) => ({ ...prev, [nodeId]: null }));
+      // Clean up session storage
+      sessionStorage.removeItem("initialEditImage");
+    },
+    [handleChange],
+  );
+
+  function focusTextareaAndPlaceCaret(el: HTMLTextAreaElement | null) {
+    if (!el) return;
+    el.focus({ preventScroll: false });
+    try {
+      const len = el.value?.length ?? 0;
+      el.setSelectionRange(len, len);
+    } catch {
+      // ignore if custom textarea doesn't support setSelectionRange
+    }
+  }
+
+  function handleRandomPrompt() {
+    const prompt = getRandomPromptForModel(modelName);
+    setIsSpinning(true);
+    if (promptParam) {
+      handleChange(promptParam.nodeId, prompt);
+    }
+
+    // focus textarea after DOM updates
+    requestAnimationFrame(() => {
+      const el =
+        textareaRef.current ||
+        (document.querySelector("textarea.prompt-textarea") as HTMLTextAreaElement | null);
+      focusTextareaAndPlaceCaret(el);
+    });
+
+    setTimeout(() => setIsSpinning(false), 600);
+  }
 
   return (
     <div className="flex gap-2">
@@ -119,12 +227,24 @@ export const RunninghubParameters = forwardRef<
             >
               <IconTerminal className="absolute left-4 top-2 text-white/80" />
               <Textarea
+                ref={textareaRef}
                 value={promptParam.fieldValue}
                 onChange={(e) => handleChange(promptParam.nodeId, e.target.value)}
-                className="hide-scrollbar min-w-[400px] pl-12"
+                className="hide-scrollbar prompt-textarea min-w-[420px] pl-12"
                 placeholder="A cute magical flying cat, cinematic, 4k"
                 maxHeight={100}
               />
+              <motion.button
+                onClick={handleRandomPrompt}
+                aria-label="Generate random prompt"
+                title="Random prompt"
+                type="button"
+                animate={{ rotate: isSpinning ? 360 : 0 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+                className="bg-white/6 absolute right-4 top-2 flex items-center justify-center rounded-md p-1.5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
+              >
+                <DicesIcon size={20} className="text-white/80" />
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -208,7 +328,8 @@ export const RunninghubParameters = forwardRef<
                         initialValue={Number(param.fieldValue)}
                         min={1}
                         max={8}
-                        onChange={(val) => handleChange(param.nodeId, val)}
+                        onChange={handleChange}
+                        paramKey={param.nodeId!}
                       />
                     </div>
                   </TooltipTrigger>
@@ -229,7 +350,8 @@ export const RunninghubParameters = forwardRef<
                         incrementStep={0.1}
                         min={0}
                         max={2}
-                        onChange={(val) => handleChange(param.nodeId!, val)}
+                        onChange={handleChange}
+                        paramKey={param.nodeId!}
                       />
                     </div>
                   </TooltipTrigger>
@@ -258,8 +380,6 @@ export const RunninghubParameters = forwardRef<
             return null;
           })}
 
-          {/* --- FIX START --- */}
-          {/* 2. Only render the DropdownMenu if at least one of its controlled parameters exists */}
           {(hasNegativePromptParam || hasLoraStrengthParam) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -284,6 +404,20 @@ export const RunninghubParameters = forwardRef<
           )}
         </div>
       </div>
+      {imageParams.map((param, index) => {
+        // Get the full image object from our dedicated state
+        const imageObject = imageObjects[param.nodeId] ?? null;
+
+        return (
+          <ImageUploadBox
+            key={param.nodeId}
+            initialImage={imageObject}
+            onImageUploaded={(image) => handleImageUploaded(param.nodeId, image)}
+            onImageRemoved={() => handleImageRemoved(param.nodeId)}
+            imageDescription={param.description || `Image ${index}`}
+          />
+        );
+      })}
     </div>
   );
 });

@@ -1,10 +1,9 @@
 "use client";
 import Masonry from "react-masonry-css";
 import ImageCard from "../ui/imageCard/ImageCard";
-import { Database } from "@/supabase/database.types";
+import { ExampleImageType } from "@/src/types/BaseType";
 
-type ExampleImageType =
-  Database["public"]["Functions"]["get_example_generations"]["Returns"][number];
+
 
 type ImageGalleryProps = {
   images: ExampleImageType[] | null;

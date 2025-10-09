@@ -28,13 +28,16 @@ export async function POST(req: Request) {
     const {
       parameters,
       conversationId: initialConversationId,
+      modelName,
       modelIdentifier,
       modelCredit,
       modelProvider,
       conversationType,
+      inputImagePermanentPaths,
     } = body;
 
-    // --- Credit Check (consider moving into RPC to reduce roundtrips) ---
+    console.log("REQUEST BODY:", body);
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("subscription_credits, bonus_credits")
@@ -51,21 +54,17 @@ export async function POST(req: Request) {
       (Array.isArray(parameters) ? parameters[0]?.fieldValue : undefined) ??
       "";
 
-    const inputImageArray = Array.isArray(parameters?.image_input || parameters?.input_image)
-      ? parameters?.image_input || parameters?.input_image
-      : parameters?.image_input || parameters?.input_image
-        ? [parameters?.image_input || parameters?.input_image]
-        : [];
-
-    const { data, error } = await supabase.rpc("create_job_and_message", {
-      p_user_id: user.id,
-      p_prompt: prompt,
-      p_model: modelIdentifier,
-      p_parameters: parameters,
-      p_credit_cost: modelCredit,
-      p_initial_conversation_id: initialConversationId,
-      p_conversation_type: conversationType,
-      p_input_image_urls: inputImageArray,
+    const { data, error } = await supabase.rpc("create_message_and_job", {
+      p_user_id: String(user.id), // UUID string
+      p_prompt: String(prompt),
+      p_parameters: parameters ?? {}, // plain JSON
+      p_credit_cost: Number(modelCredit),
+      p_initial_conversation_id: initialConversationId ?? null,
+      p_conversation_type: conversationType ?? "generate",
+      p_input_image_urls: Array.isArray(inputImagePermanentPaths)
+        ? inputImagePermanentPaths.map(String)
+        : [],
+      p_model_name: String(modelName),
     });
 
     if (error) throw error;
@@ -131,8 +130,17 @@ export async function POST(req: Request) {
             .eq("id", newJobId);
         }
       } catch (e) {
-        console.error("[Background provider trigger failed]", e);
-        // Consider marking job as errored or retrying via a queue here.
+        const errorMessage = "Failed to trigger the AI provider.";
+        console.error(`[Background provider trigger failed for job ${newJobId}]`, errorMessage);
+
+        // 1. Mark the job as failed in the database
+        await supabase
+          .from("jobs")
+          .update({
+            job_status: "failed",
+            error_message: `Provider Trigger Failed: ${errorMessage}`,
+          })
+          .eq("id", newJobId);
       }
     });
 

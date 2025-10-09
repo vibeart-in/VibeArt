@@ -1,9 +1,7 @@
+// app/conversation/[id]/page.tsx
 import ConversationClient from "@/src/components/chat/ConversationClient";
 
-export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
-  // Await the async params object (Next.js 15 change)
-  const { id } = await params;
-
-  // Pass id to client component
+export default async function ConversationPage(props: PageProps<"/image/generate/[id]">) {
+  const { id } = await props.params;
   return <ConversationClient conversationId={id} />;
 }

@@ -1,18 +1,12 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { RatioIcon } from "lucide-react";
 import {
+  SparkleIcon,
   FrameCornersIcon,
   LightningIcon,
   GearIcon,
   ImageIcon,
   PaintBrushIcon,
-  SparkleIcon,
-} from "@phosphor-icons/react";
-import { RatioIcon } from "lucide-react";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+} from "@phosphor-icons/react/dist/ssr";
 
 export function getTagColor(index: number): string {
   const colors = [

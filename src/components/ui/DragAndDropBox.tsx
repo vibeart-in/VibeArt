@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { IconUpload, IconX } from "@tabler/icons-react";
-import { uploadImage } from "@/src/lib/UploadImage";
+import { uploadImage } from "@/src/utils/server/UploadImage";
 
 export default function DragAndDropBox({
   onUploadSuccess,
@@ -15,6 +15,7 @@ export default function DragAndDropBox({
   const [uploading, setUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const dragCounter = useRef(0);
@@ -76,14 +77,22 @@ export default function DragAndDropBox({
   const handleFileUpload = async (file: File) => {
     setUploading(true);
     setError(null);
+    setProgress(0);
 
     try {
-      const result = await uploadImage({
+      await uploadImage({
         file,
-        onProgress: (p) => console.log("Progress:", p.toFixed(0) + "%"),
-        onError: (err) => setError(err.message),
-        onSuccess: (permanentPath, displayUrl) => {
+        onProgress: (p: number) => {
+          const pct = Math.max(0, Math.min(100, Math.round(p)));
+          setProgress(pct);
+          console.log("Progress:", pct + "%");
+        },
+        onError: (err: Error) => {
+          setError(err.message);
+        },
+        onSuccess: (permanentPath: string, displayUrl: string) => {
           setUploadedImageUrl(displayUrl);
+          setProgress(100);
           sessionStorage.setItem(
             "initialEditImage",
             JSON.stringify({
@@ -95,7 +104,7 @@ export default function DragAndDropBox({
         },
       });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || String(err));
     } finally {
       setUploading(false);
     }
@@ -103,6 +112,7 @@ export default function DragAndDropBox({
 
   const handleRemoveImage = () => {
     setUploadedImageUrl(null);
+    setProgress(0);
     onUploadSuccess({ displayUrl: "", permanentPath: "" });
     sessionStorage.removeItem("initialEditImage");
   };
@@ -134,16 +144,6 @@ export default function DragAndDropBox({
           whileTap={{ scale: uploadedImageUrl ? 1 : 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <div
-            className="pointer-events-none absolute inset-0 z-10 overflow-hidden opacity-60"
-            style={{
-              backgroundImage: "url(/images/landing/grain.png)",
-              backgroundSize: "200px 200px",
-              backgroundRepeat: "repeat",
-              backgroundPosition: "left top",
-            }}
-          />
-
           <div className="pointer-events-none absolute inset-0 z-20 flex h-full w-full items-center justify-center">
             <svg viewBox="0 0 400 420" className="absolute inset-0 h-full w-full" aria-hidden>
               <rect
@@ -206,9 +206,32 @@ export default function DragAndDropBox({
             </AnimatePresence>
 
             {uploading ? (
-              <div className="flex flex-col gap-4 text-center text-lg text-white">
-                <div className="upload-loader"></div>
-                <p>Uploading...</p>
+              <div className="relative flex h-full w-full items-center justify-center">
+                <div className="absolute inset-6 overflow-hidden rounded-[52px] border border-white/10 bg-transparent">
+                  <div className="relative h-full w-full">
+                    <motion.div
+                      className="absolute -left-1/2 h-[700px] w-[700px] -translate-x-1/2 rounded-[40%] border border-accent/90 bg-accent/80"
+                      initial={{ top: "100%", rotate: 0 }}
+                      animate={{
+                        top: `${100 - progress}%`,
+                        rotate: 360,
+                      }}
+                      transition={{
+                        duration: progress > 0 ? 1.5 : 0,
+                        ease: "easeOut",
+                        rotate: {
+                          duration: 7,
+                          ease: "linear",
+                          repeat: Infinity,
+                        },
+                      }}
+                    />
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-white">
+                      <div className="text-3xl font-semibold">{Math.round(progress)}%</div>
+                      <div className="mt-1 text-base">Uploading</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : error ? (
               <div className="text-center text-red-500">{error}</div>

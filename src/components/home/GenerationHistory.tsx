@@ -5,17 +5,15 @@ import HistoryCard from "./HistoryCard";
 import Link from "next/link";
 import { IconPlus } from "@tabler/icons-react";
 import { useParams, usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useConversationHistory } from "@/src/hooks/useConversationHistory";
-import { groupHistoryByDate } from "@/src/lib/dateUtils";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
+import { groupHistoryByDate } from "@/src/utils/server/dateUtils";
+import { useInView } from "react-intersection-observer";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
-  },
+  show: { opacity: 1 },
 };
 
 const itemVariants: Variants = {
@@ -38,20 +36,40 @@ const SkeletonRow = () => (
   </motion.div>
 );
 
-const GenerateHistory = () => {
+const GenerationHistory = () => {
   const params = useParams();
   const pathname = usePathname();
   const activeId = params.id as string | undefined;
-  const conversationType = pathname.split("/")[2] as ConversationType;
-  console.log(conversationType);
-  // Check if user is authenticated
+  const pathSegment = pathname.split("/")[2];
+  const conversationType = pathSegment as ConversationType;
+
   const { data: navData } = useNavInfo();
   const user = navData?.user;
 
-  const { data: historyData, isPending, isError, error } = useConversationHistory(conversationType);
+  // ❗️ Destructure new properties from our updated hook
+  const { data, error, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useConversationHistory(conversationType);
+
+  // ❗️ Use `useInView` to create a ref for our trigger element
+  const { ref, inView } = useInView({
+    threshold: 0.5, // Trigger when 50% of the element is visible
+  });
+
+  // ❗️ Effect to fetch the next page when the trigger element is in view
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ❗️ Flatten the pages array from useInfiniteQuery into a single list
+  const historyData: HistoryItem[] = useMemo(
+    () => (data?.pages.flat() as HistoryItem[]) || [],
+    [data],
+  );
 
   const groupedHistory = useMemo(() => {
-    return groupHistoryByDate(historyData || []);
+    return groupHistoryByDate(historyData);
   }, [historyData]);
   const dateGroups = Object.keys(groupedHistory);
 
@@ -62,16 +80,10 @@ const GenerateHistory = () => {
   return (
     <>
       <div className="fixed left-4 top-1/2 z-20 -translate-y-1/2" aria-label="History rail">
-        <div className="w-[75px] rounded-2xl bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515] p-2 shadow-[0_2px_8px_rgba(0,0,0,0.4)] ring-1 ring-white/5">
-          <motion.div
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 28 }}
-          >
+        <div className="w-[75px] rounded-2xl bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515] p-2 pt-3">
+          <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.96 }}>
             <Link
-              href={
-                conversationType === "ai-apps" ? "/image/ai-apps" : `/image/${conversationType}`
-              }
+              href={pathSegment === "ai-apps" ? "/image/ai-apps" : `/image/${conversationType}`}
               className={`flex h-[55px] w-full items-center justify-center rounded-2xl bg-[linear-gradient(145deg,_#1a1a1a,_#101010)] ring-1 ring-white/10 hover:bg-[linear-gradient(145deg,_#1c1c1c,_#0f0f0f)] active:bg-[linear-gradient(145deg,_#0f0f0f,_#1c1c1c)] ${activeId === undefined ? "text-accent" : "text-white/90"}`}
               aria-label="New"
             >
@@ -82,7 +94,7 @@ const GenerateHistory = () => {
           <div className="mx-4 mt-3 h-1.5 rounded-full bg-white/10" />
 
           <div
-            className="hide-scrollbar mask-gradient-vertical relative max-h-[300px] overflow-y-auto overflow-x-visible pr-[320px] pt-3"
+            className="hide-scrollbar mask-gradient-vertical relative max-h-[40vh] overflow-y-auto overflow-x-visible pr-[320px] pt-3"
             aria-live="polite"
             aria-busy={isPending ? "true" : "false"}
           >
@@ -96,7 +108,7 @@ const GenerateHistory = () => {
                   animate="show"
                   exit={{ opacity: 0, transition: { duration: 0.12 } }}
                 >
-                  {Array.from({ length: 4 }).map((_, i) => (
+                  {Array.from({ length: 2 }).map((_, i) => (
                     <SkeletonRow key={i} />
                   ))}
                 </motion.div>
@@ -119,7 +131,7 @@ const GenerateHistory = () => {
               {!isPending && !isError && historyData && historyData.length === 0 && (
                 <motion.div
                   key="empty"
-                  className="px-1 py-2 text-xs text-white/60"
+                  className="px-1 py-2 text-center text-xs text-white/60"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
@@ -139,29 +151,41 @@ const GenerateHistory = () => {
                   layout
                 >
                   {dateGroups.map((group) => (
-                    <div key={group} className="">
-                      <p className="w-full text-nowrap pb-1 text-[10px] font-bold tracking-wide text-white/50">
+                    <motion.div key={group} layout>
+                      <motion.p
+                        layout="position"
+                        className="w-full text-nowrap pb-1 text-[10px] font-bold tracking-wide text-white/50"
+                      >
                         {group}
-                      </p>
-                      <div className="flex flex-col gap-2" data-section={group}>
+                      </motion.p>
+                      <div className="flex flex-col gap-1 pl-0.5" data-section={group}>
                         {groupedHistory[group].map((history: HistoryItem) => (
                           <HistoryCard
                             key={history.id}
                             id={history.id}
                             imageUrl={history.imageUrl}
                             title="Image generation"
-                            prompt={history.prompt}
+                            prompt={history.title}
                             isActive={activeId === history.id}
-                            conversationType={conversationType}
+                            conversationType={history.conversation_type}
                             appId={history.appId}
                           />
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
+            <div ref={ref} className="h-10">
+              {isFetchingNextPage && (
+                <div className="flex flex-col gap-2">
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -169,4 +193,4 @@ const GenerateHistory = () => {
   );
 };
 
-export default GenerateHistory;
+export default GenerationHistory;

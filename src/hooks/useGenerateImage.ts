@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ConversationType, InputBoxParameter, MessageType } from "../types/BaseType";
+import { conversationData, ConversationType, InputBoxParameter } from "../types/BaseType";
 
 type GenerationParams = {
   parameters: InputBoxParameter;
   conversationId?: string;
+  modelName: string;
   modelIdentifier: string;
   modelCredit: number;
   modelProvider: "running_hub" | "replicate";
   conversationType: ConversationType;
+  inputImagePermanentPaths: string[];
 };
 
 const generateImage = async (formData: GenerationParams) => {
@@ -37,7 +39,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
     mutationFn: (params: GenerationParams) => generateImage(params),
     onMutate: async (newGeneration) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousMessages = queryClient.getQueryData<MessageType[]>(queryKey);
+      const previousMessages = queryClient.getQueryData<conversationData[]>(queryKey);
 
       // Extract prompt based on parameter type
       let userPrompt = "";
@@ -50,19 +52,23 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
         userPrompt = (newGeneration.parameters as any).prompt || "";
       }
 
-      const optimisticMessage: MessageType = {
+      const optimisticMessage: conversationData = {
         id: crypto.randomUUID(),
         userPrompt,
         job_status: "pending",
         input_images: [],
         output_images: [],
-        parameters: newGeneration,
+        parameters: [],
         credit_cost: 2,
         error_message: null,
         jobId: null,
+        model_name: newGeneration.modelName,
       };
 
-      queryClient.setQueryData<MessageType[]>(queryKey, (old = []) => [optimisticMessage, ...old]);
+      queryClient.setQueryData<conversationData[]>(queryKey, (old = []) => [
+        optimisticMessage,
+        ...old,
+      ]);
 
       return { previousMessages };
     },

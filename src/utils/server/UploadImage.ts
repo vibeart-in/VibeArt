@@ -55,7 +55,7 @@ export const uploadImage = async ({
         onProgress?.(percentage);
       },
       onSuccess: async () => {
-        const fullPermanentPath = `${bucketName}/${filePath}`; // e.g., "uploaded-images/user-id/123_image.png"
+        const fullPermanentPath = `${filePath}`;
 
         // Generate a short-lived signed URL for client-side display
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage

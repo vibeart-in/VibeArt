@@ -4,13 +4,14 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
-import { XIcon } from "lucide-react";
+import { DicesIcon, XIcon } from "lucide-react";
 
 import Image from "next/image";
-import { getIconForParam } from "@/src/lib/utils";
+import { getIconForParam } from "@/src/utils/server/utils";
 import { SchemaParam } from "@/src/types/BaseType";
 import { IconTerminal } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 
 export interface ImageObject {
   permanentPath: string;
@@ -39,17 +41,26 @@ const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
 
 interface ReplicateParametersProps {
   parameters: Record<string, SchemaParam>;
+  modelName?: string;
 }
 
+// UPDATE: The handle now exposes an object with both values and inputImages
 export interface ReplicateParametersHandle {
-  getValues: () => Record<string, any>;
+  getValues: () => {
+    values: Record<string, any>;
+    inputImages: string[];
+  };
 }
 
 export const ReplicateParameters = forwardRef<ReplicateParametersHandle, ReplicateParametersProps>(
-  ({ parameters }, ref) => {
+  ({ parameters, modelName }, ref) => {
     const imageInputKey = useMemo(() => {
       if (parameters["image input"]) return "image input";
       if (parameters["input image"]) return "input image";
+      if (parameters["style reference images"]) return "style reference images";
+      if (parameters["style reference images"]) return "style reference images";
+      if (parameters["image"]) return "image";
+      if (parameters["image prompt"]) return "image prompt";
       return null;
     }, [parameters]);
 
@@ -69,17 +80,64 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     }, [parameters]);
 
     const [values, setValues] = useState<Record<string, any>>(initialValues);
+    const [inputImagePermanentPaths, setInputImagePermanentPaths] = useState<string[]>([]);
     const [singleImageObject, setSingleImageObject] = useState<ImageObject | null>(null);
-
-    // For multiple images, store both paths to avoid state inconsistencies.
     const [multiImages, setMultiImages] = useState<ImageObject[]>([]);
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const [isSpinning, setIsSpinning] = useState(false);
 
-    // Effect to initialize values and handle initial image from session storage
+    const handleChange = useCallback(
+      (rawKey: string, value: any) => {
+        const key = normalizeKey(rawKey);
+        setValues((prev) => ({ ...prev, [key]: value }));
+      },
+      [setValues],
+    );
+
+    // UPDATE: The handle now exposes an object with both values and inputImages
+    useImperativeHandle(ref, () => ({
+      getValues: () => {
+        const filteredValues: Record<string, any> = {};
+
+        // Iterate over all the keys in the current `values` state
+        for (const key in values) {
+          const value = values[key];
+
+          // Find the original parameter definition to check its properties (like enum)
+          const originalParamKey = Object.keys(parameters).find(
+            (pKey) => normalizeKey(pKey) === key,
+          );
+          const param = originalParamKey ? parameters[originalParamKey] : null;
+
+          // RULE 1: If the parameter is an enum and its value is "None", skip it.
+          if (param?.enum && value === "None") {
+            continue;
+          }
+
+          // RULE 2: If the value is an empty array, skip it.
+          // This handles the "style reference images": [] case.
+          if (Array.isArray(value) && value.length === 0) {
+            continue;
+          }
+
+          // RULE 3: If the value is just an empty string, skip it.
+          if (typeof value === "string" && value.trim() === "") {
+            continue;
+          }
+
+          // If none of the filtering rules apply, add the key-value pair to the result.
+          filteredValues[key] = value;
+        }
+
+        return {
+          values: filteredValues,
+          inputImages: inputImagePermanentPaths, // This is returned as is, per your request.
+        };
+      },
+    }));
+
     useEffect(() => {
-      // 1. Reset values to defaults from the schema
       setValues(initialValues);
-
-      // 2. Check for an image from session storage to override the default
       if (!imageInputKey || !imageParam) return;
 
       const initialImageData = sessionStorage.getItem("initialEditImage");
@@ -90,68 +148,105 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       if (!sessionImage) return;
 
       if (imageParam.type === "string") {
-        // For single image, we just need to update the `values` state.
-        // The `ImageUploadBox` will receive this via the `initialImage` prop.
         setSingleImageObject(sessionImage);
-        handleChange(imageInputKey, sessionImage.permanentPath);
+        handleChange(imageInputKey, sessionImage.displayUrl);
+        setInputImagePermanentPaths([sessionImage.permanentPath]);
       } else if (imageParam.type === "array") {
-        // For multi-image, we update both our UI state and form values.
         setMultiImages([sessionImage]);
-        handleChange(imageInputKey, [sessionImage.permanentPath]);
+        handleChange(imageInputKey, [sessionImage.displayUrl]);
+        setInputImagePermanentPaths([sessionImage.permanentPath]);
       }
-    }, [initialValues, imageInputKey]);
+    }, [initialValues, imageInputKey, imageParam, handleChange]);
 
-    useImperativeHandle(ref, () => ({
-      getValues: () => values,
-    }));
-
-    const handleChange = useCallback(
-      (rawKey: string, value: any) => {
-        const key = normalizeKey(rawKey);
-        setValues((prev) => ({ ...prev, [key]: value }));
+    const handleSingleImageUploaded = useCallback(
+      (image: ImageObject) => {
+        if (!imageInputKey) return;
+        setSingleImageObject(image);
+        handleChange(imageInputKey, image.displayUrl);
+        setInputImagePermanentPaths([image.permanentPath]);
       },
-      [setValues],
+      [imageInputKey, handleChange],
     );
 
-    // --- REFACTORED: Simplified Image Handlers ---
-
-    const addMultiImage = (newImage: ImageObject) => {
+    const handleSingleImageRemoved = useCallback(() => {
       if (!imageInputKey) return;
-      const normalizedKey = normalizeKey(imageInputKey);
+      setSingleImageObject(null);
+      handleChange(imageInputKey, null);
+      setInputImagePermanentPaths([]);
+      sessionStorage.removeItem("initialEditImage");
+    }, [imageInputKey, handleChange]);
 
-      setMultiImages((prev) => [...prev, newImage]);
-      setValues((prev) => ({
-        ...prev,
-        [normalizedKey]: [...(prev[normalizedKey] || []), newImage.permanentPath],
-      }));
-    };
+    const addMultiImage = useCallback(
+      (newImage: ImageObject) => {
+        if (!imageInputKey) return;
+        const normalizedKey = normalizeKey(imageInputKey);
+
+        setMultiImages((prev) => [...prev, newImage]);
+        setValues((prev) => ({
+          ...prev,
+          [normalizedKey]: [...(prev[normalizedKey] || []), newImage.displayUrl],
+        }));
+        setInputImagePermanentPaths((prev) => [...prev, newImage.permanentPath]);
+      },
+      [imageInputKey],
+    );
 
     const removeMultiImage = (indexToRemove: number) => {
       if (!imageInputKey) return;
       const normalizedKey = normalizeKey(imageInputKey);
-      let removedPath: string | null = null;
+      const imageToRemove = multiImages[indexToRemove];
 
-      setMultiImages((prev) => {
-        removedPath = prev[indexToRemove]?.permanentPath;
-        return prev.filter((_, i) => i !== indexToRemove);
-      });
+      if (!imageToRemove) return;
 
-      if (removedPath) {
-        setValues((prev) => ({
-          ...prev,
-          [normalizedKey]: (prev[normalizedKey] || []).filter((p: string) => p !== removedPath),
-        }));
-      }
+      setMultiImages((prev) => prev.filter((_, i) => i !== indexToRemove));
+      setInputImagePermanentPaths((prev) =>
+        prev.filter((path) => path !== imageToRemove.permanentPath),
+      );
+      setValues((prev) => ({
+        ...prev,
+        [normalizedKey]: (prev[normalizedKey] || []).filter(
+          (url: string) => url !== imageToRemove.displayUrl,
+        ),
+      }));
 
       if (indexToRemove === 0) {
         sessionStorage.removeItem("initialEditImage");
       }
     };
 
+    const handleMultiImageRemoved = useCallback(() => {}, []);
+
     const otherEntries = useMemo(
       () => Object.entries(parameters).filter(([k]) => k !== "prompt"),
       [parameters],
     );
+
+    function focusTextareaAndPlaceCaret(el: HTMLTextAreaElement | null) {
+      if (!el) return;
+      el.focus({ preventScroll: false });
+      try {
+        const len = el.value?.length ?? 0;
+        el.setSelectionRange(len, len);
+      } catch {
+        // ignore if custom textarea doesn't support setSelectionRange
+      }
+    }
+
+    function handleRandomPrompt() {
+      const prompt = getRandomPromptForModel(modelName);
+      setIsSpinning(true);
+      handleChange("prompt", prompt);
+
+      // focus textarea after DOM updates
+      requestAnimationFrame(() => {
+        const el =
+          textareaRef.current ||
+          (document.querySelector("textarea.prompt-textarea") as HTMLTextAreaElement | null);
+        focusTextareaAndPlaceCaret(el);
+      });
+
+      setTimeout(() => setIsSpinning(false), 600);
+    }
 
     return (
       <div className="flex gap-2">
@@ -167,23 +262,33 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
               >
                 <IconTerminal className="absolute left-4 top-2 text-white/80" />
                 <Textarea
+                  ref={textareaRef}
                   value={values["prompt"] ?? ""}
                   onChange={(e) => handleChange("prompt", e.target.value)}
-                  className="hide-scrollbar min-w-[400px] pl-12"
+                  className="hide-scrollbar prompt-textarea min-w-[420px] pl-12 pr-8"
                   placeholder={
                     parameters["prompt"]?.description ?? "A cute magical flying cat, cinematic, 4k"
                   }
                   maxHeight={100}
                 />
+                <motion.button
+                  onClick={handleRandomPrompt}
+                  aria-label="Generate random prompt"
+                  title="Random prompt"
+                  type="button"
+                  animate={{ rotate: isSpinning ? 360 : 0 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  className="bg-white/6 absolute right-0 top-1 flex items-center justify-center rounded-xl bg-black/50 p-1.5 shadow-md shadow-black hover:bg-white/10 hover:text-accent hover:shadow-none focus:outline-none focus:ring-2 focus:ring-white/30"
+                >
+                  <DicesIcon size={20} />
+                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
 
           <div className="flex w-fit flex-wrap items-center gap-2">
             {otherEntries.map(([key, param]) => {
-              // Filter out the image input from this generic rendering section
               if (key === imageInputKey) return null;
-
               const value = values[normalizeKey(key)];
 
               if (param.enum) {
@@ -236,16 +341,17 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                 );
               }
 
-              if (param.type === "integer") {
+              if (param.type === "integer" || param.type === "number") {
                 return (
                   <Tooltip key={key}>
                     <TooltipTrigger asChild>
                       <div>
                         <AnimatedCounter
-                          initialValue={param.default}
+                          initialValue={value ?? param.default}
                           min={param.minimum}
                           max={param.maximum}
-                          onChange={(v) => handleChange(key, v)}
+                          onChange={handleChange}
+                          paramKey={key}
                         />
                       </div>
                     </TooltipTrigger>
@@ -255,36 +361,26 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                   </Tooltip>
                 );
               }
-              return null; // Render nothing for unhandled param types
+              return null;
             })}
           </div>
         </div>
 
-        {/* --- REFACTORED: Image Rendering Logic --- */}
-
         {imageParam?.type === "string" && imageInputKey && (
           <ImageUploadBox
             initialImage={singleImageObject}
-            onImageUploaded={({ permanentPath }) => {
-              handleChange(imageInputKey, permanentPath);
-            }}
-            onImageRemoved={() => {
-              handleChange(imageInputKey, null); // Set to null or ""
-              sessionStorage.removeItem("initialEditImage");
-            }}
-            imageDescription="Add Image"
+            onImageUploaded={handleSingleImageUploaded}
+            onImageRemoved={handleSingleImageRemoved}
+            imageDescription={`${imageParam.title}`}
           />
         )}
 
-        {/* MULTI IMAGE case manages a list */}
         {imageParam?.type === "array" && (
           <div className="flex flex-wrap gap-4">
-            {/* Render previews for existing images */}
             {multiImages.map((img, idx) => {
-              console.log("idx", idx);
               return (
                 <div
-                  key={idx}
+                  key={img.permanentPath} // Use permanent path for a stable key
                   className="group relative h-[100px] w-[100px] rounded-3xl border border-white/30 bg-black p-1.5"
                 >
                   <Image
@@ -305,15 +401,12 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
               );
             })}
 
-            {/* Render the "Add New" box */}
             {multiImages.length < 5 && (
               <ImageUploadBox
-                // A simple uploader that doesn't need to manage its own state
-                onImageUploaded={({ permanentPath, displayUrl }) => {
-                  addMultiImage({ permanentPath, displayUrl });
-                }}
-                onImageRemoved={() => {}} // Not applicable for the "add new" box
-                imageDescription="Add Image"
+                onImageUploaded={addMultiImage}
+                onImageRemoved={handleMultiImageRemoved}
+                imageDescription={`${imageParam.title}`}
+                resetOnSuccess={true}
               />
             )}
           </div>
