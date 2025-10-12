@@ -1,8 +1,9 @@
 "use client";
-import Masonry from "react-masonry-css";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
-import { motion } from "motion/react";
+import Masonry from "react-masonry-css";
+
 import ImageCard from "../ui/imageCard/ImageCard";
 
 type AppExampleGridProps = {

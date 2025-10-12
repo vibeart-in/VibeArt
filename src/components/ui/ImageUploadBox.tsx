@@ -1,9 +1,10 @@
 // src/components/ui/ImageUploadBox.tsx
 "use client";
-import { uploadImage } from "@/src/utils/server/UploadImage";
 import { ImagesIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useRef, useState, useEffect, memo } from "react";
+
+import { uploadImage } from "@/src/utils/server/UploadImage";
 
 interface ImageUploadBoxProps {
   onImageUploaded: (paths: { permanentPath: string; displayUrl: string }) => void;
@@ -106,13 +107,13 @@ const ImageUploadBox = ({
     }
     if (image) {
       return (
-        <div className="group relative h-full w-full">
+        <div className="group relative size-full">
           <Image
             src={image.displayUrl}
             alt="Uploaded preview"
             width={80}
             height={80}
-            className="h-full w-full rounded-[20px] object-cover object-top"
+            className="size-full rounded-[20px] object-cover object-top"
           />
           <button
             onClick={handleRemove}
@@ -136,7 +137,7 @@ const ImageUploadBox = ({
   return (
     <div
       onClick={handleClick}
-      className={`relative flex h-[100px] w-[100px] items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 ${!image && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
+      className={`relative flex size-[100px] items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 ${!image && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
     >
       <input
         ref={inputRef}

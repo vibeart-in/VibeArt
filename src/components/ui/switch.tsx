@@ -1,8 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { cn } from "@/src/lib/utils"; // Assuming you have a cn utility for classes
 import { Wand2Icon } from "lucide-react";
+import * as React from "react";
+
+import { cn } from "@/src/lib/utils"; // Assuming you have a cn utility for classes
 
 // Define the props for the custom switch
 interface CustomSwitchProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

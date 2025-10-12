@@ -1,13 +1,15 @@
 "use client";
 
-import { Copy, Pencil, LogOut } from "lucide-react";
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { UserProfile } from "../UserAvatar";
-import { createClient } from "@/src/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
+import { Copy, Pencil, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+
 import { type NavInfoData } from "@/src/hooks/useNavInfo";
+import { createClient } from "@/src/lib/supabase/client";
+
+import { UserProfile } from "../UserAvatar";
 
 const UserProfileDropdown = ({
   user,
@@ -33,17 +35,17 @@ const UserProfileDropdown = ({
     {
       label: navInfo?.subscription_tier,
       onClick: () => console.log("Edit"),
-      Icon: <Pencil className="h-4 w-4" />,
+      Icon: <Pencil className="size-4" />,
     },
     {
       label: "Duplicate",
       onClick: () => console.log("Duplicate"),
-      Icon: <Copy className="h-4 w-4" />,
+      Icon: <Copy className="size-4" />,
     },
     {
       label: "Logout",
       onClick: logout,
-      Icon: <LogOut className="h-4 w-4" />,
+      Icon: <LogOut className="size-4" />,
     },
   ];
 

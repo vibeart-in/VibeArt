@@ -1,10 +1,10 @@
 "use client";
-import { cn } from "@/src/lib/utils";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import Link from "next/link";
-
 import React, { useRef, useState } from "react";
+
+import { cn } from "@/src/lib/utils";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -127,7 +127,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
           {hovered === idx && (
             <motion.div
               layoutId="hovered"
-              className="absolute inset-0 h-full w-full rounded-full bg-accent dark:bg-accent/20"
+              className="absolute inset-0 size-full rounded-full bg-accent dark:bg-accent/20"
             />
           )}
           <span className="relative z-20">{item.name}</span>

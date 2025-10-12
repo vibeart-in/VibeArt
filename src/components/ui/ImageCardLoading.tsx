@@ -44,7 +44,7 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
     >
       {/* Background Gradient Layer */}
       <div
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 size-full"
         style={{
           backgroundImage: `${stripePattern}`,
           backgroundSize: "300% 200%",
@@ -63,7 +63,7 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
       </div>
 
       {/* Content with Text Shimmer */}
-      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4 text-center text-white">
+      <div className="relative z-10 flex size-full flex-col items-center justify-center px-4 text-center text-white">
         <div className="mb-2 text-2xl font-semibold">
           <AITextLoading text={loadingText} />
         </div>

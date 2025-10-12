@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import GradualBlurMemo from "../components/ui/GradualBlur";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "../components/ui/button";
+import GradualBlurMemo from "../components/ui/GradualBlur";
 
 export default function NotFound() {
   const router = useRouter();

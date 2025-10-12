@@ -1,9 +1,11 @@
 // src/components/messages/MessageGroup.tsx
 
 "use client";
-import Image from "next/image";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
+import Image from "next/image";
+
 import { MessageGroupType } from "@/src/types/BaseType";
+
 import MessageTurn from "./MessageTurn";
 
 interface MessageGroupProps {

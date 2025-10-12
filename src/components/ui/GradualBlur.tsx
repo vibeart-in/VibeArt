@@ -1,4 +1,5 @@
 "use client";
+import * as math from "mathjs";
 import React, {
   CSSProperties,
   useEffect,
@@ -7,7 +8,6 @@ import React, {
   useMemo,
   PropsWithChildren,
 } from "react";
-import * as math from "mathjs";
 
 type GradualBlurProps = PropsWithChildren<{
   position?: "top" | "bottom" | "left" | "right";
@@ -286,7 +286,7 @@ const GradualBlur: React.FC<GradualBlurProps> = (props) => {
       onMouseEnter={hoverIntensity ? () => setIsHovered(true) : undefined}
       onMouseLeave={hoverIntensity ? () => setIsHovered(false) : undefined}
     >
-      <div className="relative h-full w-full">{blurDivs}</div>
+      <div className="relative size-full">{blurDivs}</div>
       {props.children && <div className="relative">{props.children}</div>}
     </div>
   );

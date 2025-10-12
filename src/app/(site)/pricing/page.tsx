@@ -1,16 +1,17 @@
-import { MouseParallaxItem, MouseParallaxProvider } from "@/src/components/landing/MouseParallax";
-import { Tabs, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 import { PhoneCall } from "lucide-react";
 import Image from "next/image";
-import TrustedBy from "@/src/components/landing/pricing/TrustedBy";
-import { FaqAccordion } from "@/src/components/ui/faq-chat-accordion";
-import { Button } from "@/src/components/ui/button";
-import { Badge } from "@/src/components/ui/badge";
-import { FloatingParticles } from "@/src/components/shaders/FloatingParticles";
-import { EnterpriseCTA } from "@/src/components/landing/pricing/EnterpriseCTA";
-import { PricingHero } from "@/src/components/landing/pricing/PricingHero";
-import { FeatureComparison } from "@/src/components/landing/pricing/FeatureComparison";
+
 import { getCurrentUserSubscriptionDetails } from "@/src/app/(site)/pricing/actions";
+import { MouseParallaxItem, MouseParallaxProvider } from "@/src/components/landing/MouseParallax";
+import { EnterpriseCTA } from "@/src/components/landing/pricing/EnterpriseCTA";
+import { FeatureComparison } from "@/src/components/landing/pricing/FeatureComparison";
+import { PricingHero } from "@/src/components/landing/pricing/PricingHero";
+import TrustedBy from "@/src/components/landing/pricing/TrustedBy";
+import { FloatingParticles } from "@/src/components/shaders/FloatingParticles";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { FaqAccordion } from "@/src/components/ui/faq-chat-accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 
 const FAQData = [
   {
@@ -247,7 +248,7 @@ const page = async () => {
                 </div>
                 <div className="">
                   <Button className="flex items-center justify-center gap-4" variant="secondary">
-                    Any questions? Reach out <PhoneCall className="h-4 w-4" />
+                    Any questions? Reach out <PhoneCall className="size-4" />
                   </Button>
                 </div>
               </div>

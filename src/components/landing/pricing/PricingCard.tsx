@@ -1,10 +1,12 @@
 "use client";
-import { motion, AnimatePresence, Variants } from "motion/react";
-import { useEffect, useState } from "react";
 import { initializePaddle, Paddle } from "@paddle/paddle-js";
 import { CheckCircle2, Coins } from "lucide-react";
-import { PricingPlan } from "./PricingHero";
+import { motion, AnimatePresence, Variants } from "motion/react";
+import { useEffect, useState } from "react";
+
 import { updateSubscription } from "@/src/app/(site)/pricing/actions";
+
+import { PricingPlan } from "./PricingHero";
 
 const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.98 },
@@ -40,11 +42,11 @@ const FeatureItem = ({ feature }: { feature: string }) => {
       variants={featureItemVariants}
       className="flex items-center gap-3 border-b border-white/10 py-3 last:border-b-0"
     >
-      <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-accent" />
+      <CheckCircle2 className="size-4 flex-shrink-0 text-accent" />
       <span className="text-white/80">
         {isCreditsFeature ? (
           <span className="flex items-center gap-2">
-            <Coins className="h-4 w-4 text-accent" />
+            <Coins className="size-4 text-accent" />
             <span className="font-medium text-white">{feature}</span>
           </span>
         ) : (
@@ -154,7 +156,7 @@ export const PricingCard = ({
       className={`relative rounded-2xl bg-black p-0.5 transition-shadow duration-300 ${plan.borderGradient} ${plan.glowEffect}`}
     >
       <article
-        className={`relative flex h-full w-full flex-col rounded-[15px] bg-gradient-to-br p-6 ${plan.cardBgGradient}`}
+        className={`relative flex size-full flex-col rounded-[15px] bg-gradient-to-br p-6 ${plan.cardBgGradient}`}
       >
         {plan.popular && !isActuallyCurrentPlan && (
           <motion.span

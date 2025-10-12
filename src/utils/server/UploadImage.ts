@@ -1,7 +1,8 @@
 // src/lib/UploadImage.ts
 
-import { supabase } from "@/src/lib/supabase/client";
 import * as tus from "tus-js-client";
+
+import { supabase } from "@/src/lib/supabase/client";
 
 interface UploadOptions {
   file: File;

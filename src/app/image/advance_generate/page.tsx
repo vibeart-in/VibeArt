@@ -1,9 +1,10 @@
 import { IconSparkles, IconTarget, IconBolt, IconCoin } from "@tabler/icons-react";
-import { createClient } from "@/src/lib/supabase/server";
+
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import InputBox from "@/src/components/inputBox/InputBox";
 import ImageGallery from "@/src/components/home/ImageGrid";
+import InputBox from "@/src/components/inputBox/InputBox";
 import Footer from "@/src/components/landing/Footer";
+import { createClient } from "@/src/lib/supabase/server";
 
 const Page = async () => {
   const supabase = await createClient();
@@ -43,7 +44,7 @@ const Page = async () => {
           {/* Tiny pillars: Specialized / Efficient / Affordable */}
           <div className="mt-4 flex w-full max-w-3xl items-start justify-center gap-6">
             <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 backdrop-blur-sm">
-              <IconTarget className="h-5 w-5 text-white" />
+              <IconTarget className="size-5 text-white" />
               <div className="text-left">
                 <div className="text-sm font-medium text-white">Specialized</div>
                 <div className="text-xs text-gray-300">
@@ -57,7 +58,7 @@ const Page = async () => {
             </div>
 
             <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 backdrop-blur-sm">
-              <IconBolt className="h-5 w-5 text-white" />
+              <IconBolt className="size-5 text-white" />
               <div className="text-left">
                 <div className="text-sm font-medium text-white">Efficient</div>
                 <div className="text-xs text-gray-300">
@@ -67,7 +68,7 @@ const Page = async () => {
             </div>
 
             <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 backdrop-blur-sm">
-              <IconCoin className="h-5 w-5 text-white" />
+              <IconCoin className="size-5 text-white" />
               <div className="text-left">
                 <div className="text-sm font-medium text-white">Affordable</div>
                 <div className="text-xs text-gray-300">

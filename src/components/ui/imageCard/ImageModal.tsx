@@ -1,8 +1,5 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState, KeyboardEvent, MouseEvent } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
 import {
   IconArrowLeft,
   IconCheck,
@@ -13,11 +10,15 @@ import {
   IconWand,
 } from "@tabler/icons-react";
 import { ArrowRight } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState, KeyboardEvent, MouseEvent } from "react";
+import { toast } from "sonner";
+
+import { VideoOptions } from "./ImageCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../hover-card";
 import ModalPortal from "./ModalPortal";
-import { VideoOptions } from "./ImageCard";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 /**
  * Note: This file is intentionally conservative about mounting heavy DOM and media.
@@ -343,7 +344,7 @@ export const MediaModal = ({
             onMouseEnter={handlePrefetchTrigger} // if user hovers the modal container, ensure media will render
           >
             <div
-              className="relative flex h-full w-full flex-col"
+              className="relative flex size-full flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -397,7 +398,7 @@ export const MediaModal = ({
                       <div className="absolute inset-0 z-10 overflow-hidden rounded-[24px]">
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-lg">
                           <motion.div
-                            className="h-16 w-16 rounded-full border-4 border-white/20"
+                            className="size-16 rounded-full border-4 border-white/20"
                             animate={{
                               scale: [1, 1.2, 1],
                               opacity: [0.5, 0.2, 0.5],
@@ -414,7 +415,7 @@ export const MediaModal = ({
                   </AnimatePresence>
 
                   <motion.figure
-                    className="relative h-full max-h-[80vh] w-full overflow-hidden rounded-[24px] bg-black/30"
+                    className="relative size-full max-h-[80vh] overflow-hidden rounded-[24px] bg-black/30"
                     style={{ originX, originY, scale }}
                     onMouseMove={onModalPointerMove}
                     onClick={() => {
@@ -438,7 +439,7 @@ export const MediaModal = ({
                         <video
                           ref={videoRef}
                           src={mediaUrl}
-                          className="h-full max-h-[80vh] w-full select-none object-contain transition-opacity duration-300"
+                          className="size-full max-h-[80vh] select-none object-contain transition-opacity duration-300"
                           style={{ opacity: isModalMediaLoading ? 0 : 1 }}
                           onLoadedData={handleModalMediaLoad}
                           onError={handleModalMediaLoad}
@@ -456,7 +457,7 @@ export const MediaModal = ({
                           width={width}
                           height={height}
                           sizes="(max-width: 1200px) 90vw, 70vw"
-                          className="h-full max-h-[80vh] w-full select-none object-contain transition-opacity duration-300"
+                          className="size-full max-h-[80vh] select-none object-contain transition-opacity duration-300"
                           style={{ opacity: isModalMediaLoading ? 0 : 1 }}
                           draggable={false}
                           onLoad={handleModalMediaLoad}

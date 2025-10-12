@@ -66,7 +66,7 @@ const AnimatedCounter = ({
         <button
           onClick={handleDecrement}
           disabled={count <= min}
-          className={`flex h-6 w-6 items-center justify-center rounded-md transition-all duration-200 ease-out ${
+          className={`flex size-6 items-center justify-center rounded-md transition-all duration-200 ease-out ${
             count <= min
               ? "cursor-not-allowed text-gray-600 opacity-50"
               : "cursor-pointer text-accent hover:scale-110 hover:text-white active:scale-95"
@@ -77,7 +77,7 @@ const AnimatedCounter = ({
 
         {/* Counter Display */}
         <div
-          className={`mx-1 flex h-full w-full items-center justify-center rounded-md text-[12px] font-semibold text-accent transition-all duration-200 ease-out ${isAnimating ? "scale-110 bg-[#404040] shadow-lg" : "scale-100"} `}
+          className={`mx-1 flex size-full items-center justify-center rounded-md text-[12px] font-semibold text-accent transition-all duration-200 ease-out ${isAnimating ? "scale-110 bg-[#404040] shadow-lg" : "scale-100"} `}
         >
           <span
             className={`transition-all duration-300 ease-out ${isAnimating ? "scale-125 transform" : "scale-100 transform"} `}
@@ -91,7 +91,7 @@ const AnimatedCounter = ({
         <button
           onClick={handleIncrement}
           disabled={count >= max}
-          className={`flex h-6 w-6 items-center justify-center rounded-md transition-all duration-200 ease-out ${
+          className={`flex size-6 items-center justify-center rounded-md transition-all duration-200 ease-out ${
             count >= max
               ? "cursor-not-allowed text-gray-600 opacity-50"
               : "cursor-pointer text-accent hover:scale-110 hover:text-white active:scale-95"

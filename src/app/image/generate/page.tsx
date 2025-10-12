@@ -1,9 +1,10 @@
 import { IconSparkles } from "@tabler/icons-react";
-import { createClient } from "@/src/lib/supabase/server";
+
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import InputBox from "@/src/components/inputBox/InputBox";
 import ImageGallery from "@/src/components/home/ImageGrid";
+import InputBox from "@/src/components/inputBox/InputBox";
 import Footer from "@/src/components/landing/Footer";
+import { createClient } from "@/src/lib/supabase/server";
 
 const Page = async () => {
   const supabase = await createClient();

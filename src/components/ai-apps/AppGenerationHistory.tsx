@@ -2,9 +2,11 @@
 
 "use client";
 
-import { useAppGenerations } from "@/src/hooks/useAppGenerations";
-import AppGenerationGrid from "./AppGenerationGrid";
 import Masonry from "react-masonry-css";
+
+import { useAppGenerations } from "@/src/hooks/useAppGenerations";
+
+import AppGenerationGrid from "./AppGenerationGrid";
 
 // A simple loading skeleton to match the grid layout
 const SkeletonBlock = ({ width, height }: { width: string; height: string }) => (
@@ -55,7 +57,7 @@ export default function AppGenerationHistory({ appId }: { appId: string }) {
 
   return (
     <div className="mt-6">
-      <h3 className="font-satoshi mb-4 text-2xl font-medium text-white">Your Recent Generations</h3>
+      <h3 className="mb-4 font-satoshi text-2xl font-medium text-white">Your Recent Generations</h3>
 
       {isLoading && <HistoryLoadingSkeleton />}
 

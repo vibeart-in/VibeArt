@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { NavbarLander } from "@/src/components/landing/Navbar";
+
 import Footer from "@/src/components/landing/Footer";
+import { NavbarLander } from "@/src/components/landing/Navbar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`

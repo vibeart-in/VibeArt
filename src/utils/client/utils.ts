@@ -10,7 +10,9 @@ export function extractParams(parameters: InputBoxParameter, model_name: string)
       const name = param.description?.toLowerCase();
 
       if (name === "aspect_ratio") {
-        const raw = String(param.fieldValue || "").toLowerCase().trim();
+        const raw = String(param.fieldValue || "")
+          .toLowerCase()
+          .trim();
 
         // match "1:1", "16:9", etc.
         const colonMatch = raw.match(/(\d+)\s*:\s*(\d+)/);
@@ -21,14 +23,14 @@ export function extractParams(parameters: InputBoxParameter, model_name: string)
         else {
           const xMatch = raw.match(/(\d+)\s*[x×]\s*(\d+)/);
           if (xMatch) {
-        aspectRatio = `${xMatch[1]}:${xMatch[2]}`;
+            aspectRatio = `${xMatch[1]}:${xMatch[2]}`;
           } else {
-        // fallback: if there's a single number like "1" treat as "1:1", otherwise try first number
-        const numMatch = raw.match(/^\d+$/) || raw.match(/\d+/);
-        if (numMatch) {
-          const n = numMatch[0];
-          aspectRatio = `${n}:${n}`;
-        }
+            // fallback: if there's a single number like "1" treat as "1:1", otherwise try first number
+            const numMatch = raw.match(/^\d+$/) || raw.match(/\d+/);
+            if (numMatch) {
+              const n = numMatch[0];
+              aspectRatio = `${n}:${n}`;
+            }
           }
         }
       }

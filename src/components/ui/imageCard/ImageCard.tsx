@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import { MediaCardView } from "./ImageCardView";
 import dynamic from "next/dynamic";
+import React, { useCallback, useMemo, useState } from "react";
+
+import { MediaCardView } from "./ImageCardView";
 import { MediaModal } from "./ImageModal";
 
 export interface VideoOptions {

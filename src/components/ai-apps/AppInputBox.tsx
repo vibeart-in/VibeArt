@@ -1,21 +1,22 @@
 "use client";
+
+
+import { SwapIcon } from "@phosphor-icons/react";
+import { IconTerminal } from "@tabler/icons-react";
+import { XCircle } from "lucide-react";
+import { AnimatePresence, motion, Variants } from "motion/react";
+import Image from "next/image";
 import { useCallback, useState } from "react";
 
-import { XCircle } from "lucide-react";
-
-import Image from "next/image";
-import { IconTerminal } from "@tabler/icons-react";
-import { SwapIcon } from "@phosphor-icons/react";
-import { AnimatePresence, motion, Variants } from "motion/react";
+import { useGenerateAppImage } from "@/src/hooks/useGenerateAppImage";
 import { NodeParam } from "@/src/types/BaseType";
 
-import { Textarea } from "../ui/textarea";
-import GradualBlurMemo from "../ui/GradualBlur";
-import GenerateButton from "../ui/GenerateButton";
-import ImageUploadBox from "../ui/ImageUploadBox";
 import AppGridClient from "./AppGridClient";
+import GenerateButton from "../ui/GenerateButton";
+import GradualBlurMemo from "../ui/GradualBlur";
+import ImageUploadBox from "../ui/ImageUploadBox";
 import { Switch } from "../ui/switch";
-import { useGenerateAppImage } from "@/src/hooks/useGenerateAppImage";
+import { Textarea } from "../ui/textarea";
 
 const popVariants: Variants = {
   initial: { opacity: 0, scale: 0.9, y: -6 },
@@ -105,7 +106,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <div className="h-full w-full overflow-y-auto p-2">
+              <div className="size-full overflow-y-auto p-2">
                 <AppGridClient compact={true} />
               </div>
               <GradualBlurMemo
@@ -133,7 +134,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
             {isVideo ? (
               <video
                 src={appCover}
-                className="h-full w-full rounded-3xl object-cover"
+                className="size-full rounded-3xl object-cover"
                 autoPlay
                 muted
                 loop
@@ -141,7 +142,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
               />
             ) : (
               <Image
-                className="h-full w-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
+                className="size-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
                 src={appCover}
                 alt={"app card small"}
                 width={150}
@@ -149,8 +150,8 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
               />
             )}
 
-            <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-              <p className="font-satoshi truncate text-sm font-medium text-accent">Quick Change</p>
+            <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+              <p className="truncate font-satoshi text-sm font-medium text-accent">Quick Change</p>
             </div>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
               <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
@@ -201,7 +202,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
 
                 if (param.fieldName === "prompt" || param.fieldName === "text") {
                   return (
-                    <div key={key} className="flex h-full w-full items-center justify-center">
+                    <div key={key} className="flex size-full items-center justify-center">
                       {" "}
                       {/* Add key here */}
                       <IconTerminal className="absolute left-4 top-2 text-white/80" />

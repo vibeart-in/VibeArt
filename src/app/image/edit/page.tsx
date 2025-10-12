@@ -1,10 +1,11 @@
 "use client";
-import BackgroundImage from "@/src/components/home/BackgroundImage";
-import { BackgroundPlus } from "@/src/components/ui/BackgroundPlus";
-import InputBox from "@/src/components/inputBox/InputBox";
-import DragAndDropBox from "@/src/components/ui/DragAndDropBox";
 import { useState } from "react";
+
+import BackgroundImage from "@/src/components/home/BackgroundImage";
+import InputBox from "@/src/components/inputBox/InputBox";
 import { ImageObject } from "@/src/components/inputBox/ReplicateParameters";
+import { BackgroundPlus } from "@/src/components/ui/BackgroundPlus";
+import DragAndDropBox from "@/src/components/ui/DragAndDropBox";
 
 const Page = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<ImageObject | null>(null);

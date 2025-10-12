@@ -1,12 +1,15 @@
 "use client";
 
+import { IconExclamationCircle } from "@tabler/icons-react";
+import { useMemo } from "react";
+
 import ChatView from "@/src/components/chat/ChatView";
 import InputBox from "@/src/components/inputBox/InputBox";
 import { useConversationMessages } from "@/src/hooks/useConversationMessages";
 import { conversationData } from "@/src/types/BaseType";
-import { useMemo } from "react";
+
 import MessageSkeleton from "./MessageSkeleton";
-import { IconExclamationCircle } from "@tabler/icons-react";
+
 
 export default function ConversationClient({ conversationId }: { conversationId: string }) {
   const { data: messages, isLoading, isError } = useConversationMessages(conversationId);
@@ -60,7 +63,7 @@ export default function ConversationClient({ conversationId }: { conversationId:
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-12 overflow-y-auto bg-background px-4 pb-4 pt-32 text-white">
+      <div className="flex size-full flex-col items-center justify-center gap-12 overflow-y-auto bg-background px-4 pb-4 pt-32 text-white">
         <MessageSkeleton />
         <MessageSkeleton />
       </div>
@@ -71,8 +74,8 @@ export default function ConversationClient({ conversationId }: { conversationId:
   if (isError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-background text-white">
-        <div className="flex h-64 w-64 flex-col items-center justify-center rounded-2xl bg-red-900/20 p-4 text-center">
-          <IconExclamationCircle className="h-8 w-8 text-red-500" />
+        <div className="flex size-64 flex-col items-center justify-center rounded-2xl bg-red-900/20 p-4 text-center">
+          <IconExclamationCircle className="size-8 text-red-500" />
           <p className="mt-2 font-semibold text-red-500">
             Conversation failed: <br></br>Please try again or create new one.
           </p>

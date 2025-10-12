@@ -1,6 +1,7 @@
 "use client";
-import { createClient } from "@/src/lib/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/src/lib/supabase/client";
 
 type ImageObject = { id: string | number; imageUrl: string };
 

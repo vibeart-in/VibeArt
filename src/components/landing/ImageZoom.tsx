@@ -1,8 +1,8 @@
 "use client";
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import clsx from "clsx";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import Image from "next/image";
-import clsx from "clsx";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 export type FocusRect = {
   leftPct: number;
@@ -162,7 +162,7 @@ export default function ImageMagnifyCard({
           height={520}
           src={src}
           alt="source"
-          className="h-full w-full object-cover"
+          className="size-full object-cover"
           draggable={false}
           priority
         />

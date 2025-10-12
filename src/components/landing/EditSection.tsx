@@ -1,10 +1,11 @@
 "use client";
 import { IconWand } from "@tabler/icons-react";
-import { GradientComponent } from "./Gradient";
+
 import { ImageCard3D } from "./3dImageCard";
+import { GradientComponent } from "./Gradient";
 import { InfiniteImageScroll } from "./SimpleCardScroll";
-import DragAndDropBox from "../ui/DragAndDropBox";
 import InputBox from "../inputBox/InputBox";
+import DragAndDropBox from "../ui/DragAndDropBox";
 
 const goldRing = {
   primary: "#ADB2B6",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { createClient } from "@/src/lib/supabase/client";
 import { NodeParam } from "@/src/types/BaseType";
 

@@ -1,5 +1,6 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+
 import { FlatCompat } from "@eslint/eslintrc";
 import tailwind from "eslint-plugin-tailwindcss";
 
@@ -13,6 +14,19 @@ const compat = new FlatCompat({
 export default [
   // ✅ Base Next.js + TypeScript rules
   ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
+  {
+    ignores: [
+      "node_modules/",
+      ".next/",
+      "dist/",
+      "build/",
+      "coverage/",
+      "public/",
+      "**/*.config.js",
+      "supabase/database.types.ts",
+      "next-env.d.ts",
+    ],
+  },
 
   // ✅ Tailwind CSS plugin for class order & naming
   {

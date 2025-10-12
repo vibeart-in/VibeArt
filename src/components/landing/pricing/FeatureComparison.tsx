@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
 import { Check, X, ImageIcon, Sparkles, ChevronDown, Coins, Zap, Crown, Edit2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
 
 // --- TYPE DEFINITIONS ---
 type PlanId = "free" | "basic" | "pro" | "creator";
@@ -233,17 +233,17 @@ const comparisonFeatures: ComparisonFeature[] = [
     name: "Compute Units",
     values: { free: "50/day", basic: "1000/mo", pro: "2500/mo", creator: "5000/mo" },
     isCredits: true,
-    icon: <Coins className="h-4 w-4 text-yellow-400" />,
+    icon: <Coins className="size-4 text-yellow-400" />,
   },
   {
     name: "Priority Queue",
     values: { free: false, basic: true, pro: true, creator: true },
-    icon: <Zap className="h-4 w-4 text-orange-400" />,
+    icon: <Zap className="size-4 text-orange-400" />,
   },
   {
     name: "Commercial License",
     values: { free: false, basic: true, pro: true, creator: true },
-    icon: <Crown className="h-4 w-4 text-yellow-500" />,
+    icon: <Crown className="size-4 text-yellow-500" />,
   },
   { name: "Concurrent Image Generations", values: { free: 1, basic: 2, pro: 4, creator: 4 } },
   { name: "Concurrent Video Generations", values: { free: 1, basic: 1, pro: 2, creator: 4 } },
@@ -257,7 +257,7 @@ const AnimatedListItem = ({ name, count, unit, premium = false }: AnimatedListIt
   <div className="flex items-center justify-between rounded-lg px-2 py-3 text-sm transition-colors hover:bg-zinc-700/30">
     <div className="flex items-center gap-2">
       <span className="text-zinc-200">{name}</span>
-      {premium && <Crown className="h-3 w-3 text-yellow-400" />}
+      {premium && <Crown className="size-3 text-yellow-400" />}
     </div>
     <div className="flex items-center gap-1.5 font-mono">
       <motion.span
@@ -311,18 +311,18 @@ const ComparisonTable = () => {
     if (typeof value === "boolean") {
       return value ? (
         <div className="flex justify-center">
-          <Check className="h-5 w-5 text-emerald-400" />
+          <Check className="size-5 text-emerald-400" />
         </div>
       ) : (
         <div className="flex justify-center">
-          <X className="h-5 w-5 text-red-400" />
+          <X className="size-5 text-red-400" />
         </div>
       );
     }
 
     return (
       <div className="flex items-center justify-center gap-2">
-        {feature.isCredits && <Coins className="h-4 w-4 text-yellow-400" />}
+        {feature.isCredits && <Coins className="size-4 text-yellow-400" />}
         <span className="font-medium text-white">{value}</span>
       </div>
     );
@@ -335,7 +335,7 @@ const ComparisonTable = () => {
 
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
-          <Sparkles className="h-5 w-5 text-blue-400" />
+          <Sparkles className="size-5 text-blue-400" />
           Plan Comparison
         </h3>
       </div>
@@ -348,7 +348,7 @@ const ComparisonTable = () => {
               {plans.map((plan) => (
                 <th key={plan.id} className="p-4 text-center font-semibold text-white">
                   <div
-                    className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 border-${plan.color}-500/30 bg-${plan.color}-500/10`}
+                    className={`border- inline-flex items-center gap-1 rounded-full border px-3 py-1${plan.color}-500/30 bg-${plan.color}-500/10`}
                   >
                     {plan.name}
                   </div>
@@ -396,7 +396,7 @@ export const FeatureComparison = () => {
       {/* Header with Dropdown */}
       <div className="relative mb-8 flex justify-center">
         <div className="inline-flex items-center gap-3 text-lg text-zinc-300">
-          <Coins className="h-5 w-5 text-yellow-400" />
+          <Coins className="size-5 text-yellow-400" />
           Monthly Generations with
           <div className="relative">
             <select
@@ -410,7 +410,7 @@ export const FeatureComparison = () => {
                 </option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-300" />
           </div>
         </div>
       </div>
@@ -419,19 +419,19 @@ export const FeatureComparison = () => {
       <div className="relative mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <FeatureListCard
           title="Image Generation"
-          icon={<ImageIcon className="h-5 w-5 text-blue-400" />}
+          icon={<ImageIcon className="size-5 text-blue-400" />}
           items={generationData.image}
           selectedPlan={selectedPlan}
         />
         <FeatureListCard
           title="Image Editing"
-          icon={<Edit2 className="h-5 w-5 text-purple-400" />}
+          icon={<Edit2 className="size-5 text-purple-400" />}
           items={generationData.edit}
           selectedPlan={selectedPlan}
         />
         <FeatureListCard
           title="Other Features"
-          icon={<Sparkles className="h-5 w-5 text-emerald-400" />}
+          icon={<Sparkles className="size-5 text-emerald-400" />}
           items={generationData.other}
           selectedPlan={selectedPlan}
         />

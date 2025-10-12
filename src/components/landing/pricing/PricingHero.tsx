@@ -1,9 +1,11 @@
 "use client";
-import { TabsContent } from "../../ui/tabs";
 import { motion, AnimatePresence, MotionConfig, Variants } from "motion/react";
 import { useEffect, useState } from "react";
+
 import { createClient } from "@/src/lib/supabase/client";
+
 import { PricingCard } from "./PricingCard";
+import { TabsContent } from "../../ui/tabs";
 
 export type PricingPlan = {
   id: string;

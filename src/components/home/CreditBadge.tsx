@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { IconDiamondFilled } from "@tabler/icons-react"; // change to your icon lib
+import { motion, AnimatePresence } from "motion/react";
+import { useState } from "react";
 
 interface CreditBadgeProps {
   credits: number;
@@ -18,7 +18,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
       {/* Badge Button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-2xl border transition-colors ${low ? "border-red-500 bg-red-600 text-white" : "border-white/10 bg-black text-white"}`}
+        className={`relative flex size-10 items-center justify-center rounded-2xl border transition-colors ${low ? "border-red-500 bg-red-600 text-white" : "border-white/10 bg-black text-white"}`}
         whileHover={{
           scale: 1.08,
           boxShadow: low ? "0px 0px 12px rgba(255,0,0,0.6)" : "0px 0px 12px rgba(217,232,37,0.5)",
@@ -26,7 +26,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
         animate={low ? { scale: [1, 1.06, 1] } : {}}
         transition={low ? { duration: 1.2, repeat: Infinity } : { duration: 0.2 }}
       >
-        <IconDiamondFilled className="h-5 w-5" />
+        <IconDiamondFilled className="size-5" />
         {/* Small pill badge */}
         <span
           className={`absolute -right-1 -top-1 rounded-full px-1 text-[10px] font-bold ${low ? "bg-white text-red-600" : "bg-accent text-black"}`}

@@ -1,4 +1,7 @@
 "use client";
+import { User } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
+
 import {
   Navbar,
   NavBody,
@@ -10,9 +13,8 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
-import { useState, useEffect } from "react";
 import { createClient } from "@/src/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
+
 
 export function NavbarLander() {
   const navItems = [

@@ -1,4 +1,3 @@
-import { RatioIcon } from "lucide-react";
 import {
   SparkleIcon,
   FrameCornersIcon,
@@ -7,6 +6,7 @@ import {
   ImageIcon,
   PaintBrushIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { RatioIcon } from "lucide-react";
 
 export function getTagColor(index: number): string {
   const colors = [

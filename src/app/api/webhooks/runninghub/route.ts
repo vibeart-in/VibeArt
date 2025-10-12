@@ -1,10 +1,7 @@
-// /api/webhook/runninghub/route.ts
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
-import path from "path";
-import sharp from "sharp";
-import IORedis from "ioredis";
 import { Queue } from "bullmq";
+import IORedis from "ioredis";
+import { NextResponse } from "next/server";
 
 const redisConnection = new IORedis(process.env.REDIS_URL!);
 const mediaQueue = new Queue("media-processing", { connection: redisConnection });

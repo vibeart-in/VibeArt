@@ -1,7 +1,8 @@
-import { cn } from "../lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User } from "@supabase/supabase-js";
 import Bavatar from "boring-avatars";
+
+import { cn } from "../lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export const UserProfile = ({
   className = "",

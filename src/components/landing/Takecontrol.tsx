@@ -1,11 +1,13 @@
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { MouseParallaxItem, MouseParallaxProvider } from "./MouseParallax";
+
+import { ImageCard3DType } from "@/src/types/BaseType";
+
+import { ImageCard3D } from "./3dImageCard";
+import CardScroll from "./CardScroll";
 import GlassPaneBG from "./GlassPaneBG";
 import { GradientComponent } from "./Gradient";
-import { ArrowRight } from "lucide-react";
-import { ImageCard3DType } from "@/src/types/BaseType";
-import CardScroll from "./CardScroll";
-import { ImageCard3D } from "./3dImageCard";
+import { MouseParallaxItem, MouseParallaxProvider } from "./MouseParallax";
 
 const blue = {
   primary: "#4460C5",
@@ -138,7 +140,7 @@ const Takecontrol = () => {
           </MouseParallaxItem>
           <MouseParallaxItem
             strength={15}
-            className="absolute inset-0 z-20 flex h-full w-full items-center justify-center pb-[120px]"
+            className="absolute inset-0 z-20 flex size-full items-center justify-center pb-[120px]"
           >
             <Image
               alt="Take control UI element"

@@ -1,6 +1,7 @@
 "use server";
 
 import { Environment, Paddle } from "@paddle/paddle-node-sdk";
+
 import { createClient } from "@/src/lib/supabase/server";
 
 const paddle = new Paddle(process.env.PADDLE_SECRET_TOKEN!, {
@@ -60,13 +61,13 @@ export async function updateSubscription(priceId: string, subscriptionId: string
   if (authError || !user) {
     return null;
   }
-  console.log("Subscription ID:", subscriptionId);
+  // console.log("Subscription ID:", subscriptionId);
   const subscription = paddle.subscriptions.update(subscriptionId, {
     items: [{ priceId: priceId, quantity: 1 }],
     prorationBillingMode: "prorated_immediately",
     collectionMode: "manual",
   });
   // Returns an updated subscription entity
-  console.log("Subscription updated:", subscription);
+  // console.log("Subscription updated:", subscription);
   return subscription;
 }

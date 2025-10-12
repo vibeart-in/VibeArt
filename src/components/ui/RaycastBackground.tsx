@@ -1,8 +1,10 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
 import { useState, useEffect } from "react";
 import UnicornScene from "unicornstudio-react";
+
+import { cn } from "@/src/lib/utils";
+
 import SplitText from "./SplitText";
 
 export const useWindowSize = () => {
@@ -63,7 +65,7 @@ export const RaycastComponent = () => {
           text="The First Multi-Model AI Image Agent!"
           // className="text-2xl font-semibold text-center"
           className={cn(
-            "font-satoshi text-wrap text-center font-medium",
+            "text-wrap text-center font-satoshi font-medium",
             "text-4xl sm:text-6xl lg:text-7xl xl:text-8xl",
           )}
           delay={100}

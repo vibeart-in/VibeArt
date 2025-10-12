@@ -1,6 +1,6 @@
 import { EventName, Environment, Paddle } from "@paddle/paddle-node-sdk";
-import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
 
 const paddle = new Paddle(process.env.PADDLE_SECRET_TOKEN!, {
   environment: Environment.sandbox,

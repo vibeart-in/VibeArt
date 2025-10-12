@@ -16,7 +16,7 @@ export const EnterpriseCTA = () => {
       </p>
       <button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-black transition-colors hover:bg-gray-200">
         <span>Contact Sales</span>
-        <ArrowRight className="h-4 w-4" />
+        <ArrowRight className="size-4" />
       </button>
     </div>
   );

@@ -1,8 +1,6 @@
-import { IconCopy, IconDiamondFilled, IconPhoto, IconExclamationCircle } from "@tabler/icons-react";
-
 export default function MessageSkeleton() {
   return (
-    <div className="flex w-full animate-pulse flex-col lg:flex-row max-w-7xl">
+    <div className="flex w-full max-w-7xl animate-pulse flex-col lg:flex-row">
       {/* Skeleton for Prompt Box */}
       <div className="h-fit w-full flex-shrink-0 overflow-hidden rounded-3xl bg-[#111111] lg:w-[320px]">
         {/* Skeleton for Prompt Text */}
@@ -21,7 +19,7 @@ export default function MessageSkeleton() {
 
           {/* Left: Copy + Credits */}
           <div className="flex items-center gap-4">
-            <div className="h-8 w-8 rounded-full bg-gray-700/50"></div>
+            <div className="size-8 rounded-full bg-gray-700/50"></div>
             <div className="h-4 w-12 rounded bg-gray-700/50"></div>
           </div>
 

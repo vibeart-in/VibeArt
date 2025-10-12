@@ -1,10 +1,12 @@
 "use client";
+import { ClockIcon, FireIcon } from "@phosphor-icons/react";
+import { IconDiamondFilled, IconStarFilled } from "@tabler/icons-react";
+import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
 import React, { useState } from "react";
-import { motion, AnimatePresence, Variants } from "motion/react";
+
 import { ModelData } from "@/src/types/BaseType";
-import { IconDiamondFilled, IconStarFilled } from "@tabler/icons-react";
-import { ClockIcon, FireIcon } from "@phosphor-icons/react";
+
 
 const cardVariants: Variants = {
   initial: { scale: 1 },
@@ -47,7 +49,7 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
 
   return (
     <motion.div
-      className="relative h-[210px] w-[210px] cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
+      className="relative size-[210px] cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
       initial="initial"
       whileHover="hover"
       variants={cardVariants}
@@ -64,7 +66,7 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
         {model.cover_image?.endsWith(".mp4") ? (
           <video
             src={model.cover_image}
-            className="h-full w-full object-cover"
+            className="size-full object-cover"
             autoPlay
             muted
             loop
@@ -84,7 +86,7 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
 
       {/* Overlay */}
       <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-[2px] transition-all hover:backdrop-blur-0">
-        <div className="relative flex h-full w-full flex-col items-center justify-center gap-2 px-3 py-2">
+        <div className="relative flex size-full flex-col items-center justify-center gap-2 px-3 py-2">
           <motion.p
             className="text-center font-satoshi font-bold leading-8 text-accent"
             style={{
@@ -143,13 +145,13 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
           <div
             className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs ${timeColor.bg} ${timeColor.border}`}
           >
-            <ClockIcon className={`h-3 w-3 ${timeColor.text}`} />
+            <ClockIcon className={`size-3 ${timeColor.text}`} />
             <span className={`${timeColor.text} select-none`}>{model.estimated_time} s</span>
           </div>
           <div
             className={`inline-flex items-center gap-1 rounded-lg bg-[rgba(6,6,6,0.65)] px-2 py-1 text-xs ${costColor.border}`}
           >
-            <IconDiamondFilled className={`h-3 w-3 ${costColor.text}`} />
+            <IconDiamondFilled className={`size-3 ${costColor.text}`} />
             <span className={`${costColor.text} select-none`}>{model.cost} credit</span>
           </div>
         </div>

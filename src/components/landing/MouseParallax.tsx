@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useRef, type ReactNode } from "react";
 import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "motion/react";
+import React, { createContext, useContext, useRef, type ReactNode } from "react";
 
 // 1. Define the shape of the context data
 interface ParallaxContextType {

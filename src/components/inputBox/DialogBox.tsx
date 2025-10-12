@@ -1,22 +1,16 @@
 "use client";
-import {
-  IconBolt,
-  IconBoltFilled,
-  IconBrandGoogle,
-  IconBrandGoogleFilled,
-  IconPig,
-  IconPigFilled,
-  IconSearch,
-} from "@tabler/icons-react";
+import { FireIcon, HighDefinitionIcon, PenNibIcon } from "@phosphor-icons/react";
+import { IconBolt, IconBrandGoogle, IconPig, IconSearch } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState, useMemo, useRef, useEffect } from "react";
+
+import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
+import FluxIcon from "@/src/icons/flux";
+import MidjourneyIcon from "@/src/icons/midjourney";
+import { ConversationType, ModelData } from "@/src/types/BaseType";
+
 import { Input } from "../ui/input";
 import ModelCard from "../ui/Modelcard";
-import { useState, useMemo, useRef, useEffect } from "react";
-import { ConversationType, ModelData } from "@/src/types/BaseType";
-import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { FireIcon, GoogleLogoIcon, HighDefinitionIcon, PenNibIcon } from "@phosphor-icons/react";
-import { AnimatePresence, motion } from "motion/react";
-import MidjourneyIcon from "@/src/icons/midjourney";
-import FluxIcon from "@/src/icons/flux";
 
 const TagIcon = ({ name }: { name: string }) => {
   // This is a placeholder for the actual icons.
@@ -24,10 +18,10 @@ const TagIcon = ({ name }: { name: string }) => {
   const icons: { [key: string]: React.ReactNode } = {
     All: <FireIcon size={20} weight="bold" />,
     google: <IconBrandGoogle size={20} />,
-    flux: <FluxIcon className="h-6 w-6" />,
+    flux: <FluxIcon className="size-6" />,
     value: <IconPig size={20} />,
     fast: <IconBolt size={20} />,
-    midjourney: <MidjourneyIcon className="h-6 w-6" />,
+    midjourney: <MidjourneyIcon className="size-6" />,
     highres: <HighDefinitionIcon size={20} weight="bold" />,
     desgin: <PenNibIcon size={20} weight="bold" />,
   };

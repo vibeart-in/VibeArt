@@ -1,3 +1,13 @@
+import {
+  DotsThreeVerticalIcon,
+  MinusCircleIcon,
+  PencilSimpleIcon,
+  SparkleIcon,
+} from "@phosphor-icons/react";
+import { IconTerminal } from "@tabler/icons-react";
+import { DicesIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import React, {
   forwardRef,
   useCallback,
@@ -7,9 +17,22 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { IconTerminal } from "@tabler/icons-react";
-import { AnimatePresence, motion } from "motion/react";
-import { Textarea } from "../ui/textarea";
+
+import { ConversationType, ModelData, NodeParam } from "@/src/types/BaseType";
+import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+
+import DialogBox from "./DialogBox";
+import { ImageObject } from "./ReplicateParameters";
+import AnimatedCounter from "../ui/AnimatedCounter";
+import CommonModal from "../ui/CommonModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import GradualBlurMemo from "../ui/GradualBlur";
+import ImageUploadBox from "../ui/ImageUploadBox";
 import {
   Select,
   SelectContent,
@@ -18,30 +41,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import AnimatedCounter from "../ui/AnimatedCounter";
-import { ConversationType, ModelData, NodeParam } from "@/src/types/BaseType";
-import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import {
-  DotsThreeVerticalIcon,
-  MinusCircleIcon,
-  PencilSimpleIcon,
-  SparkleIcon,
-} from "@phosphor-icons/react";
 import { Switch } from "../ui/switch";
+import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import ImageUploadBox from "../ui/ImageUploadBox";
-import { ImageObject } from "./ReplicateParameters";
-import { DicesIcon } from "lucide-react";
-import { getRandomPromptForModel } from "@/src/utils/client/prompts";
-import CommonModal from "../ui/CommonModal";
-import DialogBox from "./DialogBox";
-import GradualBlurMemo from "../ui/GradualBlur";
 
 interface RunninghubParametersProps {
   parameters: NodeParam[];
@@ -221,7 +223,7 @@ const OtherParameters = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="rounded-2xl p-2 transition hover:bg-white/10">
-              <DotsThreeVerticalIcon className="h-5 w-5 text-white" />
+              <DotsThreeVerticalIcon className="size-5 text-white" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-40 bg-black/90 backdrop-blur-sm">
@@ -477,7 +479,7 @@ export const RunninghubParameters = forwardRef<
       <AnimatePresence>
         {isDialogOpen && (
           <motion.div
-            className="absolute mb-2 h-full w-full overflow-hidden"
+            className="absolute mb-2 size-full overflow-hidden"
             initial={{
               opacity: 0,
               height: 0,
@@ -495,7 +497,7 @@ export const RunninghubParameters = forwardRef<
               ease: "easeInOut",
             }}
           >
-            <div className="h-full w-full overflow-y-auto p-2">
+            <div className="size-full overflow-y-auto p-2">
               <DialogBox
                 conversationType={ConversationType.ADVANCE}
                 onSelectModel={handleModelSelect}
@@ -524,7 +526,7 @@ export const RunninghubParameters = forwardRef<
           >
             <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
             <Image
-              className="h-full w-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
+              className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
               src={
                 selectedModels?.cover_image ||
                 "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
@@ -533,7 +535,7 @@ export const RunninghubParameters = forwardRef<
               width={150}
               height={95}
             />
-            <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+            <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
               <p className="truncate font-satoshi text-sm font-medium text-accent">
                 {selectedModels?.model_name || "Select Model"}
               </p>
@@ -551,13 +553,13 @@ export const RunninghubParameters = forwardRef<
           <div className="group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100">
             <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
             <Image
-              className="h-full w-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
+              className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
               src={"https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"}
               alt={"selectedModel.model_name"}
               width={150}
               height={95}
             />
-            <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+            <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
               <p className="truncate font-satoshi text-sm font-medium text-accent">Noob xl</p>
             </div>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">

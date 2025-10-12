@@ -1,13 +1,18 @@
 "use client";
+import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { GradientComponent } from "./Gradient";
+import { useState, useEffect } from "react";
+
+import { heroSlides, HeroSlide } from "@/src/lib/heroConfig";
+import { ImageCard3DType } from "@/src/types/BaseType";
+
 import CardScroll from "./CardScroll";
 import GlassPaneBG from "./GlassPaneBG";
+import { GradientComponent } from "./Gradient";
 import InputBox from "../inputBox/InputBox";
-import { ImageCard3DType } from "@/src/types/BaseType";
-import { motion, AnimatePresence } from "motion/react";
-import { useState, useEffect } from "react";
-import { heroSlides, HeroSlide } from "@/src/lib/heroConfig";
+
+
+
 
 const cardData1: ImageCard3DType[] = [
   {
@@ -229,7 +234,7 @@ const Hero = () => {
             className="absolute inset-0"
           >
             <Image
-              className="absolute inset-0 h-full w-full object-contain"
+              className="absolute inset-0 size-full object-contain"
               src={currentSlide.image}
               alt="Cover of an high quality AI images"
               priority
@@ -255,7 +260,7 @@ const Hero = () => {
                 delay: 0.3,
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
-              className="font-satoshi mb-3 max-w-4xl text-center text-2xl font-medium leading-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl"
+              className="mb-3 max-w-4xl text-center font-satoshi text-2xl font-medium leading-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl"
             >
               {currentSlide.title}
             </motion.h1>
@@ -281,7 +286,7 @@ const Hero = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -301,7 +306,7 @@ const Hero = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </motion.button>
@@ -320,7 +325,7 @@ const Hero = () => {
               whileTap={{ scale: 0.9 }}
             >
               <div
-                className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                className={`size-2 rounded-full transition-all duration-300 ${
                   index === currentSlideIndex
                     ? "w-6 bg-white/80"
                     : "bg-white/40 group-hover:bg-white/60"

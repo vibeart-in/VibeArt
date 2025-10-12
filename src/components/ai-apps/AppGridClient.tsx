@@ -1,11 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/src/lib/supabase/client";
 import { useState } from "react";
 import Masonry from "react-masonry-css";
-import AppCard from "./AppCard";
+
+import { createClient } from "@/src/lib/supabase/client";
 import { getTagColor } from "@/src/utils/server/utils";
+
+import AppCard from "./AppCard";
+
 interface AiApp {
   id: string;
   app_name: string;

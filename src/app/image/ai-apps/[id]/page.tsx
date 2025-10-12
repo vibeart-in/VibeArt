@@ -1,17 +1,18 @@
 // app/image/ai-apps/[id]/page.tsx
 
-import Image from "next/image";
 import Avatar from "boring-avatars";
+import Image from "next/image";
 
-import AppInputBox from "@/src/components/ai-apps/AppInputBox";
 import AppExampleGrid from "@/src/components/ai-apps/AppExampleGrid";
 import AppGenerationHistory from "@/src/components/ai-apps/AppGenerationHistory";
+import AppInputBox from "@/src/components/ai-apps/AppInputBox";
 import { createClient } from "@/src/lib/supabase/server";
-import { getTagColor } from "@/src/utils/server/utils";
 import { cn } from "@/src/lib/utils";
+import { getTagColor } from "@/src/utils/server/utils";
+import { ReactNode } from "react";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const { data: app, error } = await supabase.rpc("get_ai_app_by_id", {
@@ -45,7 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           {/* left column */}
           <div className="flex flex-shrink-0 flex-col gap-4 lg:w-[400px]">
             {/* title + description */}
-            <h1 className="font-satoshi text-wrap text-3xl font-medium leading-snug">
+            <h1 className="text-wrap font-satoshi text-3xl font-medium leading-snug">
               {app.app_name}
             </h1>
             <p className="pr-8 text-base">{app.description}</p>
@@ -95,7 +96,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 alt="cover"
                 width={500}
                 height={500}
-                className="h-auto max-h-[500px] w-auto rounded-[44px] object-contain"
+                className="size-auto max-h-[500px] rounded-[44px] object-contain"
                 style={{
                   boxShadow: "0px 0px 12px 8px rgba(0,0,0,1)",
                 }}
@@ -113,6 +114,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       {/* input box footer */}
       <footer className="fixed bottom-4 left-1/2 z-20 flex -translate-x-1/2 justify-center px-2">
         <AppInputBox
+          //@ts-ignore
           appParameters={app.parameters || []}
           appId={app.id}
           appCost={app.cost}

@@ -1,10 +1,11 @@
 "use client";
 
-import GlassModal from "@/src/components/ui/GlassModal";
-import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, ReactNode } from "react";
+
+import GlassModal from "@/src/components/ui/GlassModal";
 
 interface AuthTemplateProps {
   children: ReactNode;

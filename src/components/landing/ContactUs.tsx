@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import GlassPaneBG from "./GlassPaneBG";
 
 const ContactUs = () => {
@@ -75,7 +76,7 @@ const ContactUs = () => {
                 alt="An astronaut and an anime-style girl with wings sitting on a spaceship"
                 width={300}
                 height={300}
-                className="mb-4 mt-4 aspect-square h-[600px] w-[800px] rounded-3xl object-cover object-bottom"
+                className="my-4 aspect-square h-[600px] w-[800px] rounded-3xl object-cover object-bottom"
               />
               <div
                 className="z-1 pointer-events-none absolute inset-0 overflow-hidden opacity-60"

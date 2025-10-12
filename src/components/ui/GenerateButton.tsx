@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { SparkleIcon, SpinnerBallIcon } from "@phosphor-icons/react";
+import { motion } from "motion/react";
 
 type Props = {
   handleGenerateClick: () => void;

@@ -1,6 +1,6 @@
 "use client";
-import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import Image from "next/image";
 import { useEffect } from "react";
 
 interface BackgroundImageProps {

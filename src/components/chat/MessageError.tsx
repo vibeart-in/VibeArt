@@ -45,7 +45,7 @@ export default function ErrorBox({
           <div className="mx-4 rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 shadow-lg backdrop-blur-md">
             <div className="flex items-start gap-3 text-red-200">
               <svg
-                className="mt-0.5 h-5 w-5 text-red-300"
+                className="mt-0.5 size-5 text-red-300"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"

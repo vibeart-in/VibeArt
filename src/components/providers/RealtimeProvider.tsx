@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { createClient } from "@/src/lib/supabase/client";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { createClient } from "@/src/lib/supabase/client";
+
 
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<null | { id: string }>(null);

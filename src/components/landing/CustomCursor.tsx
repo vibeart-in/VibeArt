@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect } from "react";
 import { motion, useMotionValue, useSpring, Variants } from "motion/react";
+import React, { useEffect } from "react";
 
 interface CustomCursorProps {
   isVisible: boolean;
@@ -56,7 +56,7 @@ export const CustomCursor = ({ isVisible }: CustomCursorProps) => {
         translateY: springY,
       }}
       // --- Styling for Glassmorphism ---
-      className="pointer-events-none fixed left-0 top-0 z-50 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-base font-semibold text-white backdrop-blur-sm"
+      className="pointer-events-none fixed left-0 top-0 z-50 flex size-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-base font-semibold text-white backdrop-blur-sm"
     >
       Drag me
     </motion.div>

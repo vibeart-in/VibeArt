@@ -1,7 +1,9 @@
-import GlassPaneBG from "./GlassPaneBG";
-import * as motion from "motion/react-client";
-import BackgroundImage from "../home/BackgroundImage";
 import { Variants } from "motion/react";
+import * as motion from "motion/react-client";
+
+import GlassPaneBG from "./GlassPaneBG";
+import BackgroundImage from "../home/BackgroundImage";
+
 
 // Define animation variants outside the component for better performance and readability
 const containerVariants: Variants = {

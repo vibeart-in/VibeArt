@@ -589,13 +589,7 @@
 }
 
 .ai-textbox-gradient {
-  background: linear-gradient(
-    120deg,
-    #d9e747,
-    #f0f0c0,
-    #b7c835,
-    #d9e747
-  );
+  background: linear-gradient(120deg, #d9e747, #f0f0c0, #b7c835, #d9e747);
   background-size: 300% 300%;
   animation: aiTextGradient 1.5s ease-in-out infinite;
 }
@@ -611,4 +605,3 @@
     background-position: 0% 50%;
   }
 }
-

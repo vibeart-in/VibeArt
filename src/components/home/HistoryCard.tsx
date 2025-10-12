@@ -1,9 +1,10 @@
-import { ConversationType } from "@/src/types/BaseType";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
+
+import { ConversationType } from "@/src/types/BaseType";
 
 interface HistoryCardProps {
   id: string;
@@ -56,7 +57,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
   return (
     <motion.div
-      className="group relative h-[66px] w-[66px]"
+      className="group relative size-[66px]"
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       initial="rest"
@@ -74,7 +75,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
         aria-label={title}
       >
         <div
-          className={`relative h-[55px] w-[55px] overflow-hidden rounded-2xl border-2 bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)] ring-1 ring-white/10 transition-colors duration-200 ${isActive ? "border-accent" : "border-transparent"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20`}
+          className={`relative size-[55px] overflow-hidden rounded-2xl border-2 bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)] ring-1 ring-white/10 transition-colors duration-200 ${isActive ? "border-accent" : "border-transparent"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20`}
           tabIndex={0}
         >
           {imageUrl ? (
@@ -84,7 +85,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 muted
                 loop
                 playsInline
-                className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${
+                className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
                   hovered ? "scale-[1.06]" : "scale-100"
                 }`}
               />
@@ -95,7 +96,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 width={55}
                 height={55}
                 sizes="55px"
-                className={`absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out ${
+                className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
                   hovered ? "scale-[1.06]" : "scale-100"
                 }`}
                 priority={false}

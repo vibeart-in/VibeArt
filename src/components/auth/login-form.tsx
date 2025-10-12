@@ -1,12 +1,14 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
-import { createClient } from "@/src/lib/supabase/client";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { createClient } from "@/src/lib/supabase/client";
+import { cn } from "@/src/lib/utils";
+
 import SignInWithGoogleButton from "./google-login";
 import GlassModal from "../ui/GlassModal";
 import { NavbarLogo } from "../ui/resizable-navbar";
@@ -39,7 +41,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   };
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center">
+    <div className="relative flex size-full items-center justify-center">
       <GlassModal width={40} height={550} count={16} className="z-50" />
 
       <div className="absolute z-50">

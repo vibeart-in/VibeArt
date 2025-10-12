@@ -22,7 +22,7 @@ export function CopyButton({ userPrompt }: { userPrompt: string }) {
     <button
       onClick={doCopy}
       aria-label="Copy prompt"
-      className="flex h-8 w-8 items-center justify-center rounded-full"
+      className="flex size-8 items-center justify-center rounded-full"
     >
       <AnimatePresence mode="wait" initial={false}>
         {copied ? (
@@ -32,7 +32,7 @@ export function CopyButton({ userPrompt }: { userPrompt: string }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.6, opacity: 0 }}
           >
-            <IconCheck className="h-4 w-4 text-green-400" />
+            <IconCheck className="size-4 text-green-400" />
           </motion.span>
         ) : (
           <motion.span
@@ -41,7 +41,7 @@ export function CopyButton({ userPrompt }: { userPrompt: string }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
           >
-            <IconCopy className="h-4 w-4 text-white/70" />
+            <IconCopy className="size-4 text-white/70" />
           </motion.span>
         )}
       </AnimatePresence>

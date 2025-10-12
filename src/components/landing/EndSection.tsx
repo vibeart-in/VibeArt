@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { MouseParallaxItem, MouseParallaxProvider } from "./MouseParallax";
-import HorizontalImageScroller from "./HorizontalImageScroller";
 import Link from "next/link";
+
+import HorizontalImageScroller from "./HorizontalImageScroller";
+import { MouseParallaxItem, MouseParallaxProvider } from "./MouseParallax";
 
 const sampleImages = [
   {
@@ -84,7 +85,7 @@ const EndSection = () => {
         </MouseParallaxItem>
         <MouseParallaxItem
           strength={25}
-          className="absolute inset-0 flex h-full w-full items-center justify-center"
+          className="absolute inset-0 flex size-full items-center justify-center"
         >
           <p className="absolute left-0 top-44 z-50 ml-12 text-[100px] font-bold text-accent">
             <span>GENERATE</span> <span className="z-10">WITH</span>

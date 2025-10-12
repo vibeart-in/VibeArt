@@ -1,13 +1,14 @@
 "use client";
-import { useState } from "react";
-import ImageCard from "@/src/components/ui/imageCard/ImageCard";
 import { IconCopy, IconDiamondFilled, IconCheck } from "@tabler/icons-react";
-import { conversationData } from "@/src/types/BaseType";
-import { ImageCardLoading } from "../ui/ImageCardLoading";
 import { motion, AnimatePresence } from "motion/react";
-import Image from "next/image";
-import ErrorBox from "./MessageError";
+import { useState } from "react";
+
+import ImageCard from "@/src/components/ui/imageCard/ImageCard";
+import { conversationData } from "@/src/types/BaseType";
 import { extractParams } from "@/src/utils/client/utils";
+
+import ErrorBox from "./MessageError";
+import { ImageCardLoading } from "../ui/ImageCardLoading";
 
 // Helper function remains the same
 const getLoadingMessage = (status: string) => {
@@ -76,7 +77,7 @@ export default function MessageTurn({ message }: MessageTurnProps) {
             <div
               onClick={handleCopy}
               title="Copy prompt"
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20"
+              className="flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {copied ? (
@@ -87,7 +88,7 @@ export default function MessageTurn({ message }: MessageTurnProps) {
                     exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
                     transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   >
-                    <IconCheck className="h-4 w-4 text-green-400" />{" "}
+                    <IconCheck className="size-4 text-green-400" />{" "}
                   </motion.div>
                 ) : (
                   <motion.div
@@ -97,13 +98,13 @@ export default function MessageTurn({ message }: MessageTurnProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <IconCopy className="h-4 w-4 text-white/70 transition-colors hover:text-accent" />{" "}
+                    <IconCopy className="size-4 text-white/70 transition-colors hover:text-accent" />{" "}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
             <p className="flex select-none items-center gap-1.5 text-xs font-medium text-white/70">
-              <IconDiamondFilled className="h-4 w-4 text-accent/80" />
+              <IconDiamondFilled className="size-4 text-accent/80" />
               {credit_cost}
             </p>
           </div>

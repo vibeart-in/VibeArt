@@ -1,7 +1,3 @@
-import Image from "next/image";
-import * as motion from "motion/react-client";
-import GlassPaneBG from "./GlassPaneBG";
-import { GradientComponent } from "./Gradient";
 import {
   DiscordLogoIcon,
   GithubLogoIcon,
@@ -9,6 +5,12 @@ import {
   LinkedinLogoIcon,
   TwitterLogoIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import * as motion from "motion/react-client";
+import Image from "next/image";
+
+import GlassPaneBG from "./GlassPaneBG";
+import { GradientComponent } from "./Gradient";
+
 
 // --- DATA FOR EASY UPDATES ---
 // This makes managing links simple. Just edit this list.

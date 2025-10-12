@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence, type Variants } from "motion/react";
 import { IconDownload, IconTrash, IconWand } from "@tabler/icons-react";
+import { motion, AnimatePresence, type Variants } from "motion/react";
+import Image from "next/image";
+import React, { useCallback, useMemo, useState } from "react";
+
 import { ImagePlaceholder } from "./ImagePlaceholder";
 
 const overlayVariants: Variants = {
@@ -94,7 +95,7 @@ export const MediaCardView = ({
       animate="rest"
       // style={{ aspectRatio: aspect }}
     >
-      <div className="relative h-full w-full overflow-hidden bg-black/50">
+      <div className="relative size-full overflow-hidden bg-black/50">
         <AnimatePresence>
           {isPlaceholderVisible && (
             <div className="min-w-[500px]">
@@ -112,7 +113,7 @@ export const MediaCardView = ({
           <img
             src={thumbnailUrl}
             alt={altText + " thumbnail"}
-            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+            className="absolute inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isThumbnailLoaded && !isFullLoaded ? 1 : 0 }}
             onLoad={handleThumbnailLoad}
             onError={handleThumbnailLoad}
@@ -137,7 +138,7 @@ export const MediaCardView = ({
           <img
             src={mediaUrl}
             alt={altText}
-            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+            className="absolute inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoad={handleFullLoad}
             onError={handleFullLoad}
@@ -149,7 +150,7 @@ export const MediaCardView = ({
             alt={altText}
             width={width}
             height={height}
-            className="inset-0 h-full w-full object-cover transition-opacity duration-300"
+            className="inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             // Use Next/Image's completion callback for reliable load detection
             onLoad={handleFullLoad}

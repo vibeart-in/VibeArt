@@ -1,7 +1,9 @@
-import { NodeParam } from "@/src/types/BaseType";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
-import ImageCard from "../ui/imageCard/ImageCard";
 import { motion, Variants } from "motion/react";
+
+import { NodeParam } from "@/src/types/BaseType";
+
+import ImageCard from "../ui/imageCard/ImageCard";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 
 // Animation variants for the parameters section that appears at the bottom
@@ -54,7 +56,7 @@ const AppGenerationCard = ({
       {/* Top section with Images */}
       <div className="flex w-full items-center justify-between gap-2">
         {/* Input Section */}
-        <div className="flex h-full w-full flex-col gap-2">
+        <div className="flex size-full flex-col gap-2">
           <p className="text-center text-neutral-400">Input</p>
           {inputImageUrl ? ( // Check if the URL exists
             <ImageCard
@@ -73,7 +75,7 @@ const AppGenerationCard = ({
         <ArrowRightIcon size={40} className="flex-shrink-0 text-neutral-500" />
 
         {/* Output Section */}
-        <div className="flex h-full w-full flex-col gap-2">
+        <div className="flex size-full flex-col gap-2">
           <p className="text-center text-neutral-400">Output</p>
           {status === "pending" ? (
             // If the status is pending, show the loading skeleton
@@ -88,7 +90,7 @@ const AppGenerationCard = ({
             />
           ) : (
             // Fallback for succeeded but missing image (error case)
-            <div className="flex aspect-square w-full items-center justify-center ...">
+            <div className="... flex aspect-square w-full items-center justify-center">
               <p className="text-neutral-500">Image Failed</p>
             </div>
           )}

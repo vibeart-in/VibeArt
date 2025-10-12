@@ -1,8 +1,5 @@
 import { Database } from "@/supabase/database.types";
 
-// Your existing MessageType
-
-// The new type for a group
 export interface MessageGroupType {
   input_images: conversationImageObject[];
   turns: conversationData[]; // The array of messages within this group

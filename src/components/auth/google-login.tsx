@@ -1,8 +1,9 @@
 "use client";
-import { Button } from "@/src/components/ui/button";
-import { createClient } from "@/src/lib/supabase/client";
 import Image from "next/image";
 import React from "react";
+
+import { Button } from "@/src/components/ui/button";
+import { createClient } from "@/src/lib/supabase/client";
 
 const SignInWithGoogleButton = () => {
   const signInWithGoogle = async () => {
@@ -24,7 +25,7 @@ const SignInWithGoogleButton = () => {
       <Image
         src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/Google_Favicon_2025.webp"
         alt="Google logo"
-        className="h-4 w-4"
+        className="size-4"
         width={25}
         height={25}
       />

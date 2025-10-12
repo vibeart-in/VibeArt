@@ -1,10 +1,12 @@
 // src/components/ai-apps/AppGenerationGrid.tsx
 
 "use client";
-import Masonry from "react-masonry-css";
 import { motion } from "motion/react";
+import Masonry from "react-masonry-css";
+
 // Import the type from the hook for consistency
 import { GenerationWithSignedUrls } from "@/src/hooks/useAppGenerations";
+
 import AppGenerationCard from "./AppGenerationCard";
 
 const AppGenerationGrid = ({

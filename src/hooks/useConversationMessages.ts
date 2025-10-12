@@ -1,7 +1,8 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { conversationData, conversationImageObject } from "../types/BaseType"; // Make sure to import ImageObject
+
 import { createClient } from "../lib/supabase/client";
+import { conversationData, conversationImageObject } from "../types/BaseType"; // Make sure to import ImageObject
 import { getSignedUrls } from "../utils/client/getSignedUrls";
 
 //

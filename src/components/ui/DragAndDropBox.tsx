@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { IconUpload, IconX } from "@tabler/icons-react";
+import { motion, AnimatePresence } from "motion/react";
+import React, { useRef, useState } from "react";
+
 import { uploadImage } from "@/src/utils/server/UploadImage";
 
 export default function DragAndDropBox({
@@ -124,7 +125,7 @@ export default function DragAndDropBox({
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
-            className="h-full w-full rounded-3xl border-2 border-white/20 object-cover"
+            className="size-full rounded-3xl border-2 border-white/20 object-cover"
           />
           <button onClick={handleRemoveImage} className="absolute -right-8 -top-6">
             <IconX size={32} className="custom-box hover:text-accent" />
@@ -144,8 +145,8 @@ export default function DragAndDropBox({
           whileTap={{ scale: uploadedImageUrl ? 1 : 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <div className="pointer-events-none absolute inset-0 z-20 flex h-full w-full items-center justify-center">
-            <svg viewBox="0 0 400 420" className="absolute inset-0 h-full w-full" aria-hidden>
+          <div className="pointer-events-none absolute inset-0 z-20 flex size-full items-center justify-center">
+            <svg viewBox="0 0 400 420" className="absolute inset-0 size-full" aria-hidden>
               <rect
                 x="4"
                 y="4"
@@ -168,7 +169,7 @@ export default function DragAndDropBox({
           </div>
 
           <motion.div
-            className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[62px]"
+            className="relative flex size-full flex-col items-center justify-center overflow-hidden rounded-[62px]"
             animate={{
               backgroundColor: isDragging
                 ? "rgba(0, 0, 0, 0.4)"
@@ -185,7 +186,7 @@ export default function DragAndDropBox({
                   {particles.current.map((p, i) => (
                     <motion.div
                       key={i}
-                      className="absolute h-2 w-2 rounded-full bg-white/30"
+                      className="absolute size-2 rounded-full bg-white/30"
                       initial={{ opacity: 0, scale: 0, x: p.x, y: p.y }}
                       animate={{
                         opacity: [0, 1, 0],
@@ -206,11 +207,11 @@ export default function DragAndDropBox({
             </AnimatePresence>
 
             {uploading ? (
-              <div className="relative flex h-full w-full items-center justify-center">
+              <div className="relative flex size-full items-center justify-center">
                 <div className="absolute inset-6 overflow-hidden rounded-[52px] border border-white/10 bg-transparent">
-                  <div className="relative h-full w-full">
+                  <div className="relative size-full">
                     <motion.div
-                      className="absolute -left-1/2 h-[700px] w-[700px] -translate-x-1/2 rounded-[40%] border border-accent/90 bg-accent/80"
+                      className="absolute -left-1/2 size-[700px] -translate-x-1/2 rounded-[40%] border border-accent/90 bg-accent/80"
                       initial={{ top: "100%", rotate: 0 }}
                       animate={{
                         top: `${100 - progress}%`,
@@ -245,7 +246,7 @@ export default function DragAndDropBox({
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <IconUpload className="mb-4 h-12 w-12 text-white/70" />
+                  <IconUpload className="mb-4 size-12 text-white/70" />
                 </motion.div>
 
                 <motion.div

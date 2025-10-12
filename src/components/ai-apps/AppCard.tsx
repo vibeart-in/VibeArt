@@ -1,7 +1,8 @@
 "use client";
-import Image from "next/image";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
+
 import { cn } from "@/src/lib/utils";
 
 const AppCard = ({
@@ -42,7 +43,7 @@ const AppCard = ({
       <Link href={`/image/ai-apps/${id}`}>
         {/* Media (Image or Video) */}
         <motion.div
-          className="h-full w-full"
+          className="size-full"
           variants={{
             rest: { scale: 1 },
             hover: { scale: 0.98 },

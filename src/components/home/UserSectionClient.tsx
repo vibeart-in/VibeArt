@@ -2,10 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { useNavInfo } from "@/src/hooks/useNavInfo";
+
 import CreditBadge from "@/src/components/home/CreditBadge";
-import { UserProfileDropdown } from "@/src/components/ui/UserProfileDropdown";
 import { NavbarButton } from "@/src/components/ui/resizable-navbar";
+import { UserProfileDropdown } from "@/src/components/ui/UserProfileDropdown";
+import { useNavInfo } from "@/src/hooks/useNavInfo";
 
 export function UserSectionClient() {
   const { data } = useNavInfo();

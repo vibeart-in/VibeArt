@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "motion/react";
+import React, { useRef, useCallback, useEffect } from "react";
 
 interface ImageCard3DProps {
   bottomImageUrl: string;
@@ -154,7 +154,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
       >
         {/* Layer 1: Bottom Image */}
         <div
-          className="absolute inset-0 h-full w-full rounded-[16px] bg-cover bg-center md:rounded-[26px]"
+          className="absolute inset-0 size-full rounded-[16px] bg-cover bg-center md:rounded-[26px]"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
             boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 5px 0px, rgba(0, 0, 0, 0.1) 0px 10px 3px 0px",
@@ -164,7 +164,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
 
         {/* Layer 2: Top Image (Parallax). Use z for real depth instead of invalid transform strings */}
         <motion.div
-          className="absolute inset-0 h-full w-full bg-contain bg-center bg-no-repeat [filter:drop-shadow(4px_4px_10px_rgba(0,0,0,0.5))]"
+          className="absolute inset-0 size-full bg-contain bg-center bg-no-repeat [filter:drop-shadow(4px_4px_10px_rgba(0,0,0,0.5))]"
           style={{
             backgroundImage: `url(${topImageUrl})`,
             x: topImageTranslateX,
@@ -178,7 +178,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
 
         {/* Layer 3: Text (Parallax) */}
         <motion.p
-          className="font-satoshi absolute -right-1/2 bottom-0 w-full font-medium text-white"
+          className="absolute -right-1/2 bottom-0 w-full font-satoshi font-medium text-white"
           style={{
             x: textTranslateX,
             y: textTranslateY,
@@ -195,7 +195,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
         {/* Layer 4: Glare */}
         {!prefersReducedMotion && (
           <motion.div
-            className="pointer-events-none absolute inset-0 h-full w-full rounded-[16px] mix-blend-soft-light md:rounded-[26px]"
+            className="pointer-events-none absolute inset-0 size-full rounded-[16px] mix-blend-soft-light md:rounded-[26px]"
             style={{ background: glareBackground }}
           />
         )}

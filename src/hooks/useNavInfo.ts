@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/src/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
+
+import { createClient } from "@/src/lib/supabase/client";
 
 // Define a type for what our hook will return
 export type NavInfoData = {

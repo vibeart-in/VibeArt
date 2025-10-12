@@ -197,11 +197,12 @@
 // }
 
 // file: /app/api/webhook/route.ts (or your file)
+import { createClient } from "@supabase/supabase-js";
+import { Queue } from "bullmq";
+import IORedis from "ioredis";
 import { NextResponse } from "next/server";
 import { Prediction, validateWebhook } from "replicate";
-import { createClient } from "@supabase/supabase-js";
-import IORedis from "ioredis";
-import { Queue } from "bullmq";
+
 import { Database } from "@/supabase/database.types";
 
 const getSupabaseAdmin = () => {

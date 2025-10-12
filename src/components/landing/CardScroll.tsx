@@ -1,12 +1,15 @@
 "use client";
 
+import useEmblaCarousel from "embla-carousel-react";
 import { useMotionValue } from "motion/react";
 import { useRef, useEffect, useState, ReactElement } from "react";
-import { ImageCard3D } from "./3dImageCard"; // Adjust path if necessary
-import useEmblaCarousel from "embla-carousel-react";
-import { CustomCursor } from "./CustomCursor";
-import { ImageCard3DType } from "@/src/types/BaseType";
+
 import { cn } from "@/src/lib/utils";
+import { ImageCard3DType } from "@/src/types/BaseType";
+
+import { ImageCard3D } from "./3dImageCard"; // Adjust path if necessary
+import { CustomCursor } from "./CustomCursor";
+
 
 interface CardScrollProps {
   cardData: ImageCard3DType[];
@@ -122,7 +125,7 @@ const CardScroll = ({
       <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-black/30 to-transparent md:w-32" />
       <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-black/30 to-transparent md:w-32" />
 
-      <div className="embla h-full w-full" ref={emblaRef}>
+      <div className="embla size-full" ref={emblaRef}>
         <div className="embla__container h-full items-center">
           {cardData.map((card, index) => (
             <div

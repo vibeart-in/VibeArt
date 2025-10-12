@@ -1,7 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import { XIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "motion/react";
+
 import { LoginForm } from "../auth/login-form";
 
 // import { PricingModal } from "./pricing-modal"; // Example component

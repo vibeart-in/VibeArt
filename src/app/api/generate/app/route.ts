@@ -1,6 +1,7 @@
 // app/api/generate/app/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/src/lib/supabase/server";
 
 // Assuming NodeParam is available at this path or define it here
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Merge app's default parameters with client's overridden parameters.
     // Also prepare parameters for RunningHub. This needs to replace permanent image paths with signed URLs.
-    console.log("clientParameters1", clientParameters);
+    // console.log("clientParameters1", clientParameters);
 
     // Create a deep clone so we don’t mutate clientParameters
     const parametersForRunningHub = structuredClone(clientParameters);
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
     console.log("parametersForRunningHub", parametersForRunningHub); // ✅ signed URLs
 
     // 3. Find or create a conversation for this user and app
-    let { data: conversation, error: convError } = await supabase
+    const { data: conversation, error: convError } = await supabase
       .from("conversations")
       .select("id")
       .eq("user_id", user.id)

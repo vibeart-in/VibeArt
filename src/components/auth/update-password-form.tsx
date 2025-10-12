@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
-import { createClient } from "@/src/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Button } from "@/src/components/ui/button";
 import {
   Card,
@@ -12,8 +13,8 @@ import {
 } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { createClient } from "@/src/lib/supabase/client";
+import { cn } from "@/src/lib/utils";
 
 export function UpdatePasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [password, setPassword] = useState("");

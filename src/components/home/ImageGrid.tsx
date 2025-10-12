@@ -1,9 +1,9 @@
 "use client";
 import Masonry from "react-masonry-css";
-import ImageCard from "../ui/imageCard/ImageCard";
+
 import { ExampleImageType } from "@/src/types/BaseType";
 
-
+import ImageCard from "../ui/imageCard/ImageCard";
 
 type ImageGalleryProps = {
   images: ExampleImageType[] | null;

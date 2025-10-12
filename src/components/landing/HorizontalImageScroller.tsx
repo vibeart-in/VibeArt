@@ -1,7 +1,7 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import React, { useRef, useState, useEffect } from "react";
 
 export interface ImageProps {
   src: string;
@@ -45,7 +45,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({ image, galleryHeight, index
         width={image.width}
         height={image.height}
         // If your images "contain perfectly", you might want to use 'object-contain'
-        className="pointer-events-none h-full w-full object-cover"
+        className="pointer-events-none size-full object-cover"
         priority={index < 3}
         onDragStart={(e) => e.preventDefault()}
       />

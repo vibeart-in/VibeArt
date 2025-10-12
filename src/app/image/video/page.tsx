@@ -1,9 +1,10 @@
 import { IconVideo, IconWorld, IconUsers, IconLock } from "@tabler/icons-react";
-import { createClient } from "@/src/lib/supabase/server";
+
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import InputBox from "@/src/components/inputBox/InputBox";
 import ImageGallery from "@/src/components/home/ImageGrid";
+import InputBox from "@/src/components/inputBox/InputBox";
 import Footer from "@/src/components/landing/Footer";
+import { createClient } from "@/src/lib/supabase/server";
 
 const Page = async () => {
   const supabase = await createClient();
@@ -33,7 +34,7 @@ const Page = async () => {
 
         <div className="relative z-10 flex flex-col items-center justify-center px-6 pb-24 pt-48 text-center">
           <h1 className="mb-4 flex items-center justify-center gap-3 text-3xl font-semibold md:text-4xl">
-            <IconVideo className="h-8 w-8 text-blue-400" />
+            <IconVideo className="size-8 text-blue-400" />
             Generate Stunning AI Videos Instantly
           </h1>
 
@@ -50,7 +51,7 @@ const Page = async () => {
           <div className="mt-10 flex max-w-7xl items-center justify-center gap-5">
             {/* Open Source */}
             <div className="flex w-[280px] items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:bg-white/10 md:w-[300px]">
-              <IconWorld className="h-6 w-6 text-blue-400" />
+              <IconWorld className="size-6 text-blue-400" />
               <div className="text-left">
                 <h3 className="text-sm font-semibold">Open Source</h3>
                 <p className="text-xs text-gray-400">
@@ -61,7 +62,7 @@ const Page = async () => {
 
             {/* Community-Trained */}
             <div className="flex w-[280px] items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:bg-white/10 md:w-[300px]">
-              <IconUsers className="h-6 w-6 text-green-400" />
+              <IconUsers className="size-6 text-green-400" />
               <div className="text-left">
                 <h3 className="text-sm font-semibold">Community-Trained</h3>
                 <p className="text-xs text-gray-400">
@@ -72,7 +73,7 @@ const Page = async () => {
 
             {/* Proprietary */}
             <div className="flex w-[280px] items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:bg-white/10 md:w-[300px]">
-              <IconLock className="h-6 w-6 text-yellow-400" />
+              <IconLock className="size-6 text-yellow-400" />
               <div className="text-left">
                 <h3 className="text-sm font-semibold">Proprietary</h3>
                 <p className="text-xs text-gray-400">

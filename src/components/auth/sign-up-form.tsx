@@ -1,13 +1,15 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
-import { createClient } from "@/src/lib/supabase/client";
-import { Input } from "@/src/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "../ui/button";
+
+import { Input } from "@/src/components/ui/input";
+import { createClient } from "@/src/lib/supabase/client";
+import { cn } from "@/src/lib/utils";
+
 import SignInWithGoogleButton from "./google-login";
+import { Button } from "../ui/button";
 import GlassModal from "../ui/GlassModal";
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
@@ -48,7 +50,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   };
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center">
+    <div className="relative flex size-full items-center justify-center">
       <GlassModal width={36} height={500} count={16} className="z-10" />
       <div className="absolute z-20">
         <div className={cn("flex flex-col gap-6", className)} {...props}>

@@ -1,19 +1,21 @@
 "use client";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { PencilSimpleIcon, SwapIcon } from "@phosphor-icons/react";
 import { MoreVertical, XCircle } from "lucide-react";
-import { useGenerateImage } from "@/src/hooks/useGenerateImage";
-import DialogBox from "./DialogBox";
 import { AnimatePresence, motion, Variants } from "motion/react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+
+import { useGenerateImage } from "@/src/hooks/useGenerateImage";
+import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
-import GradualBlurMemo from "../ui/GradualBlur";
+
+import DialogBox from "./DialogBox";
 import { ReplicateParameters, ReplicateParametersHandle } from "./ReplicateParameters";
 import { RunninghubParameters, RunninghubParametersHandle } from "./RunninghubParameters";
-import GenerateButton from "../ui/GenerateButton";
-import { usePathname } from "next/navigation";
-import { PencilSimpleIcon, SwapIcon } from "@phosphor-icons/react";
-import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import CommonModal from "../ui/CommonModal";
+import GenerateButton from "../ui/GenerateButton";
+import GradualBlurMemo from "../ui/GradualBlur";
 
 const validateAndSanitizePrompt = (prompt: string) => {
   const trimmed = prompt.trim();
@@ -237,7 +239,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 ease: "easeInOut",
               }}
             >
-              <div className="h-full w-full overflow-y-auto p-2">
+              <div className="size-full overflow-y-auto p-2">
                 <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
               </div>
               <GradualBlurMemo
@@ -265,7 +267,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               {selectedModel.cover_image.endsWith(".mp4") ? (
                 <video
                   src={selectedModel.cover_image}
-                  className="h-full w-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
+                  className="size-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
                   autoPlay
                   muted
                   loop
@@ -273,7 +275,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 />
               ) : (
                 <Image
-                  className="h-full w-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
+                  className="size-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
                   src={selectedModel.cover_image}
                   alt={selectedModel.model_name}
                   width={150}
@@ -281,7 +283,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 />
               )}
 
-              <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+              <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
                 <p className="truncate font-satoshi text-sm font-medium text-accent">
                   {selectedModel.model_name}
                 </p>

@@ -8,7 +8,7 @@ const MASONRY_SKELETON_HEIGHTS = ["h-48", "h-80", "h-64", "h-72", "h-56"];
 
 const PillarSkeleton = () => (
   <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2">
-    <Skeleton className="h-5 w-5 rounded-full" />
+    <Skeleton className="size-5 rounded-full" />
     <div className="flex flex-col gap-1.5">
       <Skeleton className="h-4 w-20" />
       <Skeleton className="h-3 w-40" />

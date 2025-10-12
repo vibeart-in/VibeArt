@@ -1,12 +1,5 @@
 "use client";
 
-import { useMemo, useState, memo } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-
-import { LazyMotion, domMax } from "motion/react";
-import * as m from "motion/react-m";
-
 import {
   HomeIcon,
   PencilSquareIcon,
@@ -14,7 +7,12 @@ import {
   PhotoIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
-import { FireIcon, VideoIcon } from "@phosphor-icons/react";
+import { FireIcon } from "@phosphor-icons/react";
+import { LazyMotion, domMax } from "motion/react";
+import * as m from "motion/react-m";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useState, memo } from "react";
 
 type NavItemT = {
   name: string;
@@ -23,30 +21,30 @@ type NavItemT = {
 };
 
 const NAV_ITEMS: NavItemT[] = [
-  { name: "Home", icon: <HomeIcon className="h-5 w-5" />, link: "/home" },
+  { name: "Home", icon: <HomeIcon className="size-5" />, link: "/home" },
   {
     name: "Image",
-    icon: <PhotoIcon className="h-5 w-5" />,
+    icon: <PhotoIcon className="size-5" />,
     link: "/image/generate",
   },
   {
     name: "Edit",
-    icon: <PencilSquareIcon className="h-5 w-5" />,
+    icon: <PencilSquareIcon className="size-5" />,
     link: "/image/edit",
   },
   {
     name: "Make",
-    icon: <FireIcon className="h-5 w-5" weight="fill" />,
+    icon: <FireIcon className="size-5" weight="fill" />,
     link: "/image/advance_generate",
   },
   {
     name: "Video",
-    icon: <VideoCameraIcon className="h-5 w-5" />,
+    icon: <VideoCameraIcon className="size-5" />,
     link: "/image/video",
   },
   {
     name: "AI Apps",
-    icon: <PuzzlePieceIcon className="h-5 w-5" />,
+    icon: <PuzzlePieceIcon className="size-5" />,
     link: "/image/ai-apps",
   },
 ];
@@ -94,7 +92,7 @@ const NavButton = memo(function NavButton({ item, active }: { item: NavItemT; ac
     >
       <HoverPrefetchLink
         href={item.link}
-        className={`relative flex items-center justify-center overflow-hidden rounded-2xl px-2 py-2 transition-colors duration-200 ${
+        className={`relative flex items-center justify-center overflow-hidden rounded-2xl p-2 transition-colors duration-200 ${
           active ? "bg-[#D9E825] text-black shadow-lg" : "text-white hover:bg-white/10"
         }`}
       >

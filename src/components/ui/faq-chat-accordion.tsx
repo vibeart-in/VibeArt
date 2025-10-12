@@ -1,9 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { motion } from "motion/react";
 import * as Accordion from "@radix-ui/react-accordion";
 import { Minus, Plus } from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
+
 import { cn } from "@/src/lib/utils";
 
 interface FAQItem {
@@ -77,9 +78,9 @@ export function FaqAccordion({
                   )}
                 >
                   {openItem === item.id.toString() ? (
-                    <Minus className="h-5 w-5" />
+                    <Minus className="size-5" />
                   ) : (
-                    <Plus className="h-5 w-5" />
+                    <Plus className="size-5" />
                   )}
                 </span>
               </Accordion.Trigger>

@@ -1,7 +1,8 @@
 // app/api/image/generate/route.ts
-import { createClient } from "@/src/lib/supabase/server";
 import { NextResponse, after } from "next/server";
 import Replicate from "replicate";
+
+import { createClient } from "@/src/lib/supabase/server";
 
 // --- Environment Variable Checks ---
 if (!process.env.REPLICATE_API_TOKEN) throw new Error("REPLICATE_API_TOKEN is not set");

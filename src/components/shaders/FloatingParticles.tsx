@@ -36,7 +36,7 @@ export const FloatingParticles = ({ count = 100 }) => {
   if (particles.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 h-full w-full overflow-hidden">
+    <div className="pointer-events-none absolute left-0 top-0 size-full overflow-hidden">
       {particles.map((p) => (
         <div
           key={p.id}
@@ -56,7 +56,7 @@ export const FloatingParticles = ({ count = 100 }) => {
           }
         >
           <div
-            className="h-full w-full rounded-full mix-blend-screen"
+            className="size-full rounded-full mix-blend-screen"
             style={{
               backgroundImage:
                 "radial-gradient(hsl(180, 100%, 40%), hsl(180, 100%, 40%) 10%, hsla(180, 100%, 80%, 0) 46%)",

@@ -1,3 +1,8 @@
+import { SparkleIcon } from "@phosphor-icons/react";
+import { IconTerminal } from "@tabler/icons-react";
+import { DicesIcon, XIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import React, {
   forwardRef,
   useCallback,
@@ -8,19 +13,12 @@ import React, {
   useState,
 } from "react";
 
-import { DicesIcon, XIcon } from "lucide-react";
-
-import Image from "next/image";
-import { getIconForParam } from "@/src/utils/server/utils";
 import { SchemaParam } from "@/src/types/BaseType";
-import { IconTerminal } from "@tabler/icons-react";
-import { AnimatePresence, motion } from "motion/react";
+import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+import { getIconForParam } from "@/src/utils/server/utils";
 
-import { Switch } from "../ui/switch";
-import { Textarea } from "../ui/textarea";
-import ImageUploadBox from "../ui/ImageUploadBox";
 import AnimatedCounter from "../ui/AnimatedCounter";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import ImageUploadBox from "../ui/ImageUploadBox";
 import {
   Select,
   SelectContent,
@@ -30,8 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { getRandomPromptForModel } from "@/src/utils/client/prompts";
-import { SparkleIcon } from "@phosphor-icons/react";
+import { Switch } from "../ui/switch";
+import { Textarea } from "../ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export interface ImageObject {
   permanentPath: string;
@@ -470,14 +469,14 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
               return (
                 <div
                   key={img.permanentPath} // Use permanent path for a stable key
-                  className="group relative h-[100px] w-[100px] rounded-3xl border border-white/30 bg-black p-1.5"
+                  className="group relative size-[100px] rounded-3xl border border-white/30 bg-black p-1.5"
                 >
                   <Image
                     src={img.displayUrl}
                     alt={`uploaded-${idx}`}
                     width={80}
                     height={80}
-                    className="h-full w-full rounded-[20px] object-cover object-top"
+                    className="size-full rounded-[20px] object-cover object-top"
                   />
                   <button
                     onClick={() => removeMultiImage(idx)}
@@ -504,5 +503,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     );
   },
 );
+
+ReplicateParameters.displayName = "ReplicateParameters";
 
 export default React.memo(ReplicateParameters);

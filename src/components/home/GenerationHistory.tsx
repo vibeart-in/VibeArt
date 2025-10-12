@@ -1,15 +1,17 @@
 "use client";
-import { ConversationType, HistoryItem } from "@/src/types/BaseType";
-import { motion, AnimatePresence, Variants } from "motion/react";
-import HistoryCard from "./HistoryCard";
-import Link from "next/link";
 import { IconPlus } from "@tabler/icons-react";
+import { motion, AnimatePresence, Variants } from "motion/react";
+import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useMemo } from "react";
+import { useInView } from "react-intersection-observer";
+
 import { useConversationHistory } from "@/src/hooks/useConversationHistory";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
+import { ConversationType, HistoryItem } from "@/src/types/BaseType";
 import { groupHistoryByDate } from "@/src/utils/server/dateUtils";
-import { useInView } from "react-intersection-observer";
+
+import HistoryCard from "./HistoryCard";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,7 +34,7 @@ const itemVariants: Variants = {
 
 const SkeletonRow = () => (
   <motion.div layout variants={itemVariants}>
-    <div className="skeleton-shimmer mb-2 h-[55px] w-[55px] rounded-2xl" />
+    <div className="skeleton-shimmer mb-2 size-[55px] rounded-2xl" />
   </motion.div>
 );
 
@@ -87,7 +89,7 @@ const GenerationHistory = () => {
               className={`flex h-[55px] w-full items-center justify-center rounded-2xl bg-[linear-gradient(145deg,_#1a1a1a,_#101010)] ring-1 ring-white/10 hover:bg-[linear-gradient(145deg,_#1c1c1c,_#0f0f0f)] active:bg-[linear-gradient(145deg,_#0f0f0f,_#1c1c1c)] ${activeId === undefined ? "text-accent" : "text-white/90"}`}
               aria-label="New"
             >
-              <IconPlus stroke={3} className="h-7 w-7" />
+              <IconPlus stroke={3} className="size-7" />
             </Link>
           </motion.div>
 

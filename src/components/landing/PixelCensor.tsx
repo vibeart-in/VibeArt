@@ -1,6 +1,6 @@
+import clsx from "clsx";
 import * as motion from "motion/react-client";
 import React from "react";
-import clsx from "clsx";
 
 const baseStyles = "shadow-[inset_0px_2px_4px_rgba(255,255,255,0.16)]";
 const gradientTransparent =

@@ -1,5 +1,5 @@
-import { UserSectionClient } from "./UserSectionClient";
 import { NavLinksClient } from "./NavLinksClient";
+import { UserSectionClient } from "./UserSectionClient";
 import { NavbarLogo } from "../ui/resizable-navbar";
 
 export default async function MainNavbar() {

@@ -1,7 +1,8 @@
 // src/components/InfiniteImageScroll.jsx
 "use client";
-import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+
 import { cn } from "@/src/lib/utils";
 
 export const InfiniteImageScroll = ({
@@ -113,7 +114,7 @@ export const InfiniteImageScroll = ({
             <Image
               width={250}
               height={350}
-              className="h-full w-full rounded-2xl object-cover"
+              className="size-full rounded-2xl object-cover"
               src={src}
               alt={`Scrolling image ${idx + 1}`}
             />

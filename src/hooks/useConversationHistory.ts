@@ -1,8 +1,10 @@
 "use client";
+import { useInfiniteQuery, InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
+
 import { createClient } from "@/src/lib/supabase/client";
 import { ConversationType, HistoryItem } from "@/src/types/BaseType";
+
 // ❗️ Import `InfiniteData` and `QueryFunctionContext` for better typing
-import { useInfiniteQuery, InfiniteData, QueryFunctionContext } from "@tanstack/react-query";
 import { getSignedUrls } from "../utils/client/getSignedUrls";
 
 const PAGE_SIZE = 10;

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+
 import { conversationData, ConversationType, InputBoxParameter } from "../types/BaseType";
 
 type GenerationParams = {

@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/client";
-import { motion } from "motion/react";
 import { CheckCircle, Sparkles, ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/src/components/ui/button";
+import { createClient } from "@/src/lib/supabase/client";
+
+
 
 interface UserProfile {
   subscription_tier: string;
@@ -58,7 +61,7 @@ export default function SuccessPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <div className="size-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -89,9 +92,9 @@ export default function SuccessPage() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+          className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
         >
-          <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+          <CheckCircle className="size-8 text-green-600 dark:text-green-400" />
         </motion.div>
 
         {/* Thank You Message */}
@@ -121,7 +124,7 @@ export default function SuccessPage() {
           className="mb-8 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 p-6 dark:from-blue-900/20 dark:to-purple-900/20"
         >
           <div className="mb-4 flex items-center justify-center">
-            <Sparkles className="mr-2 h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Sparkles className="mr-2 size-5 text-blue-600 dark:text-blue-400" />
             <h2 className="text-lg font-semibold capitalize text-gray-900 dark:text-white">
               {profile.subscription_tier} Plan
             </h2>
@@ -164,7 +167,7 @@ export default function SuccessPage() {
             size="lg"
           >
             Start Creating
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 size-4" />
           </Button>
 
           <Button onClick={() => router.push("/pricing")} variant="secondary" className="w-full">
