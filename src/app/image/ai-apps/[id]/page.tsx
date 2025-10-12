@@ -45,7 +45,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           {/* left column */}
           <div className="flex flex-shrink-0 flex-col gap-4 lg:w-[400px]">
             {/* title + description */}
-            <h1 className="text-wrap font-gothic text-3xl font-medium leading-snug">
+            <h1 className="font-satoshi text-wrap text-3xl font-medium leading-snug">
               {app.app_name}
             </h1>
             <p className="pr-8 text-base">{app.description}</p>

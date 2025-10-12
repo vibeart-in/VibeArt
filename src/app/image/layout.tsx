@@ -8,7 +8,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Aura.ai",
+  title: "Vibe art",
   description: "The fastest way to generate high quality AI images",
 };
 export default function ImageLayout({

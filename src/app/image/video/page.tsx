@@ -31,7 +31,7 @@ const Page = async () => {
           <div className="absolute inset-x-0 top-[700] z-10 h-[200px] bg-black backdrop-blur-lg [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[400px]" />
         </div>
 
-        <div className="relative z-10 flex max-w-4xl flex-col items-center justify-center px-6 pb-24 pt-48 text-center">
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 pb-24 pt-48 text-center">
           <h1 className="mb-4 flex items-center justify-center gap-3 text-3xl font-semibold md:text-4xl">
             <IconVideo className="h-8 w-8 text-blue-400" />
             Generate Stunning AI Videos Instantly

@@ -92,8 +92,8 @@
     display: none;
   }
 
-  .font-gothic {
-    font-family: var(--font-gothic), sans-serif;
+  .font-satoshi {
+    font-family: var(--font-satoshi), sans-serif;
   }
 }
 
@@ -587,3 +587,28 @@
     transform: translateX(-50%) rotate(360deg);
   }
 }
+
+.ai-textbox-gradient {
+  background: linear-gradient(
+    120deg,
+    #d9e747,
+    #f0f0c0,
+    #b7c835,
+    #d9e747
+  );
+  background-size: 300% 300%;
+  animation: aiTextGradient 1.5s ease-in-out infinite;
+}
+
+@keyframes aiTextGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+

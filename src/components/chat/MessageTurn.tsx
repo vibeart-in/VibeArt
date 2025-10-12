@@ -7,6 +7,7 @@ import { ImageCardLoading } from "../ui/ImageCardLoading";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import ErrorBox from "./MessageError";
+import { extractParams } from "@/src/utils/client/utils";
 
 // Helper function remains the same
 const getLoadingMessage = (status: string) => {
@@ -42,8 +43,7 @@ export default function MessageTurn({ message }: MessageTurnProps) {
     model_name,
   } = message;
 
-  const numOfOutputs = parameters?.num_of_output || 1;
-  const ratio = parameters?.aspect_ratio;
+  const { aspectRatio, batch } = extractParams(parameters, model_name);
 
   const [copied, setCopied] = useState(false);
 
@@ -51,28 +51,27 @@ export default function MessageTurn({ message }: MessageTurnProps) {
     try {
       await navigator.clipboard.writeText(userPrompt || "");
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500); // reset after 1.5s
+      setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       console.error("Copy failed", err);
     }
   };
 
-  console.log("OUT", output_images);
+  // console.log("OUT", output_images);
 
   return (
-    <div className="flex">
-      <div className="h-fit w-[320px] overflow-hidden rounded-3xl bg-[#111111]">
-        <div className="p-4">
-          <div className="hide-scrollbar max-h-[200px] w-full overflow-y-auto">
-            <p className="text-base font-light leading-relaxed text-white/95">{userPrompt}</p>
-          </div>
+    <div className="flex w-full flex-col lg:flex-row">
+      {/* Prompt Box */}
+      <div className="h-fit w-full flex-shrink-0 overflow-hidden rounded-3xl bg-[#111111] lg:w-[320px]">
+        <div className="hide-scrollbar max-h-[200px] w-full overflow-y-auto p-4">
+          <p className="text-base font-light leading-relaxed text-white/95">{userPrompt}</p>
         </div>
 
-        {/* Footer with a divider and inner glow */}
+        {/* Footer */}
         <div className="relative flex items-center justify-between bg-black/20 p-3 px-4">
           <div className="absolute left-0 top-0 h-[1px] w-full bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
 
-          {/* Left side: Copy & Credits */}
+          {/* Left: Copy + Credits */}
           <div className="flex items-center gap-4">
             <div
               onClick={handleCopy}
@@ -88,7 +87,7 @@ export default function MessageTurn({ message }: MessageTurnProps) {
                     exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
                     transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   >
-                    <IconCheck className="h-4 w-4 text-green-400" />
+                    <IconCheck className="h-4 w-4 text-green-400" />{" "}
                   </motion.div>
                 ) : (
                   <motion.div
@@ -98,27 +97,28 @@ export default function MessageTurn({ message }: MessageTurnProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <IconCopy className="h-4 w-4 text-white/70 transition-colors hover:text-accent" />
+                    <IconCopy className="h-4 w-4 text-white/70 transition-colors hover:text-accent" />{" "}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
             <p className="flex select-none items-center gap-1.5 text-xs font-medium text-white/70">
               <IconDiamondFilled className="h-4 w-4 text-accent/80" />
               {credit_cost}
             </p>
           </div>
 
-          {/* Right side: Model Name */}
+          {/* Right: Model Name */}
           <p className="text-sm tracking-wide text-white/70">
             <span className="font-semibold">{model_name}</span>
           </p>
         </div>
       </div>
 
-      <div className="pl-4">
-        <div className="flex flex-wrap gap-4">
+      {/* Images Section */}
+      <div className="mt-6 w-full lg:mt-0 lg:pl-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+          {/* <div className="flex flex-wrap gap-4"> */}
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image) => (
               <div key={image.id} className="max-w-[500px]">
@@ -136,10 +136,10 @@ export default function MessageTurn({ message }: MessageTurnProps) {
             job_status === "QUEUED" ||
             job_status === "RUNNING" ||
             job_status === "starting" ? (
-            [...Array(numOfOutputs)].map((_, index) => (
+            [...Array(batch)].map((_, index) => (
               <ImageCardLoading
                 key={index}
-                ratio={ratio}
+                ratio={aspectRatio}
                 width={500}
                 loadingText={getLoadingMessage(job_status)}
                 variant="warm"

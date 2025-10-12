@@ -20,7 +20,7 @@ const Page = async () => {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="relative flex w-full flex-col items-center overflow-hidden overflow-y-scroll bg-black">
+      <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden overflow-y-scroll bg-black">
         {/* Background Image */}
         <BackgroundImage
           className="mt-2"

@@ -29,24 +29,13 @@ export default function MessageGroup({ group }: MessageGroupProps) {
           <div className="flex max-w-[350px] flex-wrap gap-4">
             {input_images.map((image) => (
               <div key={image.id} className="w-[350px]">
-                {/(?:\.mp4|\.webm)(?:\?|$)/i.test(image.imageUrl) ? (
-                  <video
-                    src={image.imageUrl}
-                    className="w-full rounded-3xl border-2 border-white/20"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                ) : (
-                  <Image
-                    className="w-full rounded-3xl border-2 border-white/20"
-                    src={image.imageUrl}
-                    width={300}
-                    height={300}
-                    alt="INPUT IMAGE"
-                  />
-                )}
+                <Image
+                  className="w-full rounded-3xl border-2 border-white/20"
+                  src={image.imageUrl}
+                  width={300}
+                  height={300}
+                  alt="INPUT IMAGE"
+                />
               </div>
             ))}
           </div>
@@ -58,7 +47,7 @@ export default function MessageGroup({ group }: MessageGroupProps) {
       {/* MODIFICATION: `col-start-2` explicitly places this div in the
           second (center) column of our grid. This is crucial because it ensures
           the turns are centered even if there are no input images. */}
-      <div className="col-start-2 flex flex-col gap-8">
+      <div className="col-start-2 flex flex-col gap-8 pl-32">
         {turns?.map((turn) => (
           <MessageTurn key={turn.id} message={turn} />
         ))}

@@ -178,7 +178,7 @@ export const ImageCard3D = React.memo(function ImageCard3D({
 
         {/* Layer 3: Text (Parallax) */}
         <motion.p
-          className="absolute -right-1/2 bottom-0 w-full font-gothic font-medium text-white"
+          className="font-satoshi absolute -right-1/2 bottom-0 w-full font-medium text-white"
           style={{
             x: textTranslateX,
             y: textTranslateY,

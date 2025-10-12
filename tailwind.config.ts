@@ -11,7 +11,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        gothic: ["var(--font-gothic)", "sans-serif"],
+        satoshi: ["var(--font-satoshi)", "sans-serif"],
       },
       scrollBehavior: {
         smooth: "smooth",

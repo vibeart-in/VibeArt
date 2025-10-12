@@ -43,16 +43,16 @@ const PrivacySection = () => {
         </MouseParallaxItem>
 
         {/* Static text elements */}
-        <p className="z-1 absolute left-0 top-20 ml-2 font-gothic text-[20px] font-bold text-accent/80 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)] sm:top-32 sm:ml-4 sm:text-[30px] lg:top-44 lg:ml-8 lg:text-[70px]">
+        <p className="z-1 font-satoshi absolute left-0 top-20 ml-2 text-[20px] font-bold text-accent/80 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)] sm:top-32 sm:ml-4 sm:text-[30px] lg:top-44 lg:ml-8 lg:text-[70px]">
           PRIVATE BY DESIGN.
         </p>
-        <p className="absolute right-0 top-32 z-20 mr-2 font-gothic text-[20px] font-bold text-accent/80 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)] sm:top-44 sm:mr-4 sm:text-[30px] lg:top-44 lg:mr-8 lg:text-[70px]">
+        <p className="font-satoshi absolute right-0 top-32 z-20 mr-2 text-[20px] font-bold text-accent/80 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)] sm:top-44 sm:mr-4 sm:text-[30px] lg:top-44 lg:mr-8 lg:text-[70px]">
           ENCRYPTED BY DEFAULT.
         </p>
-        <p className="absolute left-0 top-44 z-20 ml-2 font-gothic text-[40px] font-bold text-black/60 sm:top-56 sm:ml-4 sm:text-[60px] lg:top-1/3 lg:ml-8 lg:text-[140px]">
+        <p className="font-satoshi absolute left-0 top-44 z-20 ml-2 text-[40px] font-bold text-black/60 sm:top-56 sm:ml-4 sm:text-[60px] lg:top-1/3 lg:ml-8 lg:text-[140px]">
           PRIVACY
         </p>
-        <p className="absolute right-0 top-56 z-20 mr-2 font-gothic text-[40px] font-bold text-black/60 sm:top-72 sm:mr-4 sm:text-[60px] lg:top-1/3 lg:mr-8 lg:text-[140px]">
+        <p className="font-satoshi absolute right-0 top-56 z-20 mr-2 text-[40px] font-bold text-black/60 sm:top-72 sm:mr-4 sm:text-[60px] lg:top-1/3 lg:mr-8 lg:text-[140px]">
           MATTERS
         </p>
 

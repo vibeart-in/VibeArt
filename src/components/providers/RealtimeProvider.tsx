@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
+import { toast } from "sonner";
 
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<null | { id: string }>(null);
@@ -77,13 +78,15 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log("Job changed:", payload);
           const updatedJob = payload.new as {
             conversation_id?: string;
             ai_app_id?: string;
             job_status?: string;
+            error_message?: string;
+            model_name?: string;
           };
 
+          // ✅ Invalidate queries as before
           if (updatedJob.conversation_id) {
             queryClient.invalidateQueries({
               queryKey: ["messages", updatedJob.conversation_id],
@@ -92,6 +95,20 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           if (updatedJob.ai_app_id && updatedJob.job_status === "succeeded") {
             queryClient.invalidateQueries({
               queryKey: ["appGenerations", updatedJob.ai_app_id],
+            });
+          }
+
+          if (updatedJob.job_status === "succeeded") {
+            toast.success("Generation completed", {
+              description: updatedJob.model_name
+                ? `Model: ${updatedJob.model_name}`
+                : "Your Image generated successfully.",
+            });
+          }
+
+          if (updatedJob.job_status === "failed" || updatedJob.error_message) {
+            toast.error("Generation failed", {
+              description: updatedJob.error_message || "Something went wrong.",
             });
           }
         },

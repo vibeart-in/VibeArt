@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+import { SparkleIcon } from "@phosphor-icons/react";
 
 export interface ImageObject {
   permanentPath: string;
@@ -52,12 +53,125 @@ export interface ReplicateParametersHandle {
   };
 }
 
+const OtherParameters = ({
+  otherEntries,
+  values,
+  handleChange,
+}: {
+  otherEntries: [string, any][];
+  values: Record<string, any>;
+  handleChange: (key: string, value: any) => void;
+}) => {
+  return (
+    <div className="flex w-fit flex-wrap items-center gap-2">
+      {otherEntries.map(([key, param]) => {
+        const value = values[normalizeKey(key)];
+
+        if (param.enum) {
+          return (
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <div className="min-w-[50px]">
+                  <Select value={String(value)} onValueChange={(val) => handleChange(key, val)}>
+                    <SelectTrigger className="w-full">
+                      {getIconForParam(param.title ?? key)}
+                      <SelectValue placeholder={param.title ?? key} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>{param.title}</SelectLabel>
+                        {param.enum
+                          .filter((opt: any) => opt !== "custom")
+                          .map((opt: any) => (
+                            <SelectItem key={String(opt)} value={String(opt)}>
+                              {String(opt)}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{param.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+
+        if (param.type === "boolean") {
+          return (
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <div>
+                  <Switch checked={!!value} onCheckedChange={(v) => handleChange(key, v)} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{param.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+
+        if (param.type === "integer" || param.type === "number") {
+          return (
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <div>
+                  <AnimatedCounter
+                    initialValue={value ?? param.default}
+                    min={param.minimum}
+                    max={param.maximum}
+                    onChange={handleChange}
+                    paramKey={key}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{param.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
+// ============================================================================
+// 2. CUSTOM COMPARISON FUNCTION to prevent re-renders from prompt changes
+// ============================================================================
+const areOtherParamsEqual = (prevProps: any, nextProps: any) => {
+  // Only re-render if the list of other parameters changes (rare)
+  if (prevProps.otherEntries !== nextProps.otherEntries) {
+    return false;
+  }
+
+  // THE KEY: Check if any value *relevant to this component* has changed.
+  // This loop completely ignores changes to `values.prompt`.
+  for (const [key] of nextProps.otherEntries) {
+    const normalized = normalizeKey(key);
+    if (prevProps.values[normalized] !== nextProps.values[normalized]) {
+      return false; // A relevant value changed, so we must re-render.
+    }
+  }
+
+  // If we reach here, no relevant props have changed. Skip the re-render.
+  return true;
+};
+
+// ============================================================================
+// 3. CREATE THE MEMOIZED COMPONENT
+// ============================================================================
+const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
+
 export const ReplicateParameters = forwardRef<ReplicateParametersHandle, ReplicateParametersProps>(
   ({ parameters, modelName }, ref) => {
     const imageInputKey = useMemo(() => {
       if (parameters["image input"]) return "image input";
       if (parameters["input image"]) return "input image";
-      if (parameters["style reference images"]) return "style reference images";
       if (parameters["style reference images"]) return "style reference images";
       if (parameters["image"]) return "image";
       if (parameters["image prompt"]) return "image prompt";
@@ -91,50 +205,43 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
         const key = normalizeKey(rawKey);
         setValues((prev) => ({ ...prev, [key]: value }));
       },
-      [setValues],
+      [], // setValues is stable, so dependencies can be empty
     );
 
-    // UPDATE: The handle now exposes an object with both values and inputImages
-    useImperativeHandle(ref, () => ({
-      getValues: () => {
-        const filteredValues: Record<string, any> = {};
+    // OPTIMIZATION: Create a lookup map to avoid `.find()` in a loop inside getValues
+    const normalizedToOriginalKeyMap = useMemo(() => {
+      const map = new Map<string, string>();
+      for (const key in parameters) {
+        map.set(normalizeKey(key), key);
+      }
+      return map;
+    }, [parameters]);
 
-        // Iterate over all the keys in the current `values` state
-        for (const key in values) {
-          const value = values[key];
+    useImperativeHandle(
+      ref,
+      () => ({
+        getValues: () => {
+          const filteredValues: Record<string, any> = {};
+          for (const key in values) {
+            const value = values[key];
+            // Use the fast map lookup
+            const originalParamKey = normalizedToOriginalKeyMap.get(key);
+            const param = originalParamKey ? parameters[originalParamKey] : null;
 
-          // Find the original parameter definition to check its properties (like enum)
-          const originalParamKey = Object.keys(parameters).find(
-            (pKey) => normalizeKey(pKey) === key,
-          );
-          const param = originalParamKey ? parameters[originalParamKey] : null;
+            if (param?.enum && value === "None") continue;
+            if (Array.isArray(value) && value.length === 0) continue;
+            if (typeof value === "string" && value.trim() === "") continue;
 
-          // RULE 1: If the parameter is an enum and its value is "None", skip it.
-          if (param?.enum && value === "None") {
-            continue;
+            filteredValues[key] = value;
           }
-
-          // RULE 2: If the value is an empty array, skip it.
-          // This handles the "style reference images": [] case.
-          if (Array.isArray(value) && value.length === 0) {
-            continue;
-          }
-
-          // RULE 3: If the value is just an empty string, skip it.
-          if (typeof value === "string" && value.trim() === "") {
-            continue;
-          }
-
-          // If none of the filtering rules apply, add the key-value pair to the result.
-          filteredValues[key] = value;
-        }
-
-        return {
-          values: filteredValues,
-          inputImages: inputImagePermanentPaths, // This is returned as is, per your request.
-        };
-      },
-    }));
+          return {
+            values: filteredValues,
+            inputImages: inputImagePermanentPaths,
+          };
+        },
+      }),
+      [values, inputImagePermanentPaths, parameters, normalizedToOriginalKeyMap],
+    ); // Add map to dependencies
 
     useEffect(() => {
       setValues(initialValues);
@@ -144,7 +251,6 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       const sessionImage: ImageObject | null = initialImageData
         ? JSON.parse(initialImageData)
         : null;
-
       if (!sessionImage) return;
 
       if (imageParam.type === "string") {
@@ -216,10 +322,10 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
 
     const handleMultiImageRemoved = useCallback(() => {}, []);
 
-    const otherEntries = useMemo(
-      () => Object.entries(parameters).filter(([k]) => k !== "prompt"),
-      [parameters],
-    );
+    // const otherEntries = useMemo(
+    //   () => Object.entries(parameters).filter(([k]) => k !== "prompt"),
+    //   [parameters],
+    // );
 
     function focusTextareaAndPlaceCaret(el: HTMLTextAreaElement | null) {
       if (!el) return;
@@ -232,138 +338,121 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       }
     }
 
-    function handleRandomPrompt() {
-      const prompt = getRandomPromptForModel(modelName);
-      setIsSpinning(true);
-      handleChange("prompt", prompt);
+    const lastEnhancedPromptRef = useRef<string | null>(null);
 
-      // focus textarea after DOM updates
-      requestAnimationFrame(() => {
-        const el =
-          textareaRef.current ||
-          (document.querySelector("textarea.prompt-textarea") as HTMLTextAreaElement | null);
-        focusTextareaAndPlaceCaret(el);
-      });
+    const handlePromptChange = (newValue: string) => {
+      handleChange("prompt", newValue);
+      // If user types, we should allow enhancement again.
+      // Setting ref to null ensures the condition `values.prompt !== lastEnhancedPromptRef.current` becomes true.
+      if (newValue !== lastEnhancedPromptRef.current) {
+        lastEnhancedPromptRef.current = null;
+      }
+    };
 
-      setTimeout(() => setIsSpinning(false), 600);
-    }
+    const handleRandomPrompt = async () => {
+      try {
+        if (isSpinning) return;
+        setIsSpinning(true);
+
+        const userPrompt = values.prompt;
+        let finalPrompt: string;
+
+        if (!userPrompt || !userPrompt.trim()) {
+          // Random prompt
+          finalPrompt = await getRandomPromptForModel("", modelName);
+          lastEnhancedPromptRef.current = null;
+        } else {
+          // Enhance only if not already enhanced
+          if (userPrompt === lastEnhancedPromptRef.current) {
+            finalPrompt = userPrompt;
+          } else {
+            finalPrompt = await getRandomPromptForModel(userPrompt, modelName);
+            lastEnhancedPromptRef.current = finalPrompt;
+          }
+        }
+
+        handleChange("prompt", finalPrompt);
+
+        requestAnimationFrame(() => {
+          const el =
+            textareaRef.current ||
+            (document.querySelector("textarea.prompt-textarea") as HTMLTextAreaElement | null);
+          focusTextareaAndPlaceCaret(el);
+        });
+      } finally {
+        setTimeout(() => setIsSpinning(false), 800);
+      }
+    };
+
+    const otherEntries = useMemo(
+      () => Object.entries(parameters).filter(([k]) => k !== "prompt" && k !== imageInputKey),
+      [parameters, imageInputKey],
+    );
+
+    const canEnhanceOrGetRandom =
+      !values.prompt?.trim() || values.prompt !== lastEnhancedPromptRef.current;
+    const isDisabled = !canEnhanceOrGetRandom || isSpinning;
 
     return (
       <div className="flex gap-2">
         <div>
-          <AnimatePresence>
-            {parameters["prompt"] && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
-                className="relative mb-3 w-full"
-              >
-                <IconTerminal className="absolute left-4 top-2 text-white/80" />
-                <Textarea
-                  ref={textareaRef}
-                  value={values["prompt"] ?? ""}
-                  onChange={(e) => handleChange("prompt", e.target.value)}
-                  className="hide-scrollbar prompt-textarea min-w-[420px] pl-12 pr-8"
-                  placeholder={
-                    parameters["prompt"]?.description ?? "A cute magical flying cat, cinematic, 4k"
-                  }
-                  maxHeight={100}
-                />
-                <motion.button
-                  onClick={handleRandomPrompt}
-                  aria-label="Generate random prompt"
-                  title="Random prompt"
-                  type="button"
-                  animate={{ rotate: isSpinning ? 360 : 0 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  className="bg-white/6 absolute right-0 top-1 flex items-center justify-center rounded-xl bg-black/50 p-1.5 shadow-md shadow-black hover:bg-white/10 hover:text-accent hover:shadow-none focus:outline-none focus:ring-2 focus:ring-white/30"
+          {/* This prompt section remains here, as its state changes frequently */}
+          <div className="">
+            <AnimatePresence>
+              {isSpinning && (
+                <div className="ai-textbox-gradient absolute inset-0 z-50 rounded-3xl opacity-50 blur-sm" />
+              )}
+              {parameters["prompt"] && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="relative mb-3 w-full"
                 >
-                  <DicesIcon size={20} />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="flex w-fit flex-wrap items-center gap-2">
-            {otherEntries.map(([key, param]) => {
-              if (key === imageInputKey) return null;
-              const value = values[normalizeKey(key)];
-
-              if (param.enum) {
-                return (
-                  <Tooltip key={key}>
-                    <TooltipTrigger asChild>
-                      <div className="min-w-[50px]">
-                        <Select
-                          value={String(value)}
-                          onValueChange={(val) => handleChange(key, val)}
-                        >
-                          <SelectTrigger className="w-full">
-                            {getIconForParam(param.title ?? key)}
-                            <SelectValue placeholder={param.title ?? key} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>{param.title}</SelectLabel>
-                              {param.enum
-                                .filter((opt) => opt !== "custom")
-                                .map((opt) => (
-                                  <SelectItem key={String(opt)} value={String(opt)}>
-                                    {String(opt)}
-                                  </SelectItem>
-                                ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{param.title}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              }
-
-              if (param.type === "boolean") {
-                return (
-                  <Tooltip key={key}>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <Switch checked={!!value} onCheckedChange={(v) => handleChange(key, v)} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{param.title}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              }
-
-              if (param.type === "integer" || param.type === "number") {
-                return (
-                  <Tooltip key={key}>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <AnimatedCounter
-                          initialValue={value ?? param.default}
-                          min={param.minimum}
-                          max={param.maximum}
-                          onChange={handleChange}
-                          paramKey={key}
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{param.title}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              }
-              return null;
-            })}
+                  <IconTerminal className="absolute left-4 top-2 text-white/80" />
+                  <Textarea
+                    ref={textareaRef}
+                    value={values["prompt"] ?? ""}
+                    onChange={(e) => handlePromptChange(e.target.value)}
+                    className="hide-scrollbar prompt-textarea min-w-[420px] pl-12 pr-8"
+                    placeholder={
+                      parameters["prompt"]?.description ??
+                      "A cute magical flying cat, cinematic, 4k"
+                    }
+                    maxHeight={100}
+                    disabled={isSpinning}
+                  />
+                  <motion.button
+                    onClick={handleRandomPrompt}
+                    aria-label="Generate random prompt"
+                    title="Random prompt"
+                    type="button"
+                    disabled={isDisabled}
+                    animate={{ rotate: isSpinning ? 360 : 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    className="absolute right-0 top-1 flex items-center justify-center rounded-xl bg-black/50 p-1.5 shadow-md shadow-black hover:bg-white/10 hover:text-accent hover:shadow-none focus:outline-none focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {values.prompt ? (
+                      <SparkleIcon
+                        size={20}
+                        className="drop-shadow-accent/50 animate-pulse text-accent"
+                      />
+                    ) : (
+                      <DicesIcon size={20} />
+                    )}
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+
+          {/* PERFORMANCE FIX: Render the other controls using the memoized component */}
+          <MemoizedOtherParameters
+            otherEntries={otherEntries}
+            values={values}
+            handleChange={handleChange}
+          />
         </div>
 
         {imageParam?.type === "string" && imageInputKey && (
@@ -415,7 +504,5 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     );
   },
 );
-
-ReplicateParameters.displayName = "ReplicateParameters";
 
 export default React.memo(ReplicateParameters);

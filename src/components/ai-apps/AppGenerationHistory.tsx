@@ -55,7 +55,7 @@ export default function AppGenerationHistory({ appId }: { appId: string }) {
 
   return (
     <div className="mt-6">
-      <h3 className="mb-4 font-gothic text-2xl font-medium text-white">Your Recent Generations</h3>
+      <h3 className="font-satoshi mb-4 text-2xl font-medium text-white">Your Recent Generations</h3>
 
       {isLoading && <HistoryLoadingSkeleton />}
 

@@ -5,5 +5,5 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const { id } = await params;
 
   // Pass id to client component
-  return <ConversationClient conversationId={id} />;
+  return <ConversationClient key={id} conversationId={id} />;
 }

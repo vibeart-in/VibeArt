@@ -17,6 +17,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "../hover-card";
 import ModalPortal from "./ModalPortal";
 import { VideoOptions } from "./ImageCard";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 /**
  * Note: This file is intentionally conservative about mounting heavy DOM and media.
@@ -217,6 +218,9 @@ export const MediaModal = ({
   const onModalToggleZoom = useCallback(() => setIsZoomed((z) => !z), []);
 
   const handleCopyPrompt = useCallback(() => {
+    toast.success("Prompt copied", {
+      description: "Use it wisely!",
+    });
     navigator.clipboard.writeText(prompt);
     setIsCopied(true);
     setTimeout(() => {

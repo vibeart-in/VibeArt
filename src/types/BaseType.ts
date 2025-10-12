@@ -23,7 +23,7 @@ export type NodeParam = {
   nodeId: string;
   fieldName: string;
   fieldValue: string;
-  description?: string;
+  description: string;
   fieldData?: string;
 };
 
@@ -48,6 +48,7 @@ export interface ModelData {
   provider: "running_hub" | "replicate";
   is_popular: boolean;
   estimated_time: number;
+  tags?: string[];
 }
 
 export type DBModelData = Database["public"]["Functions"]["get_initial_model"]["Returns"][number];
@@ -72,6 +73,8 @@ export enum ConversationType {
   AIAPP = "ai-apps", // ✅ changed from "ai-apps" to "app"
   VIDEO = "video",
   ADVANCE = "advance_generate",
+  CHECKPOINT = "checkpoint",
+  LORA = "lora",
 }
 
 export interface ImageCard3DType {

@@ -150,7 +150,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
             )}
 
             <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-              <p className="truncate font-gothic text-sm font-medium text-accent">Quick Change</p>
+              <p className="font-satoshi truncate text-sm font-medium text-accent">Quick Change</p>
             </div>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
               <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">

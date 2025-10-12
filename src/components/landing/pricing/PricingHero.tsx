@@ -45,8 +45,8 @@ const pricingPlans: PricingPlan[] = [
   {
     id: "basic",
     name: "Basic",
-    priceMonthly: "$10",
-    priceAnnually: "$8",
+    priceMonthly: "$5",
+    priceAnnually: "$3",
     priceSubtext: "/mo",
     features: [
       "1,000 Credits / month",

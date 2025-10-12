@@ -125,7 +125,7 @@ export const MediaCardView = ({
         {isMediaVideo ? (
           <video
             src={mediaUrl}
-            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+            // className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoadedData={handleFullLoad}
             onError={handleFullLoad}
@@ -161,7 +161,7 @@ export const MediaCardView = ({
         )}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/30" />
+      <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/10" />
 
       <motion.div
         className="absolute bottom-0 left-0 flex h-[80px] w-full items-end bg-gradient-to-t from-black/75 to-transparent p-5 backdrop-blur-[2px]"

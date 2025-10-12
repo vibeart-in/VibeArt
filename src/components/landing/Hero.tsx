@@ -255,7 +255,7 @@ const Hero = () => {
                 delay: 0.3,
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
-              className="mb-3 max-w-4xl text-center font-gothic text-2xl font-medium leading-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl"
+              className="font-satoshi mb-3 max-w-4xl text-center text-2xl font-medium leading-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl"
             >
               {currentSlide.title}
             </motion.h1>

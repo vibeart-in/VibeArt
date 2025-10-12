@@ -63,7 +63,7 @@ export const RaycastComponent = () => {
           text="The First Multi-Model AI Image Agent!"
           // className="text-2xl font-semibold text-center"
           className={cn(
-            "text-wrap text-center font-gothic font-medium",
+            "font-satoshi text-wrap text-center font-medium",
             "text-4xl sm:text-6xl lg:text-7xl xl:text-8xl",
           )}
           delay={100}

@@ -12,8 +12,8 @@ import { RunninghubParameters, RunninghubParametersHandle } from "./RunninghubPa
 import GenerateButton from "../ui/GenerateButton";
 import { usePathname } from "next/navigation";
 import { PencilSimpleIcon, SwapIcon } from "@phosphor-icons/react";
-import LoginModal from "../auth/LoginModal";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
+import CommonModal from "../ui/CommonModal";
 
 const validateAndSanitizePrompt = (prompt: string) => {
   const trimmed = prompt.trim();
@@ -243,7 +243,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               <GradualBlurMemo
                 target="parent"
                 position="bottom"
-                height="12rem"
+                height="10rem"
                 strength={2}
                 divCount={5}
                 zIndex={1}
@@ -282,7 +282,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               )}
 
               <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-                <p className="truncate font-gothic text-sm font-medium text-accent">
+                <p className="truncate font-satoshi text-sm font-medium text-accent">
                   {selectedModel.model_name}
                 </p>
               </div>
@@ -300,7 +300,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             >
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <PencilSimpleIcon size={24} weight="fill" className="mb-1 text-gray-400" />
-                <span className="px-2 text-center font-gothic text-xs text-gray-400">
+                <span className="px-2 text-center font-satoshi text-xs text-gray-400">
                   Select Model
                 </span>
               </div>
@@ -415,7 +415,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         )}
       </AnimatePresence>
 
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <CommonModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        variant="login"
+      />
     </>
   );
 };
