@@ -4,13 +4,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { NodeParam } from "@/src/types/BaseType";
 
-import { GenerationWithSignedUrls } from "./useAppGenerations"; // Import the updated type
+import { GenerationAppWithSignedUrls } from "./useAppGenerations";
 
 interface GenerateAppImagePayload {
   appId: string;
   parameters: NodeParam[];
-  // We need the preview URL of the input image for the optimistic update
-  inputImagePreviewUrl?: string | null;
+  inputImagePreviewUrls?: string[] | null;
+  inputMediaStoreUrls?: string[] | null;
 }
 
 interface GenerateAppImageResponse {
@@ -21,7 +21,7 @@ async function generateAppImage(
   payload: GenerateAppImagePayload,
 ): Promise<GenerateAppImageResponse> {
   // We don't send the preview URL to the API, so we can omit it here.
-  const { inputImagePreviewUrl, ...apiPayload } = payload;
+  const { inputImagePreviewUrls, ...apiPayload } = payload;
 
   const response = await fetch("/api/generate/app", {
     method: "POST",
@@ -38,7 +38,7 @@ async function generateAppImage(
 
 // Define the context type for the mutation
 interface MutationContext {
-  previousGenerations: GenerationWithSignedUrls[] | undefined;
+  previousGenerations: GenerationAppWithSignedUrls[] | undefined;
   queryKey: string[];
 }
 
@@ -59,19 +59,20 @@ export function useGenerateAppImage() {
       await queryClient.cancelQueries({ queryKey });
 
       // 2. Snapshot the previous value
-      const previousGenerations = queryClient.getQueryData<GenerationWithSignedUrls[]>(queryKey);
+      const previousGenerations = queryClient.getQueryData<GenerationAppWithSignedUrls[]>(queryKey);
 
       // 3. Create our optimistic "pending" generation object
-      const optimisticGeneration: GenerationWithSignedUrls = {
+      const optimisticGeneration: GenerationAppWithSignedUrls = {
         id: `temp-${Date.now()}`, // A temporary unique ID
         status: "pending",
         parameters: newGeneration.parameters,
-        inputImageUrl: newGeneration.inputImagePreviewUrl || null,
+        //@ts-ignore
+        inputImageUrls: newGeneration.inputImagePreviewUrls,
         outputImageUrls: [], // No output images yet
       };
 
       // 4. Optimistically update to the new value
-      queryClient.setQueryData<GenerationWithSignedUrls[]>(
+      queryClient.setQueryData<GenerationAppWithSignedUrls[]>(
         queryKey,
         (old = []) => [optimisticGeneration, ...old], // Add the new pending item to the top of the list
       );

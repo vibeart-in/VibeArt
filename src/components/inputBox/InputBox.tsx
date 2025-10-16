@@ -4,13 +4,15 @@ import { MoreVertical, XCircle } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 
 import DialogBox from "./DialogBox";
+import ModelSelectorCard from "./ModalSelectorCard";
+import ParametersSection, { ParametersSectionHandle } from "./ParametersSection";
 import { ReplicateParameters, ReplicateParametersHandle } from "./ReplicateParameters";
 import { RunninghubParameters, RunninghubParametersHandle } from "./RunninghubParameters";
 import CommonModal from "../ui/CommonModal";
@@ -95,8 +97,9 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const [formError, setFormError] = useState<string | null>(null);
   const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const replicateParamsRef = useRef<ReplicateParametersHandle>(null);
-  const runninghubParamsRef = useRef<RunninghubParametersHandle>(null);
+
+  // This single ref will now control the parameters section
+  const paramsRef = useRef<ParametersSectionHandle>(null);
 
   const pathname = usePathname();
   const conversationType = pathname.split("/")[2] as ConversationType;
@@ -104,29 +107,21 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const mutation = useGenerateImage(conversationType, conversationId);
   const { data: initialModel } = useModelsByUsecase(conversationType);
 
-  const handleModelSelect = (model: ModelData) => {
-    setSelectedModel(model);
-    sessionStorage.setItem(`${conversationType}-model`, JSON.stringify(model));
-    setIsDialogOpen(false);
-  };
-
+  // This logic remains largely the same
   useEffect(() => {
     const savedModel = sessionStorage.getItem(`${conversationType}-model`);
-
     if (savedModel) {
       try {
-        const parsed = JSON.parse(savedModel);
-        setSelectedModel(parsed);
+        setSelectedModel(JSON.parse(savedModel));
         return;
       } catch {
         console.warn("Failed to parse saved model.");
       }
     }
-
     if (initialModel && initialModel.length > 0 && !selectedModel) {
       setSelectedModel(initialModel[0]);
     }
-  }, [conversationType, initialModel]);
+  }, [conversationType, initialModel]); // Removed selectedModel from deps
 
   useEffect(() => {
     if (selectedModel) {
@@ -135,89 +130,69 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   }, [selectedModel, conversationType]);
 
   useEffect(() => {
-    return () => {
-      mutation.reset();
-    };
-  }, [mutation.reset]);
+    return () => mutation.reset();
+  }, [mutation.reset]); // Assuming mutation.reset is stable
 
-  const handleGenerateClick = () => {
-    if (mutation.isPending) return;
-    let finalParameters;
-    let inputImagePermanentPaths;
-    let promptText = "";
+  // --- Memoized Callbacks ---
+  const handleModelSelect = useCallback((model: ModelData) => {
+    setSelectedModel(model);
+    setIsDialogOpen(false);
+  }, []);
 
-    if (selectedModel?.provider === "replicate") {
-      if (!replicateParamsRef.current) {
-        console.error("Replicate parameters component is not ready.");
-        return;
-      }
-      const { values, inputImages } = replicateParamsRef.current.getValues();
-      console.log("Input Images Permanent Paths:", inputImages);
-      finalParameters = values;
-      inputImagePermanentPaths = inputImages;
-      promptText = finalParameters.prompt || "";
-    } else if (selectedModel?.provider === "running_hub") {
-      if (!runninghubParamsRef.current) {
-        console.error("Runninghub parameters component is not ready.");
-        return;
-      }
-      const { values, inputImages } = runninghubParamsRef.current.getValues();
-      console.log("Input Images Permanent Paths:", inputImages);
-      finalParameters = values;
-      inputImagePermanentPaths = inputImages;
-
-      const promptParam = finalParameters.find((p) => p.description === "prompt");
-      promptText = promptParam?.fieldValue || "";
-    } else {
-      setFormError(`Unsupported provider: ${selectedModel?.provider}`);
-      return;
-    }
-    console.log("finalParameters", finalParameters);
-
-    const { isValid, error } = validateAndSanitizePrompt(promptText);
-    if (!isValid && error) {
-      setFormError(error);
-      return;
-    }
-
-    setFormError(null);
-
-    console.log(finalParameters);
-
-    mutation.mutate(
-      {
-        parameters: finalParameters,
-        conversationId,
-        modelName: selectedModel.model_name,
-        modelIdentifier: selectedModel.identifier,
-        modelCredit: selectedModel.cost,
-        modelProvider: selectedModel.provider,
-        conversationType: conversationType,
-        inputImagePermanentPaths,
-      },
-      {
-        onSuccess: () => {
-          // You would need to add a reset method to the imperative handle
-          // on both parameter components if you want to clear the prompt on success.
-        },
-        onError: (err) => {
-          if (err.message === "Unauthorized") {
-            setIsLoginModalOpen(true);
-          } else {
-            setFormError(`Generation failed: ${err.message}`);
-          }
-        },
-      },
-    );
-  };
-
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     setIsDialogOpen((prev) => !prev);
-  };
+  }, []);
+
+  const handleGenerateClick = useCallback(() => {
+    if (mutation.isPending || !selectedModel || !paramsRef.current) return;
+
+    try {
+      setFormError(null);
+
+      // Get all values from the single ref
+      const {
+        values: finalParameters,
+        inputImages: inputImagePermanentPaths,
+        promptText,
+      } = paramsRef.current.getValues();
+
+      const { isValid, error } = validateAndSanitizePrompt(promptText);
+      if (!isValid && error) {
+        setFormError(error);
+        return;
+      }
+
+      mutation.mutate(
+        {
+          parameters: finalParameters,
+          conversationId,
+          modelName: selectedModel.model_name,
+          modelIdentifier: selectedModel.identifier,
+          modelCredit: selectedModel.cost,
+          modelProvider: selectedModel.provider,
+          conversationType: conversationType,
+          inputImagePermanentPaths,
+        },
+        {
+          onError: (err) => {
+            if (err.message === "Unauthorized") {
+              setIsLoginModalOpen(true);
+            } else {
+              setFormError(`Generation failed: ${err.message}`);
+            }
+          },
+        },
+      );
+    } catch (e: any) {
+      console.error("Failed to get parameter values:", e.message);
+      setFormError(`Configuration Error: ${e.message}`);
+    }
+  }, [mutation, selectedModel, conversationId, conversationType]);
 
   return (
     <>
       <div className="relative mb-2 w-fit rounded-[28px] border border-white/10 bg-[#0C0C0C]/80 p-2 backdrop-blur-lg md:p-3">
+        {/* Model Selection Dialog - No major changes needed here, as it's driven by simple state */}
         <AnimatePresence>
           {isDialogOpen && (
             <motion.div
@@ -258,75 +233,13 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           )}
         </AnimatePresence>
         <section className="flex justify-between gap-4">
-          {selectedModel ? (
-            <div
-              onClick={handleCardClick}
-              className="group relative z-20 h-[95px] w-[120px] flex-shrink-0 cursor-pointer overflow-hidden rounded-3xl transition-transform hover:scale-105 active:scale-100"
-            >
-              <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
-              {selectedModel.cover_image.endsWith(".mp4") ? (
-                <video
-                  src={selectedModel.cover_image}
-                  className="size-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-              ) : (
-                <Image
-                  className="size-full rounded-3xl object-cover transition-all duration-300 group-hover:brightness-90"
-                  src={selectedModel.cover_image}
-                  alt={selectedModel.model_name}
-                  width={150}
-                  height={150}
-                />
-              )}
-
-              <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-                <p className="truncate font-satoshi text-sm font-medium text-accent">
-                  {selectedModel.model_name}
-                </p>
-              </div>
-
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-                  <SwapIcon size={20} weight="bold" />
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div
-              onClick={handleCardClick}
-              className="group relative z-20 h-[95px] w-[120px] flex-shrink-0 cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-gray-600 bg-gray-800/50 transition-transform hover:scale-105 active:scale-100"
-            >
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <PencilSimpleIcon size={24} weight="fill" className="mb-1 text-gray-400" />
-                <span className="px-2 text-center font-satoshi text-xs text-gray-400">
-                  Select Model
-                </span>
-              </div>
-            </div>
-          )}
+          <ModelSelectorCard selectedModel={selectedModel} onClick={handleCardClick} />
 
           <div className="z-20 flex flex-col items-center gap-2">
             {selectedModel && (
               <div className="hidden flex-grow justify-center md:flex">
-                {selectedModel?.provider === "replicate" ? (
-                  <ReplicateParameters
-                    // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
-                    parameters={selectedModel?.parameters}
-                    modelName={selectedModel?.model_name}
-                    ref={replicateParamsRef}
-                  />
-                ) : (
-                  <RunninghubParameters
-                    // @ts-expect-error - parameters prop expects correct type but model parameters structure may not match
-                    parameters={selectedModel?.parameters}
-                    modelName={selectedModel?.model_name}
-                    ref={runninghubParamsRef}
-                  />
-                )}
+                {/* The new, self-contained parameters component */}
+                <ParametersSection ref={paramsRef} selectedModel={selectedModel} />
               </div>
             )}
 
@@ -340,13 +253,13 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               </button>
             </div>
           </div>
+
           <GenerateButton
             handleGenerateClick={handleGenerateClick}
             isPending={mutation.isPending}
             cost={selectedModel?.cost}
           />
         </section>
-
         {/* MODAL FOR MOBILE PARAMETERS */}
         <AnimatePresence>
           {isParamsMenuOpen && (

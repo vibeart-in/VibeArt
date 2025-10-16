@@ -7,7 +7,6 @@ import React, { useState } from "react";
 
 import { ModelData } from "@/src/types/BaseType";
 
-
 const cardVariants: Variants = {
   initial: { scale: 1 },
   hover: { scale: 1.03, transition: { type: "spring", stiffness: 240, damping: 18 } },
@@ -85,27 +84,27 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
       )}
 
       {/* Overlay */}
-      <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-[2px] transition-all hover:backdrop-blur-0">
+      <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-0 transition-all hover:backdrop-blur-0">
         <div className="relative flex size-full flex-col items-center justify-center gap-2 px-3 py-2">
           <motion.p
             className="text-center font-satoshi font-bold leading-8 text-accent"
-            style={{
-              fontSize: model.model_name.length > 20 ? "20px" : "22px",
-              textShadow: `
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px  1px 0 #000,
-                1px  1px 0 #000
-              `,
-              willChange: "transform, opacity",
-            }}
+            // style={{
+            //   fontSize: model.model_name.length > 20 ? "20px" : "22px",
+            //   textShadow: `
+            //     -1px -1px 0 #000,
+            //     1px -1px 0 #000,
+            //     -1px  1px 0 #000,
+            //     1px  1px 0 #000
+            //   `,
+            //   willChange: "transform, opacity",
+            // }}
           >
             {model.model_name}
           </motion.p>
 
           {/* Description & Buttons container */}
           <div className="relative flex h-[48px] w-full items-center justify-center">
-            <motion.p
+            {/* <motion.p
               animate={{ opacity: isHovered ? 0 : 1, y: isHovered ? -8 : 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="absolute px-2 text-center text-sm text-white/90"
@@ -114,7 +113,7 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
               {model?.description
                 ? `${model.description.substring(0, 40)}${model.description.length > 60 ? "..." : ""}`
                 : "No description"}
-            </motion.p>
+            </motion.p> */}
             <motion.div
               animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 8 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}

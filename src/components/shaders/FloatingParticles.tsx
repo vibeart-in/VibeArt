@@ -36,7 +36,7 @@ export const FloatingParticles = ({ count = 100 }) => {
   if (particles.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 size-full overflow-hidden">
+    <div className="pointer-events-none absolute left-0 top-0 z-20 size-full overflow-hidden">
       {particles.map((p) => (
         <div
           key={p.id}

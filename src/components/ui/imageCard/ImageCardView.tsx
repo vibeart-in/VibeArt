@@ -1,9 +1,9 @@
 "use client";
 
 import { IconDownload, IconTrash, IconWand } from "@tabler/icons-react";
-import { motion, AnimatePresence, type Variants } from "motion/react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import Image from "next/image";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useRef } from "react";
 
 import { ImagePlaceholder } from "./ImagePlaceholder";
 
@@ -49,6 +49,9 @@ export const MediaCardView = ({
   const [isThumbnailLoaded, setIsThumbnailLoaded] = useState(false);
   const [isFullLoaded, setIsFullLoaded] = useState(false);
 
+  // Ref to hold the timer ID to clear it on unmount or pointer leave
+  const preloadTimer = useRef<NodeJS.Timeout | null>(null);
+
   const handleThumbnailLoad = useCallback(() => {
     setIsThumbnailLoaded(true);
     setIsPlaceholderVisible(false);
@@ -60,11 +63,28 @@ export const MediaCardView = ({
     setIsPlaceholderVisible(false);
   }, []);
 
+  // OPTIMIZATION 3: Delay media preloading to prevent animation interference.
   const preloadModalMedia = useCallback(() => {
     if (isMediaVideo) return;
-    const img = new window.Image();
-    img.src = mediaUrl;
+
+    // Clear any existing timer
+    if (preloadTimer.current) {
+      clearTimeout(preloadTimer.current);
+    }
+
+    // Set a new timer
+    preloadTimer.current = setTimeout(() => {
+      const img = new window.Image();
+      img.src = mediaUrl;
+    }, 100); // 100ms delay gives the animation time to start smoothly
   }, [mediaUrl, isMediaVideo]);
+
+  const handlePointerLeave = useCallback(() => {
+    // Clean up the timer if the user leaves the card before it fires
+    if (preloadTimer.current) {
+      clearTimeout(preloadTimer.current);
+    }
+  }, []);
 
   const cardVideoOptions = {
     autoPlay: true,
@@ -85,11 +105,12 @@ export const MediaCardView = ({
 
   return (
     <motion.div
-      className="relative w-full cursor-pointer overflow-hidden rounded-[28px]"
+      className="relative w-full cursor-pointer overflow-hidden rounded-[28px] will-change-transform" // OPTIMIZATION 2: Added will-change
       whileHover={cardScaleWhileHover}
       transition={{ duration: 0.25 }}
       onClick={onOpen}
       onPointerEnter={preloadModalMedia}
+      onPointerLeave={handlePointerLeave}
       layoutId={cardContainerId}
       initial="rest"
       animate="rest"
@@ -152,10 +173,8 @@ export const MediaCardView = ({
             height={height}
             className="inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
-            // Use Next/Image's completion callback for reliable load detection
             onLoad={handleFullLoad}
             onError={handleFullLoad}
-            unoptimized
             priority
             draggable={false}
           />
@@ -165,7 +184,9 @@ export const MediaCardView = ({
       <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/10" />
 
       <motion.div
-        className="absolute bottom-0 left-0 flex h-[80px] w-full items-end bg-gradient-to-t from-black/75 to-transparent p-5 backdrop-blur-[2px]"
+        // OPTIMIZATION 1: Removed `backdrop-blur-[2px]` which is very performance-intensive.
+        // OPTIMIZATION 2: Added `will-change-[opacity,transform]`
+        className="absolute bottom-0 left-0 flex h-[80px] w-full items-end bg-gradient-to-t from-black/75 to-transparent p-5 will-change-[opacity,transform]"
         variants={overlayVariants}
         initial="rest"
         whileHover="hover"
@@ -174,7 +195,7 @@ export const MediaCardView = ({
         <div className="flex w-full items-center justify-between">
           <button
             type="button"
-            className="flex items-center gap-2 rounded-full bg-white/30 px-4 py-2 text-base font-semibold text-white backdrop-blur-sm"
+            className="flex items-center gap-2 rounded-full bg-white/30 px-4 py-2 text-base font-semibold text-white backdrop-blur-sm" // NOTE: Kept blur on the button as it's smaller and less costly.
             onClick={(e) => e.stopPropagation()}
             aria-label="Edit image"
             title="Edit"

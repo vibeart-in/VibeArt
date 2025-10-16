@@ -67,10 +67,10 @@ export async function POST(req: Request) {
           .update({
             paddle_subscription_id: eventData.data.id,
             subscription_tier: tier,
-            subscription_type: item.price?.billingCycle?.interval, // 'month' or 'year'
+            subscription_type: item.price?.billingCycle?.interval,
             subscription_credits: newCredits,
-            credits_renewal_date: eventData.data.nextBilledAt, // Perfect source of truth
-            subscription_status: eventData.data.status, // Use the actual status
+            credits_renewal_date: eventData.data.nextBilledAt,
+            subscription_status: eventData.data.status,
             updated_at: new Date().toISOString(),
           })
           .eq("paddle_customer_id", eventData.data.customerId);

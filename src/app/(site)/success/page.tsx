@@ -8,8 +8,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/src/components/ui/button";
 import { createClient } from "@/src/lib/supabase/client";
 
-
-
 interface UserProfile {
   subscription_tier: string;
   subscription_credits: number;

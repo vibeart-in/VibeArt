@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { createClient } from "@/src/lib/supabase/client";
 
-
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<null | { id: string }>(null);
   const queryClient = useQueryClient();

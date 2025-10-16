@@ -53,8 +53,8 @@ export default function RootLayout({
         <TanStackProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="dark"
+            forcedTheme="dark"
             disableTransitionOnChange
           >
             <RealtimeProvider>{children}</RealtimeProvider>

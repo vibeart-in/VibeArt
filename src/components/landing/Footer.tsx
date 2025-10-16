@@ -9,8 +9,7 @@ import * as motion from "motion/react-client";
 import Image from "next/image";
 
 import GlassPaneBG from "./GlassPaneBG";
-import { GradientComponent } from "./Gradient";
-
+import { NavbarLogo } from "../ui/resizable-navbar";
 
 // --- DATA FOR EASY UPDATES ---
 // This makes managing links simple. Just edit this list.
@@ -44,42 +43,32 @@ const socialLinks = [
   { icon: DiscordLogoIcon, href: "#", name: "Community" },
 ];
 
-// Re-using the gradient colors from your original snippet
-const gradientColors = {
-  primary: "#4E93FF",
-  secondary: "#639CF2",
-  accent1: "#D5FDB9",
-  accent2: "#E4F9FF",
-  accent3: "#ED74E2",
-  highlight1: "#F3001D",
-  highlight2: "#FF7EEA",
-};
-
 const Footer = () => {
   return (
     <footer className="relative mt-32 text-white">
-      {/* The main content container with your glass effect */}
       <GlassPaneBG paneWidth={55}>
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          {/* Top section: Brand, Links */}
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-            {/* Column 1: Brand Info & CTA */}
             <div className="flex flex-col items-start gap-4">
-              <a href="#" className="flex items-center space-x-2">
-                <Image // Using next/image for optimization
-                  src="/images/newlogo.png"
-                  alt="Aura.ai logo"
-                  width={40}
-                  height={40}
-                />
-                <p className="text-4xl font-bold">
-                  Aura<span className="text-[#D9E825]">.</span>ai
-                </p>
-              </a>
+              <div className="relative flex flex-col items-start px-2 py-1">
+                <div className="flex items-center space-x-2">
+                  <img src="/images/newlogo.png" alt="logo" width={40} height={40} />
+                  <motion.p className="text-4xl font-bold text-white" whileHover={{ scale: 1.05 }}>
+                    vibeart<span className="text-accent">.</span>
+                  </motion.p>
+                </div>
+                <motion.span
+                  className="mt-1 text-xs tracking-widest text-white/70"
+                  animate={{ opacity: [1, 0.8, 1] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                >
+                  where creativity vibes.
+                </motion.span>
+              </div>
+
               <p className="max-w-xs pt-2 text-white/70">
                 The future of AI-powered creative tooling, built for professionals.
               </p>
-              {/* Your exact motion button, preserved */}
               <motion.a
                 href="/image/generate"
                 whileHover={{ scale: 1.05 }}
@@ -93,7 +82,6 @@ const Footer = () => {
               </motion.a>
             </div>
 
-            {/* Columns 2 & 3: Dynamic Links */}
             <div className="mr-32 grid grid-cols-2 lg:col-span-2">
               {footerLinks.map((column) => (
                 <div key={column.title}>
@@ -116,11 +104,9 @@ const Footer = () => {
               ))}
             </div>
           </div>
-
-          {/* Bottom section: Copyright and Social Links */}
           <div className="mr-80 mt-20 flex flex-col items-center justify-between gap-6 border-t border-white/20 pt-8 sm:flex-row">
             <p className="text-sm text-white/50">
-              &copy; {new Date().getFullYear()} Aura.ai. All Rights Reserved.
+              &copy; {new Date().getFullYear()} Vibeart.in. All Rights Reserved.
             </p>
             <div className="flex items-center space-x-6">
               {socialLinks.map((social) => (
@@ -137,9 +123,6 @@ const Footer = () => {
             </div>
           </div>
         </div>
-
-        {/* Decorative Image - positioned absolutely to not affect layout */}
-        {/* It's hidden on smaller screens to prevent clutter */}
         <div className="absolute bottom-0 right-0 z-10">
           <Image
             src={
@@ -155,9 +138,15 @@ const Footer = () => {
         <div className="absolute inset-x-0 -bottom-2 z-0 h-[120%] bg-black/5 !backdrop-blur-lg [mask-image:linear-gradient(to_bottom,white,transparent)]" />
         <div className="absolute inset-x-0 -bottom-2 z-0 h-[120%] bg-black/5 !backdrop-blur-lg [mask-image:linear-gradient(to_bottom,white,transparent)]" />
       </GlassPaneBG>
-      {/* Background Gradient - using your component */}
-      <div className="absolute -top-40 left-1/2 -z-10 -translate-x-1/2">
-        <GradientComponent colors={gradientColors} sizeVW={150} isAnimated={true} />
+      <div className="absolute -top-96 left-1/2 -z-10 h-screen w-[150vw] -translate-x-1/2">
+        <Image
+          src={
+            "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/gradients/pink.webp"
+          }
+          alt="gradients"
+          className="size-full object-cover object-top"
+          fill
+        />
       </div>
     </footer>
   );

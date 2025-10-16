@@ -4,7 +4,6 @@ import * as motion from "motion/react-client";
 import GlassPaneBG from "./GlassPaneBG";
 import BackgroundImage from "../home/BackgroundImage";
 
-
 // Define animation variants outside the component for better performance and readability
 const containerVariants: Variants = {
   hidden: { opacity: 0 },

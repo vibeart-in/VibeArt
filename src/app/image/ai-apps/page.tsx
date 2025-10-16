@@ -14,7 +14,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black">
+    <div className="relative mx-auto h-screen w-full max-w-[90vw] bg-black">
       <div className="pt-20">
         <h1 className="font-satoshi text-[60px] font-medium text-accent">Creative Hub</h1>
         <p className="w-[70vw] text-xl font-medium text-white">

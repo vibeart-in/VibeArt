@@ -30,6 +30,7 @@ const ImageGallery = ({ images, columnCount = 4 }: ImageGalleryProps) => {
         <ImageCard
           key={image.id}
           mediaUrl={image.media_url}
+          // thumbnailUrl={image.thumbnail_url || null}
           prompt={image.prompt}
           width={image.width || 800}
           height={image.height || 800}

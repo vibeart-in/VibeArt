@@ -1,6 +1,5 @@
 "use client";
 
-
 import { SwapIcon } from "@phosphor-icons/react";
 import { IconTerminal } from "@tabler/icons-react";
 import { XCircle } from "lucide-react";
@@ -12,11 +11,14 @@ import { useGenerateAppImage } from "@/src/hooks/useGenerateAppImage";
 import { NodeParam } from "@/src/types/BaseType";
 
 import AppGridClient from "./AppGridClient";
+import { ImageObject } from "../inputBox/ReplicateParameters";
+import AnimatedCounter from "../ui/AnimatedCounter";
 import GenerateButton from "../ui/GenerateButton";
 import GradualBlurMemo from "../ui/GradualBlur";
 import ImageUploadBox from "../ui/ImageUploadBox";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import VideoUploadBox from "../ui/VideoUploadBox";
 
 const popVariants: Variants = {
   initial: { opacity: 0, scale: 0.9, y: -6 },
@@ -53,7 +55,8 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
   const [values, setValues] = useState<NodeParam[]>(appParameters);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [inputImagePreview, setInputImagePreview] = useState<string | null>(null);
+  // const [inputImagePreview, setInputImagePreview] = useState<string | null>(null);
+  const [mediaObjects, setMediaObjects] = useState<Record<string, ImageObject | null>>({});
 
   const { mutate, isPending, error: apiError } = useGenerateAppImage();
 
@@ -61,34 +64,54 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
     setIsDialogOpen((prev) => !prev);
   };
 
-  const handleChange = useCallback((nodeId: string, newFieldValue: any, previewUrl?: string) => {
-    setValues((currentParams) =>
-      currentParams.map((param) =>
-        param.nodeId === nodeId ? { ...param, fieldValue: String(newFieldValue) } : param,
-      ),
-    );
-    // If a preview URL was provided (meaning it was an image upload), store it
-    if (previewUrl) {
-      setInputImagePreview(previewUrl);
-    }
-  }, []);
+  const handleChange = useCallback(
+    (description: string, newFieldValue: any, mediaObject?: ImageObject) => {
+      setValues((currentParams) =>
+        currentParams.map((param) =>
+          param.description === description
+            ? { ...param, fieldValue: String(newFieldValue) }
+            : param,
+        ),
+      );
+
+      if (mediaObject?.permanentPath) {
+        setMediaObjects((prev) => ({ ...prev, [description]: mediaObject }));
+      }
+      console.log(values);
+    },
+    [],
+  );
 
   const handleGenerateClick = () => {
     setFormError(null);
-    console.log(values);
-    // Basic client-side validation based on common inputs
-    const imageParam = values.find((p) => p.fieldName === "image");
 
+    const imageParam = values.find((p) => p.fieldName === "image");
     if (imageParam && !imageParam.fieldValue) {
       setFormError("Please upload an image for the image input.");
       return;
     }
 
-    // Call the mutation
+    // ✅ Convert media objects
+    const inputMediaStoreUrls: string[] | null = (() => {
+      const paths = Object.values(mediaObjects)
+        .map((obj) => obj?.permanentPath)
+        .filter((p): p is string => Boolean(p));
+      return paths.length > 0 ? paths : null;
+    })();
+
+    const inputImagePreviewUrls: string[] | null = (() => {
+      const urls = Object.values(mediaObjects)
+        .map((obj) => obj?.displayUrl)
+        .filter((u): u is string => Boolean(u));
+      return urls.length > 0 ? urls : null;
+    })();
+
+    // ✅ Call the mutation
     mutate({
-      appId: appId,
+      appId,
       parameters: values,
-      inputImagePreviewUrl: inputImagePreview, // Pass the preview URL to the mutation
+      inputMediaStoreUrls,
+      inputImagePreviewUrls,
     });
   };
 
@@ -163,23 +186,60 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
           <div className="z-20 flex flex-col items-center gap-2">
             <div className="flex h-full items-start gap-2">
               {values.map((param) => {
-                const key = param.nodeId;
+                const key = param.description;
 
                 if (param.fieldName === "image") {
                   return (
                     <div key={key}>
-                      {" "}
                       {/* Add key here */}
                       <ImageUploadBox
-                        onImageUploaded={({ permanentPath, displayUrl }) => {
-                          handleChange(param.nodeId, permanentPath, displayUrl);
+                        onImageUploaded={(image) => {
+                          handleChange(key, image.displayUrl, image);
                         }}
                         onImageRemoved={() => {
-                          handleChange(param.nodeId, "");
+                          handleChange(key, "");
+                          setMediaObjects((prev) => ({ ...prev, [key]: null }));
                           sessionStorage.removeItem("initialEditImage");
                         }}
                         imageDescription={param.description}
                       />
+                    </div>
+                  );
+                }
+
+                if (param.fieldName === "video") {
+                  return (
+                    <div key={key}>
+                      {/* Add key here */}
+                      <VideoUploadBox
+                        onVideoUploaded={(video) => {
+                          handleChange(key, video.displayUrl, video);
+                        }}
+                        onVideoRemoved={() => {
+                          handleChange(key, "");
+                          setMediaObjects((prev) => ({ ...prev, [key]: null }));
+                          sessionStorage.removeItem("initialEditImage");
+                        }}
+                        videoDescription={param.description}
+                      />
+                    </div>
+                  );
+                }
+
+                if (param.fieldName === "int") {
+                  return (
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-xs font-semibold">{param.description}</span>
+                      <div className="px-2">
+                        <AnimatedCounter
+                          initialValue={Number(param.fieldValue)}
+                          // min={50}
+                          // max={900}
+                          // incrementStep={50}
+                          onChange={handleChange}
+                          paramKey={key!}
+                        />
+                      </div>
                     </div>
                   );
                 }
@@ -191,9 +251,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                       <div className="px-2">
                         <Switch
                           checked={param.fieldValue === "true"}
-                          onCheckedChange={(value) =>
-                            handleChange(param.nodeId, value ? "true" : "false")
-                          }
+                          onCheckedChange={(value) => handleChange(key, value ? "true" : "false")}
                         />
                       </div>
                     </div>
@@ -202,13 +260,11 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
 
                 if (param.fieldName === "prompt" || param.fieldName === "text") {
                   return (
-                    <div key={key} className="flex size-full items-center justify-center">
-                      {" "}
-                      {/* Add key here */}
-                      <IconTerminal className="absolute left-4 top-2 text-white/80" />
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-xs font-semibold">{param.description}</span>
                       <Textarea
                         value={param.fieldValue as string}
-                        onChange={(e) => handleChange(param.nodeId, e.target.value)}
+                        onChange={(e) => handleChange(key, e.target.value)}
                         className="hide-scrollbar max-h-full min-w-[200px] border pl-4"
                         maxHeight={100}
                         placeholder={param.description}

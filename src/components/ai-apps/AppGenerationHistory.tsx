@@ -5,6 +5,7 @@
 import Masonry from "react-masonry-css";
 
 import { useAppGenerations } from "@/src/hooks/useAppGenerations";
+import { useConversationMessages } from "@/src/hooks/useConversationMessages";
 
 import AppGenerationGrid from "./AppGenerationGrid";
 
@@ -55,6 +56,8 @@ const HistoryLoadingSkeleton = () => {
 export default function AppGenerationHistory({ appId }: { appId: string }) {
   const { data: generations, isLoading, isError, error } = useAppGenerations(appId);
 
+  console.log(isError);
+
   return (
     <div className="mt-6">
       <h3 className="mb-4 font-satoshi text-2xl font-medium text-white">Your Recent Generations</h3>
@@ -62,11 +65,13 @@ export default function AppGenerationHistory({ appId }: { appId: string }) {
       {isLoading && <HistoryLoadingSkeleton />}
 
       {isError && (
-        <p className="text-red-400">Could not load your generation history: {error?.message}</p>
+        <p className="mt-56 text-red-400">
+          Could not load your generation history: {error?.message}
+        </p>
       )}
 
       {!isLoading && !isError && generations && generations.length === 0 && (
-        <div className="mt-6 rounded-2xl border border-dashed border-neutral-700 p-8 text-center">
+        <div className="mt-56 rounded-2xl border border-dashed border-neutral-700 p-8 text-center">
           <h3 className="text-lg font-semibold text-neutral-300">No Generations Yet</h3>
           <p className="text-neutral-500">Your past creations using this app will appear here.</p>
         </div>

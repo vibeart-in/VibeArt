@@ -15,7 +15,6 @@ import {
 } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/client";
 
-
 export function NavbarLander() {
   const navItems = [
     {
@@ -94,10 +93,10 @@ export function NavbarLander() {
             </>
           ) : (
             <>
-              <NavbarButton href="/login" variant="secondary">
+              <NavbarButton href="/auth/login" variant="secondary">
                 Login
               </NavbarButton>
-              <NavbarButton href="/signup" variant="primary">
+              <NavbarButton href="/auth/signup" variant="primary">
                 Create Now
               </NavbarButton>
             </>

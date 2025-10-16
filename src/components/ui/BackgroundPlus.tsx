@@ -36,10 +36,6 @@ export const BackgroundPlus: React.FC<PlusPatternBackgroundProps> = ({
   };
 
   return (
-    <div
-      className={`absolute inset-0 size-full ${className}`}
-      style={backgroundStyle}
-      {...props}
-    />
+    <div className={`absolute inset-0 size-full ${className}`} style={backgroundStyle} {...props} />
   );
 };

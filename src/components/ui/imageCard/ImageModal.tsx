@@ -343,10 +343,7 @@ export const MediaModal = ({
             ref={modalRootRef}
             onMouseEnter={handlePrefetchTrigger} // if user hovers the modal container, ensure media will render
           >
-            <div
-              className="relative flex size-full flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="relative flex size-full flex-col" onClick={(e) => e.stopPropagation()}>
               {/* Header */}
               <motion.header
                 className="flex w-full items-center justify-between text-white"

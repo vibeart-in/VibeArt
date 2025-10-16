@@ -2,6 +2,7 @@
 
 import Avatar from "boring-avatars";
 import Image from "next/image";
+import { ReactNode } from "react";
 
 import AppExampleGrid from "@/src/components/ai-apps/AppExampleGrid";
 import AppGenerationHistory from "@/src/components/ai-apps/AppGenerationHistory";
@@ -9,7 +10,6 @@ import AppInputBox from "@/src/components/ai-apps/AppInputBox";
 import { createClient } from "@/src/lib/supabase/server";
 import { cn } from "@/src/lib/utils";
 import { getTagColor } from "@/src/utils/server/utils";
-import { ReactNode } from "react";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

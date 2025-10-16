@@ -290,43 +290,6 @@
   animation: text-shimmer 2.5s ease-in-out infinite;
 }
 
-.loupe-container {
-  position: relative;
-  overflow: hidden;
-  border-radius: 28px;
-  background-size: 200%;
-  /* Adjust zoom level here */
-  background-repeat: no-repeat;
-  /* cursor: zoom-in; */
-  cursor:
-    url(/cursors/zoom-in.svg) 16 16,
-    auto;
-}
-
-.loupe-container.is-zoomed {
-  cursor: zoom-out;
-  cursor:
-    url(/cursors/zoom-out.svg) 16 16,
-    auto;
-}
-
-.loupe-container.is-zoomed .loupe-image {
-  opacity: 0;
-}
-
-.loupe-image {
-  display: block;
-  transition: opacity 0.4s ease;
-}
-
-.progressive-blur-overlay {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(50px);
-  -webkit-backdrop-filter: blur(50px);
-  mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
-  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
-}
-
 /* Hide scrollbar while maintaining scroll functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -558,21 +521,6 @@
   animation: gradient-xy 5s ease-in-out infinite;
 }
 
-/* Noise overlay using inline SVG turbulence (fast, no requests) */
-.noise-texture {
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>\
-  <filter id='n'>\
-    <feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' seed='3'/>\
-    <feColorMatrix type='saturate' values='0'/>\
-  </filter>\
-  <rect width='100%' height='100%' filter='url(%23n)'/>\
-</svg>");
-  background-size: 200px 200px;
-  background-repeat: repeat;
-  filter: contrast(140%) brightness(110%);
-}
-
 .blob-rotating {
   animation: fill 7s ease-out infinite;
 }
@@ -604,4 +552,10 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
 }

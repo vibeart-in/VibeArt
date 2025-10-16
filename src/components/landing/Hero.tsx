@@ -11,9 +11,6 @@ import GlassPaneBG from "./GlassPaneBG";
 import { GradientComponent } from "./Gradient";
 import InputBox from "../inputBox/InputBox";
 
-
-
-
 const cardData1: ImageCard3DType[] = [
   {
     topImageUrl:

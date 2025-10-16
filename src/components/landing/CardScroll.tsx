@@ -10,7 +10,6 @@ import { ImageCard3DType } from "@/src/types/BaseType";
 import { ImageCard3D } from "./3dImageCard"; // Adjust path if necessary
 import { CustomCursor } from "./CustomCursor";
 
-
 interface CardScrollProps {
   cardData: ImageCard3DType[];
   scrollHeight?: string;

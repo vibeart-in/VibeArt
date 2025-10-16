@@ -30,17 +30,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { appId, parameters: clientParameters }: { appId: string; parameters: NodeParam[] } =
+    const {
+      appId,
+      parameters,
+      inputMediaStoreUrls,
+    }: { appId: string; parameters: NodeParam[]; inputMediaStoreUrls: string[] | null } =
       await req.json();
 
-    if (!appId || !clientParameters) {
+    if (!appId || !parameters) {
       return NextResponse.json({ message: "Missing appId or parameters" }, { status: 400 });
     }
 
     // 1. Fetch AI App details (cost, webappId, base parameters)
     const { data: aiApp, error: aiAppError } = await supabase
       .from("ai_apps")
-      .select("id, webappId, parameters, cost, app_name")
+      .select("id, webappId, parameters, cost, app_name, instance_type")
       .eq("id", appId)
       .single();
 
@@ -48,68 +52,29 @@ export async function POST(req: NextRequest) {
       console.error("AI App not found or database error:", aiAppError);
       return NextResponse.json({ message: "AI App not found" }, { status: 404 });
     }
-
-    // Merge app's default parameters with client's overridden parameters.
-    // Also prepare parameters for RunningHub. This needs to replace permanent image paths with signed URLs.
-    // console.log("clientParameters1", clientParameters);
-
-    // Create a deep clone so we don’t mutate clientParameters
-    const parametersForRunningHub = structuredClone(clientParameters);
+    console.log(inputMediaStoreUrls);
 
     // 2. Handle input images: Store permanent paths and generate signed URLs for RunningHub
     const inputImagesToLink: string[] = []; // Collect image IDs to link to message
 
-    for (let i = 0; i < parametersForRunningHub.length; i++) {
-      const param = parametersForRunningHub[i];
-      if (
-        param.fieldName === "image" &&
-        typeof param.fieldValue === "string" &&
-        param.fieldValue.startsWith("uploaded-images/")
-      ) {
-        const permanentImagePath = param.fieldValue; // e.g., "uploaded-images/user-id/123_image.png"
-        const [bucketName, ...filePathParts] = permanentImagePath.split("/");
-        const filePathInBucket = filePathParts.join("/"); // e.g., "user-id/123_image.png"
+    // Store input image in public.images table
+    inputMediaStoreUrls?.map(async (inputMediaStoreUrl: string) => {
+      const { data: newImage, error: imageInsertError } = await supabase
+        .from("images")
+        .insert({
+          user_id: user.id,
+          image_url: inputMediaStoreUrl,
+          is_public: false,
+        })
+        .select("id")
+        .single();
 
-        // Store input image in public.images table
-        const { data: newImage, error: imageInsertError } = await supabase
-          .from("images")
-          .insert({
-            user_id: user.id,
-            image_url: permanentImagePath,
-            is_public: false,
-          })
-          .select("id")
-          .single();
-
-        if (imageInsertError || !newImage) {
-          console.error("Error inserting input image:", imageInsertError);
-          return NextResponse.json({ message: "Failed to store input image" }, { status: 500 });
-        }
-        inputImagesToLink.push(newImage.id); // Store ID for linking later
-
-        // Generate a signed URL for the external AI service (RunningHub)
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from(bucketName)
-          .createSignedUrl(filePathInBucket, 3600); // 1 hour expiry for the AI service
-
-        if (signedUrlError || !signedUrlData) {
-          console.error("Error generating signed URL for input image:", signedUrlError);
-          return NextResponse.json(
-            { message: "Failed to generate signed URL for input image" },
-            { status: 500 },
-          );
-        }
-
-        // Replace the permanent path with the signed URL in parameters sent to RunningHub
-        parametersForRunningHub[i] = {
-          ...param,
-          fieldValue: signedUrlData.signedUrl,
-        };
+      if (imageInsertError || !newImage) {
+        console.error("Error inserting input image:", imageInsertError);
+        return NextResponse.json({ message: "Failed to store input image" }, { status: 500 });
       }
-    }
-
-    console.log("clientParameters2", clientParameters); // ✅ unchanged
-    console.log("parametersForRunningHub", parametersForRunningHub); // ✅ signed URLs
+      inputImagesToLink.push(newImage.id);
+    });
 
     // 3. Find or create a conversation for this user and app
     const { data: conversation, error: convError } = await supabase
@@ -117,7 +82,7 @@ export async function POST(req: NextRequest) {
       .select("id")
       .eq("user_id", user.id)
       .eq("ai_app_id", appId)
-      .maybeSingle(); // Use maybeSingle if a conversation might not exist
+      .maybeSingle();
 
     if (convError) {
       console.error("Error fetching conversation:", convError);
@@ -179,7 +144,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Create the job entry
-    console.log("clientParameters2222", clientParameters);
+    console.log("clientParameters2222", parameters);
 
     const { data: newJob, error: jobError } = await supabase
       .from("jobs")
@@ -187,7 +152,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         conversation_id: conversationId,
         ai_app_id: appId,
-        parameters: clientParameters, // Store the full merged parameters in DB
+        parameters: parameters, // Store the full merged parameters in DB
         credit_cost: aiApp.cost,
         job_status: "pending", // Initial status
       })
@@ -248,7 +213,8 @@ export async function POST(req: NextRequest) {
       webappId: aiApp.webappId,
       apiKey: RUNNING_HUB_API_KEY,
       webhookUrl,
-      nodeInfoList: parametersForRunningHub,
+      nodeInfoList: parameters,
+      instanceType: aiApp.instance_type,
     };
 
     const rhRes = await fetch(RUNNING_HUB_API_ENDPOINT, {

@@ -10,7 +10,6 @@ import { conversationData } from "@/src/types/BaseType";
 
 import MessageSkeleton from "./MessageSkeleton";
 
-
 export default function ConversationClient({ conversationId }: { conversationId: string }) {
   const { data: messages, isLoading, isError } = useConversationMessages(conversationId);
 

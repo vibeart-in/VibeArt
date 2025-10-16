@@ -24,8 +24,8 @@ const Page = async () => {
       <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden overflow-y-scroll bg-black">
         {/* Background Image */}
         <BackgroundImage
-          className="mt-2"
-          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/generate-bg.mp4"
+          className="-mt-20"
+          src="https://i.pinimg.com/736x/b3/68/04/b36804200ff0875ab460a8e9447311f3.jpg"
           width={1000}
           height={1000}
         />
@@ -50,7 +50,7 @@ const Page = async () => {
           </div>
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </section>
   );
 };

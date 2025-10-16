@@ -67,14 +67,14 @@ export const ImagePlaceholder = ({
   return (
     <div style={{ width, height }} className={cn("absolute h-auto w-full")}>
       <div
-        className={cn("animate-gradient-xy relative h-full w-full overflow-hidden")}
+        className={cn("relative h-full w-full overflow-hidden")}
         style={{
           backgroundImage: `linear-gradient(${getGradientDirection(
             gradientClass,
           )}, ${first}, ${second})`,
         }}
       >
-        <div className="noise-texture pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay" />
+        <div className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay" />
       </div>
     </div>
   );

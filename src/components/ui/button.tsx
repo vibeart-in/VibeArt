@@ -21,6 +21,23 @@ const buttonVariants = cva(
           "hover:bg-accent/10 hover:border-accent/80 " +
           "hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)] " +
           "active:bg-accent/20",
+
+        destructive:
+          "bg-red-500 text-white border border-red-500 " +
+          "hover:bg-red-600 hover:border-red-600 " +
+          "hover:shadow-[0_8px_25px_rgba(239,68,68,0.3)] " +
+          "active:bg-red-700",
+
+        outline:
+          "bg-transparent border border-input text-black dark:text-white " +
+          "hover:bg-accent hover:text-accent-foreground " +
+          "hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)] " +
+          "active:bg-accent/80",
+
+        ghost:
+          "bg-transparent text-black dark:text-white " +
+          "hover:bg-accent hover:text-accent-foreground " +
+          "active:bg-accent/80",
       },
       size: {
         default: "h-10 px-6",

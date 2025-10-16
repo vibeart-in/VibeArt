@@ -13,8 +13,8 @@ export const GradientComponent = ({
   sizeVW = 141.5,
   isAnimated = true,
 }) => {
-  const scaleX = 1500 / 2596;
-  const scaleY = 1500 / 2600;
+  const scaleX = 2500 / 2596;
+  const scaleY = 2500 / 2600;
 
   // We define the animation styles inside the component for easy portability.
   // The keyframes create a subtle "breathing" and "rotating" effect.

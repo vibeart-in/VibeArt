@@ -1,7 +1,9 @@
 "use client";
+import { PhotoIcon } from "@heroicons/react/24/solid";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useRef, useState } from "react";
 
 import { cn } from "@/src/lib/utils";
@@ -21,6 +23,7 @@ interface NavItemsProps {
   items: {
     name: string;
     link: string;
+    icon?: React.ReactNode;
   }[];
   className?: string;
   onItemClick?: () => void;
@@ -105,8 +108,15 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   );
 };
 
+function isActiveRoute(pathname: string, link: string) {
+  if (link === "/home") return pathname === "/" || pathname === "/home";
+  return pathname.startsWith(link);
+}
+
 export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
+
+  const pathname = usePathname();
 
   return (
     <motion.div
@@ -116,23 +126,33 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
         className,
       )}
     >
-      {items.map((item, idx) => (
-        <a
-          onMouseEnter={() => setHovered(idx)}
-          onClick={onItemClick}
-          className="relative px-4 py-2 text-neutral-600 dark:text-neutral-200"
-          key={`link-${idx}`}
-          href={item.link}
-        >
-          {hovered === idx && (
-            <motion.div
-              layoutId="hovered"
-              className="absolute inset-0 size-full rounded-full bg-accent dark:bg-accent/20"
-            />
-          )}
-          <span className="relative z-20">{item.name}</span>
-        </a>
-      ))}
+      {items.map((item, idx) => {
+        const active = isActiveRoute(pathname, item.link);
+        const isHighlighted = hovered === idx || active;
+
+        return (
+          <a
+            key={`link-${idx}`}
+            href={item.link}
+            onClick={onItemClick}
+            onMouseEnter={() => setHovered(idx)}
+            onMouseLeave={() => setHovered(-1)}
+            className={`relative flex items-center gap-2 px-4 py-2 text-neutral-600 dark:text-neutral-200 ${isHighlighted ? "text-black dark:text-black" : ""} transition-colors duration-200`}
+          >
+            <span className="relative z-20 flex items-center gap-2">
+              {item.icon}
+              {item.name}
+            </span>
+
+            {isHighlighted && (
+              <motion.div
+                layoutId="hovered"
+                className="absolute inset-0 size-full rounded-full bg-accent"
+              />
+            )}
+          </a>
+        );
+      })}
     </motion.div>
   );
 };
@@ -215,7 +235,7 @@ export const NavbarLogo = ({ className }: { className?: string }) => {
       <img src="/images/newlogo.png" alt="logo" width={30} height={30} />
       <p className="text-2xl font-bold text-white">
         {/* Vibeart */}
-        vibe<span className="text-accent">_</span>art
+        VibeArt<span className="text-accent">.</span>
       </p>
     </Link>
   );

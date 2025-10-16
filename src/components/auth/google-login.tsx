@@ -11,7 +11,7 @@ const SignInWithGoogleButton = () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/image/generate`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/auth/onboarding`,
       },
     });
   };
