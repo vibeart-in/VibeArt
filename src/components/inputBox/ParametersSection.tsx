@@ -16,6 +16,7 @@ export interface ParametersSectionHandle {
     inputImages: string[];
     promptText: string;
   };
+  clearPrompt: () => void;
 }
 
 const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionProps>(
@@ -35,12 +36,24 @@ const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionP
         if (selectedModel.provider === "running_hub") {
           if (!runninghubParamsRef.current) throw new Error("Runninghub parameters not ready");
           const { values, inputImages } = runninghubParamsRef.current.getValues();
-          const promptParam = values.find((p: any) => p.description === "prompt");
+          const promptParam = values.find(
+            (p: any) => p.description === "prompt" || p.fieldName === "prompt",
+          );
           return { values, inputImages, promptText: promptParam?.fieldValue || "" };
         }
 
         // Fallback for unsupported provider
         throw new Error(`Unsupported provider: ${selectedModel.provider}`);
+      },
+      clearPrompt: () => {
+        if (selectedModel.provider === "replicate") {
+          replicateParamsRef.current?.clearPrompt?.();
+          return;
+        }
+        if (selectedModel.provider === "running_hub") {
+          runninghubParamsRef.current?.clearPrompt?.();
+          return;
+        }
       },
     }));
 
@@ -49,9 +62,10 @@ const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionP
     if (selectedModel.provider === "replicate") {
       return (
         <ReplicateParameters
-          key={selectedModel.identifier} // Add a key to reset state when model changes
+          key={selectedModel.id}
           parameters={selectedModel.parameters as any}
           modelName={selectedModel.model_name}
+          identifier={selectedModel.identifier}
           ref={replicateParamsRef}
         />
       );
@@ -60,9 +74,10 @@ const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionP
     if (selectedModel.provider === "running_hub") {
       return (
         <RunninghubParameters
-          key={selectedModel.identifier} // Add a key to reset state when model changes
+          key={selectedModel.id}
           parameters={selectedModel.parameters as any}
           modelName={selectedModel.model_name}
+          identifier={selectedModel.identifier}
           ref={runninghubParamsRef}
         />
       );

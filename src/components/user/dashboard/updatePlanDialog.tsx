@@ -12,10 +12,8 @@ import { Toggle } from "@/src/components/ui/toggle";
 import { freePlan } from "@/src/lib/config/plans";
 import { cn } from "@/src/lib/utils";
 
-
 import { Subscription } from "./dashboard";
 import PricingCard from "./PricingCard";
-
 
 export interface UpdatePlanDialogProps {
   currentPlan: Subscription | null;

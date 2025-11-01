@@ -18,9 +18,6 @@ import { InvoiceHistory } from "./invoiceHistory";
 import { SubscriptionManagement } from "./subscriptionManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 
-
-
-
 // A single row from your 'subscriptions' table
 export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 

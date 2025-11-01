@@ -1,37 +1,22 @@
 "use client";
-import { FireIcon, HighDefinitionIcon, PenNibIcon } from "@phosphor-icons/react";
-import { IconBolt, IconBrandGoogle, IconPig, IconSearch } from "@tabler/icons-react";
+
+import { IconSearch } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState, useMemo, useRef, useEffect } from "react";
 
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import FluxIcon from "@/src/icons/flux";
-import MidjourneyIcon from "@/src/icons/midjourney";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
+import { normalizeTag, TagIcon } from "@/src/utils/server/utils";
 
 import { Input } from "../ui/input";
 import ModelCard from "../ui/Modelcard";
 
-const TagIcon = ({ name }: { name: string }) => {
-  // This is a placeholder for the actual icons.
-  // You would replace these with your actual icon components.
-  const icons: { [key: string]: React.ReactNode } = {
-    All: <FireIcon size={20} weight="bold" />,
-    google: <IconBrandGoogle size={20} />,
-    flux: <FluxIcon className="size-6" />,
-    value: <IconPig size={20} />,
-    fast: <IconBolt size={20} />,
-    midjourney: <MidjourneyIcon className="size-6" />,
-    highres: <HighDefinitionIcon size={20} weight="bold" />,
-    desgin: <PenNibIcon size={20} weight="bold" />,
-  };
-  return <>{icons[name] || null}</>;
-};
-// Define the tags to be displayed in the UI, matching the image.
-const displayTags = ["google", "flux", "midjourney", "fast", "value", "highres", "desgin"];
-
-// This array is used to render the UI tabs, including "All" and "Other".
-const filterTabs = ["All", ...displayTags, "Other"];
+const displayLabel = (tag: string) =>
+  tag
+    .split(/[-_\s]/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
 type DialogBoxProps = {
   conversationType: ConversationType;
@@ -41,23 +26,51 @@ type DialogBoxProps = {
 const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<string>("All");
-
-  // --- START: State and Refs for Expandable Search ---
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // --- END: State and Refs for Expandable Search ---
 
   const { data: models, isLoading, error } = useModelsByUsecase(conversationType);
 
-  // Auto-focus the input when it opens
+  // Build the available tag list from models dynamically
+  const availableTags = useMemo(() => {
+    if (!models || models.length === 0) return [];
+    const set = new Set<string>();
+    for (const m of models) {
+      const rawTags = m.tags ?? [];
+      // allow tags to be either string[] or a single comma-separated string
+      for (const raw of rawTags as any[]) {
+        if (!raw && raw !== 0) continue;
+        // split comma-separated tags in case DB stores "a,b,c"
+        const parts = String(raw).split(",");
+        for (const p of parts) {
+          const norm = normalizeTag(p);
+          if (norm) set.add(norm);
+        }
+      }
+    }
+    // return stable order (alphabetical) — change if you prefer another sort
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [models]);
+
+  // Tabs: All + dynamic tags + Other (Other = models with no tags)
+  const filterTabs = useMemo(() => ["All", ...availableTags], [availableTags]);
+
+  // If selectedTag disappears (e.g., models change), reset to All
+  useEffect(() => {
+    if (!filterTabs.includes(selectedTag)) {
+      setSelectedTag("All");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterTabs.join("|")]);
+
   useEffect(() => {
     if (isSearchOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isSearchOpen]);
 
-  // Handle clicking outside of the search bar to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -70,20 +83,36 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
     };
   }, []);
 
+  // Helper to extract normalized tags from a model
+  const getModelTags = (model: ModelData) => {
+    const rawTags = model.tags ?? [];
+    const out: string[] = [];
+    for (const raw of rawTags as any[]) {
+      if (!raw && raw !== 0) continue;
+      const parts = String(raw).split(",");
+      for (const p of parts) {
+        const norm = normalizeTag(p);
+        if (norm) out.push(norm);
+      }
+    }
+    return out;
+  };
+
   const filteredModels = useMemo(() => {
     if (!models) return [];
-    let tempModels = models;
+    let tempModels = models.slice();
 
     if (selectedTag === "All") {
-      tempModels = models;
     } else if (selectedTag === "Other") {
-      tempModels = models.filter((model) => {
-        if (!model.tags || model.tags.length === 0) return true;
-        const hasMatchingTag = model.tags.some((tag) => displayTags.includes(tag));
-        return !hasMatchingTag;
+      tempModels = tempModels.filter((model) => {
+        const tags = getModelTags(model);
+        return !tags || tags.length === 0;
       });
     } else {
-      tempModels = models.filter((model) => model.tags?.includes(selectedTag));
+      tempModels = tempModels.filter((model) => {
+        const tags = getModelTags(model);
+        return tags.includes(selectedTag);
+      });
     }
 
     if (searchTerm) {
@@ -118,9 +147,7 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
 
   return (
     <div className="w-full">
-      {/* --- START: Combined Tag Filter and Search Bar --- */}
       <div className="mb-8 flex items-center justify-between gap-4 border-b border-gray-700">
-        {/* Scrollable Tags Container */}
         <div className="flex items-center gap-x-6 overflow-x-auto pb-px">
           {filterTabs.map((tag) => (
             <button
@@ -133,17 +160,11 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
               }`}
             >
               <TagIcon name={tag} />
-              <span>
-                {tag
-                  .split(" ")
-                  .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
-                  .join(" ")}
-              </span>
+              <span>{tag === "All" || tag === "Other" ? tag : displayLabel(tag)}</span>
             </button>
           ))}
         </div>
 
-        {/* Expandable Search Component */}
         <div ref={searchRef} className="relative flex items-center">
           <AnimatePresence>
             {isSearchOpen && (
@@ -166,7 +187,7 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
           </AnimatePresence>
           <motion.button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="absolute right-0 p-2" // Always positioned right
+            className="absolute right-0 p-2"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -174,9 +195,6 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
           </motion.button>
         </div>
       </div>
-      {/* --- END: Combined Tag Filter and Search Bar --- */}
-
-      {/* Grid of models remains the same */}
       <div className="mb-14 mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {filteredModels.length > 0 ? (
           filteredModels.map((model) => (

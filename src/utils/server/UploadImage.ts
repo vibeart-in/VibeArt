@@ -1,5 +1,4 @@
 // src/lib/UploadImage.ts
-
 import * as tus from "tus-js-client";
 
 import { supabase } from "@/src/lib/supabase/client";
@@ -9,6 +8,45 @@ interface UploadOptions {
   onProgress?: (progress: number) => void;
   onError?: (err: Error) => void;
   onSuccess?: (permanentPath: string, displayUrl: string) => void;
+}
+
+// Utility to convert any image file to JPEG
+async function convertToJpeg(file: File, quality = 0.9): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      img.src = e.target?.result as string;
+    };
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Failed to create canvas context"));
+
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("Failed to convert image to JPEG"));
+          const newFile = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+          resolve(newFile);
+        },
+        "image/jpeg",
+        quality,
+      );
+    };
+
+    img.onerror = (err) => reject(err);
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
 }
 
 export const uploadImage = async ({
@@ -25,15 +63,19 @@ export const uploadImage = async ({
   if (sessionError || !session || !session.user) {
     throw new Error("You must be logged in to upload an image.");
   }
+
   const user = session.user;
   const accessToken = session.access_token;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const bucketName = "uploaded-images";
 
-  const filePath = `${user.id}/${Date.now()}_${file.name.replace(/\s/g, "_")}`;
+  // ✅ Convert image to JPG before upload
+  const convertedFile = await convertToJpeg(file);
+
+  const filePath = `${user.id}/${Date.now()}_${convertedFile.name.replace(/\s/g, "_")}`;
 
   return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
+    const upload = new tus.Upload(convertedFile, {
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers: {
@@ -44,7 +86,7 @@ export const uploadImage = async ({
       metadata: {
         bucketName,
         objectName: filePath,
-        contentType: file.type,
+        contentType: "image/jpeg",
       },
       chunkSize: 6 * 1024 * 1024, // 6MB
       onError: (err) => {
@@ -56,9 +98,6 @@ export const uploadImage = async ({
         onProgress?.(percentage);
       },
       onSuccess: async () => {
-        const fullPermanentPath = `${filePath}`;
-
-        // Generate a short-lived signed URL for client-side display
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from(bucketName)
           .createSignedUrl(filePath, 3600);
@@ -69,13 +108,14 @@ export const uploadImage = async ({
           return;
         }
 
-        onSuccess?.(fullPermanentPath, signedUrlData.signedUrl); // Pass both to callback
+        onSuccess?.(filePath, signedUrlData.signedUrl);
         resolve({
-          permanentPath: fullPermanentPath,
+          permanentPath: filePath,
           displayUrl: signedUrlData.signedUrl,
         });
       },
     });
+
     upload.start();
   });
 };

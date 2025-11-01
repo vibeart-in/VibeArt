@@ -196,7 +196,7 @@
 //   );
 // }
 
-// file: /app/api/webhook/route.ts (or your file)
+//api/webhook/replicate/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";

@@ -4,7 +4,7 @@ import {
   PencilSimpleIcon,
   SparkleIcon,
 } from "@phosphor-icons/react";
-import { IconTerminal } from "@tabler/icons-react";
+import { IconAspectRatio, IconTerminal } from "@tabler/icons-react";
 import { DicesIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
@@ -20,18 +20,26 @@ import React, {
 
 import { ConversationType, ModelData, NodeParam } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+import { getIconForParam } from "@/src/utils/server/utils";
 
 import DialogBox from "./DialogBox";
+import PresetModal from "./PresetModal";
 import { ImageObject } from "./ReplicateParameters";
 import AnimatedCounter from "../ui/AnimatedCounter";
-import CommonModal from "../ui/CommonModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dotted-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import GradualBlurMemo from "../ui/GradualBlur";
 import ImageUploadBox from "../ui/ImageUploadBox";
 import {
   Select,
@@ -48,6 +56,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 interface RunninghubParametersProps {
   parameters: NodeParam[];
   modelName?: string;
+  identifier?: string;
 }
 
 export interface RunninghubParametersHandle {
@@ -55,6 +64,7 @@ export interface RunninghubParametersHandle {
     values: NodeParam[];
     inputImages: string[];
   };
+  clearPrompt: () => void;
 }
 
 // ============================================================================
@@ -78,6 +88,7 @@ const OtherParameters = ({
         if (
           (param.fieldName === "aspect_ratio" ||
             param.fieldName === "size" ||
+            param.fieldName === "model" ||
             param.fieldName === "model_selected" ||
             param.description === "aspect_ratio") &&
           param.fieldData
@@ -94,15 +105,56 @@ const OtherParameters = ({
                 <div className="min-w-[130px]">
                   <Select value={param.fieldValue} onValueChange={(val) => handleChange(key, val)}>
                     <SelectTrigger className="w-full">
+                      {param.fieldName !== "aspect_ratio" &&
+                        param.description !== "aspect_ratio" &&
+                        getIconForParam(param.description ?? key)}
                       <SelectValue placeholder={param.description} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {options.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
+                        {options.map((opt) => {
+                          const isAspect =
+                            param.fieldName === "aspect_ratio" ||
+                            param.description === "aspect_ratio";
+
+                          // Detect ratio-like options (e.g. "16:9")
+                          const ratioRegex = /^\d+:\d+$/;
+                          const isRatio = ratioRegex.test(opt);
+
+                          let preview = null;
+
+                          if (isAspect) {
+                            if (isRatio) {
+                              // Numeric aspect ratio visualization
+                              const [w, h] = opt.split(":").map(Number);
+                              const aspectRatio = w / h;
+                              const baseHeight = 15;
+                              const previewWidth = baseHeight * aspectRatio;
+
+                              preview = (
+                                <div
+                                  className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
+                                  style={{
+                                    width: `${previewWidth}px`,
+                                    height: `${baseHeight}px`,
+                                  }}
+                                />
+                              );
+                            } else {
+                              // Non-ratio text options like "match_input_image" or "auto"
+                              preview = <IconAspectRatio size={15} />;
+                            }
+                          }
+
+                          return (
+                            <SelectItem key={opt} value={opt}>
+                              <div className="flex items-center gap-2">
+                                {preview}
+                                <span className="text-sm">{opt}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -279,7 +331,7 @@ const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual)
 export const RunninghubParameters = forwardRef<
   RunninghubParametersHandle,
   RunninghubParametersProps
->(({ parameters, modelName }, ref) => {
+>(({ parameters, modelName, identifier }, ref) => {
   const [values, setValues] = useState<NodeParam[]>(parameters);
   const [showNegativePrompt, setShowNegativePrompt] = useState(false);
   const [enableLoraStrength, setEnableLoraStrength] = useState(false);
@@ -297,6 +349,11 @@ export const RunninghubParameters = forwardRef<
 
     // 2. Clear out any previous image object state
     setImageObjects({});
+    setImageObjects({});
+    const lastPrompt = sessionStorage.getItem("lastPrompt");
+    if (lastPrompt) {
+      handleChange("prompt", lastPrompt);
+    }
 
     // 3. Get image from session storage
     const initialImageData = sessionStorage.getItem("initialEditImage");
@@ -339,6 +396,9 @@ export const RunninghubParameters = forwardRef<
           values: values, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
         };
+      },
+      clearPrompt: () => {
+        handlePromptChange("");
       },
     }),
     [values, imageObjects], // Depend on both states
@@ -419,8 +479,8 @@ export const RunninghubParameters = forwardRef<
 
   const handlePromptChange = (newValue: string) => {
     if (promptParam) handleChange(promptParam.description, newValue);
-    // If user types, we should allow enhancement again.
-    // Setting ref to null ensures the condition `values.prompt !== lastEnhancedPromptRef.current` becomes true.
+    sessionStorage.setItem("lastPrompt", newValue);
+
     if (newValue !== lastEnhancedPromptRef.current) {
       lastEnhancedPromptRef.current = null;
     }
@@ -467,85 +527,65 @@ export const RunninghubParameters = forwardRef<
 
   const handleModelSelect = (model: ModelData) => {
     setSelectedModels(model);
-    // sessionStorage.setItem(`-model`, JSON.stringify(model));
+    console.log("Selected model:", model.identifier);
+    if (checkpointParam) {
+      handleChange(checkpointParam?.description, model.identifier);
+    }
     setIsDialogOpen(false);
-  };
-  const handleCardClick = () => {
-    setIsDialogOpen((prev) => !prev);
   };
 
   return (
     <div className="relative flex gap-2">
-      <AnimatePresence>
-        {isDialogOpen && (
-          <motion.div
-            className="absolute mb-2 size-full overflow-hidden"
-            initial={{
-              opacity: 0,
-              height: 0,
-            }}
-            animate={{
-              opacity: 1,
-              height: "32rem",
-            }}
-            exit={{
-              opacity: 0,
-              height: 0,
-            }}
-            transition={{
-              duration: 0.5,
-              ease: "easeInOut",
-            }}
-          >
-            <div className="size-full overflow-y-auto p-2">
-              <DialogBox
-                conversationType={ConversationType.ADVANCE}
-                onSelectModel={handleModelSelect}
-              />
-            </div>
-            <GradualBlurMemo
-              target="parent"
-              position="bottom"
-              height="10rem"
-              strength={2}
-              divCount={5}
-              zIndex={1}
-              className="!bottom-2 p-2"
-              curve="bezier"
-              exponential={true}
-              opacity={1}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!(checkpointParam || loraParam) && (
+        <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
+      )}
+
       <AnimatePresence>
         {checkpointParam && (
-          <div
-            onClick={handleCardClick}
-            className="group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100"
-          >
-            <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
-            <Image
-              className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
-              src={
-                selectedModels?.cover_image ||
-                "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
-              }
-              alt={selectedModels?.model_name || "selectedModel.model_name"}
-              width={150}
-              height={95}
-            />
-            <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-              <p className="truncate font-satoshi text-sm font-medium text-accent">
-                {selectedModels?.model_name || "Select Model"}
-              </p>
-            </div>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-                <PencilSimpleIcon size={20} weight="fill" />
-              </span>
-            </div>
-          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <div className="group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100">
+                <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
+                <Image
+                  className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
+                  src={
+                    selectedModels?.cover_image ||
+                    "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
+                  }
+                  alt={selectedModels?.model_name || "selectedModel.model_name"}
+                  width={150}
+                  height={95}
+                />
+                <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+                  <p className="truncate font-satoshi text-sm font-medium text-accent">
+                    {selectedModels?.model_name || "Select Model"}
+                  </p>
+                </div>
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
+                    <PencilSimpleIcon size={20} weight="fill" />
+                  </span>
+                </div>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="w-full max-w-6xl rounded-[30px]">
+              <DialogHeader>
+                <DialogTitle>Checkpoint</DialogTitle>
+                <DialogDescription>
+                  A checkpoint is the core AI model used to create images. It determines the overall
+                  style, realism, and creativity of the results, guiding how the AI interprets your
+                  prompt to generate visuals.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="size-full overflow-y-auto p-2">
+                <DialogBox
+                  conversationType={ConversationType.CHECKPOINT}
+                  onSelectModel={handleModelSelect}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </AnimatePresence>
       <AnimatePresence>
@@ -631,27 +671,16 @@ export const RunninghubParameters = forwardRef<
         />
       </div>
       {imageParams.map((param, index) => {
-        // Get the full image object from our dedicated state
-        // const imageObject = imageObjects[param.fieldValue] ?? null;
-
         return (
           <ImageUploadBox
-            key={param.description}
-            // initialImage={imageObject}
+            uploaderId={index}
+            key={index}
             onImageUploaded={(image) => handleImageUploaded(param.description, image)}
             onImageRemoved={() => handleImageRemoved(param.description)}
             imageDescription={param.description || `Image ${index}`}
           />
         );
       })}
-
-      {/* <CommonModal
-        isOpen={!isEnhanceModalOpen}
-        onClose={() => setIsEnhanceModalOpen(false)}
-        variant="enhance"
-      >
-        <div className="fixed flex h-96 w-96 items-center justify-center bg-black">TESTING</div>
-      </CommonModal> */}
     </div>
   );
 });

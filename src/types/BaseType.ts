@@ -59,8 +59,18 @@ export interface HistoryItem {
   conversation_type: ConversationType;
 }
 
-export type ExampleImageType =
-  Database["public"]["Functions"]["get_example_generations"]["Returns"][number];
+export interface ExampleImageType {
+  id: string;
+  mediaUrl: string;
+  thumbnailUrl?: string | null;
+  prompt: string;
+  width: number;
+  height: number;
+  isVideo?: boolean;
+}
+
+// export type ExampleImageType1 =
+//   Database["public"]["Functions"]["get_example_generations"]["Returns"][number];
 
 export enum ConversationType {
   GENERATE = "generate",
@@ -90,6 +100,8 @@ export type conversationImageObject = {
   id: string;
   imageUrl: string;
   thumbnailUrl?: string | null;
+  width?: number;
+  height?: number;
 };
 
 export type conversationData = {
@@ -111,4 +123,15 @@ export type conversationData = {
   parameters: InputBoxParameter;
   userPrompt: string;
   model_name: string;
+  prediction_id?: string;
+};
+
+export type PresetData = {
+  id: number;
+  created_at: string | null;
+  name: string;
+  prompt: string;
+  cover: string;
+  tags?: string[] | null;
+  for_model: string[];
 };

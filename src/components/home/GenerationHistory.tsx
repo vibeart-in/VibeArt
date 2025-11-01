@@ -64,7 +64,7 @@ const MemoizedHistoryList = memo(({ groupedHistory, activeId }: MemoizedHistoryL
   return (
     <motion.div
       key="list"
-      className="flex flex-col"
+      className="pointer-events-auto flex flex-col"
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -84,7 +84,7 @@ const MemoizedHistoryList = memo(({ groupedHistory, activeId }: MemoizedHistoryL
                 key={history.id}
                 id={history.id}
                 imageUrl={history.imageUrl}
-                title="Image generation"
+                title={history.conversation_type}
                 prompt={history.title}
                 isActive={activeId === history.id}
                 conversationType={history.conversation_type}
@@ -169,7 +169,7 @@ const GenerationHistory = () => {
 
   return (
     <>
-      <div className="fixed left-4 top-1/2 z-20 -translate-y-1/2" aria-label="History rail">
+      <div className="fixed left-4 top-1/2 z-50 -translate-y-1/2" aria-label="History rail">
         <div className="w-[75px] rounded-2xl bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515] p-2 pt-3">
           <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.96 }}>
             <Link
@@ -186,7 +186,7 @@ const GenerationHistory = () => {
           <div className="mx-4 mt-3 h-1.5 rounded-full bg-white/10" />
 
           <div
-            className="hide-scrollbar mask-gradient-vertical relative max-h-[40vh] overflow-y-auto overflow-x-visible pr-[320px] pt-3"
+            className="hide-scrollbar mask-gradient-vertical pointer-events-none relative max-h-[40vh] overflow-y-auto overflow-x-visible pr-[320px] pt-3"
             aria-live="polite"
             aria-busy={isPending ? "true" : "false"}
           >

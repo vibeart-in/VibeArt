@@ -2,16 +2,22 @@
 "use client";
 import { ImagesIcon, XIcon } from "lucide-react";
 import Image from "next/image";
-import React, { useRef, useState, useEffect, memo } from "react";
+import React, { useRef, useState, useEffect, memo, useCallback } from "react";
 
 import { uploadImage } from "@/src/utils/server/UploadImage";
 
+interface ImageObject {
+  permanentPath: string;
+  displayUrl: string;
+}
+
 interface ImageUploadBoxProps {
-  onImageUploaded: (paths: { permanentPath: string; displayUrl: string }) => void;
+  onImageUploaded: (paths: ImageObject) => void;
   onImageRemoved: () => void;
-  initialImage?: { permanentPath: string; displayUrl: string } | null;
+  initialImage?: ImageObject | null;
   imageDescription?: string;
   resetOnSuccess?: boolean;
+  uploaderId?: number;
 }
 
 const ImageUploadBox = ({
@@ -20,16 +26,31 @@ const ImageUploadBox = ({
   initialImage = null,
   imageDescription = "Add Image",
   resetOnSuccess = false,
+  uploaderId,
 }: ImageUploadBoxProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [image, setImage] = useState(initialImage);
+  const [image, setImage] = useState<ImageObject | null>(initialImage);
 
   useEffect(() => {
     setImage(initialImage);
   }, [initialImage]);
+
+  // Wrap the callback-style uploadImage so we can re-use it for url->file uploads
+  const uploadImagePromise = useCallback((file: File) => {
+    return new Promise<ImageObject>((resolve, reject) => {
+      uploadImage({
+        file,
+        onProgress: (p) => setUploadProgress(Number(p.toFixed(0))),
+        onSuccess: (permanentPath: string, displayUrl: string) => {
+          resolve({ permanentPath, displayUrl });
+        },
+        onError: (err: any) => reject(err),
+      });
+    });
+  }, []);
 
   const handleClick = () => {
     if (isUploading || image) return;
@@ -55,25 +76,20 @@ const ImageUploadBox = ({
           onImageUploaded(newImage);
           setIsUploading(false);
 
-          // THE FIX: Conditionally reset the internal state
           if (resetOnSuccess) {
             setImage(null);
-            // Also clear the file input so the same file can be re-selected immediately
-            if (inputRef.current) {
-              inputRef.current.value = "";
-            }
+            if (inputRef.current) inputRef.current.value = "";
           } else {
-            // This is for the single-image uploader behavior
             setImage(newImage);
           }
         },
         onError: (err) => {
-          setError(`Upload failed: ${err.message}`);
+          setError(`Upload failed: ${err?.message ?? err}`);
           setIsUploading(false);
         },
       });
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message ?? String(err));
       setIsUploading(false);
     }
   };
@@ -82,10 +98,101 @@ const ImageUploadBox = ({
     e.stopPropagation();
     setImage(null);
     onImageRemoved();
-    if (inputRef.current) {
-      inputRef.current.value = "";
+    if (inputRef.current) inputRef.current.value = "";
+    try {
+      sessionStorage.removeItem("initialEditImage");
+    } catch {
+      /* ignore */
     }
   };
+
+  // Attempt to fetch imageUrl, convert to File and upload via uploadImage
+  const processImageUrl = useCallback(
+    async (imageUrl: string) => {
+      if (!imageUrl) return;
+      setError(null);
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      try {
+        // Try to fetch (may fail due to CORS)
+        const resp = await fetch(imageUrl, { mode: "cors" });
+        if (!resp.ok) throw new Error("Failed to fetch image");
+        const blob = await resp.blob();
+        const ext = (blob.type?.split("/")?.[1] ?? "jpg").split(";")[0];
+        const file = new File([blob], `edit-image.${ext}`, { type: blob.type || "image/jpeg" });
+
+        const uploaded = await uploadImagePromise(file);
+
+        // Use the same onImageUploaded + internal state flow as file uploads
+        onImageUploaded(uploaded);
+        setIsUploading(false);
+
+        if (resetOnSuccess) {
+          setImage(null);
+        } else {
+          setImage(uploaded);
+        }
+        try {
+          sessionStorage.setItem("initialEditImage", JSON.stringify(uploaded));
+        } catch {
+          setIsUploading(false);
+        }
+      } catch (_err) {
+        // fallback: can't fetch/upload -> use remote url as display url/permanentPath
+        const fallback = { permanentPath: imageUrl, displayUrl: imageUrl };
+        onImageUploaded(fallback);
+        if (resetOnSuccess) {
+          setImage(null);
+        } else {
+          setImage(fallback);
+        }
+        try {
+          sessionStorage.setItem("initialEditImage", JSON.stringify(fallback));
+        } catch {
+          /* ignore */
+        }
+      } finally {
+        setIsUploading(false);
+        // remove query param so page reload won't re-trigger
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("image-url");
+          url.searchParams.delete("imageUrl");
+          window.history.replaceState({}, "", url.toString());
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    [onImageUploaded, resetOnSuccess, uploadImagePromise],
+  );
+
+  // Event listener and query param/session handling move here
+  useEffect(() => {
+    const onAppImageEdit = (e: Event) => {
+      const detail = (e as CustomEvent).detail as
+        | { displayUrl?: string; permanentPath?: string; uploaderId?: number }
+        | undefined;
+      if (!detail) return;
+      console.log("ImageUploadBox received app:image-edit event:", detail.uploaderId, uploaderId);
+      // If multiple uploaders exist, optionally filter by uploaderId
+      if (
+        typeof detail.uploaderId === "number" &&
+        typeof uploaderId === "number" &&
+        detail.uploaderId !== uploaderId
+      ) {
+        return null;
+      }
+
+      const url = detail.displayUrl ?? detail.permanentPath;
+      if (!url) return;
+      processImageUrl(url);
+    };
+
+    window.addEventListener("app:image-edit", onAppImageEdit as EventListener);
+    return () => window.removeEventListener("app:image-edit", onAppImageEdit as EventListener);
+  }, [processImageUrl, uploaderId]);
 
   // Render Logic
   const renderContent = () => {
@@ -136,7 +243,9 @@ const ImageUploadBox = ({
 
   return (
     <div
-      onClick={handleClick}
+      onClick={() => {
+        if (!isUploading && !image) inputRef.current?.click();
+      }}
       className={`relative flex size-[100px] items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 ${!image && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
     >
       <input

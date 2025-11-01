@@ -8,6 +8,7 @@ interface BackgroundImageProps {
   width: number;
   height: number;
   rotation?: number;
+  bottomBlur?: boolean;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ const BackgroundImage = ({
   width,
   height,
   rotation = 0,
+  bottomBlur = false,
   className = "",
 }: BackgroundImageProps) => {
   const mouseX = useMotionValue(0);
@@ -65,6 +67,9 @@ const BackgroundImage = ({
           // unoptimized
           priority={true}
         />
+      )}
+      {bottomBlur && (
+        <div className="absolute inset-x-0 -bottom-2 z-10 h-[100px] bg-gradient-to-t from-black to-transparent backdrop-blur-lg [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[200px]" />
       )}
     </motion.div>
   );

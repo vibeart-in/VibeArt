@@ -1,8 +1,6 @@
 "use client";
-import { PencilSimpleIcon, SwapIcon } from "@phosphor-icons/react";
 import { MoreVertical, XCircle } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "motion/react";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -13,8 +11,6 @@ import { ConversationType, ModelData } from "@/src/types/BaseType";
 import DialogBox from "./DialogBox";
 import ModelSelectorCard from "./ModalSelectorCard";
 import ParametersSection, { ParametersSectionHandle } from "./ParametersSection";
-import { ReplicateParameters, ReplicateParametersHandle } from "./ReplicateParameters";
-import { RunninghubParameters, RunninghubParametersHandle } from "./RunninghubParameters";
 import CommonModal from "../ui/CommonModal";
 import GenerateButton from "../ui/GenerateButton";
 import GradualBlurMemo from "../ui/GradualBlur";
@@ -26,7 +22,7 @@ const validateAndSanitizePrompt = (prompt: string) => {
       isValid: false,
       error: "Prompt cannot be empty.",
     };
-  if (trimmed.length > 1000)
+  if (trimmed.length > 5000)
     return {
       isValid: false,
       error: "Prompt is too long (max 1000 characters).",
@@ -156,6 +152,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         promptText,
       } = paramsRef.current.getValues();
 
+      console.log("Final Parameters:", finalParameters);
+
       const { isValid, error } = validateAndSanitizePrompt(promptText);
       if (!isValid && error) {
         setFormError(error);
@@ -173,7 +171,13 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           conversationType: conversationType,
           inputImagePermanentPaths,
         },
+
         {
+          onSuccess: () => {
+            if (paramsRef.current) {
+              paramsRef.current.clearPrompt?.();
+            }
+          },
           onError: (err) => {
             if (err.message === "Unauthorized") {
               setIsLoginModalOpen(true);

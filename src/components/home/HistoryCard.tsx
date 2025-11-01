@@ -1,3 +1,4 @@
+import { IconGhostFilled } from "@tabler/icons-react";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -79,35 +80,25 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           tabIndex={0}
         >
           {imageUrl ? (
-            isVideoUrl(imageUrl) ? (
-              <video
-                src={imageUrl}
-                muted
-                loop
-                playsInline
-                className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
-                  hovered ? "scale-[1.06]" : "scale-100"
-                }`}
-              />
-            ) : (
-              <Image
-                src={imageUrl}
-                alt={prompt}
-                width={55}
-                height={55}
-                sizes="55px"
-                className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
-                  hovered ? "scale-[1.06]" : "scale-100"
-                }`}
-                priority={false}
-              />
-            )
-          ) : (
-            <div
-              className={`absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-900 transition-transform duration-300 ease-out ${
+            <Image
+              src={imageUrl}
+              alt={prompt}
+              width={100}
+              height={100}
+              sizes="55px"
+              className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
                 hovered ? "scale-[1.06]" : "scale-100"
               }`}
+              priority={false}
             />
+          ) : (
+            <div
+              className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900 transition-transform duration-300 ease-out ${
+                hovered ? "scale-[1.06]" : "scale-100"
+              }`}
+            >
+              <IconGhostFilled size={25} className="text-white/40" aria-hidden />
+            </div>
           )}
 
           <motion.div
@@ -125,11 +116,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             animate={{ opacity: 1, x: 10, scale: 1 }}
             exit={{ opacity: 0, x: 4, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className="absolute left-[76px] top-0 flex h-[66px] min-w-[220px] max-w-[320px] items-center rounded-2xl bg-neutral-900/95 px-4 text-white shadow-lg ring-1 ring-white/10"
+            className="absolute left-[70px] top-0 flex h-[66px] min-w-[220px] max-w-[320px] items-center rounded-2xl bg-neutral-900/95 px-4 text-white shadow-lg ring-1 ring-white/10"
             role="status"
           >
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{title}</div>
+              <div className="truncate text-sm font-medium uppercase">{title}</div>
               <div className="mt-0.5 line-clamp-2 text-xs text-white/70">{prompt}</div>
             </div>
           </motion.div>

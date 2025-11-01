@@ -1,34 +1,40 @@
 import { IconSparkles } from "@tabler/icons-react";
 
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import ImageGallery from "@/src/components/home/ImageGrid";
+import ExampleGenerations from "@/src/components/home/ExampleGenerations";
 import InputBox from "@/src/components/inputBox/InputBox";
-import Footer from "@/src/components/landing/Footer";
-import { createClient } from "@/src/lib/supabase/server";
+import { ConversationType } from "@/src/types/BaseType";
 
-const Page = async () => {
-  const supabase = await createClient();
-
-  const { data: images, error } = await supabase.rpc("get_example_generations", {
-    p_limit: 15,
-    p_showcase_for: "generate",
-  });
-
-  if (error) {
-    console.error("Error fetching random images:", error);
-    return <p className="text-center text-white">Failed to load images. Please try again later.</p>;
-  }
-
+const Page = () => {
   return (
     <section className="relative overflow-hidden">
-      <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden overflow-y-scroll bg-black">
+      <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden bg-black">
         {/* Background Image */}
         <BackgroundImage
-          className="-mt-20"
-          src="https://i.pinimg.com/736x/b3/68/04/b36804200ff0875ab460a8e9447311f3.jpg"
-          width={1000}
-          height={1000}
+          className="mt-14"
+          src="https://i.pinimg.com/736x/af/4a/4f/af4a4f086d3acdb0e40a7c88554d5fcf.jpg"
+          width={600}
+          height={600}
+          rotation={10}
         />
+        {/* <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            backgroundImage: "url(/images/landing/grain.png)",
+            backgroundSize: "100px 100px",
+            mixBlendMode: "overlay",
+          }}
+        />
+        <div className="absolute top-0 -z-20 h-full w-screen overflow-hidden">
+          <Image
+            src={
+              "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/gradients/gold_girl_top.webp"
+            }
+            alt="gradients"
+            className="h-full w-full object-cover object-top"
+            fill
+          />
+        </div> */}
 
         {/* Hero Section */}
         <div className="z-10 my-8 mt-56 flex flex-col items-center justify-center">
@@ -38,19 +44,8 @@ const Page = async () => {
           <InputBox />
         </div>
 
-        <div className="mt-32 px-4 pb-20 md:px-8 lg:px-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="z-10 text-3xl font-bold text-white">Examples</h2>
-              <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white backdrop-blur-sm transition-all hover:bg-white/10">
-                View All
-              </button>
-            </div>
-            <ImageGallery images={images} />
-          </div>
-        </div>
+        <ExampleGenerations limit={15} showcaseFor={ConversationType.GENERATE} />
       </div>
-      {/* <Footer /> */}
     </section>
   );
 };

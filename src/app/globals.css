@@ -128,7 +128,7 @@
   }
 }
 
-*::-webkit-scrollbar-track {
+/* *::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0.3);
   background-color: none;
 }
@@ -142,7 +142,7 @@
   background-color: #000000;
   border: 1px solid #383838;
   border-radius: 30px;
-}
+} */
 
 /* This is the main container for the masonry grid */
 .my-masonry-grid {

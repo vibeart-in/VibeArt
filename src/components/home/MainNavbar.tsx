@@ -8,8 +8,6 @@ import {
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
 import { User } from "@supabase/supabase-js";
-
-// import { NavbarLogo } from "../ui/resizable-navbar";
 import { useState, useEffect } from "react";
 
 import {
@@ -18,16 +16,13 @@ import {
   NavItems,
   MobileNav,
   NavbarLogo,
-  NavbarButton,
   MobileNavHeader,
   MobileNavToggle,
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/client";
 
-import { NavLinksClient } from "./NavLinksClient";
 import { UserSectionClient } from "./UserSectionClient";
-
 
 export default function MainNavbar() {
   const navItems = [
@@ -123,66 +118,9 @@ export default function MainNavbar() {
               <span className="block">{item.name}</span>
             </a>
           ))}
-          <div className="flex w-full flex-col gap-4">
-            {loading ? (
-              <>
-                <div className="h-9 w-full animate-pulse rounded bg-gray-200"></div>
-                <div className="h-9 w-full animate-pulse rounded bg-gray-200"></div>
-              </>
-            ) : user ? (
-              <>
-                <NavbarButton
-                  href="/image/generate"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  variant="primary"
-                  className="w-full"
-                >
-                  Dashboard
-                </NavbarButton>
-                <NavbarButton
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  Logout
-                </NavbarButton>
-              </>
-            ) : (
-              <>
-                <NavbarButton
-                  href="/auth/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  Login
-                </NavbarButton>
-                <NavbarButton
-                  href="/auth/signup"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  variant="primary"
-                  className="w-full"
-                >
-                  Create Now
-                </NavbarButton>
-              </>
-            )}
-          </div>
+          <UserSectionClient />
         </MobileNavMenu>
       </MobileNav>
     </Navbar>
   );
 }
-
-// export default async function MainNavbar() {
-//   return (
-//     <nav className="fixed z-20 flex w-full items-center justify-between px-8 py-2">
-//       <NavbarLogo />
-//       <NavLinksClient />
-//       <UserSectionClient />
-//     </nav>
-//   );
-// }

@@ -19,9 +19,7 @@ export default function ImageLayout({
 }>) {
   return (
     <main className="relative flex size-full flex-row">
-      <nav className="">
-        <MainNavbar />
-      </nav>
+      <MainNavbar />
       <GenerationHistory />
       <section className="size-full">{children}</section>
     </main>

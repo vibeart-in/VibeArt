@@ -8,6 +8,8 @@ export interface ImageProps {
   alt: string;
   width: number;
   height: number;
+  title?: string;
+  subtext?: string;
 }
 
 // Renamed to GalleryImage and simplified its props
@@ -18,37 +20,97 @@ interface GalleryImageProps {
 }
 
 const GalleryImage: React.FC<GalleryImageProps> = ({ image, galleryHeight, index }) => {
+  const isVideo = image.src.endsWith(".mp4") || image.src.endsWith(".webm");
+
   return (
-    // This component still handles the individual item's entry and hover animations
     <motion.div
       key={index}
-      className="flex-shrink-0 overflow-hidden rounded-[26px] border-2 border-white/30 bg-neutral-800 shadow-lg"
-      style={{
-        height: `${galleryHeight}px`,
-        aspectRatio: image.width / image.height,
-      }}
-      // Staggered entry animation variant
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
+      className="group flex cursor-pointer flex-col gap-3"
       variants={{
         hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
-      }}
-      // Hover effect for scaling and brightening
-      whileHover={{
-        scale: 1.05,
-        filter: "brightness(1.1)",
-        transition: { type: "spring", stiffness: 300, damping: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { type: "spring", stiffness: 100, damping: 15 },
+        },
       }}
     >
-      <Image
-        src={image.src}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        // If your images "contain perfectly", you might want to use 'object-contain'
-        className="pointer-events-none size-full object-cover"
-        priority={index < 3}
-        onDragStart={(e) => e.preventDefault()}
-      />
+      <motion.div
+        className="flex-shrink-0 overflow-hidden rounded-[26px] border-2 border-white/30 bg-neutral-800 shadow-lg"
+        style={{
+          height: `${galleryHeight}px`,
+          aspectRatio: image.width / image.height,
+        }}
+        variants={{
+          hover: {
+            scale: 1.05,
+            filter: "brightness(1.15)",
+            boxShadow: "0 0 25px rgba(255,255,255,0.15)",
+            transition: { type: "spring", stiffness: 300, damping: 20 },
+          },
+        }}
+      >
+        {isVideo ? (
+          <video
+            src={image.src}
+            width={image.width}
+            height={image.height}
+            className="pointer-events-none size-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <Image
+            src={image.src}
+            alt={image.alt}
+            width={image.width}
+            height={image.height}
+            className="pointer-events-none size-full object-cover"
+            priority={index < 3}
+            onDragStart={(e) => e.preventDefault()}
+          />
+        )}
+      </motion.div>
+
+      {/* Text container */}
+      <motion.div
+        className=""
+        variants={{
+          hover: {
+            y: -4,
+            color: "var(--accent)",
+            transition: { type: "spring", stiffness: 300, damping: 18 },
+          },
+        }}
+      >
+        <motion.p
+          className="font-satoshi text-lg font-semibold text-white transition-colors duration-300 group-hover:text-accent"
+          variants={{
+            hover: {
+              scale: 1.05,
+              textShadow: "0 0 10px var(--accent)",
+            },
+          }}
+        >
+          {image.title}
+        </motion.p>
+        <motion.p
+          className="font-satoshi text-sm text-neutral-400 transition-colors duration-300 group-hover:text-accent/80"
+          variants={{
+            hover: {
+              opacity: 1,
+              y: -2,
+            },
+          }}
+        >
+          {image.subtext}
+        </motion.p>
+      </motion.div>
     </motion.div>
   );
 };
@@ -98,9 +160,7 @@ const HorizontalImageScroller: React.FC<ScrollerProps> = ({ images, galleryHeigh
       ref={viewportRef}
       className="relative z-20 w-full cursor-grab overflow-hidden py-8 active:cursor-grabbing"
     >
-      {/* Left Gradient Fade */}
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-black to-transparent" />
-
+      {/* <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-black to-transparent" /> */}
       <motion.div
         ref={draggableContainerRef}
         className="inline-flex gap-8 px-5"
@@ -110,18 +170,14 @@ const HorizontalImageScroller: React.FC<ScrollerProps> = ({ images, galleryHeigh
           left: scrollConstraint,
         }}
         dragTransition={{ bounceStiffness: 400, bounceDamping: 30 }}
-        // The container orchestrates the animation for its children
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {images.map((image, index) => (
-          // Use the simplified GalleryImage component
           <GalleryImage key={index} image={image} galleryHeight={galleryHeight} index={index} />
         ))}
       </motion.div>
-
-      {/* Right Gradient Fade */}
       <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-black to-transparent" />
     </motion.div>
   );

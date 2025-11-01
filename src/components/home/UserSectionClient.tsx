@@ -8,11 +8,28 @@ import { NavbarButton } from "@/src/components/ui/resizable-navbar";
 import { UserProfileDropdown } from "@/src/components/ui/UserProfileDropdown";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
 
+/**
+ * A skeleton loader to show while user data is being fetched.
+ * This improves the user experience by preventing layout shifts.
+ */
+function UserSectionSkeleton() {
+  return (
+    <div className="flex h-10 shrink-0 animate-pulse items-center gap-4">
+      <div className="size-8 rounded-xl bg-neutral-200 dark:bg-neutral-800"></div>
+      <div className="size-10 rounded-2xl bg-neutral-200 dark:bg-neutral-800"></div>
+    </div>
+  );
+}
+
 export function UserSectionClient() {
-  const { data } = useNavInfo();
+  // Assume the hook returns a loading state
+  const { data, isLoading } = useNavInfo();
   const { user, navInfo } = data || {};
 
-  // If user is not logged in, show login/signup buttons
+  // 1. While loading, show a skeleton placeholder
+  if (isLoading && !data) return <UserSectionSkeleton />;
+
+  // 2. After loading, if there is no user, show login/signup buttons
   if (!user) {
     return (
       <div className="flex shrink-0 items-center gap-4">
@@ -20,13 +37,13 @@ export function UserSectionClient() {
           Login
         </NavbarButton>
         <NavbarButton href="/auth/signup" variant="primary">
-          Create Now
+          Sign up
         </NavbarButton>
       </div>
     );
   }
 
-  // If user is logged in, show the existing authenticated UI
+  // 3. After loading, if the user exists, show the authenticated UI
   return (
     <div className="flex shrink-0 items-center gap-4">
       {navInfo?.subscription_tier === "free" && (

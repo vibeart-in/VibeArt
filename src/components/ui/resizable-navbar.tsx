@@ -1,5 +1,4 @@
 "use client";
-import { PhotoIcon } from "@heroicons/react/24/solid";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import Link from "next/link";
@@ -86,7 +85,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         boxShadow: visible
           ? "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset"
           : "none",
-        width: visible ? "40%" : "100%",
+        width: visible ? "55%" : "100%",
         y: visible ? 20 : 0,
       }}
       transition={{
@@ -115,8 +114,13 @@ function isActiveRoute(pathname: string, link: string) {
 
 export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
-
   const pathname = usePathname();
+
+  // Find the index of the currently active item.
+  const activeItemIndex = items.findIndex((item) => isActiveRoute(pathname, item.link));
+
+  // Determine which single item should have the highlight. Hover takes precedence.
+  const highlightedItemIndex = hovered !== null ? hovered : activeItemIndex;
 
   return (
     <motion.div
@@ -127,8 +131,8 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
       )}
     >
       {items.map((item, idx) => {
-        const active = isActiveRoute(pathname, item.link);
-        const isHighlighted = hovered === idx || active;
+        // An item is considered "highlighted" if its index matches our single source of truth.
+        const isHighlighted = highlightedItemIndex === idx;
 
         return (
           <a
@@ -136,14 +140,20 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
             href={item.link}
             onClick={onItemClick}
             onMouseEnter={() => setHovered(idx)}
-            onMouseLeave={() => setHovered(-1)}
-            className={`relative flex items-center gap-2 px-4 py-2 text-neutral-600 dark:text-neutral-200 ${isHighlighted ? "text-black dark:text-black" : ""} transition-colors duration-200`}
+            className={cn(
+              "relative flex items-center gap-2 px-4 py-2 transition-colors duration-200",
+              // Apply black text only to the item that currently has the highlight.
+              isHighlighted
+                ? "text-black dark:text-black"
+                : "text-neutral-600 dark:text-neutral-200",
+            )}
           >
             <span className="relative z-20 flex items-center gap-2">
               {item.icon}
               {item.name}
             </span>
 
+            {/* The moving background is only rendered for the single highlighted item. */}
             {isHighlighted && (
               <motion.div
                 layoutId="hovered"

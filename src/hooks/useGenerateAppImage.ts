@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { NodeParam } from "@/src/types/BaseType";
+import { conversationImageObject, NodeParam } from "@/src/types/BaseType";
 
 import { GenerationAppWithSignedUrls } from "./useAppGenerations";
 
@@ -15,6 +15,23 @@ interface GenerateAppImagePayload {
 
 interface GenerateAppImageResponse {
   jobId: string;
+}
+
+// inside useGenerateAppImage.ts (or top of file)
+
+function toConversationImages(urls?: string[] | null): conversationImageObject[] {
+  // Adapt the object shape here to match your conversationImageObject type!
+  // Common shapes: { url: string }, { displayUrl: string }, { signedUrl?: string, displayUrl?: string }, etc.
+  // Replace `displayUrl` with the correct property name.
+  return (urls ?? []).map(
+    (u) =>
+      ({
+        // Example fields — **change to match your real type**
+        displayUrl: u,
+        signedUrl: null, // optional placeholder if your type has signedUrl
+        filename: undefined, // optional placeholder
+      }) as unknown as conversationImageObject,
+  );
 }
 
 async function generateAppImage(
@@ -55,32 +72,28 @@ export function useGenerateAppImage() {
     onMutate: async (newGeneration) => {
       const queryKey = ["appGenerations", newGeneration.appId];
 
-      // 1. Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey });
 
-      // 2. Snapshot the previous value
       const previousGenerations = queryClient.getQueryData<GenerationAppWithSignedUrls[]>(queryKey);
 
-      // 3. Create our optimistic "pending" generation object
+      // Convert preview URL strings -> conversationImageObject[]
+      const previewObjects = toConversationImages(newGeneration.inputImagePreviewUrls);
+
       const optimisticGeneration: GenerationAppWithSignedUrls = {
-        id: `temp-${Date.now()}`, // A temporary unique ID
+        id: `temp-${Date.now()}`,
         status: "pending",
         parameters: newGeneration.parameters,
-        //@ts-ignore
-        inputImageUrls: newGeneration.inputImagePreviewUrls,
-        outputImageUrls: [], // No output images yet
+        inputImageUrls: previewObjects, // now correctly typed
+        outputImageUrls: [],
       };
 
-      // 4. Optimistically update to the new value
-      queryClient.setQueryData<GenerationAppWithSignedUrls[]>(
-        queryKey,
-        (old = []) => [optimisticGeneration, ...old], // Add the new pending item to the top of the list
-      );
+      queryClient.setQueryData<GenerationAppWithSignedUrls[]>(queryKey, (old = []) => [
+        optimisticGeneration,
+        ...old,
+      ]);
 
-      // Smooth scroll to the history section immediately
       document.getElementById("appGenerationHistory")?.scrollIntoView({ behavior: "smooth" });
 
-      // 5. Return a context object with the snapshotted value
       return { previousGenerations, queryKey };
     },
 

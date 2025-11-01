@@ -3,40 +3,70 @@ import Masonry from "react-masonry-css";
 
 import { ExampleImageType } from "@/src/types/BaseType";
 
+import { Button } from "../ui/button";
 import ImageCard from "../ui/imageCard/ImageCard";
 
 type ImageGalleryProps = {
   images: ExampleImageType[] | null;
   columnCount?: number;
+  showMore?: boolean;
+  onShowMoreClick?: () => void;
 };
 
-const ImageGallery = ({ images, columnCount = 4 }: ImageGalleryProps) => {
+const ImageGallery = ({
+  images,
+  columnCount = 4,
+  showMore = false,
+  onShowMoreClick,
+}: ImageGalleryProps) => {
   if (!images || images.length === 0) return <p>No images to show.</p>;
 
   const breakpointColumnsObj = {
     default: columnCount,
     1500: 3,
-    1100: 2,
-    700: 1,
+    1100: 3,
+    700: 2,
   };
 
+  console.log("IMAGES IN GALLERY", images);
+
   return (
-    <Masonry
-      breakpointCols={breakpointColumnsObj}
-      className="my-masonry-grid"
-      columnClassName="my-masonry-grid_column"
-    >
-      {images.map((image) => (
-        <ImageCard
-          key={image.id}
-          mediaUrl={image.media_url}
-          // thumbnailUrl={image.thumbnail_url || null}
-          prompt={image.prompt}
-          width={image.width || 800}
-          height={image.height || 800}
-        />
-      ))}
-    </Masonry>
+    <div className="relative flex flex-col items-center overflow-hidden">
+      {/* Masonry Grid */}
+      <div className="relative w-full overflow-hidden pb-[150px]">
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="my-masonry-grid"
+          columnClassName="my-masonry-grid_column"
+        >
+          {images.map((image, index) => (
+            <ImageCard
+              key={image.id || index}
+              isVideo={image.isVideo}
+              mediaUrl={image.mediaUrl}
+              thumbnailUrl={image.thumbnailUrl}
+              prompt={image.prompt}
+              width={image.width || 800}
+              height={image.height || 800}
+            />
+          ))}
+        </Masonry>
+
+        {/* Fade overlay */}
+        {showMore && (
+          <div className="pointer-events-none absolute bottom-[60px] left-0 z-[5] h-[200px] w-full bg-black [mask-image:linear-gradient(to_top,white,transparent)]" />
+        )}
+      </div>
+
+      {/* Button Layer */}
+      {showMore && (
+        <div className="z-10 -mt-[100px] mb-6 flex w-full justify-center">
+          <Button variant={"primary"} onClick={onShowMoreClick}>
+            Show More
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

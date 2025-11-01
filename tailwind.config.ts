@@ -24,15 +24,20 @@ export default {
       },
       keyframes: {
         "smooth-bounce": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-4px)" },
+          "0%, 100%": {
+            transform: "translateY(0)",
+          },
+          "50%": {
+            transform: "translateY(-4px)",
+          },
         },
         scroll: {
-          "0%": { transform: "translateX(0)" },
-          // We translate by -50% because we have two sets of logos.
-          // This moves the entire first set out of view and the second
-          // set into the exact starting position of the first.
-          "100%": { transform: "translateX(-50%)" },
+          "0%": {
+            transform: "translateX(0)",
+          },
+          "100%": {
+            transform: "translateX(-50%)",
+          },
         },
       },
       colors: {
@@ -81,6 +86,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        "dots-pattern": "radial-gradient(transparent 1px, white 1px)",
+        "dots-pattern-dark": "radial-gradient(transparent 1px, rgb(0 0 0) 1px)",
       },
     },
   },

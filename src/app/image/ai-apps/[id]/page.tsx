@@ -2,7 +2,6 @@
 
 import Avatar from "boring-avatars";
 import Image from "next/image";
-import { ReactNode } from "react";
 
 import AppExampleGrid from "@/src/components/ai-apps/AppExampleGrid";
 import AppGenerationHistory from "@/src/components/ai-apps/AppGenerationHistory";

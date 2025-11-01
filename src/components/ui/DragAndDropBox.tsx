@@ -2,7 +2,7 @@
 
 import { IconUpload, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { uploadImage } from "@/src/utils/server/UploadImage";
 
@@ -28,6 +28,55 @@ export default function DragAndDropBox({
       delay: Math.random() * 0.6,
     })),
   );
+
+  // <<< START: NEW CODE >>>
+  useEffect(() => {
+    // This function will run only once when the component mounts,
+    // because of the empty dependency array `[]`.
+    const processUrl = async () => {
+      try {
+        // We use URLSearchParams to easily read the query parameters from the URL.
+        const params = new URLSearchParams(window.location.search);
+        const imageUrlFromQuery = params.get("image-url");
+
+        if (imageUrlFromQuery) {
+          // Set initial state to show the user we are processing the image.
+          setUploading(true);
+          setError(null);
+          setProgress(5); // Show a little progress to indicate start
+
+          // Fetch the image from the provided URL.
+          // We use a proxy to avoid CORS issues if fetching from a different domain.
+          // Note: You might need to set up a CORS proxy or ensure the source image server allows requests.
+          // For simplicity here, we'll assume direct fetching works.
+          const response = await fetch(imageUrlFromQuery);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.statusText}`);
+          }
+
+          // Convert the response into a Blob, which is raw file data.
+          const blob = await response.blob();
+
+          // Try to get a filename from the URL, or default to a generic name.
+          const filename = new URL(imageUrlFromQuery).pathname.split("/").pop() || "image.jpg";
+
+          // Create a File object, which is what our uploader function expects.
+          const file = new File([blob], filename, { type: blob.type });
+
+          // Now, call the existing file upload handler with the new file.
+          // This reuses all our existing logic for progress, success, and error handling.
+          await handleFileUpload(file);
+        }
+      } catch (err: any) {
+        console.error("Error processing image from URL:", err);
+        setError("Could not load image from the provided URL.");
+        setUploading(false);
+      }
+    };
+
+    processUrl();
+  }, []); // Empty dependency array ensures this runs only once on mount.
+  // <<< END: NEW CODE >>>
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

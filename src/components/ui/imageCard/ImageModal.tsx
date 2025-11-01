@@ -5,9 +5,12 @@ import {
   IconCheck,
   IconCopy,
   IconDownload,
+  IconEdit,
   IconShare,
   IconTrash,
+  IconVideo,
   IconWand,
+  IconWindowMaximize,
 } from "@tabler/icons-react";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
@@ -19,14 +22,6 @@ import { toast } from "sonner";
 import { VideoOptions } from "./ImageCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../hover-card";
 import ModalPortal from "./ModalPortal";
-
-/**
- * Note: This file is intentionally conservative about mounting heavy DOM and media.
- * If you also want to code-split the entire modal, import this file dynamically from the parent:
- *  const MediaModal = dynamic(() => import("./ImageModal"), { ssr: false });
- *
- * You can optionally call prefetchImageModal() from the parent on hover to prefetch the chunk.
- */
 
 // Export a helper that parent can call to prefetch this module's chunk (useful when using dynamic import)
 export const prefetchImageModal = () => import("./ImageModal");
@@ -265,36 +260,49 @@ export const MediaModal = ({
   const handleDownload = useCallback(async () => {
     try {
       const response = await fetch(mediaUrl);
-      if (!response.ok) {
-        throw new Error("Network response was not ok.");
-      }
+      if (!response.ok) throw new Error("Network response was not ok.");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      // store to revoke after click
       blobUrlRef.current = url;
+
+      // --- Derive file name from prompt ---
+      const baseName = prompt && prompt.trim().length > 0 ? prompt : "vibeart_image";
+
+      const sanitizedBase = baseName
+        .replace(/[^a-zA-Z0-9_\-]+/g, "_")
+        .replace(/_+/g, "_")
+        .slice(0, 50);
+
+      const contentType = response.headers.get("content-type") || "";
+      let ext = "jpg";
+      if (contentType.includes("png")) ext = "png";
+      else if (contentType.includes("webp")) ext = "webp";
+      else if (contentType.includes("gif")) ext = "gif";
+      else if (contentType.includes("mp4")) ext = "mp4";
+      else if (contentType.includes("webm")) ext = "webm";
+      else if (contentType.includes("mov")) ext = "mov";
+
+      const fileName = `${sanitizedBase}.${ext}`;
+
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
-
-      const fileExtension = mediaUrl.split(".").pop()?.split("?")[0] || "jpg";
-      const fileName = `${prompt.substring(0, 30).replace(/\s/g, "_") || "media"}.${fileExtension}`;
       a.download = fileName;
-
       document.body.appendChild(a);
       a.click();
-      // Revoke after a short tick to let the browser process the click.
+
       setTimeout(() => {
         try {
           window.URL.revokeObjectURL(url);
-        } catch (err) {
-          // ignore
+        } catch {
+          /* ignore */
         }
         if (a.parentNode) a.parentNode.removeChild(a);
         if (blobUrlRef.current === url) blobUrlRef.current = null;
       }, 1500);
     } catch (error) {
       console.error("Failed to download media:", error);
-      // Optionally show user-facing error
     }
   }, [mediaUrl, prompt]);
 
@@ -302,7 +310,7 @@ export const MediaModal = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "AI Generated Media",
+          title: "Image Generated with VibeArt",
           text: prompt,
           url: window.location.href,
         });
@@ -360,10 +368,10 @@ export const MediaModal = ({
                   <IconArrowLeft size={35} className="custom-box" />
                   <span className="font-medium">Go Back</span>
                 </button>
-                <div className="flex items-center gap-6 text-white/80 md:gap-4">
+                <div className="gap- flex items-center text-white/80 md:gap-4">
                   <button type="button" aria-label="Download image" onClick={handleDownload}>
                     <IconDownload
-                      className="cursor-pointer transition-colors hover:text-white"
+                      className="cursor-pointer transition-colors hover:text-accent"
                       size={28}
                     />
                   </button>
@@ -372,6 +380,15 @@ export const MediaModal = ({
                       className="cursor-pointer transition-colors hover:text-red-400"
                       size={28}
                     />
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-[20px] border bg-background px-5 py-2 transition-colors hover:text-accent"
+                    aria-label="Share image"
+                    onClick={handleShare}
+                  >
+                    <IconShare size={25} />
+                    <span>Share</span>
                   </button>
                 </div>
               </motion.header>
@@ -412,7 +429,7 @@ export const MediaModal = ({
                   </AnimatePresence>
 
                   <motion.figure
-                    className="relative size-full max-h-[80vh] overflow-hidden rounded-[24px] bg-black/30"
+                    className="relative size-full max-h-[80vh] cursor-zoom-in overflow-hidden rounded-[24px] bg-black/30"
                     style={{ originX, originY, scale }}
                     onMouseMove={onModalPointerMove}
                     onClick={() => {
@@ -486,7 +503,7 @@ export const MediaModal = ({
               >
                 <div className="flex max-w-prose items-center gap-4">
                   <span className="flex items-center gap-2 text-nowrap font-semibold text-white/80">
-                    Generate
+                    Prompt
                     <ArrowRight className="custom-box" size={35} />
                   </span>
                   <HoverCard>
@@ -516,25 +533,61 @@ export const MediaModal = ({
                     </HoverCardContent>
                   </HoverCard>
                 </div>
-                <div className="flex items-center gap-3 text-lg font-semibold">
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-[20px] border bg-background px-5 py-2 text-accent transition-colors hover:text-white/80"
-                    aria-label="Edit image"
-                    onClick={handleEdit}
-                  >
-                    <IconWand size={25} />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-[20px] border bg-background px-5 py-2 transition-colors hover:text-accent"
-                    aria-label="Share image"
-                    onClick={handleShare}
-                  >
-                    <IconShare size={25} />
-                    <span>Share</span>
-                  </button>
+                <div className="flex items-center gap-2">
+                  {[
+                    {
+                      label: "Edit",
+                      icon: IconEdit,
+                      onClick: () => {
+                        const mediaData = {
+                          permanentPath: mediaUrl,
+                          displayUrl: mediaUrl,
+                          uploaderId: 0,
+                        };
+                        const currentPath = window.location.pathname;
+
+                        if (currentPath.startsWith("/image/edit/")) {
+                          // If already on edit page, emit a custom event so the page can handle the file immediately
+                          window.dispatchEvent(
+                            new CustomEvent("app:image-edit", { detail: mediaData }),
+                          );
+                        } else {
+                          // Otherwise navigate and include the image URL in the query
+                          const encoded = encodeURIComponent(mediaUrl);
+                          // Use router.push if you have next/router or next/navigation; fallback to location.href
+                          if ((window as any).nextRouterPush) {
+                            (window as any).nextRouterPush(`/image/edit?image-url=${encoded}`);
+                          } else {
+                            window.location.href = `${window.location.origin}/image/edit?image-url=${encoded}`;
+                          }
+                        }
+                      },
+                    },
+                    {
+                      label: "Upscale",
+                      icon: IconWindowMaximize,
+                      onClick: () => console.log("Upscale clicked"),
+                    },
+                    {
+                      label: "Video",
+                      icon: IconVideo,
+                      onClick: () => console.log("Create Video clicked"),
+                    },
+                  ].map(({ label, icon: Icon, onClick }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClick();
+                      }}
+                      title={label}
+                      className="flex items-center gap-1.5 rounded-2xl bg-[#111111] px-6 py-1.5 text-lg text-white transition hover:bg-accent/40 hover:text-accent"
+                    >
+                      <Icon className="size-5" aria-hidden="true" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
                 </div>
               </motion.footer>
             </div>

@@ -1,18 +1,30 @@
 "use client";
 
-import { IconDownload, IconTrash, IconWand } from "@tabler/icons-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import Image from "next/image";
-import React, { useCallback, useMemo, useState, useRef } from "react";
+import {
+  IconDownload,
+  IconEdit,
+  IconTrash,
+  IconVideo,
+  IconWand,
+  IconWindowMaximize,
+} from "@tabler/icons-react";
+import { motion, type Variants } from "framer-motion";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { useResizeObserver } from "@/src/hooks/useResizeObserver";
 
 import { ImagePlaceholder } from "./ImagePlaceholder";
+
+// Parent variants now expose both `rest` and `hover` so child variants will receive the state.
+const parentVariants: Variants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.02 },
+};
 
 const overlayVariants: Variants = {
   rest: { opacity: 0, y: 20, transition: { duration: 0.2 } },
   hover: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
-
-const cardScaleWhileHover = { scale: 1.02 };
 
 export interface VideoOptions {
   autoPlay?: boolean;
@@ -23,6 +35,7 @@ export interface VideoOptions {
 }
 
 export interface MediaCardViewProps {
+  prompt: string;
   mediaUrl: string;
   thumbnailUrl?: string | null;
   altText: string;
@@ -35,6 +48,7 @@ export interface MediaCardViewProps {
 }
 
 export const MediaCardView = ({
+  prompt,
   mediaUrl,
   thumbnailUrl,
   altText,
@@ -48,135 +62,271 @@ export const MediaCardView = ({
   const [isPlaceholderVisible, setIsPlaceholderVisible] = useState(true);
   const [isThumbnailLoaded, setIsThumbnailLoaded] = useState(false);
   const [isFullLoaded, setIsFullLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  // Ref to hold the timer ID to clear it on unmount or pointer leave
-  const preloadTimer = useRef<NodeJS.Timeout | null>(null);
+  // timers/cache
+  const preloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const preloadCache = useRef<Record<string, boolean>>({});
 
+  // DOM refs so we can check `.complete` for cached images and to force re-checks
+  const thumbnailRef = useRef<HTMLImageElement | null>(null);
+  const fullRef = useRef<HTMLImageElement | null>(null);
+
+  const { ref: containerRef, width: containerWidth } = useResizeObserver();
+  const showText = containerWidth > 350; // Set your desired breakpoint
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (preloadTimer.current) {
+        clearTimeout(preloadTimer.current);
+        preloadTimer.current = null;
+      }
+    };
+  }, []);
+
+  // Handlers --- keep them stable with useCallback
   const handleThumbnailLoad = useCallback(() => {
     setIsThumbnailLoaded(true);
+    // hide placeholder once a thumbnail is ready (but full media may still be loading)
     setIsPlaceholderVisible(false);
+    // helpful debug when testing
+    // console.log("Thumbnail loaded");
   }, []);
 
   const handleFullLoad = useCallback(() => {
     setIsFullLoaded(true);
-    // CRITICAL: also hide placeholder when full media is ready
     setIsPlaceholderVisible(false);
+    // console.log("Full loaded");
   }, []);
 
-  // OPTIMIZATION 3: Delay media preloading to prevent animation interference.
-  const preloadModalMedia = useCallback(() => {
-    if (isMediaVideo) return;
+  const handleFullError = useCallback(() => {
+    setLoadError(true);
+    setIsPlaceholderVisible(false);
+    // console.log("Error loading media");
+  }, []);
 
-    // Clear any existing timer
+  // Debounced preload with a tiny cache so we don't spam requests on jittering pointer
+  const preloadModalMedia = useCallback(() => {
+    if (isMediaVideo) return; // don't preload large video blobs here
+    if (!mediaUrl) return;
+
+    if (preloadCache.current[mediaUrl]) return;
+
     if (preloadTimer.current) {
       clearTimeout(preloadTimer.current);
     }
 
-    // Set a new timer
     preloadTimer.current = setTimeout(() => {
-      const img = new window.Image();
-      img.src = mediaUrl;
-    }, 100); // 100ms delay gives the animation time to start smoothly
+      try {
+        const img = new window.Image();
+        img.onload = () => {
+          preloadCache.current[mediaUrl] = true;
+        };
+        img.onerror = () => {
+          preloadCache.current[mediaUrl] = false;
+        };
+        img.src = mediaUrl;
+      } catch (e) {
+        // defensive
+      } finally {
+        preloadTimer.current = null;
+      }
+    }, 120);
   }, [mediaUrl, isMediaVideo]);
 
   const handlePointerLeave = useCallback(() => {
-    // Clean up the timer if the user leaves the card before it fires
     if (preloadTimer.current) {
       clearTimeout(preloadTimer.current);
+      preloadTimer.current = null;
     }
   }, []);
 
-  const cardVideoOptions = {
+  // Use correct HTML video attributes typing
+  const cardVideoProps: React.VideoHTMLAttributes<HTMLVideoElement> = {
     autoPlay: true,
     muted: true,
     loop: true,
     playsInline: true,
     controls: false,
+    preload: "metadata",
     ...videoOptions,
-  } as VideoOptions & { preload?: string };
+  };
 
   const aspect = `${width} / ${height}`;
 
-  // If using blob:/data: URLs, Next/Image can fail on some versions — use <img>
-  const isBlobLike = useMemo(
-    () => mediaUrl.startsWith("blob:") || mediaUrl.startsWith("data:"),
-    [mediaUrl],
+  // keyboard accessibility for the clickable card
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onOpen();
+      }
+    },
+    [onOpen],
   );
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const response = await fetch(mediaUrl);
+      if (!response.ok) throw new Error("Network response was not ok.");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // derive file name
+      const baseName = prompt && prompt.trim().length > 0 ? prompt : "vibeart_image";
+      const sanitizedBase = baseName
+        .replace(/[^a-zA-Z0-9_\-]+/g, "_")
+        .replace(/_+/g, "_")
+        .slice(0, 50);
+
+      const contentType = response.headers.get("content-type") || "";
+      let ext = "jpg";
+      if (contentType.includes("png")) ext = "png";
+      else if (contentType.includes("webp")) ext = "webp";
+      else if (contentType.includes("gif")) ext = "gif";
+      else if (contentType.includes("mp4")) ext = "mp4";
+      else if (contentType.includes("webm")) ext = "webm";
+      else if (contentType.includes("mov")) ext = "mov";
+
+      const fileName = `${sanitizedBase}.${ext}`;
+
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(() => {
+        try {
+          window.URL.revokeObjectURL(url);
+        } catch {
+          /* ignore */
+        }
+        if (a.parentNode) a.parentNode.removeChild(a);
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to download media:", error);
+    }
+  }, [mediaUrl, prompt]);
+
+  // --- IMPORTANT: react to mediaUrl/thumbnailUrl changes ---
+  // HMR / fast-refresh and re-use of DOM nodes can cause `onLoad` not to fire
+  // if the <img> DOM node is reused and the new src was already cached. We
+  // defensively reset visual state and then check `.complete` on the image DOM
+  // node so we don't get stuck showing the placeholder.
+  useEffect(() => {
+    // reset state when resources change
+    setIsPlaceholderVisible(true);
+    setIsThumbnailLoaded(false);
+    setIsFullLoaded(false);
+    setLoadError(false);
+
+    // clear any pending preload timer
+    if (preloadTimer.current) {
+      clearTimeout(preloadTimer.current);
+      preloadTimer.current = null;
+    }
+
+    // If thumbnail or full image are already cached the DOM `complete` flag will be true.
+    // We check and manually trigger our handlers so we don't stay stuck on the placeholder.
+    // Note: refs may be null on first render; they will be set after mount.
+    const t = thumbnailRef.current;
+    if (t && t.complete) {
+      // small microtask to let React attach listeners
+      Promise.resolve().then(() => handleThumbnailLoad());
+    }
+
+    const f = fullRef.current;
+    if (f && f.complete) {
+      Promise.resolve().then(() => handleFullLoad());
+    }
+
+    // also reset the small preload cache for this item so user interactions work predictably
+    if (mediaUrl) preloadCache.current[mediaUrl] = false;
+  }, [mediaUrl, thumbnailUrl, handleThumbnailLoad, handleFullLoad]);
 
   return (
     <motion.div
-      className="relative w-full cursor-pointer overflow-hidden rounded-[28px] will-change-transform" // OPTIMIZATION 2: Added will-change
-      whileHover={cardScaleWhileHover}
+      ref={containerRef}
+      role="button"
+      tabIndex={0}
+      className="relative w-full min-w-[300px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
+      variants={parentVariants}
+      initial="rest"
+      animate="rest"
+      whileHover="hover"
       transition={{ duration: 0.25 }}
       onClick={onOpen}
       onPointerEnter={preloadModalMedia}
       onPointerLeave={handlePointerLeave}
+      onKeyDown={onKeyDown}
       layoutId={cardContainerId}
-      initial="rest"
-      animate="rest"
-      // style={{ aspectRatio: aspect }}
+      style={{ aspectRatio: aspect }}
+      aria-label={altText}
     >
       <div className="relative size-full overflow-hidden bg-black/50">
-        <AnimatePresence>
-          {isPlaceholderVisible && (
-            <div className="min-w-[500px]">
-              <ImagePlaceholder
-                key={`placeholder-${cardContainerId}`}
-                mediaUrl={mediaUrl}
-                width={width}
-                height={height}
-              />
-            </div>
-          )}
-        </AnimatePresence>
+        <div className="-z-10 min-w-[500px]" style={{ opacity: isPlaceholderVisible ? 1 : 0 }}>
+          <ImagePlaceholder
+            key={`placeholder-${cardContainerId}`}
+            mediaUrl={mediaUrl}
+            width={width}
+            height={height}
+          />
+        </div>
 
         {thumbnailUrl && (
           <img
+            key={`thumb-${thumbnailUrl}-${mediaUrl}`}
+            ref={thumbnailRef}
             src={thumbnailUrl}
-            alt={altText + " thumbnail"}
+            alt={altText}
             className="absolute inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isThumbnailLoaded && !isFullLoaded ? 1 : 0 }}
             onLoad={handleThumbnailLoad}
             onError={handleThumbnailLoad}
-            loading="eager"
+            loading="lazy"
             decoding="async"
             draggable={false}
+            aria-hidden={!isThumbnailLoaded}
           />
         )}
 
-        {isMediaVideo ? (
+        {loadError ? (
+          // Render a lightweight fallback UI when the media fails to load
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-white">
+            <div className="flex flex-col items-center gap-2">
+              <IconTrash aria-hidden="true" />
+              <span className="text-sm">Failed to load media</span>
+            </div>
+          </div>
+        ) : isMediaVideo ? (
           <video
-            src={mediaUrl}
-            // className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+            // using style opacity so we can fade in once loaded
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoadedData={handleFullLoad}
-            onError={handleFullLoad}
+            onError={handleFullError}
             poster={thumbnailUrl ?? undefined}
-            preload="metadata"
-            {...cardVideoOptions}
-          />
-        ) : isBlobLike ? (
-          <img
             src={mediaUrl}
-            alt={altText}
-            className="absolute inset-0 size-full object-cover transition-opacity duration-300"
-            style={{ opacity: isFullLoaded ? 1 : 0 }}
-            onLoad={handleFullLoad}
-            onError={handleFullLoad}
-            draggable={false}
+            {...cardVideoProps}
+            className="z-5 absolute inset-0 size-full object-cover transition-opacity duration-300"
           />
         ) : (
-          <Image
+          <img
+            key={`full-${mediaUrl}`}
+            ref={fullRef}
             src={mediaUrl}
             alt={altText}
             width={width}
             height={height}
-            className="inset-0 size-full object-cover transition-opacity duration-300"
+            className="z-5 absolute inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoad={handleFullLoad}
-            onError={handleFullLoad}
-            priority
+            onError={handleFullError}
             draggable={false}
+            loading="lazy"
+            decoding="async"
           />
         )}
       </div>
@@ -184,41 +334,87 @@ export const MediaCardView = ({
       <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/10" />
 
       <motion.div
-        // OPTIMIZATION 1: Removed `backdrop-blur-[2px]` which is very performance-intensive.
-        // OPTIMIZATION 2: Added `will-change-[opacity,transform]`
-        className="absolute bottom-0 left-0 flex h-[80px] w-full items-end bg-gradient-to-t from-black/75 to-transparent p-5 will-change-[opacity,transform]"
+        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4"
         variants={overlayVariants}
         initial="rest"
         whileHover="hover"
         animate="rest"
       >
-        <div className="flex w-full items-center justify-between">
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-full bg-white/30 px-4 py-2 text-base font-semibold text-white backdrop-blur-sm" // NOTE: Kept blur on the button as it's smaller and less costly.
-            onClick={(e) => e.stopPropagation()}
-            aria-label="Edit image"
-            title="Edit"
-          >
-            <IconWand />
-            <span>Edit</span>
-          </button>
-          <div className="flex items-center gap-4 text-xl text-white/80">
+        <div className="pointer-events-auto flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+          {/* --- Left side buttons (Edit / Upscale / Video) --- */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              {
+                label: "Edit",
+                icon: IconEdit,
+                onClick: () => {
+                  const mediaData = {
+                    permanentPath: mediaUrl,
+                    displayUrl: mediaUrl,
+                    uploaderId: 0,
+                  };
+                  const currentPath = window.location.pathname;
+
+                  if (currentPath.startsWith("/image/edit/")) {
+                    // If already on edit page, emit a custom event so the page can handle the file immediately
+                    window.dispatchEvent(new CustomEvent("app:image-edit", { detail: mediaData }));
+                  } else {
+                    // Otherwise navigate and include the image URL in the query
+                    const encoded = encodeURIComponent(mediaUrl);
+                    // Use router.push if you have next/router or next/navigation; fallback to location.href
+                    if ((window as any).nextRouterPush) {
+                      (window as any).nextRouterPush(`/image/edit?image-url=${encoded}`);
+                    } else {
+                      window.location.href = `${window.location.origin}/image/edit?image-url=${encoded}`;
+                    }
+                  }
+                },
+              },
+              {
+                label: "Upscale",
+                icon: IconWindowMaximize,
+                onClick: () => {
+                  window.location.href = `${window.origin}/image/edit?image-url=${encodeURIComponent(mediaUrl)}`;
+                },
+              },
+              {
+                label: "Video",
+                icon: IconVideo,
+                onClick: () => {
+                  window.location.href = `${window.origin}/image/video?image-url=${encodeURIComponent(mediaUrl)}`;
+                },
+              },
+            ].map(({ label, icon: Icon, onClick }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick();
+                }}
+                title={label}
+                className="flex items-center gap-1.5 rounded-xl bg-white/20 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-accent/30 hover:text-accent"
+              >
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
+                {showText && <span>{label}</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* --- Right side icons (Download / Delete) --- */}
+          <div className="flex items-center gap-2 text-white/80">
             <button
               type="button"
               aria-label="Download image"
               title="Download"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleDownload?.();
+              }}
+              className="transition-colors hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
-              <IconDownload className="cursor-pointer transition-colors hover:text-white" />
-            </button>
-            <button
-              type="button"
-              aria-label="Delete image"
-              title="Delete"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <IconTrash className="cursor-pointer transition-colors hover:text-white" />
+              <IconDownload className="size-6" aria-hidden="true" />
             </button>
           </div>
         </div>

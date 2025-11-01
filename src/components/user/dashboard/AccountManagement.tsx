@@ -1,6 +1,5 @@
 "use client";
 
-
 import { User } from "@supabase/supabase-js";
 import { LoaderCircle, LogOutIcon, Trash2Icon, UserIcon } from "lucide-react";
 import { useState } from "react";

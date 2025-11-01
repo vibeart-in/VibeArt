@@ -49,10 +49,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Insufficient credits." }, { status: 402 });
     }
 
-    // STEP 1: Create job + message (no external calls here)
     const prompt =
       parameters?.prompt ??
-      (Array.isArray(parameters) ? parameters[0]?.fieldValue : undefined) ??
+      (Array.isArray(parameters)
+        ? parameters[0]?.fieldValue
+        : parameters.find((p: any) => p.description === "prompt" || p.fieldName === "prompt")
+            ?.fieldValue) ??
       "";
 
     const { data, error } = await supabase.rpc("create_message_and_job", {
@@ -79,7 +81,7 @@ export async function POST(req: Request) {
     after(async () => {
       try {
         if (modelProvider === "running_hub") {
-          const webhookUrl = `${WEBHOOK_HOST}/api/webhooks/runninghub?jobId=${newJobId}`;
+          const webhookUrl = `${WEBHOOK_HOST}/webhook/runninghub?jobId=${newJobId}`;
 
           const rhRes = await fetch("https://www.runninghub.ai/task/openapi/ai-app/run", {
             method: "POST",
@@ -97,8 +99,6 @@ export async function POST(req: Request) {
             const runningHubData = await rhRes.json();
             const taskId = runningHubData?.data?.taskId;
 
-            // Optional: update jobs with provider task id/status;
-            // Or skip and let the webhook finalize all updates.
             if (taskId) {
               await supabase
                 .from("jobs")
@@ -114,14 +114,14 @@ export async function POST(req: Request) {
           }
         } else {
           // Replicate path
-          const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJobId}`;
+          const webhookUrl = `${WEBHOOK_HOST}/webhook/replicate?jobId=${newJobId}`;
 
           // Prefer webhooks to drive state; do not block the route on this call.
           const prediction = await replicate.predictions.create({
             model: modelIdentifier,
             input: parameters,
             webhook: webhookUrl,
-            webhook_events_filter: ["completed"], // optionally include "start"
+            webhook_events_filter: ["completed"],
           });
 
           // Optional: update with prediction id/status now; otherwise rely on webhook.

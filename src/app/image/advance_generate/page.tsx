@@ -1,27 +1,14 @@
 import { IconSparkles, IconTarget, IconBolt, IconCoin } from "@tabler/icons-react";
 
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import ImageGallery from "@/src/components/home/ImageGrid";
+import ExampleGenerations from "@/src/components/home/ExampleGenerations";
 import InputBox from "@/src/components/inputBox/InputBox";
-import Footer from "@/src/components/landing/Footer";
-import { createClient } from "@/src/lib/supabase/server";
+import { ConversationType } from "@/src/types/BaseType";
 
-const Page = async () => {
-  const supabase = await createClient();
-
-  const { data: images, error } = await supabase.rpc("get_example_generations", {
-    p_limit: 15,
-    p_showcase_for: "advance_generate",
-  });
-
-  if (error) {
-    console.error("Error fetching random images:", error);
-    return <p className="text-center text-white">Failed to load images. Please try again later.</p>;
-  }
-
+const Page = () => {
   return (
     <section className="relative overflow-hidden">
-      <div className="relative flex h-screen w-full flex-col items-center overflow-y-scroll bg-black">
+      <div className="relative flex h-screen w-full flex-col items-center bg-black">
         {/* Background Image */}
         <BackgroundImage
           className="mt-2"
@@ -80,19 +67,9 @@ const Page = async () => {
         </div>
 
         {/* Examples / Image Gallery */}
-        <div className="px-4 pb-20 md:px-8 lg:px-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white">Examples</h2>
-              <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white backdrop-blur-sm transition-all hover:bg-white/10">
-                View All
-              </button>
-            </div>
-            <ImageGallery images={images} />
-          </div>
-        </div>
+        <ExampleGenerations limit={15} showcaseFor={ConversationType.ADVANCE} />
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </section>
   );
 };

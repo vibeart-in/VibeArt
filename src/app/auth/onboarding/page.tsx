@@ -4,7 +4,6 @@ import { getUser } from "@/src/actions/getUser";
 import { ensureDodoCustomer } from "@/src/actions/subscription/createUser";
 import OnboardingClient from "@/src/components/onboarding/onboardingClient";
 
-
 export default async function OnboardingPage() {
   const customerResult = await ensureDodoCustomer();
 

@@ -27,8 +27,6 @@ export interface ImageCardProps {
   };
 }
 
-const DEFAULT_SIZES = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
-
 const ImageCard = ({
   mediaUrl,
   thumbnailUrl,
@@ -42,7 +40,7 @@ const ImageCard = ({
   // const MediaModal = dynamic(() => import("./ImageModal"), { ssr: false, loading: () => <div /> });
 
   // Use the explicit isVideo prop if provided, otherwise detect automatically.
-  const isMediaVideo = isVideo ?? /(?:\.mp4|\.webm)(?:\?|$)/i.test(mediaUrl);
+  const isMediaVideo = isVideo ?? /(?:\.mp4|\.webm|\.mov)(?:\?|$)/i.test(mediaUrl);
 
   const openModal = useCallback(() => {
     setIsModalOpen(true);
@@ -59,6 +57,7 @@ const ImageCard = ({
   return (
     <div>
       <MediaCardView
+        prompt={prompt || "vibeart_image"}
         mediaUrl={mediaUrl}
         altText={altText}
         width={width}

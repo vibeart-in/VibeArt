@@ -1,36 +1,22 @@
 import { IconVideo, IconWorld, IconUsers, IconLock } from "@tabler/icons-react";
 
 import BackgroundImage from "@/src/components/home/BackgroundImage";
-import ImageGallery from "@/src/components/home/ImageGrid";
+import ExampleGenerations from "@/src/components/home/ExampleGenerations";
 import InputBox from "@/src/components/inputBox/InputBox";
 import Footer from "@/src/components/landing/Footer";
-import { createClient } from "@/src/lib/supabase/server";
+import { ConversationType } from "@/src/types/BaseType";
 
-const Page = async () => {
-  const supabase = await createClient();
-
-  const { data: videos, error } = await supabase.rpc("get_example_generations", {
-    p_limit: 15,
-    p_showcase_for: "video",
-  });
-
-  if (error) {
-    console.error("Error fetching random videos:", error);
-    return <p className="text-center text-white">Failed to load videos. Please try again later.</p>;
-  }
-
+const Page = () => {
   return (
     <section className="relative overflow-hidden text-white">
-      <div className="relative flex min-h-screen flex-col items-center overflow-hidden">
-        <div>
-          <BackgroundImage
-            className="absolute inset-0 z-0 opacity-30"
-            src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video-bg.mp4"
-            width={1920}
-            height={1080}
-          />
-          <div className="absolute inset-x-0 top-[700] z-10 h-[200px] bg-black backdrop-blur-lg [mask-image:linear-gradient(to_top,white,transparent)] sm:h-[400px]" />
-        </div>
+      <div className="flex min-h-screen w-full flex-col items-center overflow-hidden bg-black">
+        <BackgroundImage
+          className="opacity-30"
+          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video-bg.mp4"
+          width={1920}
+          height={1080}
+          bottomBlur={true}
+        />
 
         <div className="relative z-10 flex flex-col items-center justify-center px-6 pb-24 pt-48 text-center">
           <h1 className="mb-4 flex items-center justify-center gap-3 text-3xl font-semibold md:text-4xl">
@@ -43,7 +29,7 @@ const Page = async () => {
             community-trained, or proprietary AI video models.
           </p>
 
-          <div className="mt-8 w-full max-w-7xl">
+          <div className="mt-8">
             <InputBox />
           </div>
 
@@ -84,20 +70,8 @@ const Page = async () => {
           </div>
         </div>
 
-        <div className="relative z-10 mt-24 w-full px-6 pb-24 md:px-12 lg:px-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-10 flex flex-col items-center justify-between gap-4 md:flex-row">
-              <h2 className="text-3xl font-bold">Example Generations</h2>
-              <button className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-white transition-all hover:bg-white/10">
-                View All
-              </button>
-            </div>
-            <ImageGallery images={videos} columnCount={3} />
-          </div>
-        </div>
+        <ExampleGenerations limit={15} showcaseFor={ConversationType.GENERATE} />
       </div>
-
-      <Footer />
     </section>
   );
 };

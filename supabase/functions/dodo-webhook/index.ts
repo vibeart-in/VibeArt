@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         });
     }
   } catch (error) {
-    //@ts-ignore
+    // @ts-ignore
     console.error("Error processing webhook:", error.message);
     return new Response("Error processing webhook", {
       status: 500,

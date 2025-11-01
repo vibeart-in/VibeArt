@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/rh/force-fetch",
+        destination: "https://vibeart-webhook.fly.dev/api/rh/force-fetch",
+      },
+    ];
+  },
   /* config options here */
   images: {
     remotePatterns: [

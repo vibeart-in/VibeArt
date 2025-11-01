@@ -7,6 +7,5 @@
  The fastest way to create production quality images and video 
 </p>
 
-
 <img alt="showcase image" src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/demos/p1.jpg">
 <img alt="showcase image" src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/demos/p2.jpg">
