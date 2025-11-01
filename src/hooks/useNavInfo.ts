@@ -11,7 +11,6 @@ export type NavInfoData = {
   subscription_tier: string;
   total_credits: number;
 };
-
 export type UseNavInfoReturn = {
   user: User | null;
   navInfo: NavInfoData | null;
