@@ -15,8 +15,52 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Vibe art",
-  description: "The fastest way to generate high quality AI images",
+  title: {
+    default: "VibeArt",
+    template: "%s • VibeArt",
+  },
+  description:
+    "VibeArt — Instantly create high-quality AI images from text and reference photos. Generate photorealistic or stylized artwork, upscale to 4K, and share results with one click.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+    other: [{ rel: "icon", url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" }],
+  },
+  openGraph: {
+    title: "VibeArt",
+    description:
+      "Create stunning AI images from text and references — fast, flexible, and shareable. Upscale to 4K, batch export, and publish directly to social.",
+    url: `${defaultUrl}/image/home`,
+    siteName: "VibeArt",
+    images: [
+      {
+        url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/brand/logo.png",
+        // Ideally replace with a dedicated social-preview image (see notes below)
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VibeArt",
+    description:
+      "Create stunning AI images from text and references — fast, flexible, and shareable. Upscale to 4K and export for social.",
+    images: [
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/brand/logo.png",
+    ],
+    creator: "@your_twitter_handle", // optional: put your X handle
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 const geistSans = Quicksand({
