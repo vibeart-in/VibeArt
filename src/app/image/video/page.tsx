@@ -70,7 +70,7 @@ const Page = () => {
           </div>
         </div>
 
-        <ExampleGenerations limit={15} showcaseFor={ConversationType.GENERATE} />
+        <ExampleGenerations limit={15} showcaseFor={ConversationType.VIDEO} />
       </div>
     </section>
   );

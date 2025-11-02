@@ -1,6 +1,5 @@
 // src/lib/UploadImage.ts
 import * as tus from "tus-js-client";
-
 import { supabase } from "@/src/lib/supabase/client";
 
 interface UploadOptions {
@@ -10,9 +9,12 @@ interface UploadOptions {
   onSuccess?: (permanentPath: string, displayUrl: string) => void;
 }
 
-// Utility to convert any image file to JPEG
 async function convertToJpeg(file: File, quality = 0.9): Promise<File> {
   return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      return reject(new Error("Not an image file"));
+    }
+
     const img = new Image();
     const reader = new FileReader();
 
@@ -61,7 +63,7 @@ export const uploadImage = async ({
   } = await supabase.auth.getSession();
 
   if (sessionError || !session || !session.user) {
-    throw new Error("You must be logged in to upload an image.");
+    throw new Error("You must be logged in to upload a file.");
   }
 
   const user = session.user;
@@ -69,13 +71,24 @@ export const uploadImage = async ({
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const bucketName = "uploaded-images";
 
-  // ✅ Convert image to JPG before upload
-  const convertedFile = await convertToJpeg(file);
+  let uploadFile = file;
+  let contentType = file.type || "application/octet-stream";
 
-  const filePath = `${user.id}/${Date.now()}_${convertedFile.name.replace(/\s/g, "_")}`;
+  // ✅ Only convert images to JPEG
+  if (file.type.startsWith("image/")) {
+    try {
+      uploadFile = await convertToJpeg(file);
+      contentType = "image/jpeg";
+    } catch {
+      // Fallback to original file if conversion fails
+      uploadFile = file;
+    }
+  }
+
+  const filePath = `${user.id}/${Date.now()}_${uploadFile.name.replace(/\s/g, "_")}`;
 
   return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(convertedFile, {
+    const upload = new tus.Upload(uploadFile, {
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers: {
@@ -86,7 +99,7 @@ export const uploadImage = async ({
       metadata: {
         bucketName,
         objectName: filePath,
-        contentType: "image/jpeg",
+        contentType,
       },
       chunkSize: 6 * 1024 * 1024, // 6MB
       onError: (err) => {

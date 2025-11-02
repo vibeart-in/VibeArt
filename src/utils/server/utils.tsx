@@ -20,14 +20,14 @@ import MidjourneyIcon from "@/src/icons/midjourney";
 
 export function getTagColor(index: number): string {
   const colors = [
-    "border-blue-500/80 text-blue-400",
-    "border-green-500/80 text-green-400",
-    "border-purple-500/80 text-purple-400",
-    "border-pink-500/80 text-pink-400",
-    "border-yellow-500/80 text-yellow-400",
-    "border-red-500/80 text-red-400",
-    "border-cyan-500/80 text-cyan-400",
-    "border-orange-500/80 text-orange-400",
+    "border-blue-300/60 text-blue-300",
+    "border-green-300/60 text-green-300",
+    "border-purple-300/60 text-purple-300",
+    "border-pink-300/60 text-pink-300",
+    "border-yellow-300/60 text-yellow-300",
+    "border-red-300/60 text-red-300",
+    "border-cyan-300/60 text-cyan-300",
+    "border-orange-300/60 text-orange-300",
   ];
   return colors[index % colors.length];
 }

@@ -11,13 +11,11 @@ import AppGenerationCard from "./AppGenerationCard";
 
 const AppGenerationGrid = ({ generations }: { generations: GenerationAppWithSignedUrls[] }) => {
   const breakpointColumnsObj = {
-    default: 3,
+    default: 2,
     1500: 2,
-    1100: 2,
+    1100: 1,
     700: 1,
   };
-
-  console.log("GENNN", generations);
 
   return (
     <div className="relative w-full">

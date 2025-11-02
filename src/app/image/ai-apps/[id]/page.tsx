@@ -105,7 +105,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         </div>
 
         {/* generation history */}
-        <div id="appGenerationHistory" className="mt-8 w-full max-w-7xl">
+        <div id="appGenerationHistory" className="mt-8 w-full max-w-[80vw]">
           <AppGenerationHistory appId={id} />
         </div>
       </div>

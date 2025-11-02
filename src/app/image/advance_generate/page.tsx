@@ -8,7 +8,7 @@ import { ConversationType } from "@/src/types/BaseType";
 const Page = () => {
   return (
     <section className="relative overflow-hidden">
-      <div className="relative flex h-screen w-full flex-col items-center bg-black">
+      <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden bg-black">
         {/* Background Image */}
         <BackgroundImage
           className="mt-2"

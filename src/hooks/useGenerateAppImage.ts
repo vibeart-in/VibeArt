@@ -27,9 +27,11 @@ function toConversationImages(urls?: string[] | null): conversationImageObject[]
     (u) =>
       ({
         // Example fields — **change to match your real type**
-        displayUrl: u,
-        signedUrl: null, // optional placeholder if your type has signedUrl
-        filename: undefined, // optional placeholder
+        imageUrl: u,
+        thumbnailUrl: null, // optional placeholder if your type has signedUrl
+        id: 1,
+        width: 200,
+        height: 200,
       }) as unknown as conversationImageObject,
   );
 }
@@ -39,6 +41,8 @@ async function generateAppImage(
 ): Promise<GenerateAppImageResponse> {
   // We don't send the preview URL to the API, so we can omit it here.
   const { inputImagePreviewUrls, ...apiPayload } = payload;
+
+  console.log("Sending API Payload:", apiPayload);
 
   const response = await fetch("/api/generate/app", {
     method: "POST",
@@ -78,6 +82,8 @@ export function useGenerateAppImage() {
 
       // Convert preview URL strings -> conversationImageObject[]
       const previewObjects = toConversationImages(newGeneration.inputImagePreviewUrls);
+
+      console.log("previewObjects", previewObjects);
 
       const optimisticGeneration: GenerationAppWithSignedUrls = {
         id: `temp-${Date.now()}`,

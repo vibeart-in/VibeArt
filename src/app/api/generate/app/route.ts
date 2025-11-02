@@ -3,21 +3,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/src/lib/supabase/server";
+import { NodeParam } from "@/src/types/BaseType";
 
-// Assuming NodeParam is available at this path or define it here
-type NodeParam = {
-  nodeId: string;
-  fieldName: string;
-  fieldValue: string;
-  description?: string;
-  fieldData?: string;
-};
-
-// --- Environment Variables ---
 const RUNNING_HUB_API_ENDPOINT = "https://www.runninghub.ai/task/openapi/ai-app/run";
 const RUNNING_HUB_API_KEY = process.env.RUNNING_HUB_API_KEY;
-// For local development, this might be `http://localhost:3000`. For Vercel, it's auto-set.
-const WEBHOOK_HOST = process.env.WEBHOOK_HOST || process.env.NEXT_PUBLIC_VERCEL_URL;
+const WEBHOOK_HOST = process.env.WEBHOOK_HOST;
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -30,8 +20,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { appId, parameters: clientParameters }: { appId: string; parameters: NodeParam[] } =
-      await req.json();
+    const {
+      appId,
+      parameters: clientParameters,
+      inputMediaStoreUrls,
+    }: { appId: string; parameters: NodeParam[]; inputMediaStoreUrls: string[] } = await req.json();
 
     if (!appId || !clientParameters) {
       return NextResponse.json({ message: "Missing appId or parameters" }, { status: 400 });
@@ -50,46 +43,51 @@ export async function POST(req: NextRequest) {
     }
 
     const parametersForRunningHub = structuredClone(clientParameters);
-    const inputImagesForDB: { image_url: string; is_public: boolean }[] = [];
+    const inputImagesForDB: { image_url: string; is_public: boolean }[] = inputMediaStoreUrls.map(
+      (url) => ({
+        image_url: url,
+        is_public: false,
+      }),
+    );
 
-    // 2. Handle input images: Generate signed URLs for RunningHub and prepare image data for DB
-    for (let i = 0; i < parametersForRunningHub.length; i++) {
-      const param = parametersForRunningHub[i];
-      if (
-        param.fieldName === "image" &&
-        typeof param.fieldValue === "string" &&
-        param.fieldValue.startsWith("uploaded-images/")
-      ) {
-        const permanentImagePath = param.fieldValue;
-        const [bucketName, ...filePathParts] = permanentImagePath.split("/");
-        const filePathInBucket = filePathParts.join("/");
+    // // 2. Handle input images: Generate signed URLs for RunningHub and prepare image data for DB
+    // for (let i = 0; i < parametersForRunningHub.length; i++) {
+    //   const param = parametersForRunningHub[i];
+    //   if (
+    //     param.fieldName === "image" &&
+    //     typeof param.fieldValue === "string" &&
+    //     param.fieldValue.startsWith("uploaded-images/")
+    //   ) {
+    //     const permanentImagePath = param.fieldValue;
+    //     const [bucketName, ...filePathParts] = permanentImagePath.split("/");
+    //     const filePathInBucket = filePathParts.join("/");
 
-        // Prepare image data for the RPC function
-        inputImagesForDB.push({
-          image_url: permanentImagePath,
-          is_public: false,
-        });
+    //     // Prepare image data for the RPC function
+    //     inputImagesForDB.push({
+    //       image_url: permanentImagePath,
+    //       is_public: false,
+    //     });
 
-        // Generate a signed URL for the external AI service (RunningHub)
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from(bucketName)
-          .createSignedUrl(filePathInBucket, 3600); // 1 hour expiry
+    //     // Generate a signed URL for the external AI service (RunningHub)
+    //     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    //       .from(bucketName)
+    //       .createSignedUrl(filePathInBucket, 3600);
 
-        if (signedUrlError || !signedUrlData) {
-          console.error("Error generating signed URL for input image:", signedUrlError);
-          return NextResponse.json(
-            { message: "Failed to generate signed URL for input image" },
-            { status: 500 },
-          );
-        }
+    //     if (signedUrlError || !signedUrlData) {
+    //       console.error("Error generating signed URL for input image:", signedUrlError);
+    //       return NextResponse.json(
+    //         { message: "Failed to generate signed URL for input image" },
+    //         { status: 500 },
+    //       );
+    //     }
 
-        // Replace the permanent path with the signed URL for RunningHub
-        parametersForRunningHub[i] = {
-          ...param,
-          fieldValue: signedUrlData.signedUrl,
-        };
-      }
-    }
+    //     // Replace the permanent path with the signed URL for RunningHub
+    //     parametersForRunningHub[i] = {
+    //       ...param,
+    //       fieldValue: signedUrlData.signedUrl,
+    //     };
+    //   }
+    // }
 
     // 3. Call the RPC function to handle all database operations in one go
     const { data: newJobId, error: rpcError } = await supabase.rpc(

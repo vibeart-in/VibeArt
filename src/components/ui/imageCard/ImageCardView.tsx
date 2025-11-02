@@ -5,7 +5,6 @@ import {
   IconEdit,
   IconTrash,
   IconVideo,
-  IconWand,
   IconWindowMaximize,
 } from "@tabler/icons-react";
 import { motion, type Variants } from "framer-motion";
@@ -45,6 +44,11 @@ export interface MediaCardViewProps {
   cardContainerId: string;
   isMediaVideo: boolean;
   videoOptions?: VideoOptions;
+  /**
+   * If true the card will compute and use the actual media aspect ratio
+   * (from thumbnail/full image or video metadata) instead of the provided width/height.
+   */
+  autoRatio?: boolean;
 }
 
 export const MediaCardView = ({
@@ -58,11 +62,17 @@ export const MediaCardView = ({
   cardContainerId,
   isMediaVideo,
   videoOptions = {},
+  autoRatio = false,
 }: MediaCardViewProps) => {
   const [isPlaceholderVisible, setIsPlaceholderVisible] = useState(true);
   const [isThumbnailLoaded, setIsThumbnailLoaded] = useState(false);
   const [isFullLoaded, setIsFullLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
+
+  // calculated aspect string like "1920 / 1080" when discovered
+  const [calculatedAspect, setCalculatedAspect] = useState<string | null>(
+    autoRatio ? null : `${width} / ${height}`,
+  );
 
   // timers/cache
   const preloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,10 +80,11 @@ export const MediaCardView = ({
 
   // DOM refs so we can check `.complete` for cached images and to force re-checks
   const thumbnailRef = useRef<HTMLImageElement | null>(null);
-  const fullRef = useRef<HTMLImageElement | null>(null);
+  const fullRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null);
 
   const { ref: containerRef, width: containerWidth } = useResizeObserver();
   const showText = containerWidth > 350; // Set your desired breakpoint
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -84,20 +95,55 @@ export const MediaCardView = ({
     };
   }, []);
 
+  // Helper: set aspect from numeric w/h
+  const setRatioFromNumbers = useCallback(
+    (w?: number, h?: number) => {
+      if (!autoRatio) return;
+      if (!w || !h || w <= 0 || h <= 0) return;
+      // normalize to avoid huge integers (optional)
+      setCalculatedAspect(`${Math.round(w)} / ${Math.round(h)}`);
+    },
+    [autoRatio],
+  );
+
+  // Check an element (img/video) and set ratio if possible
+  const setRatioFromElement = useCallback(
+    (el: HTMLImageElement | HTMLVideoElement | null) => {
+      if (!el || !autoRatio) return;
+      if (el instanceof HTMLImageElement) {
+        if (el.naturalWidth && el.naturalHeight) {
+          setRatioFromNumbers(el.naturalWidth, el.naturalHeight);
+        }
+      } else if (el instanceof HTMLVideoElement) {
+        if ((el as HTMLVideoElement).videoWidth && (el as HTMLVideoElement).videoHeight) {
+          setRatioFromNumbers(
+            (el as HTMLVideoElement).videoWidth,
+            (el as HTMLVideoElement).videoHeight,
+          );
+        }
+      }
+    },
+    [autoRatio, setRatioFromNumbers],
+  );
+
   // Handlers --- keep them stable with useCallback
   const handleThumbnailLoad = useCallback(() => {
     setIsThumbnailLoaded(true);
     // hide placeholder once a thumbnail is ready (but full media may still be loading)
     setIsPlaceholderVisible(false);
+    // use thumbnail intrinsic size as first hint
+    setRatioFromElement(thumbnailRef.current);
     // helpful debug when testing
     // console.log("Thumbnail loaded");
-  }, []);
+  }, [setRatioFromElement]);
 
   const handleFullLoad = useCallback(() => {
     setIsFullLoaded(true);
     setIsPlaceholderVisible(false);
+    // Use full element (image/video) to set final accurate ratio
+    setRatioFromElement(fullRef.current);
     // console.log("Full loaded");
-  }, []);
+  }, [setRatioFromElement]);
 
   const handleFullError = useCallback(() => {
     setLoadError(true);
@@ -151,8 +197,6 @@ export const MediaCardView = ({
     preload: "metadata",
     ...videoOptions,
   };
-
-  const aspect = `${width} / ${height}`;
 
   // keyboard accessibility for the clickable card
   const onKeyDown = useCallback(
@@ -212,16 +256,19 @@ export const MediaCardView = ({
   }, [mediaUrl, prompt]);
 
   // --- IMPORTANT: react to mediaUrl/thumbnailUrl changes ---
-  // HMR / fast-refresh and re-use of DOM nodes can cause `onLoad` not to fire
-  // if the <img> DOM node is reused and the new src was already cached. We
-  // defensively reset visual state and then check `.complete` on the image DOM
-  // node so we don't get stuck showing the placeholder.
   useEffect(() => {
     // reset state when resources change
     setIsPlaceholderVisible(true);
     setIsThumbnailLoaded(false);
     setIsFullLoaded(false);
     setLoadError(false);
+
+    // reset calculated aspect when switching media (if autoRatio)
+    if (autoRatio) {
+      setCalculatedAspect(null);
+    } else {
+      setCalculatedAspect(`${width} / ${height}`);
+    }
 
     // clear any pending preload timer
     if (preloadTimer.current) {
@@ -231,28 +278,41 @@ export const MediaCardView = ({
 
     // If thumbnail or full image are already cached the DOM `complete` flag will be true.
     // We check and manually trigger our handlers so we don't stay stuck on the placeholder.
-    // Note: refs may be null on first render; they will be set after mount.
-    const t = thumbnailRef.current;
+    const t = thumbnailRef.current as HTMLImageElement | null;
     if (t && t.complete) {
-      // small microtask to let React attach listeners
+      // microtask to let React attach listeners
       Promise.resolve().then(() => handleThumbnailLoad());
     }
 
-    const f = fullRef.current;
-    if (f && f.complete) {
-      Promise.resolve().then(() => handleFullLoad());
+    const f = fullRef.current as HTMLImageElement | HTMLVideoElement | null;
+    // For images the `complete` flag exists; for videos check readyState
+    if (f) {
+      if (f instanceof HTMLImageElement && f.complete) {
+        Promise.resolve().then(() => handleFullLoad());
+      } else if (f instanceof HTMLVideoElement && (f as HTMLVideoElement).readyState > 0) {
+        Promise.resolve().then(() => handleFullLoad());
+      }
     }
 
     // also reset the small preload cache for this item so user interactions work predictably
     if (mediaUrl) preloadCache.current[mediaUrl] = false;
-  }, [mediaUrl, thumbnailUrl, handleThumbnailLoad, handleFullLoad]);
+  }, [mediaUrl, thumbnailUrl, handleThumbnailLoad, handleFullLoad, autoRatio, width, height]);
+
+  // computed style: prefer calculatedAspect when present.
+  const computedAspectStyle: React.CSSProperties = {};
+  if (calculatedAspect) {
+    computedAspectStyle.aspectRatio = calculatedAspect;
+  } else if (!autoRatio) {
+    computedAspectStyle.aspectRatio = `${width} / ${height}`;
+  } // if autoRatio && !calculatedAspect -> leave undefined to allow min-h fallback
 
   return (
     <motion.div
       ref={containerRef}
       role="button"
       tabIndex={0}
-      className="relative w-full min-w-[300px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
+      // note: added min-h fallback so card doesn't collapse while waiting for ratio
+      className="relative min-h-[180px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
       variants={parentVariants}
       initial="rest"
       animate="rest"
@@ -263,7 +323,7 @@ export const MediaCardView = ({
       onPointerLeave={handlePointerLeave}
       onKeyDown={onKeyDown}
       layoutId={cardContainerId}
-      style={{ aspectRatio: aspect }}
+      style={computedAspectStyle}
       aria-label={altText}
     >
       <div className="relative size-full overflow-hidden bg-black/50">
@@ -306,20 +366,30 @@ export const MediaCardView = ({
             // using style opacity so we can fade in once loaded
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoadedData={handleFullLoad}
+            onLoadedMetadata={(e) => {
+              // set ratio as soon as metadata available
+              setRatioFromElement(e.currentTarget);
+            }}
             onError={handleFullError}
             poster={thumbnailUrl ?? undefined}
             src={mediaUrl}
             {...cardVideoProps}
+            ref={(el) => {
+              // keep ref to the video element for readyState checks and sizing
+              fullRef.current = el;
+            }}
             className="z-5 absolute inset-0 size-full object-cover transition-opacity duration-300"
           />
         ) : (
           <img
             key={`full-${mediaUrl}`}
-            ref={fullRef}
+            ref={(el) => {
+              fullRef.current = el;
+            }}
             src={mediaUrl}
             alt={altText}
-            width={width}
-            height={height}
+            // IMPORTANT: when autoRatio is true we DON'T pass width/height attributes
+            {...(!autoRatio ? { width, height } : {})}
             className="z-5 absolute inset-0 size-full object-cover transition-opacity duration-300"
             style={{ opacity: isFullLoaded ? 1 : 0 }}
             onLoad={handleFullLoad}

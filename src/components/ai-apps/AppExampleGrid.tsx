@@ -50,13 +50,7 @@ const AppExampleGrid = ({ images }: AppExampleGridProps) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <ImageCard
-                mediaUrl={url}
-                prompt=""
-                // alt={`example-${idx}`}
-                width={300}
-                height={300}
-              />
+              <ImageCard mediaUrl={url} prompt="" width={200} height={300} autoRatio={true} />
             </motion.div>
           ))}
         </Masonry>
