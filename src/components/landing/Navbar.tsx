@@ -14,6 +14,7 @@ import {
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function NavbarLander() {
   const navItems = [
@@ -87,9 +88,9 @@ export function NavbarLander() {
               <NavbarButton href="/image/generate" variant="primary">
                 Dashboard
               </NavbarButton>
-              <NavbarButton onClick={handleLogout} variant="secondary">
-                Logout
-              </NavbarButton>
+              <div onClick={handleLogout}>
+                <NavbarButton variant="secondary">Logout</NavbarButton>
+              </div>
             </>
           ) : (
             <>
@@ -143,7 +144,7 @@ export function NavbarLander() {
                 <NavbarButton
                   onClick={() => {
                     handleLogout();
-                    setIsMobileMenuOpen(false);
+                    // setIsMobileMenuOpen(false);
                   }}
                   variant="secondary"
                   className="w-full"

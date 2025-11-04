@@ -7,6 +7,8 @@ import CreditBadge from "@/src/components/home/CreditBadge";
 import { NavbarButton } from "@/src/components/ui/resizable-navbar";
 import { UserProfileDropdown } from "@/src/components/ui/UserProfileDropdown";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
+import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 /**
  * A skeleton loader to show while user data is being fetched.
@@ -25,6 +27,7 @@ export function UserSectionClient() {
   // Assume the hook returns a loading state
   const { data, isLoading } = useNavInfo();
   const { user, navInfo } = data || {};
+  const router = useRouter();
 
   // 1. While loading, show a skeleton placeholder
   if (isLoading && !data) return <UserSectionSkeleton />;
@@ -45,18 +48,18 @@ export function UserSectionClient() {
 
   // 3. After loading, if the user exists, show the authenticated UI
   return (
-    <div className="flex shrink-0 items-center gap-4">
+    <div className="flex shrink-0 items-center gap-3">
       {navInfo?.subscription_tier === "free" && (
-        <Link href="/pricing">
-          <button className="flex h-8 w-[108px] items-center justify-center rounded-xl border border-[#D9E825]/30 bg-black/20 text-[13px] font-bold leading-4 text-accent shadow-[0px_0px_8px_rgba(217,232,37,0.38)]">
-            Upgrade
-          </button>
-        </Link>
+        <Button
+          variant="secondary"
+          className="flex h-8 items-center justify-center rounded-xl border border-[#D9E825]/30 bg-black/20 text-xs font-bold leading-4 text-accent shadow-[0px_0px_8px_rgba(217,232,37,0.38)]"
+          onClick={() => router.push("/pricing")}
+        >
+          Upgrade
+        </Button>
       )}
       <CreditBadge credits={navInfo?.total_credits ?? 0} lowThreshold={100} />
-      <div>
-        <UserProfileDropdown navInfo={navInfo ?? null} user={user ?? null} />
-      </div>
+      <UserProfileDropdown navInfo={navInfo ?? null} user={user ?? null} />
     </div>
   );
 }

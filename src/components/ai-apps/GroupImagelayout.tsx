@@ -11,6 +11,7 @@ type Props = {
   maxVisibleThumbnails?: number;
   /** whether to hide the selected (primary) from the thumbnails (default true) */
   hidePrimaryFromThumbnails?: boolean;
+  autoRatio?: boolean;
 };
 
 const GroupImageLayout = ({
@@ -19,6 +20,7 @@ const GroupImageLayout = ({
   status,
   maxVisibleThumbnails = 2,
   hidePrimaryFromThumbnails = true,
+  autoRatio = false,
 }: Props) => {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -84,6 +86,7 @@ const GroupImageLayout = ({
             width={primary.width || 520}
             height={primary.height || 650}
             prompt={title}
+            autoRatio={autoRatio}
           />
         </div>
 

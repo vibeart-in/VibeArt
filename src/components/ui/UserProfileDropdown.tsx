@@ -2,7 +2,6 @@
 
 import { EnvelopeIcon, ImageIcon, SignOutIcon, StarIcon, UserIcon } from "@phosphor-icons/react";
 import { User } from "@supabase/supabase-js";
-import { LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -25,7 +24,7 @@ const UserProfileDropdown = ({
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/image/home");
   };
 
   const toggleDropdown = () => {

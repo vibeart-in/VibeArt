@@ -10,6 +10,24 @@ import { createClient } from "@/src/lib/supabase/server";
 import { cn } from "@/src/lib/utils";
 import { getTagColor } from "@/src/utils/server/utils";
 
+// Small inline clock icon so we don't have to add another dependency
+function ClockIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      className={className}
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 7v5l3 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -23,7 +41,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     return <p className="text-white">App not found</p>;
   }
 
-  const isVideo = app.cover_image.endsWith(".mp4");
+  const isVideo = app.cover_image?.endsWith?.(".mp4");
+
+  // duration is stored in seconds in the DB. Convert to minutes for display.
+  const durationSeconds = Number(app.duration ?? 0);
+  const durationMinutes = durationSeconds > 0 ? Math.round((durationSeconds / 60) * 10) / 10 : null;
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center bg-black pb-40">
@@ -43,7 +65,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         {/* main card */}
         <div className="flex w-fit max-w-6xl flex-col justify-between gap-8 rounded-[50px] bg-[#111111] p-6 lg:flex-row">
           {/* left column */}
-          <div className="flex flex-shrink-0 flex-col gap-4 lg:w-[400px]">
+          <div className="flex flex-shrink-0 flex-col gap-4 lg:w-[500px]">
             {/* title + description */}
             <h1 className="text-wrap font-satoshi text-3xl font-medium leading-snug">
               {app.app_name}
@@ -65,6 +87,23 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                   </p>
                 ))}
               </div>
+              {/* duration display (converted to minutes) - styled to blend with UI */}
+              {durationMinutes ? (
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="border-white/8 from-white/2 to-white/3 flex items-center gap-3 rounded-full border bg-gradient-to-b px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 p-1">
+                      <ClockIcon className="h-4 w-4 text-accent" />
+                    </div>
+
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-nowrap text-sm font-medium text-white">
+                        {durationMinutes} min
+                      </span>
+                      <span className="-mt-0.5 text-xs text-white/60">({durationSeconds}s)</span>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
               <div className="flex flex-shrink-0 items-center gap-1 rounded-full border border-white/30 bg-black/20">
                 <Avatar name={app.author || "Unknown"} />
                 <p className="m-1 mr-3">{app.author}</p>

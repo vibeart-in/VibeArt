@@ -72,7 +72,7 @@ const EditSection = () => {
           <div className="h-[200px] w-[300px]">
             <DragAndDropBox onUploadSuccess={() => {}} />
           </div>
-          <InputBox />
+          {/* <InputBox /> */}
         </div>
       </div>
     </section>

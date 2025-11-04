@@ -67,7 +67,7 @@ const Page = () => {
         <div className="relative">
           <div className="z-10 h-56 w-screen bg-gradient-to-t from-black to-transparent"></div>
           <RaycastComponent />
-          <div className="z-10 h-56 w-screen bg-gradient-to-t from-[#0a0b08] to-black"></div>
+          <div className="z-10 h-56 w-screen bg-gradient-to-t from-transparent to-black"></div>
         </div>
 
         {/* === PART 2: LAZY-LOADED & ANIMATED CONTENT === */}

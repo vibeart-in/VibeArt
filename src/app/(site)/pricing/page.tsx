@@ -73,6 +73,9 @@ const page = async () => {
   const productRes = await getProducts();
   const userSubscriptionRes = await getUserSubscription();
 
+  console.log("productRes:", productRes);
+  console.log("userSubscriptionRes:", userSubscriptionRes);
+
   if (!productRes.success) {
     // TODO: Replace this with an error boundary
     return <div>Internal Server Error</div>;

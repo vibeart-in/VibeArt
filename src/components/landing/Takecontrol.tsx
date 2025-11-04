@@ -132,7 +132,7 @@ const Takecontrol = () => {
           >
             <Image
               alt="Abstract background"
-              src="/images/landing/control/control_bottom.jpg"
+              src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/control_bottom.webp"
               fill
               unoptimized
               className="rounded-[100px] object-cover"
@@ -144,7 +144,7 @@ const Takecontrol = () => {
           >
             <Image
               alt="Take control UI element"
-              src="/images/landing/control/control_top.png"
+              src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/control/control_top.webp"
               width={600}
               height={800}
               unoptimized

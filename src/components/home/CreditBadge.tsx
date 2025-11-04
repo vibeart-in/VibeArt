@@ -1,8 +1,9 @@
 "use client";
 
-import { IconDiamondFilled } from "@tabler/icons-react"; // change to your icon lib
+import { IconDiamondFilled } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // ✅ import router
 
 interface CreditBadgeProps {
   credits: number;
@@ -12,13 +13,16 @@ interface CreditBadgeProps {
 export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeProps) {
   const [open, setOpen] = useState(false);
   const low = credits < lowThreshold;
+  const router = useRouter(); // ✅ initialize router
 
   return (
     <div className="relative">
       {/* Badge Button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className={`relative flex size-10 items-center justify-center rounded-2xl border transition-colors ${low ? "border-red-500 bg-red-600 text-white" : "border-white/10 bg-black text-white"}`}
+        className={`relative flex size-10 items-center justify-center rounded-2xl border transition-colors ${
+          low ? "border-red-500 bg-red-600 text-white" : "border-white/10 bg-black text-white"
+        }`}
         whileHover={{
           scale: 1.08,
           boxShadow: low ? "0px 0px 12px rgba(255,0,0,0.6)" : "0px 0px 12px rgba(217,232,37,0.5)",
@@ -29,7 +33,9 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
         <IconDiamondFilled className="size-5" />
         {/* Small pill badge */}
         <span
-          className={`absolute -right-1 -top-1 rounded-full px-1 text-[10px] font-bold ${low ? "bg-white text-red-600" : "bg-accent text-black"}`}
+          className={`absolute -right-1 -top-1 rounded-full px-1 text-[10px] font-bold ${
+            low ? "bg-white text-red-600" : "bg-accent text-black"
+          }`}
         >
           {credits}
         </span>
@@ -52,10 +58,7 @@ export default function CreditBadge({ credits, lowThreshold = 10 }: CreditBadgeP
 
             <button
               className="mt-3 w-full rounded-lg bg-accent py-2 font-semibold text-black transition-colors hover:bg-accent/90"
-              onClick={() => {
-                // 🔗 handle Buy More flow
-                alert("Redirect to Buy more credits!");
-              }}
+              onClick={() => router.push("/pricing")} // ✅ redirect
             >
               Buy more
             </button>

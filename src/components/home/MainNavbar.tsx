@@ -7,8 +7,7 @@ import {
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
-import { User } from "@supabase/supabase-js";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import {
   Navbar,
@@ -20,7 +19,6 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
-import { createClient } from "@/src/lib/supabase/client";
 
 import { UserSectionClient } from "./UserSectionClient";
 
@@ -59,36 +57,6 @@ export default function MainNavbar() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const supabase = createClient();
-
-  useEffect(() => {
-    // Get initial session
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-
-    getUser();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   return (
     <Navbar>

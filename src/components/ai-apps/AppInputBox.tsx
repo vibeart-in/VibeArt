@@ -256,65 +256,68 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                     console.error("Failed to parse fieldData:", e);
                   }
                   return (
-                    <div key={param.nodeId} className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
-                        onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {param.fieldName !== "aspect_ratio" &&
-                            param.description !== "aspect_ratio" &&
-                            getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {options.map((opt) => {
-                              const isAspect =
-                                param.fieldName === "aspect_ratio" ||
-                                param.description === "aspect_ratio";
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-sm font-semibold">{param.description}</span>
+                      <div key={param.nodeId} className="min-w-[130px]">
+                        <Select
+                          value={param.fieldValue}
+                          onValueChange={(val) => handleChange(key, val)}
+                        >
+                          <SelectTrigger className="w-full">
+                            {param.fieldName !== "aspect_ratio" &&
+                              param.description !== "aspect_ratio" &&
+                              getIconForParam(param.description ?? key)}
+                            <SelectValue placeholder={param.description} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {options.map((opt) => {
+                                const isAspect =
+                                  param.fieldName === "aspect_ratio" ||
+                                  param.description === "aspect_ratio";
 
-                              // Detect ratio-like options (e.g. "16:9")
-                              const ratioRegex = /^\d+:\d+$/;
-                              const isRatio = ratioRegex.test(opt);
+                                // Detect ratio-like options (e.g. "16:9")
+                                const ratioRegex = /^\d+:\d+$/;
+                                const isRatio = ratioRegex.test(opt);
 
-                              let preview = null;
+                                let preview = null;
 
-                              if (isAspect) {
-                                if (isRatio) {
-                                  // Numeric aspect ratio visualization
-                                  const [w, h] = opt.split(":").map(Number);
-                                  const aspectRatio = w / h;
-                                  const baseHeight = 15;
-                                  const previewWidth = baseHeight * aspectRatio;
+                                if (isAspect) {
+                                  if (isRatio) {
+                                    // Numeric aspect ratio visualization
+                                    const [w, h] = opt.split(":").map(Number);
+                                    const aspectRatio = w / h;
+                                    const baseHeight = 15;
+                                    const previewWidth = baseHeight * aspectRatio;
 
-                                  preview = (
-                                    <div
-                                      className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
-                                      style={{
-                                        width: `${previewWidth}px`,
-                                        height: `${baseHeight}px`,
-                                      }}
-                                    />
-                                  );
-                                } else {
-                                  // Non-ratio text options like "match_input_image" or "auto"
-                                  preview = <IconAspectRatio size={15} />;
+                                    preview = (
+                                      <div
+                                        className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
+                                        style={{
+                                          width: `${previewWidth}px`,
+                                          height: `${baseHeight}px`,
+                                        }}
+                                      />
+                                    );
+                                  } else {
+                                    // Non-ratio text options like "match_input_image" or "auto"
+                                    preview = <IconAspectRatio size={15} />;
+                                  }
                                 }
-                              }
 
-                              return (
-                                <SelectItem key={opt} value={opt}>
-                                  <div className="flex items-center gap-2">
-                                    {preview}
-                                    <span className="text-sm">{opt}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                                return (
+                                  <SelectItem key={opt} value={opt}>
+                                    <div className="flex items-center gap-2">
+                                      {preview}
+                                      <span className="text-sm">{opt}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   );
                 }
@@ -387,6 +390,32 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                             <SelectGroup>
                               <SelectItem value={"1"}>Women</SelectItem>
                               <SelectItem value={"2"}>Mam</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (param.description === "Character action selection") {
+                  return (
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-sm font-semibold">Gender</span>
+                      <div className="min-w-[130px]">
+                        <Select
+                          value={param.fieldValue}
+                          onValueChange={(val) => handleChange(key, val)}
+                        >
+                          <SelectTrigger className="w-full">
+                            {getIconForParam(param.description ?? key)}
+                            <SelectValue placeholder={param.description} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value={"1"}>Clean the figurine</SelectItem>
+                              <SelectItem value={"2"}>Figurine sits on hands</SelectItem>
+                              <SelectItem value={"3"}>Custom action</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -487,7 +516,43 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                   );
                 }
 
-                if (param.fieldName === "prompt" || param.fieldName === "text") {
+                if (param.description === "Width" || param.description === "Height") {
+                  return (
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-xs font-semibold">{param.description}</span>
+                      <div>
+                        <AnimatedCounter
+                          initialValue={Number(param.fieldValue)}
+                          onChange={handleChange}
+                          paramKey={key!}
+                          max={1080}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (param.description === "Duration (seconds)") {
+                  return (
+                    <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                      <span className="text-center text-xs font-semibold">{param.description}</span>
+                      <div>
+                        <AnimatedCounter
+                          initialValue={Number(param.fieldValue)}
+                          onChange={handleChange}
+                          paramKey={key!}
+                          max={10}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (
+                  param.fieldName === "prompt" ||
+                  param.fieldName === "text" ||
+                  param.description === "Prompt"
+                ) {
                   return (
                     <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                       <span className="text-center text-xs font-semibold">{param.description}</span>
@@ -495,13 +560,13 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                         value={param.fieldValue as string}
                         onChange={(e) => handleChange(key, e.target.value)}
                         className="hide-scrollbar max-h-full min-w-[200px] border pl-4"
-                        maxHeight={100}
-                        placeholder={param.description}
+                        maxHeight={60}
+                        // placeholder={param.description}
                       />
                     </div>
                   );
                 }
-                return null; // Return null for unhandled parameter types
+                return null;
               })}
             </div>
           </div>

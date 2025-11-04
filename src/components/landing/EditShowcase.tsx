@@ -2,9 +2,9 @@ import { ImageCard3D } from "./3dImageCard";
 import { InfiniteImageScroll } from "./SimpleCardScroll";
 
 const imageList = [
-  "/images/landing/edit/cane2.png",
-  "/images/landing/edit/cane3.png",
-  "/images/landing/edit/cane4.png",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane2.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane3.webp",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/edit/cane4.webp",
 ];
 
 const EditShowcase = () => {

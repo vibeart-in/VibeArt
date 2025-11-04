@@ -77,13 +77,13 @@ const UpscaleSection = () => {
       </MouseParallaxProvider>
       <div className="mt-32 flex w-full items-end justify-between">
         <ImageMagnifyCard
-          src="/images/landing/upscale/upscale3.jpg"
+          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/upscale/upscale3.webp"
           focus={imageFocus1}
           scale={6}
           className="left-[110%]"
         />
         <ImageMagnifyCard
-          src="/images/landing/upscale/upscale2.jpg"
+          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/upscale/upscale2.webp"
           focus={imageFocus2}
           scale={6}
           className="bottom-0 right-[110%]"
@@ -94,7 +94,7 @@ const UpscaleSection = () => {
       </p>
       <div className="mt-3 flex w-full items-start justify-between">
         <ImageMagnifyCard
-          src="/images/landing/upscale/upscale4.jpg"
+          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/upscale/upscale4.jpg"
           mainSize={{ w: 500, h: 600 }}
           previewSize={{ w: 350, h: 260 }}
           focus={imageFocus3}
@@ -102,7 +102,7 @@ const UpscaleSection = () => {
           className="left-[110%]"
         />
         <ImageMagnifyCard
-          src="/images/landing/upscale/upscale5.jpg"
+          src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/upscale/upscale5.jpg"
           mainSize={{ w: 554, h: 810 }}
           previewSize={{ w: 400, h: 300 }}
           focus={imageFocus4}

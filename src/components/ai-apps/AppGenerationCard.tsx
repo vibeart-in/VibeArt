@@ -38,7 +38,7 @@ const AppGenerationCard = ({
       {/* Top section with Images */}
       <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
-          <GroupImageLayout images={inputImages} title="Input" />
+          <GroupImageLayout images={inputImages} title="Input" autoRatio={true} />
         </div>
 
         {/* Arrow — hidden on very small screens for space */}

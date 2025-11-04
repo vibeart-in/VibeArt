@@ -11,6 +11,7 @@ import { cn } from "@/src/lib/utils";
 import SignInWithGoogleButton from "./google-login";
 import { Button } from "../ui/button";
 import GlassModal from "../ui/GlassModal";
+import { NavbarLogo } from "../ui/resizable-navbar";
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
@@ -51,10 +52,18 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <div className="relative flex size-full items-center justify-center">
-      <GlassModal width={36} height={500} count={16} className="z-10" />
+      <GlassModal width={40} height={650} count={16} className="z-10" />
       <div className="absolute z-20">
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-          <h2 className="text-center text-xl font-semibold">Sign Up</h2>
+          <div className="flex w-full flex-col items-center justify-center gap-4">
+            <NavbarLogo className="mb-2" />
+            <div>
+              <h2 className="text-center text-2xl font-bold">Start Creating 🔥</h2>
+              <p className="mt-1 text-sm text-gray-400">
+                Log in to generate, edit and bring your vison to life
+              </p>
+            </div>
+          </div>
           <SignInWithGoogleButton />
           <div className="border-b border-gray-500"></div>
           <form onSubmit={handleSignUp}>
@@ -90,8 +99,8 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-64" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating an account..." : "Sign up and start creating"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
