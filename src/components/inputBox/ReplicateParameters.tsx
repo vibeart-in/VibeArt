@@ -221,6 +221,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
         "Image",
         "last_frame_image",
         "reference_images",
+        "first_frame_image",
       ]);
       if (explicit.has(key)) return true;
     }

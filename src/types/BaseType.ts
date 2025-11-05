@@ -1,4 +1,4 @@
-import { Database } from "@/supabase/database.types";
+import { Database, Json } from "@/supabase/database.types";
 
 export interface MessageGroupType {
   input_images: conversationImageObject[];
@@ -46,6 +46,8 @@ export interface ModelData {
   is_popular: boolean;
   estimated_time: number;
   tags?: string[];
+  is_variable_price?: boolean;
+  pricing_parameters?: Json;
 }
 
 export type DBModelData = Database["public"]["Functions"]["get_initial_model"]["Returns"][number];

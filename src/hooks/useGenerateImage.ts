@@ -8,7 +8,7 @@ type GenerationParams = {
   conversationId?: string;
   modelName: string;
   modelIdentifier: string;
-  modelCredit: number;
+  modelCredit: number | null;
   modelProvider: "running_hub" | "replicate";
   conversationType: ConversationType;
   inputImagePermanentPaths: string[];

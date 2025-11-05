@@ -1,3 +1,4 @@
+// InputBox.tsx (replace relevant parts or drop in whole file)
 "use client";
 import { MoreVertical, XCircle } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "motion/react";
@@ -14,6 +15,15 @@ import ParametersSection, { ParametersSectionHandle } from "./ParametersSection"
 import CommonModal from "../ui/CommonModal";
 import GenerateButton from "../ui/GenerateButton";
 import GradualBlurMemo from "../ui/GradualBlur";
+import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dotted-dialog";
 
 const validateAndSanitizePrompt = (prompt: string) => {
   const trimmed = prompt.trim();
@@ -94,6 +104,17 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  // confirmation modal state (new)
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmCredits, setConfirmCredits] = useState<number | null>(null);
+  const [confirmAppliedRule, setConfirmAppliedRule] = useState<string | undefined>(undefined);
+  const [confirmPayload, setConfirmPayload] = useState<{
+    finalParameters: Record<string, any>;
+    inputImagePermanentPaths: string[];
+    promptText: string;
+  } | null>(null);
+  const [isComputingCredits, setIsComputingCredits] = useState(false);
+
   // This single ref will now control the parameters section
   const paramsRef = useRef<ParametersSectionHandle>(null);
 
@@ -103,7 +124,6 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const mutation = useGenerateImage(conversationType, conversationId);
   const { data: initialModel } = useModelsByUsecase(conversationType);
 
-  // This logic remains largely the same
   useEffect(() => {
     const savedModel = sessionStorage.getItem(`${conversationType}-model`);
     if (savedModel) {
@@ -117,7 +137,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     if (initialModel && initialModel.length > 0 && !selectedModel) {
       setSelectedModel(initialModel[0]);
     }
-  }, [conversationType, initialModel]); // Removed selectedModel from deps
+  }, [conversationType, initialModel]);
 
   useEffect(() => {
     if (selectedModel) {
@@ -127,7 +147,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   useEffect(() => {
     return () => mutation.reset();
-  }, [mutation.reset]); // Assuming mutation.reset is stable
+  }, [mutation.reset]);
 
   // --- Memoized Callbacks ---
   const handleModelSelect = useCallback((model: ModelData) => {
@@ -139,20 +159,19 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     setIsDialogOpen((prev) => !prev);
   }, []);
 
+  // ---------- New behaviour: only compute credits at top-level Generate click ----------
   const handleGenerateClick = useCallback(() => {
     if (mutation.isPending || !selectedModel || !paramsRef.current) return;
 
     try {
       setFormError(null);
 
-      // Get all values from the single ref
+      // read params only now
       const {
         values: finalParameters,
         inputImages: inputImagePermanentPaths,
         promptText,
       } = paramsRef.current.getValues();
-
-      console.log("Final Parameters:", finalParameters);
 
       const { isValid, error } = validateAndSanitizePrompt(promptText);
       if (!isValid && error) {
@@ -160,43 +179,162 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
         return;
       }
 
-      mutation.mutate(
-        {
-          parameters: finalParameters,
-          conversationId,
-          modelName: selectedModel.model_name,
-          modelIdentifier: selectedModel.identifier,
-          modelCredit: selectedModel.cost,
-          modelProvider: selectedModel.provider,
-          conversationType: conversationType,
-          inputImagePermanentPaths,
-        },
+      // If not variable pricing -> proceed immediately with existing static model cost
+      if (!selectedModel.is_variable_price) {
+        const modelCredit = typeof selectedModel.cost === "number" ? selectedModel.cost : null;
 
-        {
-          onSuccess: () => {
-            if (paramsRef.current) {
-              paramsRef.current.clearPrompt?.();
-            }
+        mutation.mutate(
+          {
+            parameters: finalParameters,
+            conversationId,
+            modelName: selectedModel.model_name,
+            modelIdentifier: selectedModel.identifier,
+            modelCredit,
+            modelProvider: selectedModel.provider,
+            conversationType: conversationType,
+            inputImagePermanentPaths,
           },
-          onError: (err) => {
-            if (err.message === "Unauthorized") {
-              setIsLoginModalOpen(true);
-            } else {
-              setFormError(`Generation failed: ${err.message}`);
-            }
+          {
+            onSuccess: () => {
+              if (paramsRef.current) {
+                paramsRef.current.clearPrompt?.();
+              }
+            },
+            onError: (err) => {
+              if (err.message === "Unauthorized") {
+                setIsLoginModalOpen(true);
+              } else {
+                setFormError(`Generation failed: ${err.message}`);
+              }
+            },
           },
-        },
-      );
+        );
+
+        return;
+      }
+
+      // Variable pricing -> compute credits once, then open confirmation dialog
+      setIsComputingCredits(true);
+      try {
+        // parse credit parameters safely (some models may store stringified JSON)
+        const creditParams =
+          typeof selectedModel.pricing_parameters === "string"
+            ? JSON.parse(selectedModel.pricing_parameters)
+            : selectedModel.pricing_parameters;
+
+        // call the evaluator (it returns { credits, appliedRule })
+        const result = evaluateCreditsFromModelParams(creditParams, finalParameters);
+        const credits = result.credits ?? null;
+
+        // store payload to confirm
+        setConfirmCredits(credits);
+        setConfirmAppliedRule(result.appliedRule);
+        setConfirmPayload({
+          finalParameters,
+          inputImagePermanentPaths,
+          promptText,
+        });
+
+        // open confirm dialog
+        setConfirmOpen(true);
+      } catch (err: any) {
+        console.error("Failed to compute credits:", err);
+        // fallback: show static cost if available, or show error
+        const modelCredit = typeof selectedModel.cost === "number" ? selectedModel.cost : null;
+        if (modelCredit !== null) {
+          // proceed with fallback cost after optionally notifying the user
+          mutation.mutate(
+            {
+              parameters: finalParameters,
+              conversationId,
+              modelName: selectedModel.model_name,
+              modelIdentifier: selectedModel.identifier,
+              modelCredit,
+              modelProvider: selectedModel.provider,
+              conversationType: conversationType,
+              inputImagePermanentPaths,
+            },
+            {
+              onSuccess: () => paramsRef.current?.clearPrompt?.(),
+              onError: (err) => {
+                if (err.message === "Unauthorized") setIsLoginModalOpen(true);
+                else setFormError(`Generation failed: ${err.message}`);
+              },
+            },
+          );
+          return;
+        }
+
+        setFormError("Could not calculate credits for these parameters. Please check your input.");
+      } finally {
+        setIsComputingCredits(false);
+      }
     } catch (e: any) {
       console.error("Failed to get parameter values:", e.message);
       setFormError(`Configuration Error: ${e.message}`);
     }
   }, [mutation, selectedModel, conversationId, conversationType]);
 
+  // when user confirms in the dialog -> actually generate
+  const handleConfirmGenerate = useCallback(() => {
+    if (!confirmPayload || !selectedModel) {
+      setFormError("Missing payload for generation.");
+      setConfirmOpen(false);
+      return;
+    }
+
+    const { finalParameters, inputImagePermanentPaths } = confirmPayload;
+
+    // use confirmCredits as final charge
+    const modelCredit = confirmCredits;
+
+    mutation.mutate(
+      {
+        parameters: finalParameters,
+        conversationId,
+        modelName: selectedModel.model_name,
+        modelIdentifier: selectedModel.identifier,
+        modelCredit,
+        modelProvider: selectedModel.provider,
+        conversationType: conversationType,
+        inputImagePermanentPaths,
+        // optional: pass appliedRule so backend can persist which rule was used
+        // appliedPricingRule: confirmAppliedRule,
+      },
+      {
+        onSuccess: () => {
+          if (paramsRef.current) {
+            paramsRef.current.clearPrompt?.();
+          }
+          setConfirmOpen(false);
+          setConfirmCredits(null);
+          setConfirmPayload(null);
+          setConfirmAppliedRule(undefined);
+        },
+        onError: (err) => {
+          setConfirmOpen(false);
+          if (err.message === "Unauthorized") {
+            setIsLoginModalOpen(true);
+          } else {
+            setFormError(`Generation failed: ${err.message}`);
+          }
+        },
+      },
+    );
+  }, [
+    confirmPayload,
+    confirmCredits,
+    selectedModel,
+    mutation,
+    conversationId,
+    conversationType,
+    confirmAppliedRule,
+  ]);
+
   return (
     <>
       <div className="relative mb-2 w-fit rounded-[28px] border border-white/10 bg-[#0C0C0C]/80 p-2 backdrop-blur-lg md:p-3">
-        {/* Model Selection Dialog - No major changes needed here, as it's driven by simple state */}
+        {/* Model Selection Dialog */}
         <AnimatePresence>
           {isDialogOpen && (
             <motion.div
@@ -236,18 +374,17 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             </motion.div>
           )}
         </AnimatePresence>
+
         <section className="flex justify-between gap-4">
           <ModelSelectorCard selectedModel={selectedModel} onClick={handleCardClick} />
 
           <div className="z-20 flex flex-col items-center gap-2">
             {selectedModel && (
               <div className="hidden flex-grow justify-center md:flex">
-                {/* The new, self-contained parameters component */}
                 <ParametersSection ref={paramsRef} selectedModel={selectedModel} />
               </div>
             )}
 
-            {/* MOBILE: Show 3-dot menu button */}
             <div className="flex flex-grow justify-end md:hidden">
               <button
                 onClick={() => setIsParamsMenuOpen(true)}
@@ -261,10 +398,11 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           <GenerateButton
             handleGenerateClick={handleGenerateClick}
             isPending={mutation.isPending}
-            cost={selectedModel?.cost}
+            cost={selectedModel?.cost} // still shows static cost; confirmation dialog will show final for variable
           />
         </section>
-        {/* MODAL FOR MOBILE PARAMETERS */}
+
+        {/* MOBILE: parameters modal (unchanged) */}
         <AnimatePresence>
           {isParamsMenuOpen && (
             <motion.div
@@ -313,6 +451,63 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Confirmation Dialog (appears only when variable-priced model) */}
+      <AnimatePresence>
+        <Dialog
+          open={confirmOpen}
+          onOpenChange={(open) => {
+            // keep same semantics: close dialog when user dismisses
+            if (!open) setConfirmOpen(false);
+          }}
+        >
+          <DialogContent className="w-full max-w-md rounded-2xl bg-[#0f0f0f] p-6 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="mb-2 text-xl font-semibold text-white">
+                Confirm Credits
+              </DialogTitle>
+              <DialogDescription className="mb-4 text-sm text-muted-foreground">
+                Based on your video parameters. You're about to spend{" "}
+                <span className="font-bold text-white">
+                  {isComputingCredits
+                    ? "calculating..."
+                    : confirmCredits !== null
+                      ? `${confirmCredits} credits`
+                      : "—"}
+                </span>{" "}
+                to generate this output.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* optional: show applied rule */}
+            {/* {confirmAppliedRule && (
+              <div className="mb-4 text-xs text-white/60">Applied rule: {confirmAppliedRule}</div>
+            )} */}
+
+            {/* you can show a short summary of parameters if you want */}
+            {/* <pre className="mb-4 text-xs text-white/60">{JSON.stringify(confirmPayload?.finalParameters, null, 2)}</pre> */}
+
+            <DialogFooter className="flex gap-3 pt-4">
+              <button
+                onClick={() => setConfirmOpen(false)}
+                className="flex-1 rounded-lg border border-white/10 px-4 py-2 text-sm"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmGenerate}
+                className="flex-1 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-black"
+              >
+                {mutation.isPending
+                  ? "Generating..."
+                  : `Generate (${confirmCredits ?? "—"} credits)`}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </AnimatePresence>
+
       <AnimatePresence mode="popLayout">
         {formError && (
           <motion.div
