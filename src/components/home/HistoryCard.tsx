@@ -80,7 +80,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           tabIndex={0}
         >
           {imageUrl ? (
-            <Image
+            <img
               src={imageUrl}
               alt={prompt}
               width={100}
@@ -89,7 +89,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
               className={`absolute inset-0 size-full object-cover transition-transform duration-300 ease-out ${
                 hovered ? "scale-[1.06]" : "scale-100"
               }`}
-              priority={false}
             />
           ) : (
             <div

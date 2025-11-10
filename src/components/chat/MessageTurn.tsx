@@ -1,7 +1,6 @@
 "use client";
 import { IconCopy, IconDiamondFilled, IconCheck } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
-import Image from "next/image";
 import { useState } from "react";
 
 import ImageCard from "@/src/components/ui/imageCard/ImageCard";
@@ -132,7 +131,7 @@ export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
           <div className="mt-4 flex w-full flex-wrap gap-4">
             {input_images.map((image) => (
               <div key={image.id} className="w-[150px]">
-                <Image
+                <img
                   className="w-full rounded-xl border-2 border-white/20"
                   src={image.imageUrl}
                   width={300}

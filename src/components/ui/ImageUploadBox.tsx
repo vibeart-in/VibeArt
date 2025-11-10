@@ -1,7 +1,6 @@
 // src/components/ui/ImageUploadBox.tsx
 "use client";
 import { ImagesIcon, XIcon } from "lucide-react";
-import Image from "next/image";
 import React, { useRef, useState, useEffect, memo, useCallback } from "react";
 
 import { uploadImage } from "@/src/utils/server/UploadImage";
@@ -215,7 +214,7 @@ const ImageUploadBox = ({
     if (image) {
       return (
         <div className="group relative size-full">
-          <Image
+          <img
             src={image.displayUrl}
             alt="Uploaded preview"
             width={80}
