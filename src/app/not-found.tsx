@@ -15,13 +15,11 @@ export default function NotFound() {
   };
 
   return (
-    <section className="relative h-screen w-screen overflow-hidden">
-      {/* <NavbarLander /> */}
-
+    <section className="relative h-screen w-screen overflow-hidden bg-[#060602]">
       {/* Full screen image */}
       <div className="absolute inset-0">
         <Image
-          src={"/images/404.png"}
+          src={"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/404.webp"}
           alt="404 Not found"
           fill
           className="object-scale-down"
@@ -43,8 +41,8 @@ export default function NotFound() {
       />
       <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-wrap justify-center gap-3 px-4 sm:gap-4 md:bottom-8">
         <Button onClick={handleGoBack}>Go Back</Button>
-        <Link href={"/library"}>
-          <Button variant="secondary">Gallery</Button>
+        <Link href={"/image/home"}>
+          <Button variant="secondary">Home</Button>
         </Link>
       </div>
     </section>

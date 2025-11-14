@@ -91,7 +91,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({ image, galleryHeight, index
               src={image.src}
               width={image.width}
               height={image.height}
-              className="pointer-events-none h-full w-full object-cover"
+              className="pointer-events-none size-full object-cover"
               autoPlay
               muted
               loop
@@ -102,7 +102,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({ image, galleryHeight, index
             // Server render / initial client render: an inert placeholder that matches size
             <div
               aria-hidden
-              className="flex h-full w-full items-center justify-center bg-neutral-700"
+              className="flex size-full items-center justify-center bg-neutral-700"
               style={{ width: "100%", height: "100%" }}
             >
               {/* optional lightweight poster image or icon */}
@@ -115,7 +115,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({ image, galleryHeight, index
             alt={image.alt}
             width={image.width}
             height={image.height}
-            className="h-full w-full object-cover"
+            className="size-full object-cover"
             priority={index < 3}
             onDragStart={(e) => e.preventDefault()}
           />

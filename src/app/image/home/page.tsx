@@ -1,6 +1,51 @@
+import { Metadata } from "next";
+import Script from "next/script";
+
 import { ShowcaseClient } from "@/src/components/home/ShowcaseClient";
 import HorizontalImageScroller from "@/src/components/landing/HorizontalImageScroller";
 import { createClient } from "@/src/lib/supabase/server";
+
+export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Create images & videos with AI",
+  description:
+    "VibeArt — The all-in-one AI-powered platform for creators. Generate photorealistic images and videos with Wan2.2, Seedream-4, Veo3.1 and more. Upscale to 4K, batch export, and share instantly.",
+  keywords: [
+    "AI image generator",
+    "AI video generator",
+    "creator platform",
+    "Wan2.2",
+    "Seedream-4",
+    "Veo3.1",
+    "Sora 2",
+    "AI upscaler",
+    "image-to-video",
+    "4K upscale",
+  ],
+  openGraph: {
+    title: "VibeArt — Create images & videos with AI",
+    description:
+      "Generate stunning AI images and videos using the latest models — Wan2.2, Seedream-4, Veo3.1, and more. Upscale to 4K with VibeArt.",
+    url: "https://vibeart.in/",
+    siteName: "VibeArt",
+    images: ["https://vibeart.in/opengraph-image.png"],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VibeArt — Create images & videos with AI",
+    description:
+      "The All-in-one AI platform for creators — generate with Wan2.2, Seedream-4, and Veo3.1.",
+    images: ["https://vibeart.in/opengraph-image.png"],
+    creator: "@ametheshlgp",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 const sampleImages = [
   {
@@ -41,8 +86,6 @@ const sampleImages = [
   },
 ];
 
-export const revalidate = 3600;
-
 const Page = async () => {
   const supabase = await createClient();
 
@@ -59,13 +102,48 @@ const Page = async () => {
     ...new Set(models.map((m) => m.generated_by).filter((name): name is string => !!name)),
   ];
 
+  // ✅ Structured data (JSON-LD) for SEO + LLMs
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Pngage",
+    name: "AI Image & Video Generator",
+    description:
+      "VibeArt helps creators generate AI images and videos with the latest models like Wan2.2, Seedream-4, Veo3.1, and more.",
+    url: "https://vibeart.in/",
+    mainEntity: {
+      "@type": "ItemList",
+      name: "Supported AI Models",
+      itemListElement: uniqueModelNames.map((model, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: model,
+      })),
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://vibeart.in/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
-    <section className="relative mt-12">
-      <HorizontalImageScroller images={sampleImages} galleryHeight={450} />
-      <div className="flex flex-col gap-24">
-        {uniqueModelNames.length > 0 && <ShowcaseClient models={uniqueModelNames} />}
-      </div>
-    </section>
+    <>
+      {/* ✅ Structured data injection (invisible, SEO only) */}
+      <Script
+        id="home-jsonld"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* ✅ No visible or structural changes below */}
+      <section className="relative mt-12">
+        <HorizontalImageScroller images={sampleImages} galleryHeight={450} />
+        <div className="flex flex-col gap-24">
+          {uniqueModelNames.length > 0 && <ShowcaseClient models={uniqueModelNames} />}
+        </div>
+      </section>
+    </>
   );
 };
 

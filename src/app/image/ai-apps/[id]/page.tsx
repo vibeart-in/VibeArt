@@ -91,8 +91,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               {durationMinutes ? (
                 <div className="mt-3 flex items-center gap-3">
                   <div className="border-white/8 from-white/2 to-white/3 flex items-center gap-3 rounded-full border bg-gradient-to-b px-3 py-2 backdrop-blur-sm">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 p-1">
-                      <ClockIcon className="h-4 w-4 text-accent" />
+                    <div className="flex size-7 items-center justify-center rounded-full bg-black/30 p-1">
+                      <ClockIcon className="size-4 text-accent" />
                     </div>
 
                     <div className="flex flex-col leading-tight">

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+
 import type { conversationImageObject } from "@/src/types/BaseType";
+
 import ImageCard from "../ui/imageCard/ImageCard";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 
@@ -103,13 +105,13 @@ const GroupImageLayout = ({
                   key={img.id ?? `${idx}`}
                   type="button"
                   onClick={() => onThumbClick(idx)}
-                  className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-800 transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:h-14 sm:w-14"
+                  className="relative size-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-800 transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:size-14"
                   aria-label={`Make image ${idx + 1} primary`}
                 >
                   <img
                     src={img.thumbnailUrl || img.imageUrl}
                     alt={`${title} thumbnail ${idx + 1}`}
-                    className="h-full w-full object-cover"
+                    className="size-full object-cover"
                     draggable={false}
                   />
                   <div className="absolute right-1 top-1 rounded-sm bg-black/60 px-1 text-[10px] text-neutral-200">
@@ -123,7 +125,7 @@ const GroupImageLayout = ({
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
-                  className="flex h-12 w-12 items-center justify-center rounded-lg border border-neutral-800 bg-gradient-to-b from-black/40 to-black/20 px-2 text-sm font-medium text-neutral-200 sm:h-14 sm:w-14"
+                  className="flex size-12 items-center justify-center rounded-lg border border-neutral-800 bg-gradient-to-b from-black/40 to-black/20 px-2 text-sm font-medium text-neutral-200 sm:size-14"
                   aria-label="Show all thumbnails"
                   title={`Show ${allThumbnails.length} thumbnails`}
                 >
@@ -165,7 +167,7 @@ const GroupImageLayout = ({
                 <img
                   src={img.thumbnailUrl || img.imageUrl}
                   alt={`${title} thumbnail ${idx + 1}`}
-                  className="h-full w-full object-cover"
+                  className="size-full object-cover"
                   draggable={false}
                 />
                 <div className="absolute right-1 top-1 rounded-sm bg-black/60 px-1 text-[10px] text-neutral-200">

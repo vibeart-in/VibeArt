@@ -2,12 +2,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import CreditBadge from "@/src/components/home/CreditBadge";
 import { NavbarButton } from "@/src/components/ui/resizable-navbar";
 import { UserProfileDropdown } from "@/src/components/ui/UserProfileDropdown";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
-import { useRouter } from "next/navigation";
+
 import { Button } from "../ui/button";
 
 /**

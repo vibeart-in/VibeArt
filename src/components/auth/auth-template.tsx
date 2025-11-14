@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useEffect, ReactNode } from "react";
 
 import GlassModal from "@/src/components/ui/GlassModal";
-import AnimatedGradientBackground from "../ui/animated-gradient-background";
+
 import BackgroundImage from "../home/BackgroundImage";
+import AnimatedGradientBackground from "../ui/animated-gradient-background";
 
 interface AuthTemplateProps {
   children: ReactNode;

@@ -6,6 +6,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 
 import { RealtimeProvider } from "../components/providers/RealtimeProvider";
+import { SkipToContent } from "../components/SkipToContent";
 import { Toaster } from "../components/ui/sonner";
 import { TanStackProvider } from "../lib/TanstackProvider";
 
@@ -19,8 +20,21 @@ export const metadata: Metadata = {
     default: "VibeArt",
     template: "%s • VibeArt",
   },
-  description:
-    "VibeArt — Instantly create high-quality AI images from text and reference photos. Generate photorealistic or stylized artwork, upscale to 4K, and share results with one click.",
+  description: "The All-in-one AI-powered Platform for modern creators.",
+  keywords: [
+    "AI image generator",
+    "AI video generator",
+    "creator platform",
+    "image-to-image",
+    "upscale to 4K",
+    "photorealistic images",
+    "stylized art",
+    "Wan2.2",
+    "Seedream-4",
+    "Veo3.1",
+    "higgsfield",
+    "krea",
+  ],
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -28,30 +42,19 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "VibeArt",
-    description:
-      "Create stunning AI images from text and references — fast, flexible, and shareable. Upscale to 4K, batch export, and publish directly to social.",
+    description: "The All-in-one AI-powered Platform for modern creators.",
+    images: [new URL("/opengraph-image.png", defaultUrl).toString()],
     url: `${defaultUrl}/image/home`,
     siteName: "VibeArt",
-    images: [
-      {
-        url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/brand/logo.png",
-        // Ideally replace with a dedicated social-preview image (see notes below)
-        width: 1200,
-        height: 630,
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "VibeArt",
-    description:
-      "Create stunning AI images from text and references — fast, flexible, and shareable. Upscale to 4K and export for social.",
-    images: [
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/brand/logo.png",
-    ],
-    creator: "@your_twitter_handle", // optional: put your X handle
+    description: "The All-in-one AI-powered Platform for modern creators.",
+    images: [new URL("/opengraph-image.png", defaultUrl).toString()],
+    creator: "@ametheshlgp",
   },
   robots: {
     index: true,
@@ -59,6 +62,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      "max-snippet": -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
     },
   },
 };
@@ -94,6 +100,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} ${satoshi.variable} antialiased`}>
+        <SkipToContent />
         <TanStackProvider>
           <ThemeProvider
             attribute="class"

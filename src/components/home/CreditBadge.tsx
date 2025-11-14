@@ -2,8 +2,8 @@
 
 import { IconDiamondFilled } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
 import { useRouter } from "next/navigation"; // ✅ import router
+import { useState } from "react";
 
 interface CreditBadgeProps {
   credits: number;

@@ -8,14 +8,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
+import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
 
 import DialogBox from "./DialogBox";
 import ModelSelectorCard from "./ModalSelectorCard";
 import ParametersSection, { ParametersSectionHandle } from "./ParametersSection";
 import CommonModal from "../ui/CommonModal";
-import GenerateButton from "../ui/GenerateButton";
-import GradualBlurMemo from "../ui/GradualBlur";
-import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +22,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dotted-dialog";
+import GenerateButton from "../ui/GenerateButton";
+import GradualBlurMemo from "../ui/GradualBlur";
 
 const validateAndSanitizePrompt = (prompt: string) => {
   const trimmed = prompt.trim();

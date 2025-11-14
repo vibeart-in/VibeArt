@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { motion, Variants } from "framer-motion";
 
 import { conversationImageObject, NodeParam } from "@/src/types/BaseType";
+
 import GroupImageLayout from "./GroupImagelayout";
 
 // Animation variants for the parameters section

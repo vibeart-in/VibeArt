@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
     ];
   },
   /* config options here */
+  // Performance optimizations
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+  // Optimize bundle size
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
   images: {
     remotePatterns: [
       {

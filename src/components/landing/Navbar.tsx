@@ -1,5 +1,6 @@
 "use client";
 import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import {
@@ -14,7 +15,6 @@ import {
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 export function NavbarLander() {
   const navItems = [

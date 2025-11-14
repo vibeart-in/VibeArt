@@ -18,7 +18,6 @@ import {
 } from "../ui/dotted-dialog";
 import PresetCard from "../ui/PresetCard";
 
-
 type Props = {
   forModel?: string;
   onSelectPrompt?: (prompt: string) => void;
