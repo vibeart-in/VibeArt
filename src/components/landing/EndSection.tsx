@@ -97,7 +97,7 @@ const EndSection = () => {
             >
               <Image src="/images/newlogo.png" alt="logo" width={90} height={90} />
               <p className="text-[120px] font-bold text-white">
-                Aura<span className="text-accent">.</span>ai
+                VibeArt<span className="text-accent">.</span>in
               </p>
             </Link>
           </p>

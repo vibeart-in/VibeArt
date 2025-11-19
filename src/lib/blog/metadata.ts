@@ -18,9 +18,21 @@ export function generateBlogListingMetadata(): Metadata {
   const url = `${SITE_URL}/blog`;
   const ogImage = `${SITE_URL}/blog-og-image.png`;
 
+  const keywords = [
+    "VibeArt Blog",
+    "AI Art",
+    "Generative AI",
+    "Digital Art",
+    "Creative Tools",
+    "AI Image Generation",
+    "Design Inspiration",
+    "Tutorials",
+  ];
+
   return {
     title,
     description,
+    keywords,
     alternates: {
       canonical: url,
     },
@@ -63,6 +75,7 @@ export function generateBlogPostMetadata(post: BlogPost): Metadata {
   return {
     title: `${post.title} | VibeArt Blog`,
     description: post.description,
+    keywords: post.tags,
     authors: [{ name: post.author.name }],
     alternates: {
       canonical: url,
@@ -199,6 +212,11 @@ export function generateBlogSchema() {
         "@type": "ImageObject",
         url: `${SITE_URL}/logo.png`,
       },
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/blog?search={search_term_string}`,
+      "query-input": "required name=search_term_string",
     },
   };
 }

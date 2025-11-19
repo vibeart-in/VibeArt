@@ -65,7 +65,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
       </div>
 
       {isVisible ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {posts.map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}

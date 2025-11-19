@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Clock, Calendar, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { BlogPost } from "@/src/types/blog";
 
@@ -14,6 +15,21 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ post, priority = false }: BlogCardProps) {
+  const router = useRouter();
+
+  const handleCategoryClick = (e: React.MouseEvent, category: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/blog/category/${category.toLowerCase().replace(/\s+/g, "-")}`);
+  };
+
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const tagSlug = tag.toLowerCase().replace(/\s+/g, "-");
+    router.push(`/blog/tag/${tagSlug}`);
+  };
+
   return (
     <motion.article
       className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card"
@@ -43,14 +59,13 @@ export function BlogCard({ post, priority = false }: BlogCardProps) {
 
           {/* Category Badge */}
           <div className="absolute left-4 top-4">
-            <Link
-              href={`/blog/category/${post.category.toLowerCase().replace(/\s+/g, "-")}`}
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={(e) => handleCategoryClick(e, post.category)}
               className="inline-block rounded-full bg-accent/50 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur-sm transition-colors hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               aria-label={`View all posts in ${post.category} category`}
             >
               {post.category}
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -70,19 +85,17 @@ export function BlogCard({ post, priority = false }: BlogCardProps) {
           {post.tags.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2" role="list" aria-label="Post tags">
               {post.tags.slice(0, 3).map((tag) => {
-                const tagSlug = tag.toLowerCase().replace(/\s+/g, "-");
                 return (
-                  <Link
+                  <button
                     key={tag}
-                    href={`/blog/tag/${tagSlug}`}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => handleTagClick(e, tag)}
                     className="inline-flex items-center gap-1 rounded-full border border-border bg-background/50 px-2 py-1 text-xs transition-colors hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     aria-label={`View all posts tagged with ${tag}`}
                     role="listitem"
                   >
                     <Tag className="size-3" aria-hidden="true" />
                     {tag}
-                  </Link>
+                  </button>
                 );
               })}
             </div>

@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import { BlogPost, Author } from "@/src/types/blog";
 
 import {
@@ -7,6 +9,7 @@ import {
   getSlugFromFilePath,
   validateFrontmatter,
   generateExcerpt,
+  parseFrontmatter,
 } from "./mdx";
 
 // Mock author data - in a real app, this would come from a database or config
@@ -65,22 +68,30 @@ export function getAllPosts(): BlogPost[] {
   for (const filePath of filePaths) {
     try {
       const slug = getSlugFromFilePath(filePath);
-      const { frontmatter, content } = parseMDXFile(filePath);
+      // Optimization: Only parse frontmatter for the list view
+      const frontmatter = parseFrontmatter(filePath);
 
       // Validate frontmatter
       if (!validateFrontmatter(frontmatter, slug)) {
         continue;
       }
 
-      const readingTime = calculateReadingTime(content);
-      const excerpt = generateExcerpt(content);
+      // Estimate reading time from file size to avoid reading full content
+      // Approx 6 chars per word (5 chars + 1 space)
+      // This is a rough estimate but sufficient for list view
+      const stats = fs.statSync(filePath);
+      const estimatedWords = stats.size / 6;
+      const readingTime = Math.ceil(estimatedWords / 200);
+
+      // Use description as excerpt for list view
+      const excerpt = frontmatter.description;
       const author = getAuthor(frontmatter.author);
 
       posts.push({
         slug,
         title: frontmatter.title,
         description: frontmatter.description,
-        content,
+        content: "", // Empty content for list view to save memory
         date: frontmatter.date,
         author,
         featuredImage: frontmatter.featuredImage,
@@ -101,9 +112,47 @@ export function getAllPosts(): BlogPost[] {
 /**
  * Get a single blog post by slug
  */
+/**
+ * Get a single blog post by slug
+ */
 export function getPostBySlug(slug: string): BlogPost | null {
-  const posts = getAllPosts();
-  return posts.find((post) => post.slug === slug) || null;
+  const filePaths = getMDXFilePaths();
+  const filePath = filePaths.find((path) => getSlugFromFilePath(path) === slug);
+
+  if (!filePath) {
+    return null;
+  }
+
+  try {
+    const { frontmatter, content } = parseMDXFile(filePath);
+
+    // Validate frontmatter
+    if (!validateFrontmatter(frontmatter, slug)) {
+      return null;
+    }
+
+    const readingTime = calculateReadingTime(content);
+    const excerpt = generateExcerpt(content);
+    const author = getAuthor(frontmatter.author);
+
+    return {
+      slug,
+      title: frontmatter.title,
+      description: frontmatter.description,
+      content,
+      date: frontmatter.date,
+      author,
+      featuredImage: frontmatter.featuredImage,
+      category: frontmatter.category,
+      tags: frontmatter.tags,
+      published: frontmatter.published ?? true,
+      readingTime,
+      excerpt,
+    };
+  } catch (error) {
+    console.error(`Error parsing blog post at ${filePath}:`, error);
+    return null;
+  }
 }
 
 /**

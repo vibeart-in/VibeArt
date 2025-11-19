@@ -22,6 +22,30 @@ export function parseMDXFile(filePath: string) {
 }
 
 /**
+ * Parse only the frontmatter of an MDX file
+ * This is much faster than parsing the whole file when content isn't needed
+ * It reads only the first 4KB which should be enough for frontmatter
+ */
+export function parseFrontmatter(filePath: string) {
+  // Read only the first 4KB to get frontmatter
+  // This avoids reading the entire file content into memory
+  const fd = fs.openSync(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(4096);
+    const bytesRead = fs.readSync(fd, buffer, 0, 4096, 0);
+    const content = buffer.toString("utf8", 0, bytesRead);
+    
+    // gray-matter will parse what we give it. 
+    // If the file was cut off, it might have issues if the frontmatter wasn't closed.
+    // But 4KB is very large for frontmatter.
+    const { data } = matter(content);
+    return data as BlogPostMetadata;
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+/**
  * Calculate reading time based on word count
  * Average reading speed: 200 words per minute
  */

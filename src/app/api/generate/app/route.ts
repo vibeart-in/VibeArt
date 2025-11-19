@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     // 1. Fetch AI App details (cost, webappId, base parameters)
     const { data: aiApp, error: aiAppError } = await supabase
       .from("ai_apps")
-      .select("id, webappId, cost, app_name")
+      .select("id, webappId, cost, app_name, instance_type")
       .eq("id", appId)
       .single();
 
@@ -49,45 +49,6 @@ export async function POST(req: NextRequest) {
         is_public: false,
       }),
     );
-
-    // // 2. Handle input images: Generate signed URLs for RunningHub and prepare image data for DB
-    // for (let i = 0; i < parametersForRunningHub.length; i++) {
-    //   const param = parametersForRunningHub[i];
-    //   if (
-    //     param.fieldName === "image" &&
-    //     typeof param.fieldValue === "string" &&
-    //     param.fieldValue.startsWith("uploaded-images/")
-    //   ) {
-    //     const permanentImagePath = param.fieldValue;
-    //     const [bucketName, ...filePathParts] = permanentImagePath.split("/");
-    //     const filePathInBucket = filePathParts.join("/");
-
-    //     // Prepare image data for the RPC function
-    //     inputImagesForDB.push({
-    //       image_url: permanentImagePath,
-    //       is_public: false,
-    //     });
-
-    //     // Generate a signed URL for the external AI service (RunningHub)
-    //     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    //       .from(bucketName)
-    //       .createSignedUrl(filePathInBucket, 3600);
-
-    //     if (signedUrlError || !signedUrlData) {
-    //       console.error("Error generating signed URL for input image:", signedUrlError);
-    //       return NextResponse.json(
-    //         { message: "Failed to generate signed URL for input image" },
-    //         { status: 500 },
-    //       );
-    //     }
-
-    //     // Replace the permanent path with the signed URL for RunningHub
-    //     parametersForRunningHub[i] = {
-    //       ...param,
-    //       fieldValue: signedUrlData.signedUrl,
-    //     };
-    //   }
-    // }
 
     // 3. Call the RPC function to handle all database operations in one go
     const { data: newJobId, error: rpcError } = await supabase.rpc(
@@ -145,7 +106,10 @@ export async function POST(req: NextRequest) {
       apiKey: RUNNING_HUB_API_KEY,
       webhookUrl,
       nodeInfoList: parametersForRunningHub,
+      instanceType: aiApp.instance_type,
     };
+
+    console.log("RH", runningHubBody);
 
     const rhRes = await fetch(RUNNING_HUB_API_ENDPOINT, {
       method: "POST",

@@ -12,9 +12,9 @@ const TermsAndConditionsPage = () => {
 
           <div className="space-y-8 text-lg leading-relaxed">
             <p>
-              Welcome to Aura.ai! These Terms and Conditions (&quot;Terms&quot;) govern your access
-              to and use of the Aura.ai website, platform, APIs, and any related services
-              (collectively, the &quot;Service&quot;), provided by <strong>Aura.ai</strong>{" "}
+              Welcome to VibeArt! These Terms and Conditions (&quot;Terms&quot;) govern your access
+              to and use of the VibeArt website, platform, APIs, and any related services
+              (collectively, the &quot;Service&quot;), provided by <strong>VibeArt</strong>{" "}
               (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
             </p>
             <p>
@@ -27,7 +27,7 @@ const TermsAndConditionsPage = () => {
               <h2 className="mb-3 text-2xl font-bold">1. Definitions</h2>
               <ul className="list-inside list-disc space-y-2">
                 <li>
-                  <strong>&quot;Service&quot;</strong> refers to the Aura.ai platform, which allows
+                  <strong>&quot;Service&quot;</strong> refers to the VibeArt platform, which allows
                   users to generate images, videos, and other media (&quot;Generated Content&quot;)
                   using artificial intelligence models.
                 </li>
@@ -215,7 +215,7 @@ const TermsAndConditionsPage = () => {
                 </li>
                 <li>
                   <strong>Limitation of Liability:</strong> To the fullest extent permitted by law,{" "}
-                  <strong>Aura.ai</strong> and its affiliates shall not be liable for any indirect,
+                  <strong>VibeArt</strong> and its affiliates shall not be liable for any indirect,
                   incidental, special, consequential, or punitive damages, or any loss of profits or
                   revenues, whether incurred directly or indirectly, or any loss of data, use,
                   goodwill, or other intangible losses, resulting from (a) your access to or use of

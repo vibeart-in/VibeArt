@@ -91,7 +91,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {/* Main Content */}
             <main id="main-content" className="min-w-0 max-w-4xl">
               {/* Table of Contents - Mobile */}
-              <TableOfContents content={post.content} />
+              {/* <TableOfContents content={post.content} /> */}
 
               {/* Post Content */}
               <BlogContent content={post.content} />
@@ -107,7 +107,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </section>
 
               {/* Related Posts */}
-              {/* <RelatedPosts posts={relatedPosts} /> */}
+              <RelatedPosts posts={relatedPosts} />
             </main>
 
             {/* Table of Contents - Desktop Sidebar */}
