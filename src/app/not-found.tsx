@@ -41,7 +41,7 @@ export default function NotFound() {
       />
       <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-wrap justify-center gap-3 px-4 sm:gap-4 md:bottom-8">
         <Button onClick={handleGoBack}>Go Back</Button>
-        <Link href={"/image/home"}>
+        <Link href={"/generate/home"}>
           <Button variant="secondary">Home</Button>
         </Link>
       </div>

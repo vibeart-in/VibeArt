@@ -26,32 +26,32 @@ export default function MainNavbar() {
   const navItems = [
     {
       name: "Home",
-      link: "/image/home",
+      link: "/generate/home",
       icon: <HomeIcon className="size-5" />,
     },
     {
       name: "Image",
-      link: "/image/generate",
+      link: "/generate/image",
       icon: <PhotoIcon className="size-5" />,
     },
     {
       name: "Video",
-      link: "/image/video",
+      link: "/generate/video",
       icon: <VideoCameraIcon className="size-5" />,
     },
     {
       name: "Edit",
-      link: "/image/edit",
+      link: "/generate/edit",
       icon: <PencilSquareIcon className="size-5" />,
     },
     {
       name: "Make",
-      link: "/image/advance_generate",
+      link: "/generate/advance_generate",
       icon: <FireIcon className="size-5" weight="fill" />,
     },
     {
       name: "AI Apps",
-      link: "/image/ai-apps",
+      link: "/generate/ai-apps",
       icon: <PuzzlePieceIcon className="size-5" />,
     },
   ];

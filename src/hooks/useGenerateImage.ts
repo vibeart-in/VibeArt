@@ -80,7 +80,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
     },
     onSettled: (data) => {
       if (!conversationId && data?.conversationId) {
-        router.push(`/image/${conversationType}/${data.conversationId}`);
+        router.push(`/generate/${conversationType}/${data.conversationId}`);
       } else {
         queryClient.invalidateQueries({ queryKey });
       }

@@ -55,7 +55,7 @@ const sampleImages = [
     height: 1080,
     title: "Upscale any image to 4K",
     subtext: "An AI-powered smart upscaler that transforms your images into stunning 4K quality",
-    link: "/image/ai-apps/2e10a43b-ed29-4bdd-a298-091779a04b15",
+    link: "/generate/ai-apps/2e10a43b-ed29-4bdd-a298-091779a04b15",
   },
   {
     src: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/ai_apps/Ai_girlfriend/AI-girlfriend-thumbnail2.mp4",
@@ -64,7 +64,7 @@ const sampleImages = [
     height: 1280,
     title: "AI Girlfriend",
     subtext: "Make your imaginary girlfriend do anything for you.",
-    link: "/image/ai-apps/2e10a43b-ed29-4bdd-a298-091779a04b15",
+    link: "/generate/ai-apps/2e10a43b-ed29-4bdd-a298-091779a04b15",
   },
   {
     src: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/ai_apps/Dance_transfer/Dance-tranfer-thumbnail2.mp4",
@@ -73,7 +73,7 @@ const sampleImages = [
     height: 1280,
     title: "WAN 2.2 Dance transfer",
     subtext: "Transfer any moment to any picture you want",
-    link: "/image/ai-apps/eda689e8-0683-4290-86c4-f973532305f1",
+    link: "/generate/ai-apps/eda689e8-0683-4290-86c4-f973532305f1",
   },
   {
     src: "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/516c8d4e-9fa0-46fa-a60a-a20826dadadf/transcode=true,original=true,quality=90/106778230.webm",
@@ -82,7 +82,7 @@ const sampleImages = [
     height: 705,
     title: "The Cheapest Sora 2 Generation - 50× More Affordable!",
     subtext: "We make Sora 2 generation accessible — 50× cheaper than the competition, starting",
-    link: "/image/video",
+    link: "/generate/video",
   },
 ];
 

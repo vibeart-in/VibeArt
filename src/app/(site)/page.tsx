@@ -1,8 +1,12 @@
-// Make sure this is a client component to use hooks and Framer Motion
 "use client";
 
+import type { User } from "@supabase/supabase-js";
 import { motion, Variants } from "motion/react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { createClient } from "@/src/lib/supabase/client";
 
 // --- STATICALLY IMPORT "ABOVE THE FOLD" COMPONENTS ---
 // The Hero is the first thing users see, so it should load instantly for the best LCP.
@@ -42,7 +46,7 @@ const EndSection = dynamic(() => import("../../components/landing/EndSection"), 
   loading: () => <SectionLoader />,
 });
 
-const Page = () => {
+const LandingPage = () => {
   // --- DEFINE ANIMATION VARIANTS ---
   // We can define the animation once and reuse it for every section.
   const sectionVariants: Variants = {
@@ -156,4 +160,54 @@ const Page = () => {
   );
 };
 
-export default Page;
+// Main component that handles authentication-based redirection
+export default function AuthRedirectWrapper() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    // Get initial session - same logic as navbar
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    // Listen for auth changes - same logic as navbar
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      // Redirect authenticated users to /image/home
+      router.push("/generate/home");
+    }
+    // If not authenticated, do nothing - they'll see the landing page
+  }, [user, loading, router]);
+
+  // Show loading state
+  if (loading) {
+    return <div className="flex min-h-screen w-full items-center justify-center">Loading...</div>;
+  }
+
+  // Show landing page only for non-authenticated users
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  // For authenticated users, show a brief loading message while redirecting
+  return <div className="flex min-h-screen w-full items-center justify-center">Redirecting...</div>;
+}

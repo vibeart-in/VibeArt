@@ -32,7 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     // Add other static routes here
     {
-      url: `${baseUrl}/image/home`,
+      url: `${baseUrl}/generate/home`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,

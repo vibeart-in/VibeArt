@@ -156,7 +156,7 @@ const GenerationHistory = () => {
   // Use a useCallback for the Link's href for minor optimization.
   const newConversationHref = useCallback(() => {
     if (!conversationType) return "/"; // Fallback URL
-    return conversationType === "ai-apps" ? "/image/ai-apps" : `/image/${conversationType}`;
+    return conversationType === "ai-apps" ? "/generate/ai-apps" : `/generate/${conversationType}`;
   }, [conversationType]);
 
   // Early returns for clarity
