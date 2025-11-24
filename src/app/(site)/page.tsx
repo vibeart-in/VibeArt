@@ -193,7 +193,7 @@ export default function AuthRedirectWrapper() {
   useEffect(() => {
     if (!loading && user) {
       // Redirect authenticated users to /image/home
-      router.push("/generate/home");
+      router.push("/home");
     }
     // If not authenticated, do nothing - they'll see the landing page
   }, [user, loading, router]);

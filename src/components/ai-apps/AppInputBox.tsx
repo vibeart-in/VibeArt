@@ -14,7 +14,7 @@ import { getIconForParam } from "@/src/utils/server/utils";
 import AppGridClient from "./AppGridClient";
 import { ImageObject } from "../inputBox/ReplicateParameters";
 import AnimatedCounter from "../ui/AnimatedCounter";
-import GenerateButton from "../ui/GenerateButton";
+import GenerateButton from "../uiButton";
 import GradualBlurMemo from "../ui/GradualBlur";
 import ImageUploadBox from "../ui/ImageUploadBox";
 import {

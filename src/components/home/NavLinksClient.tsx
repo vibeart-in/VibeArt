@@ -25,27 +25,27 @@ const NAV_ITEMS: NavItemT[] = [
   {
     name: "Image",
     icon: <PhotoIcon className="size-5" />,
-    link: "/generate/image",
+    link: "/image",
   },
   {
     name: "Edit",
     icon: <PencilSquareIcon className="size-5" />,
-    link: "/generate/edit",
+    link: "/edit",
   },
   {
     name: "Make",
     icon: <FireIcon className="size-5" weight="fill" />,
-    link: "/generate/advance_generate",
+    link: "/advance_generate",
   },
   {
     name: "Video",
     icon: <VideoCameraIcon className="size-5" />,
-    link: "/generate/video",
+    link: "/video",
   },
   {
     name: "AI Apps",
     icon: <PuzzlePieceIcon className="size-5" />,
-    link: "/generate/ai-apps",
+    link: "/ai-apps",
   },
 ];
 

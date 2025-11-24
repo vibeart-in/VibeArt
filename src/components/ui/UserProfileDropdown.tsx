@@ -24,7 +24,7 @@ const UserProfileDropdown = ({
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/generate/home");
+    router.push("/home");
   };
 
   const toggleDropdown = () => {
@@ -52,7 +52,7 @@ const UserProfileDropdown = ({
     },
     {
       label: "Gallery / Creations",
-      onClick: () => router.push("/generate/gallery"),
+      onClick: () => router.push("/gallery"),
       Icon: <ImageIcon weight="fill" className="size-4" />,
       isEmail: false,
     },

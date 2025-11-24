@@ -40,7 +40,7 @@ const AppCard = ({
       }}
       transition={{ type: "spring", stiffness: 250, damping: 22 }}
     >
-      <Link href={`/generate/ai-apps/${id}`}>
+      <Link href={`/ai-apps/${id}`}>
         {/* Media (Image or Video) */}
         <motion.div
           className="size-full"

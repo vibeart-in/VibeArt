@@ -17,10 +17,10 @@ const footerLinks = [
   {
     title: "Product",
     links: [
-      { name: "Create", href: "/generate/image" },
-      { name: "Edit", href: "/generate/edit" },
-      { name: "Upscale", href: "/generate/upscale" },
-      { name: "AI Apps", href: "/generate/apps" },
+      { name: "Create", href: "/image" },
+      { name: "Edit", href: "/edit" },
+      { name: "Upscale", href: "/upscale" },
+      { name: "AI Apps", href: "/apps" },
       { name: "Pricing", href: "/pricing" },
     ],
   },
@@ -70,7 +70,7 @@ const Footer = () => {
               The future of AI-powered creative tooling, built for professionals.
             </p>
             <motion.a
-              href="/generate/image"
+              href="/image"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}

@@ -1,4 +1,4 @@
-<a href="https://vibeart.in/generate/image">
+<a href="https://vibeart.in/image">
   <img alt="showcase image" src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/demos/p3.jpg">
   <h1 align="center">VibeArt - All in one image and video genraetion platform</h1>
 </a>
