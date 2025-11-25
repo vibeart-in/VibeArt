@@ -20,7 +20,7 @@ export function NavbarLander() {
   const navItems = [
     {
       name: "Create",
-      link: "/image",
+      link: "/generate",
     },
     {
       name: "Pricing",
@@ -85,7 +85,7 @@ export function NavbarLander() {
             </div>
           ) : user ? (
             <>
-              <NavbarButton href="/image" variant="primary">
+              <NavbarButton href="/generate" variant="primary">
                 Dashboard
               </NavbarButton>
               <div onClick={handleLogout}>
@@ -134,7 +134,7 @@ export function NavbarLander() {
             ) : user ? (
               <>
                 <NavbarButton
-                  href="/image"
+                  href="/generate"
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant="primary"
                   className="w-full"

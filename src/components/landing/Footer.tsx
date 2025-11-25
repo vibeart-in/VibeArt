@@ -17,7 +17,7 @@ const footerLinks = [
   {
     title: "Product",
     links: [
-      { name: "Create", href: "/image" },
+      { name: "Create", href: "/generate" },
       { name: "Edit", href: "/edit" },
       { name: "Upscale", href: "/upscale" },
       { name: "AI Apps", href: "/apps" },

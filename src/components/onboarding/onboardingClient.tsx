@@ -46,7 +46,7 @@ export default function OnboardingClient({ user }: OnboardingClientProps) {
         case "social-media-image":
         case "anime":
         case "fun": // fun can go to the general generate page
-          router.push("/image");
+          router.push("/generate");
           break;
 
         case "social-media-video":

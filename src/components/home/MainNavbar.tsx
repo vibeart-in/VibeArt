@@ -31,7 +31,7 @@ export default function MainNavbar() {
     },
     {
       name: "Image",
-      link: "/image",
+      link: "/generate",
       icon: <PhotoIcon className="size-5" />,
     },
     {

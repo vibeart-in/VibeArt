@@ -15,7 +15,7 @@ type GenerationParams = {
 };
 
 const generateImage = async (formData: GenerationParams) => {
-  const response = await fetch("/api", {
+  const response = await fetch("/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formData),

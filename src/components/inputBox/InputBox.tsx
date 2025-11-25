@@ -119,7 +119,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const paramsRef = useRef<ParametersSectionHandle>(null);
 
   const pathname = usePathname();
-  const conversationType = pathname.split("/")[2] as ConversationType;
+  const conversationType = pathname.split("/")[1] as ConversationType;
+  console.log("Conversation Type:", conversationType);
 
   const mutation = useGenerateImage(conversationType, conversationId);
   const { data: initialModel } = useModelsByUsecase(conversationType);

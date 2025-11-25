@@ -110,7 +110,7 @@ const GenerationHistory = () => {
    * OPTIMIZATION 3: Memoize derived path segment to prevent re-calculating on every render.
    */
   const conversationType = useMemo(() => {
-    const pathSegment = pathname.split("/")[2];
+    const pathSegment = pathname.split("/")[1];
     const validConversationTypes = Object.values(ConversationType);
     if (pathSegment && validConversationTypes.includes(pathSegment as ConversationType)) {
       return pathSegment as ConversationType;
