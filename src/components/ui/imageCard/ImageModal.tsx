@@ -324,7 +324,7 @@ export const MediaModal = ({
   }, [prompt, mediaUrl]);
 
   const handleEdit = useCallback(() => {
-    router.push(`/image/edit?imageUrl=${encodeURIComponent(mediaUrl)}`);
+    router.push(`/edit?imageUrl=${encodeURIComponent(mediaUrl)}`);
   }, [router, mediaUrl]);
 
   // If we shouldn't render the DOM (fast-return) do it now, avoiding all heavy JSX.
@@ -546,7 +546,7 @@ export const MediaModal = ({
                         };
                         const currentPath = window.location.pathname;
 
-                        if (currentPath.startsWith("/image/edit/")) {
+                        if (currentPath.startsWith("/edit/")) {
                           // If already on edit page, emit a custom event so the page can handle the file immediately
                           window.dispatchEvent(
                             new CustomEvent("app:image-edit", { detail: mediaData }),
@@ -556,9 +556,9 @@ export const MediaModal = ({
                           const encoded = encodeURIComponent(mediaUrl);
                           // Use router.push if you have next/router or next/navigation; fallback to location.href
                           if ((window as any).nextRouterPush) {
-                            (window as any).nextRouterPush(`/image/edit?image-url=${encoded}`);
+                            (window as any).nextRouterPush(`/edit?image-url=${encoded}`);
                           } else {
-                            window.location.href = `${window.location.origin}/image/edit?image-url=${encoded}`;
+                            window.location.href = `${window.location.origin}/edit?image-url=${encoded}`;
                           }
                         }
                       },

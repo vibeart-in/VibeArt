@@ -52,7 +52,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
   React.useEffect(() => {
     if (hovered) {
-      router.prefetch(`/image/${conversationType}/${id}`);
+      router.prefetch(`/${conversationType}/${id}`);
     }
   }, [hovered, router, conversationType, id]);
 
@@ -70,8 +70,8 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
       <Link
         href={
           conversationType === "ai-apps"
-            ? `/image/ai-apps/${appId}?convo=${id}`
-            : `/image/${conversationType}/${id}`
+            ? `/ai-apps/${appId}?convo=${id}`
+            : `/${conversationType}/${id}`
         }
         aria-label={title}
       >

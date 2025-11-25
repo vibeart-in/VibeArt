@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   }
 
   if (customerResult.alreadyExists) {
-    redirect("/image/generate");
+    redirect("/image");
   }
 
   const userResult = await getUser();

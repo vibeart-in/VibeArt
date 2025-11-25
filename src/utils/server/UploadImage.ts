@@ -12,7 +12,7 @@ interface UploadOptions {
 
 async function convertToJpeg(file: File, quality = 0.9): Promise<File> {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith("image/")) {
+    if (!file.type.startsWith("generate/")) {
       return reject(new Error("Not an image file"));
     }
 
@@ -76,7 +76,7 @@ export const uploadImage = async ({
   let contentType = file.type || "application/octet-stream";
 
   // ✅ Only convert images to JPEG
-  if (file.type.startsWith("image/")) {
+  if (file.type.startsWith("generate/")) {
     try {
       uploadFile = await convertToJpeg(file);
       contentType = "image/jpeg";

@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
   ) {
     // redirect authenticated users away from login/signup pages
     const url = request.nextUrl.clone();
-    url.pathname = "/image/generate";
+    url.pathname = "/image";
     return NextResponse.redirect(url);
   }
 

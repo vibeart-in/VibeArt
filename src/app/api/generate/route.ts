@@ -1,4 +1,4 @@
-// app/api/image/generate/route.ts
+// app/api/image/route.ts
 import { NextResponse, after } from "next/server";
 import Replicate from "replicate";
 

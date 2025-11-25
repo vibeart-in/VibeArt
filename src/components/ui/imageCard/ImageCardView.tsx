@@ -425,7 +425,7 @@ export const MediaCardView = ({
                   };
                   const currentPath = window.location.pathname;
 
-                  if (currentPath.startsWith("/image/edit/")) {
+                  if (currentPath.startsWith("/edit/")) {
                     // If already on edit page, emit a custom event so the page can handle the file immediately
                     window.dispatchEvent(new CustomEvent("app:image-edit", { detail: mediaData }));
                   } else {
@@ -433,9 +433,9 @@ export const MediaCardView = ({
                     const encoded = encodeURIComponent(mediaUrl);
                     // Use router.push if you have next/router or next/navigation; fallback to location.href
                     if ((window as any).nextRouterPush) {
-                      (window as any).nextRouterPush(`/image/edit?image-url=${encoded}`);
+                      (window as any).nextRouterPush(`/edit?image-url=${encoded}`);
                     } else {
-                      window.location.href = `${window.location.origin}/image/edit?image-url=${encoded}`;
+                      window.location.href = `${window.location.origin}/edit?image-url=${encoded}`;
                     }
                   }
                 },
@@ -444,14 +444,14 @@ export const MediaCardView = ({
                 label: "Upscale",
                 icon: IconWindowMaximize,
                 onClick: () => {
-                  window.location.href = `${window.origin}/image/edit?image-url=${encodeURIComponent(mediaUrl)}`;
+                  window.location.href = `${window.origin}/edit?image-url=${encodeURIComponent(mediaUrl)}`;
                 },
               },
               {
                 label: "Video",
                 icon: IconVideo,
                 onClick: () => {
-                  window.location.href = `${window.origin}/image/video?image-url=${encodeURIComponent(mediaUrl)}`;
+                  window.location.href = `${window.origin}/video?image-url=${encodeURIComponent(mediaUrl)}`;
                 },
               },
             ].map(({ label, icon: Icon, onClick }) => (

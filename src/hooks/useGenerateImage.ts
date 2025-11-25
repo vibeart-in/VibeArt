@@ -15,7 +15,7 @@ type GenerationParams = {
 };
 
 const generateImage = async (formData: GenerationParams) => {
-  const response = await fetch("/api/generate", {
+  const response = await fetch("/api", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formData),
@@ -80,7 +80,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
     },
     onSettled: (data) => {
       if (!conversationId && data?.conversationId) {
-        router.push(`/image/${conversationType}/${data.conversationId}`);
+        router.push(`/${conversationType}/${data.conversationId}`);
       } else {
         queryClient.invalidateQueries({ queryKey });
       }

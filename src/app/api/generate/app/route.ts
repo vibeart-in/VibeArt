@@ -1,4 +1,4 @@
-// app/api/generate/app/route.ts
+// app/api/app/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 

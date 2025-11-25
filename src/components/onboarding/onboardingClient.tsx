@@ -46,31 +46,31 @@ export default function OnboardingClient({ user }: OnboardingClientProps) {
         case "social-media-image":
         case "anime":
         case "fun": // fun can go to the general generate page
-          router.push("/image/generate");
+          router.push("/image");
           break;
 
         case "social-media-video":
-          router.push("/image/video");
+          router.push("/video");
           break;
 
         case "ads":
-          router.push("/image/edit");
+          router.push("/edit");
           break;
 
         case "ai-apps":
-          router.push("/image/ai-apps");
+          router.push("/ai-apps");
           break;
 
         case "community":
-          router.push("/image/advance_generate");
+          router.push("/advance_generate");
           break;
 
         default:
-          router.push("/image/generate");
+          router.push("");
       }
     } catch (error) {
       console.error("Error handling selection:", error);
-      router.push("/image/generate");
+      router.push("");
     } finally {
       setIsLoading(false);
     }

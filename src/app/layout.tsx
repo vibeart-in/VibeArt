@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "VibeArt",
     description: "The All-in-one AI-powered Platform for modern creators.",
     images: [new URL("/opengraph-image.png", defaultUrl).toString()],
-    url: `${defaultUrl}/image/home`,
+    url: `${defaultUrl}/home`,
     siteName: "VibeArt",
     locale: "en_US",
     type: "website",

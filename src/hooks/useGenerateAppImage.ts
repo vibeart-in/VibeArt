@@ -44,7 +44,7 @@ async function generateAppImage(
 
   console.log("Sending API Payload:", apiPayload);
 
-  const response = await fetch("/api/generate/app", {
+  const response = await fetch("/api/app", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(apiPayload),
