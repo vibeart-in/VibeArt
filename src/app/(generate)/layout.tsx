@@ -20,7 +20,10 @@ export default function ImageLayout({
   return (
     <main className="relative flex size-full flex-row">
       <MainNavbar />
+      <div className="hidden sm:block">
+
       <GenerationHistory />
+      </div>
       <section className="size-full">{children}</section>
     </main>
   );

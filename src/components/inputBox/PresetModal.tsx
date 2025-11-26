@@ -119,7 +119,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
         </div>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-3xl rounded-[30px]">
+      <DialogContent className="w-full h-[90vh] max-w-3xl rounded-[30px]">
         <DialogHeader>
           <DialogTitle>Presets</DialogTitle>
           <DialogDescription>
@@ -147,7 +147,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
           )}
 
           {!isLoading && presets.length > 0 && (
-            <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
               {presets.map((p) => (
                 <PresetCard key={p.id} preset={p} onSelect={handleSelect} />
               ))}

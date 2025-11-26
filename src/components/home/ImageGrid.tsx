@@ -23,17 +23,18 @@ const ImageGallery = ({
 
   const breakpointColumnsObj = {
     default: columnCount,
-    1500: 3,
-    1100: 3,
-    700: 2,
+    1280: Math.min(columnCount, 3),
+    1024: Math.min(columnCount, 2),
+    640: 2,
   };
 
-  console.log("IMAGES IN GALLERY", images);
 
   return (
     <div className="relative flex flex-col items-center overflow-hidden">
       {/* Masonry Grid */}
-      <div className="relative w-full overflow-hidden pb-[150px]">
+      <div
+        className={`relative w-full overflow-hidden ${showMore ? "pb-[150px]" : "pb-8"}`}
+      >
         <Masonry
           breakpointCols={breakpointColumnsObj}
           className="my-masonry-grid"

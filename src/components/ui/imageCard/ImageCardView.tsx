@@ -312,7 +312,7 @@ export const MediaCardView = ({
       role="button"
       tabIndex={0}
       // note: added min-h fallback so card doesn't collapse while waiting for ratio
-      className="relative min-h-[180px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
+      className="relative min-h-[200px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
       variants={parentVariants}
       initial="rest"
       animate="rest"
@@ -327,7 +327,7 @@ export const MediaCardView = ({
       aria-label={altText}
     >
       <div className="relative size-full overflow-hidden bg-black/50">
-        <div className="-z-10 min-w-[500px]" style={{ opacity: isPlaceholderVisible ? 1 : 0 }}>
+        <div className="-z-10 sm:size-full lg:min-w-[500px]" style={{ opacity: isPlaceholderVisible ? 1 : 0 }}>
           <ImagePlaceholder
             key={`placeholder-${cardContainerId}`}
             mediaUrl={mediaUrl}
@@ -404,7 +404,7 @@ export const MediaCardView = ({
       <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/10" />
 
       <motion.div
-        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4"
+        className="hidden md:block absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4"
         variants={overlayVariants}
         initial="rest"
         whileHover="hover"

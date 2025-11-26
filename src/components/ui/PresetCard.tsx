@@ -26,7 +26,7 @@ const PresetCard = ({ preset, onSelect }: PresetCardProps) => {
 
   return (
     <motion.div
-      className="relative h-[200px] w-[150px] cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
+      className="relative aspect-[3/4] w-full cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
       initial="initial"
       whileHover="hover"
       variants={cardVariants}
