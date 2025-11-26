@@ -2,7 +2,7 @@
 import { FireIcon } from "@phosphor-icons/react";
 import { motion, Variants } from "motion/react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { PresetData } from "@/src/types/BaseType";
 
@@ -23,6 +23,23 @@ type PresetCardProps = {
 
 const PresetCard = ({ preset, onSelect }: PresetCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check if device is mobile on component mount and on resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical breakpoint for mobile
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
+
+  const shouldShowButton = isMobile || isHovered;
 
   return (
     <motion.div
@@ -59,36 +76,25 @@ const PresetCard = ({ preset, onSelect }: PresetCardProps) => {
       {/* Overlay */}
       <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-0 transition-all hover:backdrop-blur-0">
         <div className="relative flex size-full flex-col items-center justify-end gap-2 px-3 py-2">
-          <motion.p
-            className="text-center font-bold leading-8 text-accent"
-            // style={{
-            //   fontSize: preset.name.length > 20 ? "16px" : "16px",
-            //   textShadow: `
-            //     -1px -1px 0 #000,
-            //     1px -1px 0 #000,
-            //     -1px  1px 0 #000,
-            //     1px  1px 0 #000
-            //   `,
-            //   willChange: "transform, opacity",
-            // }}
-          >
-            {preset.name}
-          </motion.p>
+          <motion.p className="text-center font-bold leading-8 text-accent">{preset.name}</motion.p>
 
           {/* Description & Buttons container */}
           <div className="relative flex h-[48px] w-full items-center justify-center">
             <motion.div
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 8 }}
+              animate={{
+                opacity: shouldShowButton ? 1 : 0,
+                y: shouldShowButton ? 0 : 8,
+              }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="absolute flex gap-2"
               style={{
-                pointerEvents: isHovered ? "auto" : "none",
+                pointerEvents: shouldShowButton ? "auto" : "none",
                 willChange: "opacity, transform",
               }}
             >
               <button
                 onClick={() => onSelect(preset)}
-                className="rounded-xl border border-accent bg-[linear-gradient(90deg,rgba(217,232,37,0.5)_0%,rgba(227,210,186,0.5)_100%)] px-6 py-1 font-satoshi text-sm font-semibold text-accent shadow-sm transition-transform hover:scale-105"
+                className="rounded-xl border border-accent bg-[linear-gradient(90deg,rgba(217,232,37,0.5)_0%,rgba(227,210,186,0.5)_100%)] px-6 py-1 font-satoshi text-sm font-semibold text-accent shadow-sm transition-transform hover:scale-105 active:scale-95"
               >
                 Use
               </button>

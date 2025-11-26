@@ -138,19 +138,19 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
       </DialogTrigger>
 
       <DialogContent className="h-[90vh] w-full max-w-3xl rounded-[30px]">
-        <DialogHeader>
-          <DialogTitle>Prompts</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="px-4 sm:px-6">
+          <DialogTitle className="text-lg sm:text-xl">Prompts</DialogTitle>
+          {/* <DialogDescription className="text-xs sm:text-sm md:text-base">
             Prompts are ready-made prompt templates designed to help you create stylish, trendy, and
             creative visuals instantly. Pick a preset to use its prompt — you can edit it after
             selection if you want.
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
 
-        {/* Improved Tags Filter for Small Screens */}
+        {/* Improved Responsive Tags Filter */}
         {allTags.length > 1 && (
-          <div className="px-4">
-            <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 flex gap-1 overflow-x-auto pb-2">
+          <div className="px-3 sm:px-4">
+            <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 flex flex-wrap gap-1.5 overflow-x-auto pb-2">
               {allTags.map((tag) => (
                 <button
                   key={tag}
@@ -161,14 +161,14 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
                       : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
                   }`}
                 >
-                  {tag === "all" ? "All Prompts" : `#${tag}`}
+                  {tag === "all" ? "All" : `#${tag}`}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        <div className="size-full overflow-y-auto p-4">
+        <div className="size-full overflow-y-auto p-3 sm:p-4">
           {isLoading && (
             <div className="py-8 text-center text-sm text-white/70">Loading Prompts</div>
           )}
@@ -188,7 +188,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
           )}
 
           {!isLoading && filteredPresets.length > 0 && (
-            <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredPresets.map((p) => (
                 <PresetCard key={p.id} preset={p} onSelect={handleSelect} />
               ))}
