@@ -28,13 +28,10 @@ const ImageGallery = ({
     640: 2,
   };
 
-
   return (
     <div className="relative flex flex-col items-center overflow-hidden">
       {/* Masonry Grid */}
-      <div
-        className={`relative w-full overflow-hidden ${showMore ? "pb-[150px]" : "pb-8"}`}
-      >
+      <div className={`relative w-full overflow-hidden ${showMore ? "pb-[150px]" : "pb-8"}`}>
         <Masonry
           breakpointCols={breakpointColumnsObj}
           className="my-masonry-grid"

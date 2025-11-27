@@ -29,7 +29,7 @@ const ModelSelectorCard = React.memo(({ selectedModel, onClick }: ModelSelectorC
   return (
     <div
       onClick={onClick}
-      className="group relative z-20 h-[150px] md:h-[95px] w-full md:w-[120px] flex-shrink-0 cursor-pointer overflow-hidden rounded-3xl transition-transform hover:scale-105 active:scale-100"
+      className="group relative z-20 h-[150px] w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-3xl transition-transform hover:scale-105 active:scale-100 md:h-[95px] md:w-[120px]"
     >
       <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
 

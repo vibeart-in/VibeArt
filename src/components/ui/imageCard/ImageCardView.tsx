@@ -327,7 +327,10 @@ export const MediaCardView = ({
       aria-label={altText}
     >
       <div className="relative size-full overflow-hidden bg-black/50">
-        <div className="-z-10 sm:size-full lg:min-w-[500px]" style={{ opacity: isPlaceholderVisible ? 1 : 0 }}>
+        <div
+          className="-z-10 sm:size-full lg:min-w-[500px]"
+          style={{ opacity: isPlaceholderVisible ? 1 : 0 }}
+        >
           <ImagePlaceholder
             key={`placeholder-${cardContainerId}`}
             mediaUrl={mediaUrl}
@@ -404,7 +407,7 @@ export const MediaCardView = ({
       <div className="pointer-events-none absolute inset-0 rounded-[28px] border-2 border-white/10" />
 
       <motion.div
-        className="hidden md:block absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4"
+        className="absolute bottom-0 left-0 hidden w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4 md:block"
         variants={overlayVariants}
         initial="rest"
         whileHover="hover"

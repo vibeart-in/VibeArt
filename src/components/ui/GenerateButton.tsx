@@ -19,7 +19,7 @@ const GenerateButton = React.memo(
         whileHover={{ scale: 1.05, boxShadow: "0px 0px 12px rgba(0,0,0,0.2)" }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="z-20 lg:min-h-[100px] flex max-h-40 flex-col items-center justify-center rounded-3xl border-2 border-black bg-accent px-4 py-2 text-sm font-bold text-black disabled:cursor-not-allowed disabled:bg-gray-500 md:px-12 md:text-base"
+        className="z-20 flex max-h-40 flex-col items-center justify-center rounded-3xl border-2 border-black bg-accent px-4 py-2 text-sm font-bold text-black disabled:cursor-not-allowed disabled:bg-gray-500 md:px-12 md:text-base lg:min-h-[100px]"
       >
         <motion.span
           className="flex items-center gap-1"
@@ -38,7 +38,7 @@ const GenerateButton = React.memo(
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             >
-              <SpinnerBallIcon size={24} weight="duotone" className="md:h-8 md:w-8" />
+              <SpinnerBallIcon size={24} weight="duotone" className="md:size-8" />
             </motion.div>
           ) : (
             <motion.div
@@ -53,7 +53,7 @@ const GenerateButton = React.memo(
         </motion.span>
         {cost && (
           <span className="text-xs font-medium">
-            <span >({cost} Credits)</span>
+            <span>({cost} Credits)</span>
           </span>
         )}
       </motion.button>

@@ -80,7 +80,7 @@ const UserProfileDropdown = ({
             animate={{ y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ y: -5, scale: 0.95, opacity: 0, filter: "blur(10px)" }}
             transition={{ duration: 0.6, ease: "circInOut", type: "spring" }}
-            className="absolute md:right-1 z-10 mt-2 flex w-56 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a0a]/95 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl"
+            className="absolute z-10 mt-2 flex w-56 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a0a]/95 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl md:right-1"
           >
             {options && options.length > 0 ? (
               <div className="p-1.5">

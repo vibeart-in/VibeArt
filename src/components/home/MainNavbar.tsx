@@ -8,16 +8,14 @@ import {
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { cn } from "@/src/lib/utils";
+import { useState } from "react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
-
 import {
   Navbar,
   NavBody,
@@ -28,9 +26,10 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/src/components/ui/resizable-navbar";
+import { cn } from "@/src/lib/utils";
 
-import { UserSectionClient } from "./UserSectionClient";
 import GenerationHistory from "./GenerationHistory";
+import { UserSectionClient } from "./UserSectionClient";
 
 export default function MainNavbar() {
   const navItems = [

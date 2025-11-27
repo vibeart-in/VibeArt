@@ -13,7 +13,7 @@ export default function Page() {
       <img
         alt="bg"
         src="https://i.pinimg.com/736x/d8/d5/2d/d8d52df12700539c54ee365507d3233d.jpg"
-        className="absolute inset-0 h-full w-full object-cover md:hidden"
+        className="absolute inset-0 size-full object-cover md:hidden"
       />
       <SignUpForm />
     </div>

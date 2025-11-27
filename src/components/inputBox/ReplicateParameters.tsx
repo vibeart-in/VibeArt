@@ -480,7 +480,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     const isDisabled = !canEnhanceOrGetRandom || isSpinning;
 
     return (
-      <div className="flex w-full flex-col gap-8 md:gap-3 md:flex-row">
+      <div className="flex w-full flex-col gap-8 md:flex-row md:gap-3">
         <div className="flex flex-col gap-4">
           <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
 

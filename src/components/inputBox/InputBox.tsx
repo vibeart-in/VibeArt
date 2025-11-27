@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
+import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
 

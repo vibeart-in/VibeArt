@@ -1,6 +1,6 @@
-import HeroText from "@/src/components/home/HeroText";
 import BackgroundImage from "@/src/components/home/BackgroundImage";
 import ExampleGenerations from "@/src/components/home/ExampleGenerations";
+import HeroText from "@/src/components/home/HeroText";
 import InputBox from "@/src/components/inputBox/InputBox";
 import { ConversationType } from "@/src/types/BaseType";
 

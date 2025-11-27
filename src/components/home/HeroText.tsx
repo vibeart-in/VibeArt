@@ -27,12 +27,12 @@ export default function HeroText() {
         >
           <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-lg" />
           <IconSparkles
-            className="relative h-10 w-10 text-yellow-300 md:h-12 md:w-12"
+            className="relative size-10 text-yellow-300 md:size-12"
             aria-hidden="true"
           />
         </motion.div>
 
-        <h1 className="bg-gradient-to-b from-white via-white/90 to-white/70 bg-clip-text font-satoshi text-4xl font-black leading-[1.1] tracking-tight text-transparent sm:text-5xl md:text-7xl p-4">
+        <h1 className="bg-gradient-to-b from-white via-white/90 to-white/70 bg-clip-text p-4 font-satoshi text-4xl font-black leading-[1.1] tracking-tight text-transparent sm:text-5xl md:text-7xl">
           Imagine it. Make it. Share it.
         </h1>
       </motion.div>

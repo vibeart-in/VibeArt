@@ -13,7 +13,7 @@ export default function Page() {
       <img
         alt="bg"
         src="https://i.pinimg.com/1200x/83/83/38/838338aad36177e2645afce271db7d1f.jpg"
-        className="absolute inset-0 h-full w-full object-cover md:hidden"
+        className="absolute inset-0 size-full object-cover md:hidden"
       />
       <LoginForm />
     </div>

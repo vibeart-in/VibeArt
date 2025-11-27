@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { generateUUID } from "../lib/utils";
 
+import { generateUUID } from "../lib/utils";
 import { conversationData, ConversationType, InputBoxParameter } from "../types/BaseType";
 
 type GenerationParams = {

@@ -34,8 +34,8 @@ export function parseFrontmatter(filePath: string) {
     const buffer = Buffer.alloc(4096);
     const bytesRead = fs.readSync(fd, buffer, 0, 4096, 0);
     const content = buffer.toString("utf8", 0, bytesRead);
-    
-    // gray-matter will parse what we give it. 
+
+    // gray-matter will parse what we give it.
     // If the file was cut off, it might have issues if the frontmatter wasn't closed.
     // But 4KB is very large for frontmatter.
     const { data } = matter(content);

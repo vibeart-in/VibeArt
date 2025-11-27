@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/src/lib/supabase/client";
 import { Loader2, Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { useState } from "react";
+
+import { createClient } from "@/src/lib/supabase/client";
 
 export default function UploadPresetsPage() {
   const [name, setName] = useState("");
@@ -41,22 +42,24 @@ export default function UploadPresetsPage() {
       if (uploadError) throw uploadError;
 
       // 2. Get Public URL
-      const { data: publicUrlData } = supabase.storage
-        .from("images")
-        .getPublicUrl(filePath);
+      const { data: publicUrlData } = supabase.storage.from("images").getPublicUrl(filePath);
 
       const publicUrl = publicUrlData.publicUrl;
 
       // 3. Insert into Presets Table
-      const { error: insertError } = await supabase
-        .from("presets")
-        .insert({
-          name,
-          prompt,
-          cover: publicUrl,
-          tags: tags.split(",").map((t) => t.trim()).filter((t) => t),
-          for_model: forModel.split(",").map((t) => t.trim()).filter((t) => t),
-        });
+      const { error: insertError } = await supabase.from("presets").insert({
+        name,
+        prompt,
+        cover: publicUrl,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
+        for_model: forModel
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
+      });
 
       if (insertError) throw insertError;
 
@@ -76,15 +79,17 @@ export default function UploadPresetsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 flex justify-center">
+    <div className="flex min-h-screen justify-center bg-black p-8 text-white">
       <div className="w-full max-w-2xl space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Add New Preset</h1>
           <p className="text-gray-400">Upload a new preset configuration for the community.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/50 p-6 rounded-2xl border border-white/10">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 rounded-2xl border border-white/10 bg-zinc-900/50 p-6"
+        >
           {/* Name */}
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium text-gray-300">
@@ -96,7 +101,7 @@ export default function UploadPresetsPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="e.g., Cinematic Portrait"
             />
           </div>
@@ -112,7 +117,7 @@ export default function UploadPresetsPage() {
               onChange={(e) => setPrompt(e.target.value)}
               required
               rows={4}
-              className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none"
+              className="w-full resize-none rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Enter the prompt for this preset..."
             />
           </div>
@@ -120,26 +125,28 @@ export default function UploadPresetsPage() {
           {/* Cover Image */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Cover Image</label>
-            <div className="relative group">
+            <div className="group relative">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
                 required
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                className="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
               />
-              <div className={`w-full rounded-lg border-2 border-dashed px-4 py-8 flex flex-col items-center justify-center transition-all ${coverFile ? 'border-green-500/50 bg-green-500/5' : 'border-white/10 bg-black/50 group-hover:border-white/20'}`}>
+              <div
+                className={`flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 transition-all ${coverFile ? "border-green-500/50 bg-green-500/5" : "border-white/10 bg-black/50 group-hover:border-white/20"}`}
+              >
                 {coverFile ? (
                   <>
-                    <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-                    <p className="text-sm text-green-400 font-medium">{coverFile.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">Click to change</p>
+                    <CheckCircle className="mb-2 size-8 text-green-500" />
+                    <p className="text-sm font-medium text-green-400">{coverFile.name}</p>
+                    <p className="mt-1 text-xs text-gray-500">Click to change</p>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-300 font-medium">Click to upload cover</p>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                    <Upload className="mb-2 size-8 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-300">Click to upload cover</p>
+                    <p className="mt-1 text-xs text-gray-500">PNG, JPG up to 5MB</p>
                   </>
                 )}
               </div>
@@ -156,7 +163,7 @@ export default function UploadPresetsPage() {
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="portrait, cinematic, dark"
             />
           </div>
@@ -171,15 +178,17 @@ export default function UploadPresetsPage() {
               type="text"
               value={forModel}
               onChange={(e) => setForModel(e.target.value)}
-              className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="sdxl, flux"
             />
           </div>
 
           {/* Message */}
           {message && (
-            <div className={`p-4 rounded-lg flex items-center gap-3 ${message.type === 'success' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-              {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+            <div
+              className={`flex items-center gap-3 rounded-lg p-4 ${message.type === "success" ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}
+            >
+              {message.type === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
               <p className="text-sm font-medium">{message.text}</p>
             </div>
           )}
@@ -188,7 +197,7 @@ export default function UploadPresetsPage() {
           <button
             type="submit"
             disabled={isUploading}
-            className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-white py-3 font-bold text-black transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isUploading ? (
               <>
@@ -199,7 +208,6 @@ export default function UploadPresetsPage() {
               "Create Preset"
             )}
           </button>
-
         </form>
       </div>
     </div>
