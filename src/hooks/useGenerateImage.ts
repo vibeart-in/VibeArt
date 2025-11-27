@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { generateUUID } from "../lib/utils";
 
 import { conversationData, ConversationType, InputBoxParameter } from "../types/BaseType";
 
@@ -54,7 +55,7 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
       }
 
       const optimisticMessage: conversationData = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         userPrompt,
         job_status: "pending",
         input_images: [],

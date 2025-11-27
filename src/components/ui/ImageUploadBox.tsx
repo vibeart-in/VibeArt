@@ -213,7 +213,7 @@ const ImageUploadBox = ({
     }
     if (image) {
       return (
-        <div className="group relative size-full">
+        <div className="relative size-full">
           <img
             src={image.displayUrl}
             alt="Uploaded preview"
@@ -223,7 +223,7 @@ const ImageUploadBox = ({
           />
           <button
             onClick={handleRemove}
-            className="absolute right-2 top-2 rounded-full bg-black bg-opacity-50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+            className="absolute right-2 top-2 rounded-full bg-black bg-opacity-50 p-1 text-white transition-opacity"
             aria-label="Remove image"
           >
             <XIcon size={16} />
@@ -245,7 +245,7 @@ const ImageUploadBox = ({
       onClick={() => {
         if (!isUploading && !image) inputRef.current?.click();
       }}
-      className={`relative flex size-[100px] items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 ${!image && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
+      className={`relative flex aspect-square size-full items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 md:size-[100px] ${!image && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
     >
       <input
         ref={inputRef}

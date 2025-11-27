@@ -5,6 +5,7 @@ import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
 import React, { useState } from "react";
 
+import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { ModelData } from "@/src/types/BaseType";
 
 const cardVariants: Variants = {
@@ -43,12 +44,13 @@ function getCostColor(cost?: number) {
 
 const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const timeColor = getTimeColor(model.estimated_time);
   const costColor = getCostColor(model.cost);
 
   return (
     <motion.div
-      className="relative size-[210px] cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
+      className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-3xl border border-white/30 bg-black/20 shadow-md transition-all hover:shadow-lg"
       initial="initial"
       whileHover="hover"
       variants={cardVariants}
@@ -77,9 +79,9 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
       </motion.div>
 
       {model.is_popular && (
-        <div className="absolute right-2 top-2 z-20 flex items-center rounded-lg bg-rose-500/80 px-2 py-1 text-xs font-bold text-black shadow-md backdrop-blur-sm">
+        <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-lg bg-rose-500/80 px-2 py-1 text-xs font-bold text-black shadow-md backdrop-blur-sm">
           <FireIcon size={14} />
-          Popular
+          <span className="hidden sm:inline">Popular</span>
         </div>
       )}
 
@@ -87,9 +89,9 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
       <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-0 transition-all hover:backdrop-blur-0">
         <div className="relative flex size-full flex-col items-center justify-center gap-2 px-3 py-2">
           <motion.p
-            className="text-center font-satoshi font-bold leading-8 text-accent"
+            className="text-center font-satoshi font-bold leading-tight text-accent"
             // style={{
-            //   fontSize: model.model_name.length > 20 ? "20px" : "22px",
+            //   fontSize: "clamp(1rem, 5vw, 1.375rem)", // Responsive font size
             //   textShadow: `
             //     -1px -1px 0 #000,
             //     1px -1px 0 #000,
@@ -104,22 +106,15 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
 
           {/* Description & Buttons container */}
           <div className="relative flex h-[48px] w-full items-center justify-center">
-            {/* <motion.p
-              animate={{ opacity: isHovered ? 0 : 1, y: isHovered ? -8 : 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="absolute px-2 text-center text-sm text-white/90"
-              style={{ willChange: "opacity, transform" }}
-            >
-              {model?.description
-                ? `${model.description.substring(0, 40)}${model.description.length > 60 ? "..." : ""}`
-                : "No description"}
-            </motion.p> */}
             <motion.div
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 8 }}
+              animate={{
+                opacity: isMobile || isHovered ? 1 : 0,
+                y: isMobile || isHovered ? 0 : 8,
+              }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="absolute flex gap-2"
               style={{
-                pointerEvents: isHovered ? "auto" : "none",
+                pointerEvents: isMobile || isHovered ? "auto" : "none",
                 willChange: "opacity, transform",
               }}
             >
@@ -140,15 +135,15 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
         </div>
 
         {/* Bottom tags */}
-        <div className="absolute bottom-3 left-3 z-10 flex gap-2">
+        <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1.5">
           <div
-            className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs ${timeColor.bg} ${timeColor.border}`}
+            className={`inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-[10px] sm:text-xs ${timeColor.bg} ${timeColor.border}`}
           >
             <ClockIcon className={`size-3 ${timeColor.text}`} />
             <span className={`${timeColor.text} select-none`}>{model.estimated_time} s</span>
           </div>
           <div
-            className={`inline-flex items-center gap-1 rounded-lg bg-[rgba(6,6,6,0.65)] px-2 py-1 text-xs ${costColor.border}`}
+            className={`inline-flex items-center gap-1 rounded-lg bg-[rgba(6,6,6,0.65)] px-1.5 py-0.5 text-[10px] sm:text-xs ${costColor.border}`}
           >
             <IconDiamondFilled className={`size-3 ${costColor.text}`} />
             <span className={`${costColor.text} select-none`}>{model.cost} credit</span>

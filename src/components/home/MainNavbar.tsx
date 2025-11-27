@@ -7,7 +7,16 @@ import {
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/src/lib/utils";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
 
 import {
   Navbar,
@@ -21,6 +30,7 @@ import {
 } from "@/src/components/ui/resizable-navbar";
 
 import { UserSectionClient } from "./UserSectionClient";
+import GenerationHistory from "./GenerationHistory";
 
 export default function MainNavbar() {
   const navItems = [
@@ -57,6 +67,12 @@ export default function MainNavbar() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  function isActiveRoute(pathname: string, link: string) {
+    if (link === "/home") return pathname === "/" || pathname === "/home";
+    return pathname.startsWith(link);
+  }
 
   return (
     <Navbar>
@@ -69,6 +85,18 @@ export default function MainNavbar() {
       <MobileNav>
         <MobileNavHeader>
           <NavbarLogo />
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-accent bg-accent/30 px-4 py-1.5 text-sm font-medium text-accent outline-none backdrop-blur-sm transition-all focus:bg-white/10 active:scale-95">
+              <span>History</span>
+              <ChevronDown className="size-4 text-white/50" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[200px] border-white/10 bg-[#0C0C0C] p-0"
+            >
+              <GenerationHistory isMobileDropdown />
+            </DropdownMenuContent>
+          </DropdownMenu>
           <MobileNavToggle
             isOpen={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -76,16 +104,26 @@ export default function MainNavbar() {
         </MobileNavHeader>
 
         <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
-          {navItems.map((item, idx) => (
-            <a
-              key={`mobile-link-${idx}`}
-              href={item.link}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="relative text-neutral-600 dark:text-neutral-300"
-            >
-              <span className="block">{item.name}</span>
-            </a>
-          ))}
+          <div className="grid w-full grid-cols-3 gap-2">
+            {navItems.map((item, idx) => {
+              const isHighlighted = isActiveRoute(pathname, item.link);
+              return (
+                <a
+                  key={`mobile-link-${idx}`}
+                  href={item.link}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center font-semibold text-neutral-600 transition-colors dark:text-neutral-300",
+                    isHighlighted &&
+                      "border-accent bg-accent/20 font-bold text-accent dark:text-accent",
+                  )}
+                >
+                  {item.icon}
+                  <span className="block text-xs">{item.name}</span>
+                </a>
+              );
+            })}
+          </div>
           <UserSectionClient />
         </MobileNavMenu>
       </MobileNav>

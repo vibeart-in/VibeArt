@@ -195,7 +195,7 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
           </motion.button>
         </div>
       </div>
-      <div className="mb-14 mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+      <div className="mb-14 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
         {filteredModels.length > 0 ? (
           filteredModels.map((model) => (
             <ModelCard key={model.id} model={model} onSelect={onSelectModel} />

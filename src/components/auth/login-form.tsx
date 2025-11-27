@@ -42,11 +42,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
   return (
     <div className="relative flex size-full items-center justify-center">
-      <GlassModal width={40} height={550} count={16} className="z-50" />
+      <GlassModal width={40} height={550} count={16} className="z-50 hidden md:flex" />
+      <GlassModal width="90vw" height={550} count={1} className="z-50 md:hidden" />
 
-      <div className="absolute z-50">
+      <div className="absolute inset-0 z-50 flex items-center justify-center">
         <div
-          className={cn("flex w-full max-w-sm flex-col items-center gap-6 text-center", className)}
+          className={cn(
+            "flex w-[80vw] max-w-sm flex-col items-center gap-6 text-center md:w-full",
+            className,
+          )}
           {...props}
         >
           <NavbarLogo />

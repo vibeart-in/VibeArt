@@ -480,8 +480,72 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     const isDisabled = !canEnhanceOrGetRandom || isSpinning;
 
     return (
-      <div className="flex gap-2">
-        <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
+      <div className="flex w-full flex-col gap-8 md:gap-3 md:flex-row">
+        <div className="flex flex-col gap-4">
+          <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
+
+          {/* Render all image inputs (one per image param) */}
+          <div className="flex gap-4 md:hidden">
+            {imageInputKeys.map((imgKey) => {
+              const imgParam = parameters[imgKey];
+              if (!imgParam) return null;
+
+              if (imgParam.type === "string") {
+                return (
+                  <ImageUploadBox
+                    key={imgKey}
+                    initialImage={singleImageObjects[imgKey] ?? null}
+                    onImageUploaded={(img) => handleSingleImageUploaded(imgKey, img)}
+                    onImageRemoved={() => handleSingleImageRemoved(imgKey)}
+                    imageDescription={`${imgParam.title}`}
+                  />
+                );
+              }
+
+              if (imgParam.type === "array") {
+                const imgs = multiImagesMap[imgKey] || [];
+                return (
+                  <div key={imgKey} className="grid w-full grid-cols-3 gap-4">
+                    {imgs.map((img, idx) => (
+                      <div
+                        key={img.permanentPath}
+                        className="relative aspect-square w-full rounded-3xl border border-white/30 bg-black p-1.5"
+                      >
+                        <img
+                          src={img.displayUrl}
+                          alt={`uploaded-${idx}`}
+                          width={80}
+                          height={80}
+                          className="size-full rounded-[20px] object-cover object-top"
+                        />
+                        <button
+                          onClick={() => removeMultiImage(imgKey, idx)}
+                          className="absolute right-2.5 top-2.5 rounded-full bg-black bg-opacity-50 p-1 text-white transition-opacity"
+                          aria-label="Remove image"
+                        >
+                          <XIcon size={16} />
+                        </button>
+                      </div>
+                    ))}
+
+                    {(multiImagesMap[imgKey]?.length || 0) < 5 && (
+                      <ImageUploadBox
+                        key={imgKey + "-adder"}
+                        onImageUploaded={(img) => addMultiImage(imgKey, img)}
+                        onImageRemoved={handleMultiImageRemoved}
+                        imageDescription={`${imgParam.title}`}
+                        resetOnSuccess={true}
+                      />
+                    )}
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+        </div>
+
         <div>
           <div>
             <AnimatePresence>
@@ -505,7 +569,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                     ref={textareaRef}
                     value={values["prompt"] ?? ""}
                     onChange={(e) => handlePromptChange(e.target.value)}
-                    className="hide-scrollbar prompt-textarea min-w-[420px] pl-12 pr-8"
+                    className="hide-scrollbar prompt-textarea min-h-24 w-full pl-12 pr-8 md:min-h-4 md:min-w-[420px]"
                     placeholder={
                       parameters["prompt"]?.description ??
                       "A cute magical flying cat, cinematic, 4k"
@@ -545,7 +609,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
         </div>
 
         {/* Render all image inputs (one per image param) */}
-        <div className="flex gap-4">
+        <div className="hidden gap-4 md:flex">
           {imageInputKeys.map((imgKey) => {
             const imgParam = parameters[imgKey];
             if (!imgParam) return null;

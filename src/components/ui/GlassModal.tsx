@@ -1,6 +1,6 @@
 interface GlassModalProps {
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
   count?: number;
   className?: string;
 }
@@ -30,7 +30,10 @@ const GlassModal: React.FC<GlassModalProps> = ({
       <li
         key={index}
         className={`${glassItemClasses} ${radiusClasses}`}
-        style={{ width: `${width}px`, height: `${height}px` }}
+        style={{
+          width: typeof width === "number" ? `${width}px` : width,
+          height: typeof height === "number" ? `${height}px` : height,
+        }}
       ></li>
     );
   });

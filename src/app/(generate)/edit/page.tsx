@@ -15,14 +15,15 @@ const Page = () => {
   };
 
   return (
-    <div className="relative flex h-screen w-full flex-col items-center overflow-y-scroll bg-black">
+    <div className="relative flex h-screen w-full flex-col items-center overflow-y-scroll bg-black px-4">
       <BackgroundPlus plusColor="#848484" />
       <BackgroundImage
         src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/background/edit_background2.webp"
         width={600}
         height={600}
+        className="mt-20 h-auto w-full max-w-[600px] [&>img]:h-auto [&>img]:w-full"
       />
-      <div className="z-10 my-8 mt-32 flex flex-col items-center justify-center">
+      <div className="z-10 my-8 mt-40 flex w-full flex-col items-center justify-center md:mt-32">
         <DragAndDropBox onUploadSuccess={handleUploadSuccess} />
       </div>
       {uploadedImageUrl && (

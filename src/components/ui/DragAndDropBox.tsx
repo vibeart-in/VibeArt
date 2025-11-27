@@ -170,7 +170,7 @@ export default function DragAndDropBox({
   return (
     <>
       {uploadedImageUrl ? (
-        <div className="relative h-[60vh] w-full">
+        <div className="relative h-[60vh] w-full max-w-[600px]">
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
@@ -182,7 +182,7 @@ export default function DragAndDropBox({
         </div>
       ) : (
         <motion.div
-          className="relative h-[420px] w-[400px] cursor-pointer"
+          className="relative aspect-[400/420] h-auto w-full max-w-[400px] cursor-pointer"
           onClick={handleClick}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}

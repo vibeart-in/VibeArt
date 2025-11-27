@@ -7,14 +7,18 @@ import {
 
 import ImageGallery from "./ImageGrid";
 
-const ExampleGenerations = ({ limit, showcaseFor }: useExampleGenerationsType) => {
+const ExampleGenerations = ({
+  limit,
+  showcaseFor,
+  className,
+}: useExampleGenerationsType & { className?: string }) => {
   const { data: images, error, isLoading } = useExampleGenerations({ limit, showcaseFor });
 
   if (isLoading) return <p className="text-center text-white">Loading examples...</p>;
   if (error) return <p className="text-center text-white">Failed to load images.</p>;
 
   return (
-    <div className="z-20 mt-20 px-4 pb-20 md:mt-32 md:px-8 lg:px-32">
+    <div className={`z-20 mt-20 px-4 pb-20 md:mt-32 md:px-8 lg:px-32 ${className}`}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex w-full gap-4 sm:items-center sm:justify-between">
           <h2 className="z-10 text-3xl font-bold text-white">Examples</h2>

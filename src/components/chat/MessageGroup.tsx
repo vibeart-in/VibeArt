@@ -11,7 +11,7 @@ interface MessageGroupProps {
 
 export default function MessageGroup({ message }: MessageGroupProps) {
   return (
-    <div className="ml-32">
+    <div className="md:ml-32">
       <MessageTurn message={message} isEdit={false} />
     </div>
   );

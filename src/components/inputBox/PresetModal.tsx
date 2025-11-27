@@ -82,7 +82,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
     >
       <DialogTrigger asChild>
         <div
-          className={`group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100 ${triggerClassName ?? ""}`}
+          className={`md: group relative z-20 h-[130px] w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100 md:h-[95px] md:w-[70px] ${triggerClassName ?? ""}`}
         >
           {/* <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div> */}
 
@@ -119,7 +119,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
         </div>
       </DialogTrigger>
 
-      <DialogContent className="w-full h-[90vh] max-w-3xl rounded-[30px]">
+      <DialogContent className="h-[90vh] w-full max-w-3xl rounded-[30px]">
         <DialogHeader>
           <DialogTitle>Presets</DialogTitle>
           <DialogDescription>

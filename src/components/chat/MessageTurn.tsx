@@ -55,11 +55,33 @@ export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(userPrompt || "");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(userPrompt || "");
+      } else {
+        // Fallback for older browsers or environments where navigator.clipboard is not available or restricted
+        const textarea = document.createElement("textarea");
+        textarea.value = userPrompt || "";
+        // Make the textarea invisible and off-screen
+        textarea.style.position = "fixed";
+        textarea.style.top = "0";
+        textarea.style.left = "0";
+        textarea.style.width = "1px";
+        textarea.style.height = "1px";
+        textarea.style.padding = "0";
+        textarea.style.border = "none";
+        textarea.style.outline = "none";
+        textarea.style.boxShadow = "none";
+        textarea.style.background = "transparent";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
-      console.error("Copy failed", err);
+      console.error("Failed to copy text:", err);
     }
   };
 

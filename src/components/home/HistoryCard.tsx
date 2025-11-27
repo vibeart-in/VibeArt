@@ -1,6 +1,5 @@
 import { IconGhostFilled } from "@tabler/icons-react";
 import { motion, AnimatePresence, Variants } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -15,6 +14,7 @@ interface HistoryCardProps {
   isActive?: boolean;
   conversationType: ConversationType;
   appId?: string;
+  disableHover?: boolean;
 }
 
 const parentVariants: Variants = {
@@ -35,9 +35,6 @@ const overlayVariants: Variants = {
   hover: { opacity: 0, transition: { duration: 0.25, ease: "easeOut" } },
 };
 
-// Helper to detect if the URL is a video file
-const isVideoUrl = (url: string) => /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
-
 const HistoryCard: React.FC<HistoryCardProps> = ({
   id,
   title,
@@ -46,15 +43,50 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   isActive = false,
   conversationType,
   appId,
+  disableHover = false,
 }) => {
   const [hovered, setHovered] = React.useState(false);
   const router = useRouter();
 
   React.useEffect(() => {
-    if (hovered) {
+    if (hovered && !disableHover) {
       router.prefetch(`/${conversationType}/${id}`);
     }
-  }, [hovered, router, conversationType, id]);
+  }, [hovered, router, conversationType, id, disableHover]);
+
+  const href =
+    conversationType === "ai-apps" ? `/ai-apps/${appId}?convo=${id}` : `/${conversationType}/${id}`;
+
+  if (disableHover) {
+    return (
+      <motion.div layout className="w-full">
+        <Link
+          href={href}
+          className={`group flex w-full items-center gap-3 rounded-xl p-2 transition-colors hover:bg-white/5 active:bg-white/10 ${
+            isActive ? "bg-white/5" : ""
+          }`}
+        >
+          <div
+            className={`relative size-10 shrink-0 overflow-hidden rounded-lg border bg-neutral-900 ${
+              isActive ? "border-accent ring-1 ring-accent" : "border-white/10"
+            }`}
+          >
+            {imageUrl ? (
+              <img src={imageUrl} alt={prompt} className="size-full object-cover" />
+            ) : (
+              <div className="flex size-full items-center justify-center bg-neutral-800">
+                <IconGhostFilled size={16} className="text-white/40" />
+              </div>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="truncate text-sm font-medium text-white/90">{title}</span>
+            <span className="truncate text-xs text-white/50">{prompt}</span>
+          </div>
+        </Link>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -67,14 +99,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
       variants={parentVariants}
       layout
     >
-      <Link
-        href={
-          conversationType === "ai-apps"
-            ? `/ai-apps/${appId}?convo=${id}`
-            : `/${conversationType}/${id}`
-        }
-        aria-label={title}
-      >
+      <Link href={href} aria-label={title}>
         <div
           className={`relative size-[55px] overflow-hidden rounded-2xl border-2 bg-[radial-gradient(120%_120%_at_30%_30%,_#1b1b1b,_#0e0e0e)] ring-1 ring-white/10 transition-colors duration-200 ${isActive ? "border-accent" : "border-transparent"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20`}
           tabIndex={0}

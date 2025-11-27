@@ -52,9 +52,14 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <div className="relative flex size-full items-center justify-center">
-      <GlassModal width={40} height={650} count={16} className="z-10" />
-      <div className="absolute z-20">
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <GlassModal width={40} height={650} count={16} className="z-10 hidden md:flex" />
+      <GlassModal width="90vw" height={550} count={1} className="z-10 md:hidden" />
+
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
+        <div
+          className={cn("flex w-[80vw] max-w-sm flex-col gap-6 md:w-full", className)}
+          {...props}
+        >
           <div className="flex w-full flex-col items-center justify-center gap-4">
             <NavbarLogo className="mb-2" />
             <div>

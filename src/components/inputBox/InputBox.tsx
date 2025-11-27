@@ -1,12 +1,14 @@
 // InputBox.tsx (replace relevant parts or drop in whole file)
 "use client";
-import { MoreVertical, XCircle } from "lucide-react";
+import { MoreVertical, XCircle, X, Sparkles } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
+import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
 
@@ -98,11 +100,33 @@ interface InputBoxProps {
 }
 
 const InputBox = ({ conversationId }: InputBoxProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  const placeholders = [
+    "Origami nebula unraveling...",
+    "Porcelain astronaut mid-shatter...",
+    "Clockwork koi in a rain puddle...",
+    "Velvet glacier melting upward...",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // confirmation modal state (new)
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -200,6 +224,8 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               if (paramsRef.current) {
                 paramsRef.current.clearPrompt?.();
               }
+              // Close mobile dialog on success if open
+              setIsMobileDialogOpen(false);
             },
             onError: (err) => {
               if (err.message === "Unauthorized") {
@@ -256,7 +282,10 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               inputImagePermanentPaths,
             },
             {
-              onSuccess: () => paramsRef.current?.clearPrompt?.(),
+              onSuccess: () => {
+                paramsRef.current?.clearPrompt?.();
+                setIsMobileDialogOpen(false);
+              },
               onError: (err) => {
                 if (err.message === "Unauthorized") setIsLoginModalOpen(true);
                 else setFormError(`Generation failed: ${err.message}`);
@@ -311,6 +340,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           setConfirmCredits(null);
           setConfirmPayload(null);
           setConfirmAppliedRule(undefined);
+          setIsMobileDialogOpen(false);
         },
         onError: (err) => {
           setConfirmOpen(false);
@@ -332,126 +362,176 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     confirmAppliedRule,
   ]);
 
-  return (
+  // --- Render Content Logic ---
+  const renderInputBoxContent = () => (
     <>
-      <div className="relative mb-2 w-fit rounded-[28px] border border-white/10 bg-[#0C0C0C]/80 p-2 backdrop-blur-lg md:p-3">
-        {/* Model Selection Dialog */}
-        <AnimatePresence>
-          {isDialogOpen && (
-            <motion.div
-              className="mb-2 w-full overflow-hidden"
-              initial={{
-                opacity: 0,
-                height: 0,
-              }}
-              animate={{
-                opacity: 1,
-                height: "32rem",
-              }}
-              exit={{
-                opacity: 0,
-                height: 0,
-              }}
-              transition={{
-                duration: 0.5,
-                ease: "easeInOut",
-              }}
-            >
-              <div className="size-full overflow-y-auto p-2">
-                <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
-              </div>
-              <GradualBlurMemo
-                target="parent"
-                position="bottom"
-                height="10rem"
-                strength={2}
-                divCount={5}
-                zIndex={1}
-                className="!bottom-2 p-2"
-                curve="bezier"
-                exponential={true}
-                opacity={1}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* Model Selection Dialog */}
+      <AnimatePresence>
+        {isDialogOpen && !isMobile && (
+          <motion.div
+            className="mb-2 w-full overflow-hidden"
+            initial={{
+              opacity: 0,
+              height: 0,
+            }}
+            animate={{
+              opacity: 1,
+              height: "32rem",
+            }}
+            exit={{
+              opacity: 0,
+              height: 0,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: "easeInOut",
+            }}
+          >
+            <div className="size-full overflow-y-auto p-2">
+              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
+            </div>
+            <GradualBlurMemo
+              target="parent"
+              position="bottom"
+              height="10rem"
+              strength={2}
+              divCount={5}
+              zIndex={1}
+              className="!bottom-2 p-2"
+              curve="bezier"
+              exponential={true}
+              opacity={1}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <section className="flex justify-between gap-4">
+      <AnimatePresence>
+        {isDialogOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[9999] flex h-full flex-col bg-black p-4"
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">Select model</h2>
+              <button
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-2xl bg-white/10 p-2 text-white/70 hover:bg-white/20"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="size-full overflow-y-auto p-2">
+              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <section className="flex h-full flex-col justify-between gap-4 md:flex-row md:justify-between md:gap-2">
+        <div className="flex flex-col gap-4 md:flex-row md:gap-4">
           <ModelSelectorCard selectedModel={selectedModel} onClick={handleCardClick} />
 
-          <div className="z-20 flex flex-col items-center gap-2">
+          <div className="z-20 flex flex-col items-center gap-2 md:flex-grow">
             {selectedModel && (
-              <div className="hidden flex-grow justify-center md:flex">
+              <div className="flex w-full justify-center">
                 <ParametersSection ref={paramsRef} selectedModel={selectedModel} />
               </div>
             )}
+          </div>
+        </div>
 
-            <div className="flex flex-grow justify-end md:hidden">
-              <button
-                onClick={() => setIsParamsMenuOpen(true)}
-                className="flex h-[75px] w-[60px] items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-white/70 hover:bg-black/40"
-              >
-                <MoreVertical />
-              </button>
+        <GenerateButton
+          handleGenerateClick={handleGenerateClick}
+          isPending={mutation.isPending}
+          cost={selectedModel?.cost}
+        />
+      </section>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Trigger */}
+      {isMobile ? (
+        <>
+          <div
+            onClick={() => setIsMobileDialogOpen(true)}
+            className="relative z-50 mb-2 flex w-full cursor-pointer items-center justify-between gap-3 rounded-[24px] border border-white/20 bg-[#0C0C0C]/80 p-3 pl-4 shadow-[0_0_20px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all hover:border-white/30 active:scale-[0.98]"
+          >
+            <div className="flex flex-col items-start gap-1 overflow-hidden">
+              <div className="flex items-center gap-2">
+                <div className="relative size-5 overflow-hidden rounded-[4px] ring-1 ring-white/20">
+                  <img
+                    className="size-full object-cover"
+                    src={selectedModel?.cover_image}
+                    alt="Model"
+                  />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
+                  {selectedModel?.model_name || "GENERAL"}
+                </span>
+              </div>
+
+              <div className="relative flex h-10 w-full items-center justify-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={placeholderIndex}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -20, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="block truncate text-lg font-medium text-white/90"
+                  >
+                    {placeholders[placeholderIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-[18px] border border-[#D9E825] bg-gradient-to-r from-[#D9E825] to-[#E3D2BA] text-black hover:border-[#E3F235] hover:from-[#E3F235] hover:to-[#F0E0CC]">
+              <Sparkles size={20} fill="currentColor" />
             </div>
           </div>
 
-          <GenerateButton
-            handleGenerateClick={handleGenerateClick}
-            isPending={mutation.isPending}
-            cost={selectedModel?.cost} // still shows static cost; confirmation dialog will show final for variable
-          />
-        </section>
+          {/* Full Screen Mobile Dialog */}
+          {mounted &&
+            createPortal(
+              <AnimatePresence>
+                {isMobileDialogOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: "100%" }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: "100%" }}
+                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    className="fixed inset-0 z-[9999] flex h-full flex-col bg-black p-4"
+                  >
+                    <div className="mb-6 flex items-center justify-between">
+                      <h2 className="text-xl font-bold text-white">Parameters</h2>
+                      <button
+                        onClick={() => setIsMobileDialogOpen(false)}
+                        className="rounded-2xl bg-white/10 p-2 text-white/70 hover:bg-white/20"
+                      >
+                        <X size={24} />
+                      </button>
+                    </div>
 
-        {/* MOBILE: parameters modal (unchanged) */}
-        <AnimatePresence>
-          {isParamsMenuOpen && (
-            <motion.div
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-              }}
-              exit={{
-                opacity: 0,
-              }}
-              onClick={() => setIsParamsMenuOpen(false)}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-            >
-              <motion.div
-                initial={{
-                  scale: 0.9,
-                  opacity: 0,
-                }}
-                animate={{
-                  scale: 1,
-                  opacity: 1,
-                }}
-                exit={{
-                  scale: 0.9,
-                  opacity: 0,
-                }}
-                transition={{
-                  duration: 0.2,
-                  ease: "easeOut",
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#181818] p-6 shadow-2xl"
-              >
-                <h3 className="mb-4 text-lg font-semibold text-white">Advanced Settings</h3>
-                <div className="mb-6"></div>
-                <button
-                  onClick={() => setIsParamsMenuOpen(false)}
-                  className="w-full rounded-lg bg-accent/90 py-2.5 font-bold text-black"
-                >
-                  Done
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                    <div className="flex-1 overflow-y-auto pb-8">{renderInputBoxContent()}</div>
+                  </motion.div>
+                )}
+              </AnimatePresence>,
+              document.body,
+            )}
+        </>
+      ) : (
+        /* Desktop View */
+        <div className="relative mb-2 w-fit rounded-[28px] border border-white/10 bg-[#0C0C0C]/80 p-2 backdrop-blur-lg md:p-3">
+          {renderInputBoxContent()}
+        </div>
+      )}
 
       {/* Confirmation Dialog (appears only when variable-priced model) */}
       <AnimatePresence>
@@ -479,14 +559,6 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 to generate this output.
               </DialogDescription>
             </DialogHeader>
-
-            {/* optional: show applied rule */}
-            {/* {confirmAppliedRule && (
-              <div className="mb-4 text-xs text-white/60">Applied rule: {confirmAppliedRule}</div>
-            )} */}
-
-            {/* you can show a short summary of parameters if you want */}
-            {/* <pre className="mb-4 text-xs text-white/60">{JSON.stringify(confirmPayload?.finalParameters, null, 2)}</pre> */}
 
             <DialogFooter className="flex gap-3 pt-4">
               <button
