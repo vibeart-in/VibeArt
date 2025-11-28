@@ -170,9 +170,7 @@ const VideoUploadBox = ({
   return (
     <div
       onClick={handleClick}
-      className={`relative flex size-[100px] items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 ${
-        !video && !isUploading ? "cursor-pointer hover:text-white" : ""
-      }`}
+      className={`relative flex aspect-square size-full items-center justify-center rounded-3xl border border-white/30 bg-black p-1.5 text-white/60 transition-all duration-300 md:size-[100px] ${!video && !isUploading ? "cursor-pointer hover:text-white" : ""}`}
     >
       <input
         ref={inputRef}
