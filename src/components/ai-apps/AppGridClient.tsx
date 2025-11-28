@@ -37,8 +37,10 @@ export default function AppGridClient({
     default: 5,
     1500: 3,
     1100: 2,
-    700: 1,
+    700: 2,
+    300: 2,
   };
+
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   const {
@@ -65,7 +67,7 @@ export default function AppGridClient({
           <button
             key={tag}
             onClick={() => setSelectedTag((prev) => (prev === tag ? null : tag))}
-            className={`rounded-full border px-3 py-1 transition-colors ${
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
               selectedTag === tag
                 ? "border-accent bg-accent font-semibold text-black"
                 : `bg-gray-800/50 hover:bg-gray-700/50 ${getTagColor(index)}`

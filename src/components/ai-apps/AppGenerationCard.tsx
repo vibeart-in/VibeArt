@@ -1,4 +1,4 @@
-// src/components/ai-apps/AppGenerationCard.tsx (Corrected and Redesigned)
+// src/components/ai-apps/AppGenerationCard.tsx (Optimized Responsive Version)
 
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { motion, Variants } from "framer-motion";
@@ -34,19 +34,21 @@ const AppGenerationCard = ({
       initial="rest"
       whileHover="hover"
       animate="rest"
-      className="flex h-fit w-full flex-col gap-0 overflow-hidden rounded-[40px] bg-[#111111] p-6"
+      className="flex h-fit w-full flex-col gap-0 overflow-hidden rounded-3xl bg-[#111111] p-1 sm:p-5"
     >
-      {/* Top section with Images */}
-      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Top section with Images and Arrow in same row */}
+      <div className="flex w-full items-center gap-3 sm:gap-4">
+        {/* Input Images - Flexible sizing */}
         <div className="min-w-0 flex-1">
           <GroupImageLayout images={inputImages} title="Input" autoRatio={true} />
         </div>
 
-        {/* Arrow — hidden on very small screens for space */}
-        <div className="hidden px-2 sm:flex sm:flex-col sm:items-center sm:justify-center">
+        {/* Arrow - Always visible and properly centered */}
+        <div className="flex shrink-0 items-center justify-center">
           <ArrowRightIcon size={36} className="text-neutral-500" />
         </div>
 
+        {/* Output Images - Flexible sizing */}
         <div className="min-w-0 flex-1">
           <GroupImageLayout images={outputImages} title="Output" status={status} />
         </div>
