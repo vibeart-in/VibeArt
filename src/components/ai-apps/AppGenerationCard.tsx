@@ -50,7 +50,7 @@ const AppGenerationCard = ({
     } else {
       setOutputSelectedIndex(idx);
     }
-    setExpandedSection(null); // Collapse after selection
+    // setExpandedSection(null); // Removed to prevent UI shift
   };
 
   const handleExpandToggle = (section: "input" | "output") => {
@@ -86,7 +86,7 @@ const AppGenerationCard = ({
               key={img.id ?? `${idx}-exp`}
               type="button"
               onClick={() => handleThumbClick(section, idx)}
-              className={`relative aspect-square w-full overflow-hidden rounded-lg border-2 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
+              className={`relative aspect-square w-full overflow-hidden rounded-xl border-2 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
                 idx === selectedIndex
                   ? "scale-105 border-indigo-500 shadow-lg ring-2 ring-indigo-500 ring-offset-1 ring-offset-neutral-900"
                   : "border-neutral-700 hover:border-neutral-500"
@@ -111,17 +111,34 @@ const AppGenerationCard = ({
     );
   };
 
+  const [showInputMobile, setShowInputMobile] = useState(false);
+
   return (
     <motion.div
       initial="rest"
       whileHover="hover"
       animate="rest"
-      className="flex h-fit w-full flex-col gap-0 overflow-hidden rounded-3xl bg-[#111111] p-1 sm:p-5"
+      className="flex h-fit w-full flex-col gap-0 overflow-hidden rounded-3xl bg-[#111111] p-4 sm:p-5"
     >
+      {/* Mobile Toggle for Input */}
+      <div className="mb-4 flex w-full justify-end md:hidden">
+        <button
+          type="button"
+          onClick={() => setShowInputMobile(!showInputMobile)}
+          className="text-xs font-medium text-neutral-400 underline decoration-neutral-600 underline-offset-4 hover:text-neutral-200"
+        >
+          {showInputMobile ? "Hide Input" : "Show Input"}
+        </button>
+      </div>
+
       {/* Top section with Images and Arrow */}
-      <div className="flex w-full items-start gap-3 sm:gap-4">
+      <div className="flex w-full flex-col items-center gap-6 md:flex-row md:items-start md:gap-4">
         {/* Input Images */}
-        <div className="min-w-0 flex-1">
+        <div
+          className={`w-full min-w-0 flex-1 md:w-auto ${
+            showInputMobile ? "flex" : "hidden md:flex"
+          }`}
+        >
           <GroupImageLayout
             images={inputImages}
             title="Input"
@@ -130,16 +147,22 @@ const AppGenerationCard = ({
             onThumbClick={(idx) => handleThumbClick("input", idx)}
             onExpandToggle={() => handleExpandToggle("input")}
             expanded={expandedSection === "input"}
+            maxVisibleThumbnails={3}
+            containerClassName="max-w-[240px] md:max-w-[520px]"
           />
         </div>
 
         {/* Arrow */}
-        <div className="flex shrink-0 items-center justify-center">
-          <ArrowRightIcon size={36} className="text-neutral-500" />
+        <div
+          className={`shrink-0 items-center justify-center self-center ${
+            showInputMobile ? "flex" : "hidden md:flex"
+          }`}
+        >
+          <ArrowRightIcon size={36} className="rotate-90 text-neutral-500 md:rotate-0" />
         </div>
 
         {/* Output Images */}
-        <div className="min-w-0 flex-1">
+        <div className="w-full min-w-0 flex-1 md:w-auto">
           <GroupImageLayout
             images={outputImages}
             title="Output"
@@ -148,6 +171,7 @@ const AppGenerationCard = ({
             onThumbClick={(idx) => handleThumbClick("output", idx)}
             onExpandToggle={() => handleExpandToggle("output")}
             expanded={expandedSection === "output"}
+            maxVisibleThumbnails={3}
           />
         </div>
       </div>

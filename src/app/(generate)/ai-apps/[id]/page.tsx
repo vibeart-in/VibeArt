@@ -61,9 +61,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       />
 
       {/* content container */}
-      <div className="z-10 my-8 mt-20 flex w-full flex-col items-center justify-center px-4">
+      <div className="z-10 mt-20 flex w-full flex-col items-center justify-center">
         {/* main card */}
-        <div className="flex w-fit max-w-6xl flex-col justify-between gap-8 rounded-[50px] bg-[#111111] p-6 lg:flex-row">
+        <div className="mx-4 flex w-fit max-w-6xl flex-col justify-between gap-8 rounded-[50px] bg-[#111111] p-6 lg:flex-row">
           {/* Mobile: Cover image first */}
           <div className="flex flex-grow items-center justify-center lg:hidden">
             {isVideo ? (

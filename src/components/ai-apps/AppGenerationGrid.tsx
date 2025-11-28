@@ -22,7 +22,7 @@ const AppGenerationGrid = ({ generations }: { generations: GenerationAppWithSign
       <Masonry
         breakpointCols={breakpointColumnsObj}
         className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
+        columnClassName="my-masonry-grid_column !pl-0 md:!pl-6"
       >
         {generations.map((gen) => (
           <motion.div

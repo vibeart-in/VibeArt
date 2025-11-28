@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-
 import type { conversationImageObject } from "@/src/types/BaseType";
-
 import ImageCard from "../ui/imageCard/ImageCard";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
-
 type Props = {
   images: conversationImageObject[];
   title: string;
@@ -16,8 +13,8 @@ type Props = {
   onThumbClick?: (idx: number) => void;
   onExpandToggle?: () => void;
   expanded?: boolean;
+  containerClassName?: string;
 };
-
 const GroupImageLayout = ({
   images = [],
   title,
@@ -29,34 +26,37 @@ const GroupImageLayout = ({
   onThumbClick: externalOnThumbClick,
   onExpandToggle,
   expanded = false,
+  containerClassName = "",
 }: Props) => {
   const [internalSelectedIndex, setInternalSelectedIndex] = useState<number>(0);
-
   // Use external state if provided, otherwise use internal state
   const selectedIndex =
     externalSelectedIndex !== undefined ? externalSelectedIndex : internalSelectedIndex;
   const onThumbClick = externalOnThumbClick || setInternalSelectedIndex;
-
   useEffect(() => {
     setInternalSelectedIndex(0);
   }, [images.length, images[0]?.id]);
-
   // Loading state
   if (status === "pending" || status === "running") {
     return (
       <div className="flex min-w-0 flex-1 flex-col items-center gap-3">
         <p className="text-center text-sm text-neutral-400">{title}</p>
+        <p className="text-center text-sm font-medium uppercase tracking-wider text-neutral-300">
+          {title}
+        </p>
         <ImageCardLoading width={320} />
       </div>
     );
   }
-
   // Empty state
   if (!images || images.length === 0) {
     const message = title === "Input" ? "No Image Input" : "Image Failed";
     return (
       <div className="flex min-w-0 flex-1 flex-col items-center gap-3">
         <p className="text-center text-sm text-neutral-400">{title}</p>
+        <p className="text-center text-sm font-medium uppercase tracking-wider text-neutral-300">
+          {title}
+        </p>
         <div className="relative w-full max-w-[420px]">
           <div className="flex aspect-[4/5] w-full items-center justify-center rounded-2xl border-2 border-dashed border-neutral-700 bg-neutral-900/50">
             <p className="text-sm text-neutral-500">{message}</p>
@@ -65,25 +65,22 @@ const GroupImageLayout = ({
       </div>
     );
   }
-
   const totalThumbs = images.length - (hidePrimaryFromThumbnails ? 1 : 0);
   const allThumbnails = images
     .map((img, idx) => ({ img, idx }))
     .filter(({ idx }) => !(hidePrimaryFromThumbnails && idx === selectedIndex));
-
   const inlineThumbnails = allThumbnails.slice(0, maxVisibleThumbnails);
   const primary = images[selectedIndex];
-
   function handleThumbClick(idx: number) {
     onThumbClick(idx);
   }
-
   return (
     <div className="relative flex min-w-0 flex-1 flex-col items-center gap-3">
-      <p className="text-center text-sm text-neutral-400">{title}</p>
-
+      <p className="text-center text-sm font-medium uppercase tracking-wider text-neutral-300">
+        {title}
+      </p>
       {/* Primary image */}
-      <div className="relative w-full max-w-[520px]">
+      <div className={`relative w-full max-w-[520px] ${containerClassName}`}>
         <div
           className="overflow-hidden rounded-[20px]"
           style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.6)" }}
@@ -96,7 +93,6 @@ const GroupImageLayout = ({
             autoRatio={autoRatio}
           />
         </div>
-
         {/* Inline thumbnail row */}
         <div className={`z-20 mt-3 w-full sm:absolute sm:bottom-4 sm:right-4 sm:mt-0 sm:w-auto`}>
           <div className="flex items-center gap-2">
@@ -110,7 +106,7 @@ const GroupImageLayout = ({
                   key={img.id ?? `${idx}`}
                   type="button"
                   onClick={() => handleThumbClick(idx)}
-                  className="relative size-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-800 transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:size-14"
+                  className="relative size-12 flex-shrink-0 overflow-hidden rounded-xl border border-neutral-800 transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:size-14"
                   aria-label={`Make image ${idx + 1} primary`}
                 >
                   <img
@@ -124,7 +120,6 @@ const GroupImageLayout = ({
                   </div>
                 </button>
               ))}
-
               {/* +N pill if there are more */}
               {allThumbnails.length > inlineThumbnails.length && !expanded && (
                 <button
@@ -144,5 +139,4 @@ const GroupImageLayout = ({
     </div>
   );
 };
-
 export default GroupImageLayout;
