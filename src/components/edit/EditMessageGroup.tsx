@@ -22,13 +22,13 @@ export default function EditMessageGroup({ group }: MessageGroupProps) {
     //    - The middle column (`auto`) will be exactly as wide as its content (the message turns).
     //    - The outer columns (`1fr`) will take up the remaining space equally, perfectly centering the middle column.
     // 3. `items-start`: Aligns items to the top of their grid cell.
-    <div className="grid w-full grid-cols-[1fr,auto,1fr] items-start gap-4">
+    <div className="grid w-full items-start gap-4">
       {/* 1. RENDER SHARED INPUT IMAGES (IF THEY EXIST) */}
       {/* This content is now in the first grid column. */}
       {/* `justify-self-end` aligns it to the right edge of its column. */}
       {input_images && input_images.length > 0 && (
-        <div className="sticky top-8 ml-44 flex items-center gap-4 self-start justify-self-end">
-          <div className="flex max-w-[350px] flex-wrap gap-4">
+        <div className="sticky top-8 ml-0 flex flex-col items-center gap-4 justify-self-start md:justify-self-end lg:ml-44 lg:flex-row">
+          <div className="flex max-w-[100px] flex-wrap gap-4 lg:max-w-[350px]">
             {input_images.map((image) => (
               <div key={image.id} className="w-[350px]">
                 <Image

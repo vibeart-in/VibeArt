@@ -64,7 +64,7 @@ export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
   };
 
   return (
-    <div className="flex w-full flex-col lg:flex-row">
+    <div className="flex w-full flex-col xl:flex-row">
       {/* Prompt Box */}
       <div>
         <div className="h-fit w-full flex-shrink-0 overflow-hidden rounded-3xl bg-[#111111] lg:w-[320px]">
@@ -146,11 +146,11 @@ export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
 
       {/* Images Section */}
       <div className="mt-6 w-full lg:mt-0 lg:pl-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+        <div className="md:mt-5">
           {/* <div className="flex flex-wrap gap-4"> */}
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image) => (
-              <div key={image.id} className="max-w-[500px]">
+              <div key={image.id} className="max-w-[350px]">
                 <ImageCard
                   thumbnailUrl={image.thumbnailUrl}
                   mediaUrl={image.imageUrl}
