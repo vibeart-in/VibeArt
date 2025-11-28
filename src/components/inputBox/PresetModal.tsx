@@ -137,7 +137,7 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
         </div>
       </DialogTrigger>
 
-      <DialogContent className="h-[90vh] w-full max-w-3xl rounded-[30px]">
+      <DialogContent className="flex h-[90vh] w-full max-w-3xl flex-col rounded-[30px] p-0">
         <DialogHeader className="px-4 sm:px-6">
           <DialogTitle className="text-lg sm:text-xl">Prompts</DialogTitle>
           {/* <DialogDescription className="text-xs sm:text-sm md:text-base">
