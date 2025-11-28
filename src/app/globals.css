@@ -179,6 +179,13 @@
   /* gutter size */
   background-clip: padding-box;
 }
+@media screen and (max-width: 768px) {
+  .app-masonry-grid_column {
+    padding-left: 5px;
+    /* gutter size */
+    background-clip: padding-box;
+  }
+}
 
 /* This is for each item within a column */
 .app-masonry-grid_column > div {

@@ -17,7 +17,7 @@ const AppExampleGrid = ({ images }: AppExampleGridProps) => {
     default: 2,
     1500: 2,
     1100: 2,
-    700: 1,
+    700: 2,
   };
 
   const displayedImages = showAll ? images : images.slice(0, 4);

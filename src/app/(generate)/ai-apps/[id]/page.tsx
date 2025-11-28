@@ -61,10 +61,32 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       />
 
       {/* content container */}
-      <div className="z-10 my-8 mt-20 flex w-full flex-col items-center justify-center px-4">
+      <div className="z-10 mt-20 flex w-full flex-col items-center justify-center">
         {/* main card */}
-        <div className="flex w-fit max-w-6xl flex-col justify-between gap-8 rounded-[50px] bg-[#111111] p-6 lg:flex-row">
-          {/* left column */}
+        <div className="mx-4 flex w-fit max-w-6xl flex-col justify-between gap-8 rounded-[50px] bg-[#111111] p-6 lg:flex-row">
+          {/* Mobile: Cover image first */}
+          <div className="flex flex-grow items-center justify-center lg:hidden">
+            {isVideo ? (
+              <video
+                src={app.cover_image}
+                className="h-auto max-h-[400px] w-full max-w-[400px] rounded-3xl object-contain"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <Image
+                src={app.cover_image}
+                alt="cover"
+                width={400}
+                height={400}
+                className="size-auto max-h-[400px] w-full max-w-[400px] rounded-[44px] object-contain"
+              />
+            )}
+          </div>
+
+          {/* left column - content */}
           <div className="flex flex-shrink-0 flex-col gap-4 lg:w-[500px]">
             {/* title + description */}
             <h1 className="text-wrap font-satoshi text-3xl font-medium leading-snug">
@@ -72,8 +94,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             </h1>
             <p className="pr-8 text-base">{app.description}</p>
 
-            {/* tags + author */}
-            <div className="mr-8 flex items-center justify-between">
+            {/* tags + author + duration */}
+            <div className="mr-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
                 {app.tags?.map((tag: string, idx: number) => (
                   <p
@@ -87,26 +109,31 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                   </p>
                 ))}
               </div>
-              {/* duration display (converted to minutes) - styled to blend with UI */}
-              {durationMinutes ? (
-                <div className="mt-3 flex items-center gap-3">
-                  <div className="border-white/8 from-white/2 to-white/3 flex items-center gap-3 rounded-full border bg-gradient-to-b px-3 py-2 backdrop-blur-sm">
-                    <div className="flex size-7 items-center justify-center rounded-full bg-black/30 p-1">
-                      <ClockIcon className="size-4 text-accent" />
-                    </div>
 
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-nowrap text-sm font-medium text-white">
-                        {durationMinutes} min
-                      </span>
-                      <span className="-mt-0.5 text-xs text-white/60">({durationSeconds}s)</span>
+              <div className="flex flex-row gap-4 sm:flex-row sm:items-center">
+                {/* duration display */}
+                {durationMinutes ? (
+                  <div className="flex items-center gap-3">
+                    <div className="border-white/8 from-white/2 to-white/3 flex items-center gap-3 rounded-full border bg-gradient-to-b px-3 py-2 backdrop-blur-sm">
+                      <div className="flex size-7 items-center justify-center rounded-full bg-black/30 p-1">
+                        <ClockIcon className="size-4 text-accent" />
+                      </div>
+
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-nowrap text-sm font-medium text-white">
+                          {durationMinutes} min
+                        </span>
+                        <span className="-mt-0.5 text-xs text-white/60">({durationSeconds}s)</span>
+                      </div>
                     </div>
                   </div>
+                ) : null}
+
+                {/* author */}
+                <div className="flex flex-shrink-0 items-center gap-1 rounded-full border border-white/30 bg-black/20">
+                  <Avatar name={app.author || "Unknown"} />
+                  <p className="m-1 mr-3">{app.author}</p>
                 </div>
-              ) : null}
-              <div className="flex flex-shrink-0 items-center gap-1 rounded-full border border-white/30 bg-black/20">
-                <Avatar name={app.author || "Unknown"} />
-                <p className="m-1 mr-3">{app.author}</p>
               </div>
             </div>
 
@@ -117,8 +144,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
 
-          {/* right column: cover image / video */}
-          <div className="relative flex flex-grow items-center justify-center">
+          {/* Desktop: Cover image on right */}
+          <div className="hidden lg:flex lg:flex-grow lg:items-center lg:justify-center">
             {isVideo ? (
               <video
                 src={app.cover_image}

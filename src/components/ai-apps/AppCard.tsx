@@ -23,10 +23,10 @@ const AppCard = ({
     ? "rounded-lg sm:rounded-3xl"
     : "rounded-2xl sm:rounded-3xl lg:rounded-[40px]";
 
-  // Responsive text size adapts to compact
+  // Responsive text size - smaller for mobile
   const textSizeClass = compact
-    ? "text-sm sm:text-base rounded-md"
-    : "text-lg sm:text-xl md:text-2xl lg:text-3xl rounded-3xl";
+    ? "text-xs sm:text-base" // Reduced from text-sm on mobile
+    : "text-sm sm:text-xl md:text-2xl lg:text-3xl"; // Reduced from text-lg on mobile
 
   return (
     <motion.div
@@ -70,7 +70,7 @@ const AppCard = ({
           )}
         </motion.div>
 
-        {/* Hover overlay */}
+        {/* Hover overlay - hidden on mobile, shown on hover for desktop */}
         <motion.div
           className={cn(
             "absolute inset-0 bg-black/20 shadow-[inset_0_4px_38px_rgba(0,0,0,0.8)]",
@@ -83,9 +83,19 @@ const AppCard = ({
           transition={{ duration: 0.3, ease: "easeOut" }}
         />
 
-        {/* App name */}
+        {/* App name - bottom positioned with overlay on mobile */}
+        <div className="absolute inset-x-0 bottom-0 md:hidden">
+          {/* Transparent black overlay for mobile */}
+          <div className="bg-black/60 px-3 py-2 backdrop-blur-[1px]">
+            <p className={cn("line-clamp-2 text-center font-semibold text-white", textSizeClass)}>
+              {appName}
+            </p>
+          </div>
+        </div>
+
+        {/* App name - only visible on hover for desktop */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 hidden items-center justify-center md:flex"
           variants={{
             rest: { opacity: 0, y: 20 },
             hover: { opacity: 1, y: 0 },

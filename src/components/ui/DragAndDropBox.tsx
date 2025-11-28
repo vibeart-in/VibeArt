@@ -176,7 +176,7 @@ export default function DragAndDropBox({
             alt="Uploaded"
             className="size-full rounded-3xl border-2 border-white/20 object-cover"
           />
-          <button onClick={handleRemoveImage} className="absolute -right-8 -top-6">
+          <button onClick={handleRemoveImage} className="absolute -right-4 -top-8">
             <IconX size={32} className="custom-box hover:text-accent" />
           </button>
         </div>

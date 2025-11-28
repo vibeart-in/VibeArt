@@ -312,7 +312,7 @@ export const MediaCardView = ({
       role="button"
       tabIndex={0}
       // note: added min-h fallback so card doesn't collapse while waiting for ratio
-      className="relative min-h-[200px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
+      className="md: relative min-h-[200px] min-h-[90px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[28px] will-change-transform"
       variants={parentVariants}
       initial="rest"
       animate="rest"
