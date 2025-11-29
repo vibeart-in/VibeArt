@@ -34,7 +34,7 @@ const Page = () => {
           </div>
 
           {/* Model Types (Pillars) */}
-          <div className="mt-10 flex max-w-7xl items-center justify-center gap-5">
+          <div className="mt-10 flex flex-row flex-wrap items-center justify-center gap-5">
             {/* Open Source */}
             <div className="flex w-[280px] items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:bg-white/10 md:w-[300px]">
               <IconWorld className="size-6 text-blue-400" />
@@ -70,7 +70,7 @@ const Page = () => {
           </div>
         </div>
 
-        <ExampleGenerations limit={15} showcaseFor={ConversationType.VIDEO} />
+        <ExampleGenerations limit={15} showcaseFor={ConversationType.VIDEO} className="!mt-44 origin-bottom scale-95 !pb-0 md:scale-100" />
       </div>
     </section>
   );
