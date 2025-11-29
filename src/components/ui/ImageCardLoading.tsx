@@ -1,4 +1,5 @@
 import React from "react";
+import { useMediaQuery } from "@/src/hooks/use-media-query";
 
 interface ImageCardLoadingProps {
   ratio?: string | number;
@@ -16,6 +17,8 @@ function parseRatio(ratio: string | number): number {
   return h === 0 ? 1 : w / h;
 }
 
+
+
 export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
   ratio = "1:1",
   width = 400,
@@ -23,7 +26,9 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
   subtitle = "Please chill, while we create your image",
   variant = "cool",
 }) => {
-  const height = width / parseRatio(ratio);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const effectiveWidth = isMobile ? 200 : width;
+  const height = effectiveWidth / parseRatio(ratio);
 
   const rainbowVariants = {
     default:
@@ -40,7 +45,10 @@ export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
   return (
     <div
       className="relative overflow-hidden rounded-3xl border-2 border-white/10 shadow-md"
-      style={{ width: `${width}px`, height: `${height}px` }}
+      style={{
+        width: `${effectiveWidth}px`,
+        height: `${height}px`,
+      }}
     >
       {/* Background Gradient Layer */}
       <div
