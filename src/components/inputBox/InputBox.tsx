@@ -174,6 +174,18 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
     return () => mutation.reset();
   }, [mutation.reset]);
 
+  // Lock body scroll when mobile dialog is open
+  useEffect(() => {
+    if (isMobileDialogOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileDialogOpen, isMobile]);
+
   // --- Memoized Callbacks ---
   const handleModelSelect = useCallback((model: ModelData) => {
     setSelectedModel(model);

@@ -27,7 +27,7 @@ const Page = () => {
         </div>
 
         <ExampleGenerations
-          limit={8}
+          limit={15}
           showcaseFor={ConversationType.GENERATE}
           className="!mt-44 origin-bottom scale-95 !pb-0 md:scale-100"
         />
