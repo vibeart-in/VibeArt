@@ -49,7 +49,7 @@ export function UserSectionClient() {
 
   // 3. After loading, if the user exists, show the authenticated UI
   return (
-    <div className="flex shrink-0 items-center gap-3">
+    <div className="flex shrink-0 items-center gap-1 md:gap-3">
       {navInfo?.subscription_tier === "free" && (
         <Button
           variant="secondary"

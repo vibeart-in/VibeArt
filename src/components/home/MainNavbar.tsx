@@ -7,7 +7,7 @@ import {
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Images } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -65,6 +65,14 @@ export default function MainNavbar() {
     },
   ];
 
+  const mobileOnlyNavItems = [
+    {
+      name: "Creations",
+      link: "/gallery",
+      icon: <Images className="size-5" />,
+    },
+  ];
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -84,46 +92,73 @@ export default function MainNavbar() {
       <MobileNav>
         <MobileNavHeader>
           <NavbarLogo />
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-accent bg-accent/30 px-4 py-1.5 text-sm font-medium text-accent outline-none backdrop-blur-sm transition-all focus:bg-white/10 active:scale-95">
-              <span>History</span>
-              <ChevronDown className="size-4 text-white/50" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-[200px] border-white/10 bg-[#0C0C0C] p-0"
-            >
-              <GenerationHistory isMobileDropdown />
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <MobileNavToggle
-            isOpen={isMobileMenuOpen}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          />
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-accent bg-accent/30 px-4 py-1.5 text-sm font-medium text-accent outline-none backdrop-blur-sm transition-all focus:bg-white/10 active:scale-95">
+                <span>History</span>
+                <ChevronDown className="size-4 text-white/50" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[200px] border-white/10 bg-[#0C0C0C] p-0"
+              >
+                <GenerationHistory isMobileDropdown />
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </div>
         </MobileNavHeader>
 
         <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
-          <div className="grid w-full grid-cols-3 gap-2">
-            {navItems.map((item, idx) => {
-              const isHighlighted = isActiveRoute(pathname, item.link);
-              return (
-                <a
-                  key={`mobile-link-${idx}`}
-                  href={item.link}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "relative flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center font-semibold text-neutral-600 transition-colors dark:text-neutral-300",
-                    isHighlighted &&
-                      "border-accent bg-accent/20 font-bold text-accent dark:text-accent",
-                  )}
-                >
-                  {item.icon}
-                  <span className="block text-xs">{item.name}</span>
-                </a>
-              );
-            })}
+          <div className="flex w-full flex-col gap-4">
+            {/* Main nav items grid */}
+            <div className="grid w-full grid-cols-3 gap-2">
+              {navItems.map((item, idx) => {
+                const isHighlighted = isActiveRoute(pathname, item.link);
+                return (
+                  <a
+                    key={`mobile-link-${idx}`}
+                    href={item.link}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center font-semibold text-neutral-600 transition-colors dark:text-neutral-300",
+                      isHighlighted &&
+                        "border-accent bg-accent/20 font-bold text-accent dark:text-accent",
+                    )}
+                  >
+                    {item.icon}
+                    <span className="block text-xs">{item.name}</span>
+                  </a>
+                );
+              })}
+              
+              {/* Mobile-only nav items */}
+              {mobileOnlyNavItems.map((item, idx) => {
+                const isHighlighted = isActiveRoute(pathname, item.link);
+                return (
+                  <a
+                    key={`mobile-only-link-${idx}`}
+                    href={item.link}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center font-semibold text-neutral-600 transition-colors dark:text-neutral-300",
+                      isHighlighted &&
+                        "border-accent bg-accent/20 font-bold text-accent dark:text-accent",
+                    )}
+                  >
+                    {item.icon}
+                    <span className="block text-xs">{item.name}</span>
+                  </a>
+                );
+              })}
+              <UserSectionClient />
+            </div>
+
+           
           </div>
-          <UserSectionClient />
         </MobileNavMenu>
       </MobileNav>
     </Navbar>

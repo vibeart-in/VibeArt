@@ -23,7 +23,7 @@ const ImageGallery = ({ images, columnCount = 4 }: ImageGalleryProps) => {
     default: columnCount,
     1500: 3,
     1100: 2,
-    700: 1,
+    700: 2,
   };
 
   return (
