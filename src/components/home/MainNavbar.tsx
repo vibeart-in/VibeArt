@@ -7,7 +7,7 @@ import {
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
-import { ChevronDown, Images } from "lucide-react";
+import { ChevronDown, Folder } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -69,7 +69,7 @@ export default function MainNavbar() {
     {
       name: "Creations",
       link: "/gallery",
-      icon: <Images className="size-5" />,
+      icon: <Folder fill="currentColor" className="size-5" />,
     },
   ];
 
@@ -94,7 +94,7 @@ export default function MainNavbar() {
           <NavbarLogo />
           <div className="flex items-center gap-2">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-accent bg-accent/30 px-4 py-1.5 text-sm font-medium text-accent outline-none backdrop-blur-sm transition-all focus:bg-white/10 active:scale-95">
+              <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-accent bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent outline-none backdrop-blur-sm transition-all focus:bg-white/10 active:scale-95">
                 <span>History</span>
                 <ChevronDown className="size-4 text-white/50" />
               </DropdownMenuTrigger>
@@ -134,7 +134,9 @@ export default function MainNavbar() {
                   </a>
                 );
               })}
-              
+            </div>
+
+            <div className="flex w-full items-center gap-2">
               {/* Mobile-only nav items */}
               {mobileOnlyNavItems.map((item, idx) => {
                 const isHighlighted = isActiveRoute(pathname, item.link);
@@ -144,20 +146,18 @@ export default function MainNavbar() {
                     href={item.link}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      "relative flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center font-semibold text-neutral-600 transition-colors dark:text-neutral-300",
+                      "flex flex-1 items-center justify-center gap-2 rounded-xl border bg-black px-4 py-2 text-xs font-medium text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_2px_6px_rgba(0,0,0,1),0_0_15px_rgba(0,0,0,1)] backdrop-blur-md transition hover:bg-black/40 active:scale-95",
                       isHighlighted &&
                         "border-accent bg-accent/20 font-bold text-accent dark:text-accent",
                     )}
                   >
                     {item.icon}
-                    <span className="block text-xs">{item.name}</span>
+                    <span>{item.name}</span>
                   </a>
                 );
               })}
               <UserSectionClient />
             </div>
-
-           
           </div>
         </MobileNavMenu>
       </MobileNav>

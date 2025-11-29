@@ -1,13 +1,7 @@
-import {
-  DotsThreeVerticalIcon,
-  MinusCircleIcon,
-  PencilSimpleIcon,
-  SparkleIcon,
-} from "@phosphor-icons/react";
+import { DotsThreeVerticalIcon, MinusCircleIcon } from "@phosphor-icons/react";
 import { IconAspectRatio, IconTerminal } from "@tabler/icons-react";
 import { DicesIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import React, {
   forwardRef,
   useCallback,
@@ -22,18 +16,10 @@ import { ConversationType, ModelData, NodeParam } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 import { getIconForParam } from "@/src/utils/server/utils";
 
-import DialogBox from "./DialogBox";
+import ModelSelectModal from "./ModelSelectModal";
 import PresetModal from "./PresetModal";
 import { ImageObject } from "./ReplicateParameters";
 import AnimatedCounter from "../ui/AnimatedCounter";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dotted-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +38,7 @@ import {
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { SparkleIcon } from "@phosphor-icons/react";
 
 interface RunninghubParametersProps {
   parameters: NodeParam[];
@@ -338,8 +325,8 @@ export const RunninghubParameters = forwardRef<
   const [imageObjects, setImageObjects] = useState<Record<string, ImageObject | null>>({});
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedModels, setSelectedModels] = useState<ModelData | null>(null);
+  const [selectedLoraModel, setSelectedLoraModel] = useState<ModelData | null>(null);
 
   useEffect(() => {
     // 1. Start with clean parameters, ensuring any initial image values are cleared
@@ -525,91 +512,60 @@ export const RunninghubParameters = forwardRef<
     !promptParam?.fieldValue.trim() || promptParam?.fieldValue !== lastEnhancedPromptRef.current;
   const isDisabled = !canEnhanceOrGetRandom || isSpinning;
 
-  const handleModelSelect = (model: ModelData) => {
+  const handleCheckpointSelect = (model: ModelData) => {
     setSelectedModels(model);
-    console.log("Selected model:", model.identifier);
+    console.log("Selected checkpoint:", model.identifier);
     if (checkpointParam) {
-      handleChange(checkpointParam?.description, model.identifier);
+      handleChange(checkpointParam.description, model.identifier);
     }
-    setIsDialogOpen(false);
+  };
+
+  const handleLoraSelect = (model: ModelData) => {
+    setSelectedLoraModel(model);
+    console.log("Selected lora:", model.identifier);
+    if (loraParam) {
+      handleChange(loraParam.description, model.identifier);
+    }
   };
 
   return (
-    <div className="relative flex gap-2">
+    <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
       {!(checkpointParam || loraParam) && (
         <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
       )}
-
-      <AnimatePresence>
-        {checkpointParam && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <div className="group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100">
-                <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
-                <Image
-                  className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
-                  src={
-                    selectedModels?.cover_image ||
-                    "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
-                  }
-                  alt={selectedModels?.model_name || "selectedModel.model_name"}
-                  width={150}
-                  height={95}
-                />
-                <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-                  <p className="truncate font-satoshi text-sm font-medium text-accent">
-                    {selectedModels?.model_name || "Select Model"}
-                  </p>
-                </div>
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-                    <PencilSimpleIcon size={20} weight="fill" />
-                  </span>
-                </div>
-              </div>
-            </DialogTrigger>
-            <DialogContent className="w-full max-w-6xl rounded-[30px]">
-              <DialogHeader>
-                <DialogTitle>Checkpoint</DialogTitle>
-                <DialogDescription>
-                  A checkpoint is the core AI model used to create images. It determines the overall
-                  style, realism, and creativity of the results, guiding how the AI interprets your
-                  prompt to generate visuals.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="size-full overflow-y-auto p-2">
-                <DialogBox
-                  conversationType={ConversationType.CHECKPOINT}
-                  onSelectModel={handleModelSelect}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {loraParam && (
-          <div className="group relative z-20 h-[95px] w-[70px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-105 active:scale-100">
-            <div className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_4px_18px_rgba(0,0,0,0.5)]"></div>
-            <Image
-              className="size-full rounded-lg object-cover transition-all duration-300 group-hover:brightness-90"
-              src={"https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"}
-              alt={"selectedModel.model_name"}
-              width={150}
-              height={95}
+      <div className="grid grid-cols-2 gap-2">
+        <AnimatePresence>
+          {checkpointParam && (
+            <ModelSelectModal
+              title="Checkpoint"
+              description="A checkpoint is the core AI model used to create images. It determines the overall style, realism, and creativity of the results, guiding how the AI interprets your prompt to generate visuals."
+              coverImage={
+                selectedModels?.cover_image ||
+                "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
+              }
+              modelName={selectedModels?.model_name || "Select Model"}
+              conversationType={ConversationType.CHECKPOINT}
+              onSelectModel={handleCheckpointSelect}
             />
-            <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-              <p className="truncate font-satoshi text-sm font-medium text-accent">Noob xl</p>
-            </div>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-                <PencilSimpleIcon size={20} weight="fill" />
-              </span>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {loraParam && (
+            <ModelSelectModal
+              title="LoRA"
+              description="LoRA (Low-Rank Adaptation) models are small, fine-tuned models that can be added to a checkpoint to introduce specific styles, characters, or concepts without changing the base model."
+              coverImage={
+                selectedLoraModel?.cover_image ||
+                "https://i.pinimg.com/736x/84/27/67/842767f8e288bfd4a0cbf2977ee7661c.jpg"
+              }
+              modelName={selectedLoraModel?.model_name || "Select LoRA"}
+              conversationType={ConversationType.LORA}
+              onSelectModel={handleLoraSelect}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
       <div>
         <AnimatePresence>
           <div className="">
@@ -630,7 +586,7 @@ export const RunninghubParameters = forwardRef<
                   ref={textareaRef}
                   value={promptParam.fieldValue}
                   onChange={(e) => handlePromptChange(e.target.value)}
-                  className="hide-scrollbar prompt-textarea min-w-[420px] pl-12 pr-8"
+                  className="hide-scrollbar prompt-textarea min-h-24 w-full pl-12 pr-8 md:min-h-4 md:min-w-[420px]"
                   placeholder="A cute magical flying cat, cinematic, 4k"
                   maxHeight={100}
                   disabled={isSpinning}

@@ -22,7 +22,12 @@ export default function ErrorBox({
   return (
     <div
       className="relative overflow-hidden rounded-2xl bg-neutral-900"
-      style={{ width, height }}
+      style={{
+        width,
+        maxWidth: "100%",
+        height: "auto",
+        aspectRatio: `${width} / ${height}`,
+      }}
       role="alert"
       aria-live="polite"
     >
@@ -31,7 +36,7 @@ export default function ErrorBox({
         src={src}
         alt={alt}
         fill
-        sizes={`${width}px`}
+        sizes={`(max-width: 768px) 100vw, ${width}px`}
         className={`object-cover transition-all duration-300 ${
           hasError ? "scale-105 opacity-70 blur-md" : ""
         }`}
@@ -41,11 +46,11 @@ export default function ErrorBox({
 
       {/* Error overlay */}
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="mx-4 rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 shadow-lg backdrop-blur-md">
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 shadow-lg backdrop-blur-md">
             <div className="flex items-start gap-3 text-red-200">
               <svg
-                className="mt-0.5 size-5 text-red-300"
+                className="mt-0.5 size-5 min-w-5 text-red-300"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -56,7 +61,7 @@ export default function ErrorBox({
                   clipRule="evenodd"
                 />
               </svg>
-              <div className="max-w-[85%]">
+              <div className="flex-1">
                 <p className="font-medium text-red-100">Generation failed</p>
                 <p className="break-words text-sm text-red-200/90">{error}</p>
               </div>
@@ -68,12 +73,6 @@ export default function ErrorBox({
               >
                 Dismiss
               </button>
-              {/* <button
-                className="rounded-md bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/20"
-                onClick={() => location.reload()}
-              >
-                Retry
-              </button> */}
             </div>
           </div>
         </div>
