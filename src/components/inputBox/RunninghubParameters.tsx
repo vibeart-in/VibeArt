@@ -12,7 +12,7 @@ import React, {
   useState,
 } from "react";
 
-import { ConversationType, ModelData, NodeParam } from "@/src/types/BaseType";
+import { ConversationType, ModelData, NodeParam, PresetData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 import { getIconForParam } from "@/src/utils/server/utils";
 
@@ -50,6 +50,9 @@ export interface RunninghubParametersHandle {
   getValues: () => {
     values: NodeParam[];
     inputImages: string[];
+    currentImage?: ImageObject | null;
+    allImageObjects?: ImageObject[];
+    selectedPreset?: PresetData | null;
   };
   clearPrompt: () => void;
 }
@@ -283,37 +286,11 @@ const OtherParameters = ({
   );
 };
 
-// ============================================================================
-// 2. CUSTOM COMPARISON FUNCTION to prevent re-renders from prompt changes
-// ============================================================================
-const areOtherParamsEqual = (prevProps: any, nextProps: any) => {
-  // Check simple boolean toggles first
-  if (prevProps.showNegativePrompt !== nextProps.showNegativePrompt) return false;
-  if (prevProps.enableLoraStrength !== nextProps.enableLoraStrength) return false;
-
-  const prevParams = prevProps.otherParams;
-  const nextParams = nextProps.otherParams;
-
-  // Check if the number of parameters has changed
-  if (prevParams.length !== nextParams.length) return false;
-
-  // THE KEY: Iterate and check if any `fieldValue` has actually changed.
-  // This is what allows a change in "aspect_ratio" to trigger a re-render,
-  // while a change in the main component's "prompt" does not.
-  for (let i = 0; i < nextParams.length; i++) {
-    if (prevParams[i].fieldValue !== nextParams[i].fieldValue) {
-      return false; // A relevant value changed, so we must re-render.
-    }
-  }
-
-  // If we reach here, no relevant props have changed. Skip the re-render.
-  return true;
-};
 
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
+const MemoizedOtherParameters = React.memo(OtherParameters);
 
 export const RunninghubParameters = forwardRef<
   RunninghubParametersHandle,
@@ -323,6 +300,7 @@ export const RunninghubParameters = forwardRef<
   const [showNegativePrompt, setShowNegativePrompt] = useState(false);
   const [enableLoraStrength, setEnableLoraStrength] = useState(false);
   const [imageObjects, setImageObjects] = useState<Record<string, ImageObject | null>>({});
+  const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedModels, setSelectedModels] = useState<ModelData | null>(null);
@@ -368,6 +346,18 @@ export const RunninghubParameters = forwardRef<
         : p,
     );
     setValues(updatedValues);
+
+    // 6. Restore preset
+    const persistedPresetStr = sessionStorage.getItem("persistedPreset");
+    if (persistedPresetStr) {
+      try {
+        const preset = JSON.parse(persistedPresetStr);
+        setSelectedPreset(preset);
+      } catch (e) {
+        console.error("Failed to restore preset", e);
+      }
+      sessionStorage.removeItem("persistedPreset");
+    }
   }, [parameters]);
 
   useImperativeHandle(
@@ -382,6 +372,9 @@ export const RunninghubParameters = forwardRef<
         return {
           values: values, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
+          currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
+          allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
+          selectedPreset,
         };
       },
       clearPrompt: () => {
@@ -531,7 +524,12 @@ export const RunninghubParameters = forwardRef<
   return (
     <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
       {!(checkpointParam || loraParam) && (
-        <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
+        <PresetModal 
+          forModel={identifier} 
+          onSelectPrompt={handlePromptChange} 
+          selectedPreset={selectedPreset}
+          onSelect={setSelectedPreset}
+        />
       )}
       <div className="grid grid-cols-2 gap-2">
         <AnimatePresence>
@@ -633,6 +631,7 @@ export const RunninghubParameters = forwardRef<
             key={index}
             onImageUploaded={(image) => handleImageUploaded(param.description, image)}
             onImageRemoved={() => handleImageRemoved(param.description)}
+            initialImage={imageObjects[param.description]}
             imageDescription={param.description || `Image ${index}`}
           />
         );

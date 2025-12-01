@@ -25,6 +25,8 @@ type Props = {
   forModel?: string;
   onSelectPrompt?: (prompt: string) => void;
   triggerClassName?: string;
+  selectedPreset?: PresetData | null;
+  onSelect?: (preset: PresetData) => void;
 };
 
 const fetchPresets = async (forModel?: string): Promise<PresetData[]> => {
@@ -48,9 +50,16 @@ const fetchPresets = async (forModel?: string): Promise<PresetData[]> => {
   return (data as PresetData[]) || [];
 };
 
-const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassName }) => {
+const PresetModal: React.FC<Props> = ({
+  forModel,
+  onSelectPrompt,
+  triggerClassName,
+  selectedPreset: controlledSelectedPreset,
+  onSelect,
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
+  const [internalSelectedPreset, setInternalSelectedPreset] = useState<PresetData | null>(null);
+  const selectedPreset = controlledSelectedPreset ?? internalSelectedPreset;
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [mounted, setMounted] = useState(false);
@@ -87,7 +96,11 @@ const PresetModal: React.FC<Props> = ({ forModel, onSelectPrompt, triggerClassNa
   }, [presets, selectedTag]);
 
   const handleSelect = (preset: PresetData) => {
-    setSelectedPreset(preset);
+    if (onSelect) {
+      onSelect(preset);
+    } else {
+      setInternalSelectedPreset(preset);
+    }
     setIsDialogOpen(false);
     if (onSelectPrompt && preset.prompt) onSelectPrompt(preset.prompt);
   };

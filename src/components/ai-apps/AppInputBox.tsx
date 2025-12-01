@@ -75,6 +75,34 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
 
   useEffect(() => {
     setMounted(true);
+
+    const processInitialImage = () => {
+      // Check for URL query param first
+      const params = new URLSearchParams(window.location.search);
+      const queryImageUrl = params.get("image-url");
+
+      let sessionImage: ImageObject | null = null;
+
+      if (queryImageUrl) {
+        sessionImage = {
+          permanentPath: queryImageUrl,
+          displayUrl: queryImageUrl,
+        };
+      } else {
+        const initialImageData = sessionStorage.getItem("initialEditImage");
+        sessionImage = initialImageData ? JSON.parse(initialImageData) : null;
+      }
+
+      if (!sessionImage) return;
+
+      // Find the image parameter
+      const imageParam = values.find((p) => p.fieldName === "image");
+      if (imageParam) {
+        handleChange(imageParam.description, sessionImage.displayUrl, sessionImage);
+      }
+    };
+
+    processInitialImage();
   }, []);
 
   useEffect(() => {
@@ -268,6 +296,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                         setMediaObjects((prev) => ({ ...prev, [key]: null }));
                         sessionStorage.removeItem("initialEditImage");
                       }}
+                      initialImage={mediaObjects[key]}
                       imageDescription={param.description}
                     />
                   </div>
