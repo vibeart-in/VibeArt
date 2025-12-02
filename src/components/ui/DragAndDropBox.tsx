@@ -170,13 +170,13 @@ export default function DragAndDropBox({
   return (
     <>
       {uploadedImageUrl ? (
-        <div className="relative h-[60vh] w-full max-w-[600px]">
+        <div className="relative flex w-full max-w-[600px] justify-center">
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
-            className="size-full rounded-3xl border-2 border-white/20 object-cover"
+            className="h-auto max-h-[60vh] w-auto max-w-full rounded-3xl border-2 border-white/20"
           />
-          <button onClick={handleRemoveImage} className="absolute -right-4 -top-8">
+          <button onClick={handleRemoveImage} className="absolute -right-4 -top-4">
             <IconX size={32} className="custom-box hover:text-accent" />
           </button>
         </div>

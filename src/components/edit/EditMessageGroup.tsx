@@ -58,7 +58,7 @@ export default function EditMessageGroup({ group }: MessageGroupProps) {
                 transition={{ duration: 0.2 }}
               >
                 {/* Image */}
-                <Image
+                <img
                   className="w-full"
                   src={image.imageUrl}
                   width={300}
