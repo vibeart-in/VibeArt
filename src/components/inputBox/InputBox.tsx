@@ -188,6 +188,24 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   // --- Memoized Callbacks ---
   const handleModelSelect = useCallback((model: ModelData) => {
+    // Try to save the current image state before switching
+    try {
+      if (paramsRef.current) {
+        const { currentImage, allImageObjects, selectedPreset } = paramsRef.current.getValues();
+        if (currentImage) {
+          sessionStorage.setItem("initialEditImage", JSON.stringify(currentImage));
+        }
+        if (allImageObjects && allImageObjects.length > 0) {
+          sessionStorage.setItem("persistedInputImages", JSON.stringify(allImageObjects));
+        }
+        if (selectedPreset) {
+          sessionStorage.setItem("persistedPreset", JSON.stringify(selectedPreset));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to save image state on model switch:", e);
+    }
+
     setSelectedModel(model);
     setIsDialogOpen(false);
   }, []);

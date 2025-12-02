@@ -432,9 +432,7 @@ export const MediaCardView = ({
                     // If already on edit page, emit a custom event so the page can handle the file immediately
                     window.dispatchEvent(new CustomEvent("app:image-edit", { detail: mediaData }));
                   } else {
-                    // Otherwise navigate and include the image URL in the query
                     const encoded = encodeURIComponent(mediaUrl);
-                    // Use router.push if you have next/router or next/navigation; fallback to location.href
                     if ((window as any).nextRouterPush) {
                       (window as any).nextRouterPush(`/edit?image-url=${encoded}`);
                     } else {
@@ -447,14 +445,16 @@ export const MediaCardView = ({
                 label: "Upscale",
                 icon: IconWindowMaximize,
                 onClick: () => {
-                  window.location.href = `${window.origin}/edit?image-url=${encodeURIComponent(mediaUrl)}`;
+                  const encoded = encodeURIComponent(mediaUrl);
+                  window.location.href = `${window.origin}/ai-apps/108fa3df-6a1a-460b-aecb-cd1f025d4534?image-url=${encoded}`;
                 },
               },
               {
                 label: "Video",
                 icon: IconVideo,
                 onClick: () => {
-                  window.location.href = `${window.origin}/video?image-url=${encodeURIComponent(mediaUrl)}`;
+                  const encoded = encodeURIComponent(mediaUrl);
+                  window.location.href = `${window.origin}/video?image-url=${encoded}`;
                 },
               },
             ].map(({ label, icon: Icon, onClick }) => (

@@ -13,7 +13,7 @@ import React, {
   useState,
 } from "react";
 
-import { SchemaParam } from "@/src/types/BaseType";
+import { SchemaParam, PresetData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 import { getIconForParam } from "@/src/utils/server/utils";
 
@@ -51,6 +51,9 @@ export interface ReplicateParametersHandle {
   getValues: () => {
     values: Record<string, any>;
     inputImages: string[];
+    currentImage?: ImageObject | null;
+    allImageObjects?: ImageObject[];
+    selectedPreset?: PresetData | null;
   };
   clearPrompt: () => void;
 }
@@ -264,6 +267,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     const [inputImagePermanentPathsMap, setInputImagePermanentPathsMap] = useState<
       Record<string, string[]>
     >(() => ({}));
+    const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [isSpinning, setIsSpinning] = useState(false);
@@ -299,6 +303,14 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             values: filteredValues,
             inputImages: inputImagesFlat, // legacy-friendly
             inputImageMap: inputImagePermanentPathsMap, // new, keyed by original param key
+            currentImage:
+              Object.values(multiImagesMap).flat()[0] ||
+              null,
+            allImageObjects: [
+              ...Object.values(singleImageObjects).filter((img): img is ImageObject => img !== null),
+              ...Object.values(multiImagesMap).flat(),
+            ],
+            selectedPreset,
           };
         },
         clearPrompt: () => {
@@ -315,10 +327,22 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       const lastPrompt = sessionStorage.getItem("lastPrompt");
       if (lastPrompt) handleChange("prompt", lastPrompt);
 
-      const initialImageData = sessionStorage.getItem("initialEditImage");
-      const sessionImage: ImageObject | null = initialImageData
-        ? JSON.parse(initialImageData)
-        : null;
+      // Check for URL query param first
+      const params = new URLSearchParams(window.location.search);
+      const queryImageUrl = params.get("image-url");
+
+      let sessionImage: ImageObject | null = null;
+
+      if (queryImageUrl) {
+        sessionImage = {
+          permanentPath: queryImageUrl,
+          displayUrl: queryImageUrl,
+        };
+      } else {
+        const initialImageData = sessionStorage.getItem("initialEditImage");
+        sessionImage = initialImageData ? JSON.parse(initialImageData) : null;
+      }
+
       if (!sessionImage) return;
 
       // If session image exists, assign it sensibly to image keys:
@@ -331,19 +355,59 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
 
       if (imageParam?.type === "string") {
         setSingleImageObjects((prev) => ({ ...prev, [targetKey]: sessionImage }));
-        handleChange(targetKey, sessionImage.displayUrl);
+        handleChange(targetKey, sessionImage!.displayUrl);
         setInputImagePermanentPathsMap((prev) => ({
           ...prev,
-          [targetKey]: [sessionImage.permanentPath],
+          [targetKey]: [sessionImage!.permanentPath],
         }));
       } else if (imageParam?.type === "array") {
-        setMultiImagesMap((prev) => ({ ...prev, [targetKey]: [sessionImage] }));
+        setMultiImagesMap((prev) => ({ ...prev, [targetKey]: [sessionImage!] }));
         const normalizedKey = normalizeKey(targetKey);
-        setValues((prev) => ({ ...prev, [normalizedKey]: [sessionImage.displayUrl] }));
+        setValues((prev) => ({ ...prev, [normalizedKey]: [sessionImage!.displayUrl] }));
         setInputImagePermanentPathsMap((prev) => ({
           ...prev,
-          [targetKey]: [sessionImage.permanentPath],
+          [targetKey]: [sessionImage!.permanentPath],
         }));
+      }
+
+      // Restore multiple images if available
+      const persistedImagesStr = sessionStorage.getItem("persistedInputImages");
+      if (persistedImagesStr) {
+        try {
+          const persistedImages: ImageObject[] = JSON.parse(persistedImagesStr);
+          if (persistedImages.length > 0 && imageInputKeys.length > 0) {
+            const targetKey = imageInputKeys[0];
+            const imageParam = parameters[targetKey];
+
+            if (imageParam?.type === "array") {
+               setMultiImagesMap((prev) => ({ ...prev, [targetKey]: persistedImages }));
+               const normalizedKey = normalizeKey(targetKey);
+               setValues((prev) => ({ 
+                 ...prev, 
+                 [normalizedKey]: persistedImages.map(img => img.displayUrl) 
+               }));
+               setInputImagePermanentPathsMap((prev) => ({
+                 ...prev,
+                 [targetKey]: persistedImages.map(img => img.permanentPath),
+               }));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to restore persisted images", e);
+        }
+        sessionStorage.removeItem("persistedInputImages");
+      }
+
+      // Restore preset
+      const persistedPresetStr = sessionStorage.getItem("persistedPreset");
+      if (persistedPresetStr) {
+        try {
+          const preset = JSON.parse(persistedPresetStr);
+          setSelectedPreset(preset);
+        } catch (e) {
+          console.error("Failed to restore preset", e);
+        }
+        sessionStorage.removeItem("persistedPreset");
       }
     }, [initialValues, imageInputKeys, parameters, handleChange]);
 
@@ -482,7 +546,12 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     return (
       <div className="flex w-full flex-col gap-8 md:flex-row md:gap-3">
         <div className="flex flex-col gap-4">
-          <PresetModal forModel={identifier} onSelectPrompt={handlePromptChange} />
+          <PresetModal 
+            forModel={identifier} 
+            onSelectPrompt={handlePromptChange} 
+            selectedPreset={selectedPreset}
+            onSelect={setSelectedPreset}
+          />
 
           {/* Render all image inputs (one per image param) */}
           <div className="flex gap-4 md:hidden">
@@ -502,44 +571,6 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                 );
               }
 
-              if (imgParam.type === "array") {
-                const imgs = multiImagesMap[imgKey] || [];
-                return (
-                  <div key={imgKey} className="grid w-full grid-cols-3 gap-4">
-                    {imgs.map((img, idx) => (
-                      <div
-                        key={img.permanentPath}
-                        className="relative aspect-square w-full rounded-3xl border border-white/30 bg-black p-1.5"
-                      >
-                        <img
-                          src={img.displayUrl}
-                          alt={`uploaded-${idx}`}
-                          width={80}
-                          height={80}
-                          className="size-full rounded-[20px] object-cover object-top"
-                        />
-                        <button
-                          onClick={() => removeMultiImage(imgKey, idx)}
-                          className="absolute right-2.5 top-2.5 rounded-full bg-black bg-opacity-50 p-1 text-white transition-opacity"
-                          aria-label="Remove image"
-                        >
-                          <XIcon size={16} />
-                        </button>
-                      </div>
-                    ))}
-
-                    {(multiImagesMap[imgKey]?.length || 0) < 5 && (
-                      <ImageUploadBox
-                        key={imgKey + "-adder"}
-                        onImageUploaded={(img) => addMultiImage(imgKey, img)}
-                        onImageRemoved={handleMultiImageRemoved}
-                        imageDescription={`${imgParam.title}`}
-                        resetOnSuccess={true}
-                      />
-                    )}
-                  </div>
-                );
-              }
 
               return null;
             })}

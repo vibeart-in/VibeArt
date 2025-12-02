@@ -15,6 +15,9 @@ export interface ParametersSectionHandle {
     values: any; // Use a more specific type if possible
     inputImages: string[];
     promptText: string;
+    currentImage?: any; // ImageObject | null
+    allImageObjects?: any[]; // ImageObject[]
+    selectedPreset?: any; // PresetData | null
   };
   clearPrompt: () => void;
 }
@@ -29,17 +32,24 @@ const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionP
       getValues: () => {
         if (selectedModel.provider === "replicate") {
           if (!replicateParamsRef.current) throw new Error("Replicate parameters not ready");
-          const { values, inputImages } = replicateParamsRef.current.getValues();
-          return { values, inputImages, promptText: values.prompt || "" };
+          const { values, inputImages, currentImage, allImageObjects, selectedPreset } = replicateParamsRef.current.getValues();
+          return { values, inputImages, promptText: values.prompt || "", currentImage, allImageObjects, selectedPreset };
         }
 
         if (selectedModel.provider === "running_hub") {
           if (!runninghubParamsRef.current) throw new Error("Runninghub parameters not ready");
-          const { values, inputImages } = runninghubParamsRef.current.getValues();
+          const { values, inputImages, currentImage, allImageObjects, selectedPreset } = runninghubParamsRef.current.getValues();
           const promptParam = values.find(
             (p: any) => p.description === "prompt" || p.fieldName === "prompt",
           );
-          return { values, inputImages, promptText: promptParam?.fieldValue || "" };
+          return {
+            values,
+            inputImages,
+            promptText: promptParam?.fieldValue || "",
+            currentImage,
+            allImageObjects,
+            selectedPreset,
+          };
         }
 
         // Fallback for unsupported provider

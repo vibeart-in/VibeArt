@@ -566,12 +566,18 @@ export const MediaModal = ({
                     {
                       label: "Upscale",
                       icon: IconWindowMaximize,
-                      onClick: () => console.log("Upscale clicked"),
+                      onClick: () => {
+                        const encoded = encodeURIComponent(mediaUrl);
+                        window.location.href = `${window.origin}/ai-apps/108fa3df-6a1a-460b-aecb-cd1f025d4534?image-url=${encoded}`;
+                      },
                     },
                     {
                       label: "Video",
                       icon: IconVideo,
-                      onClick: () => console.log("Create Video clicked"),
+                      onClick: () => {
+                        const encoded = encodeURIComponent(mediaUrl);
+                        window.location.href = `${window.origin}/video?image-url=${encoded}`;
+                      },
                     },
                   ].map(({ label, icon: Icon, onClick }) => (
                     <button
