@@ -24,8 +24,8 @@ const ImageGallery = ({
   const breakpointColumnsObj = {
     default: columnCount,
     1280: Math.min(columnCount, 3),
-    1024: Math.min(columnCount, 2),
-    640: 2,
+    1024: Math.min(columnCount, 3),
+    700: 2,
   };
 
   return (

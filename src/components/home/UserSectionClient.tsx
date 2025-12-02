@@ -49,11 +49,11 @@ export function UserSectionClient() {
 
   // 3. After loading, if the user exists, show the authenticated UI
   return (
-    <div className="flex shrink-0 items-center gap-1 md:gap-3">
+    <div className="flex shrink-0 items-center gap-1 md:gap-3 ">
       {navInfo?.subscription_tier === "free" && (
         <Button
           variant="secondary"
-          className="flex h-8 items-center justify-center rounded-xl border border-[#D9E825]/30 bg-black/20 text-xs font-bold leading-4 text-accent shadow-[0px_0px_8px_rgba(217,232,37,0.38)]"
+          className="hidden md:flex h-8 items-center justify-center rounded-xl border border-[#D9E825]/30 bg-black/20 text-xs font-bold leading-4 text-accent shadow-[0px_0px_8px_rgba(217,232,37,0.38)]"
           onClick={() => router.push("/pricing")}
         >
           Upgrade

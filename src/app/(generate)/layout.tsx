@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import GenerationHistory from "@/src/components/home/GenerationHistory";
 import MainNavbar from "@/src/components/home/MainNavbar";
+import UpgradesFooter from "@/src/components/home/UpgradesFooter";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -24,6 +25,9 @@ export default function ImageLayout({
         <GenerationHistory />
       </div>
       <section className="size-full">{children}</section>
+      <div className="md:hidden">
+        <UpgradesFooter />
+      </div>
     </main>
   );
 }

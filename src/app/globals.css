@@ -185,6 +185,9 @@
     /* gutter size */
     background-clip: padding-box;
   }
+  .my-masonry-grid_column {
+    padding-left: 5px;
+  }
 }
 
 /* This is for each item within a column */
