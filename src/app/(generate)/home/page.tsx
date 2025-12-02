@@ -5,6 +5,7 @@ import LensCaveHero from "@/src/components/home/LensCaveHero";
 import HorizontalImageScroller from "@/src/components/landing/HorizontalImageScroller";
 import LensCaveCards from "@/src/components/home/LensCaveCards";
 import LensCaveLiveRooms from "@/src/components/home/LensCaveLiveRooms";
+import HomeFeatureCard from "@/src/components/home/HomeFeatureCard";
 
 export const revalidate = 3600;
 
@@ -96,8 +97,9 @@ const Page = async () => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <LensCaveHero />
+      <HomeFeatureCard />
       {/* <HorizontalImageScroller images={sampleImages} galleryHeight={450} /> */}
-      <LensCaveCards />
+      {/* <LensCaveCards /> */}
       {/* <LensCaveLiveRooms /> */}
     </main>
   );
