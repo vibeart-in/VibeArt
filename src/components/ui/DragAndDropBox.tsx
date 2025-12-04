@@ -1,6 +1,7 @@
 "use client";
 
-import { IconUpload, IconX } from "@tabler/icons-react";
+import { IconUpload, IconX, IconEdit } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -11,6 +12,7 @@ export default function DragAndDropBox({
 }: {
   onUploadSuccess: (paths: { permanentPath: string; displayUrl: string }) => void;
 }) {
+  const router = useRouter();
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -178,6 +180,13 @@ export default function DragAndDropBox({
           />
           <button onClick={handleRemoveImage} className="absolute -right-4 -top-4">
             <IconX size={32} className="custom-box hover:text-accent" />
+          </button>
+          <button 
+            onClick={() => router.push(`/design-editor?image-url=${encodeURIComponent(uploadedImageUrl)}`)} 
+            className="absolute -right-4 top-8"
+            title="Open in Design Editor"
+          >
+            <IconEdit size={32} className="custom-box hover:text-accent" />
           </button>
         </div>
       ) : (
