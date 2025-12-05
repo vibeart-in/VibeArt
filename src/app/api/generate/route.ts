@@ -63,7 +63,8 @@ export async function POST(req: Request) {
       p_parameters: parameters ?? {}, // plain JSON
       p_credit_cost: Number(modelCredit),
       p_initial_conversation_id: initialConversationId ?? null,
-      p_conversation_type: conversationType ?? "generate",
+      p_conversation_type:
+        conversationType === "canva" ? "generate" : conversationType ?? "generate",
       p_input_image_urls: Array.isArray(inputImagePermanentPaths)
         ? inputImagePermanentPaths.map(String)
         : [],

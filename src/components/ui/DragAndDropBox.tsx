@@ -181,13 +181,7 @@ export default function DragAndDropBox({
           <button onClick={handleRemoveImage} className="absolute -right-4 -top-4">
             <IconX size={32} className="custom-box hover:text-accent" />
           </button>
-          <button 
-            onClick={() => router.push(`/design-editor?image-url=${encodeURIComponent(uploadedImageUrl)}`)} 
-            className="absolute -right-4 top-8"
-            title="Open in Design Editor"
-          >
-            <IconEdit size={32} className="custom-box hover:text-accent" />
-          </button>
+          
         </div>
       ) : (
         <motion.div

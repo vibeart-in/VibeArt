@@ -1,100 +1,101 @@
-import React, { useRef, useEffect } from "react";
-import { Image as KonvaImage, Transformer } from "react-konva";
+import React, { useRef, useEffect, useState } from "react";
+import { Image as KonvaImage, Group, Rect, Transformer } from "react-konva";
 import useImage from "use-image";
 import Konva from "konva";
 
 interface DraggableImageProps {
   id: string;
   imageSrc: string;
-  isSelected: boolean;
-  onSelect: () => void;
-  onChange: (newAttrs: any) => void;
-  // Initial props
-  x?: number;
-  y?: number;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
   rotation?: number;
   scaleX?: number;
   scaleY?: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  onChange: (newAttrs: any) => void;
+  onDragEnd: () => void;
+  onTransformEnd: () => void;
 }
 
-export default function DraggableImage({
+const DraggableImage = ({
   id,
   imageSrc,
-  isSelected,
-  onSelect,
-  onChange,
-  x = 0,
-  y = 0,
+  x,
+  y,
+  width,
+  height,
   rotation = 0,
   scaleX = 1,
   scaleY = 1,
-}: DraggableImageProps) {
-  const [image] = useImage(imageSrc, "anonymous");
+  isSelected,
+  onSelect,
+  onChange,
+  onDragEnd,
+  onTransformEnd,
+}: DraggableImageProps) => {
+  const [image] = useImage(imageSrc, 'anonymous');
   const shapeRef = useRef<Konva.Image>(null);
   const trRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
     if (isSelected && trRef.current && shapeRef.current) {
-      // attach transformer manually
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer()?.batchDraw();
     }
   }, [isSelected]);
 
-  // Update parent with image dimensions once loaded
-  useEffect(() => {
-    if (image) {
-      onChange({
-        width: image.width,
-        height: image.height,
-      });
-    }
-  }, [image]);
-
   return (
-    <>
+    <React.Fragment>
       <KonvaImage
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         image={image}
-        name={`image-${id}`}
-        draggable
         x={x}
         y={y}
+        width={width}
+        height={height}
         rotation={rotation}
         scaleX={scaleX}
         scaleY={scaleY}
-        // Center the origin for easier rotation/scaling
-        offsetX={image ? image.width / 2 : 0}
-        offsetY={image ? image.height / 2 : 0}
+        draggable
+        name={`image-${id}`}
         onDragEnd={(e) => {
           onChange({
-            ...e.target.attrs,
+            x: e.target.x(),
+            y: e.target.y(),
           });
+          onDragEnd();
         }}
         onTransformEnd={(e) => {
-          // transformer is changing scale and rotation and absolutePosition
           const node = shapeRef.current;
           if (!node) return;
-
+          
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
-
-          // we will reset it back
-          node.scaleX(1);
-          node.scaleY(1);
-
+          
+          // reset scale to 1 to avoid weird scaling issues if we save it
+          // node.scaleX(1);
+          // node.scaleY(1);
+          
           onChange({
-            ...node.attrs,
             x: node.x(),
             y: node.y(),
-            // set minimal value
+            rotation: node.rotation(),
             scaleX: scaleX,
             scaleY: scaleY,
-            rotation: node.rotation(),
           });
+          onTransformEnd();
         }}
+        // Add a shadow or border effect when selected or hovered could be nice
+        shadowColor="black"
+        shadowBlur={10}
+        shadowOpacity={0.3}
+        shadowOffsetX={5}
+        shadowOffsetY={5}
       />
       {isSelected && (
         <Transformer
@@ -108,6 +109,8 @@ export default function DraggableImage({
           }}
         />
       )}
-    </>
+    </React.Fragment>
   );
-}
+};
+
+export default DraggableImage;

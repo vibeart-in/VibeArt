@@ -10,7 +10,10 @@ export const useModelsByUsecase = (conversationType: ConversationType) => {
     queryKey: ["modelsByUsecase", conversationType],
     queryFn: async () => {
       const { data, error: rpcError } = await supabase.rpc("get_models_by_usecase", {
-        p_usecase: conversationType || "generate",
+        p_usecase:
+          conversationType === ConversationType.CANVA
+            ? "generate"
+            : conversationType || "generate",
       });
       if (rpcError) throw new Error(rpcError.message);
       return data as unknown as ModelData[];

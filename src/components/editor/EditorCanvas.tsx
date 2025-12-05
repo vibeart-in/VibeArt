@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Group, Shape } from "react-konva";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { Stage, Layer, Group, Shape, Text } from "react-konva";
 import Konva from "konva";
+import { ZoomIn, ZoomOut } from "lucide-react";
 import DraggableImage from "./DraggableImage";
 import Toolbar from "./Toolbar";
-import { Undo2, Redo2, Upload, History, Layers, Plus } from "lucide-react";
-import { useGenerateImage } from "@/src/hooks/useGenerateImage";
-import { ConversationType } from "@/src/types/BaseType";
+import { ImageCardLoading } from "../ui/ImageCardLoading";
+import { conversationData } from "@/src/types/BaseType";
 
 interface EditorCanvasProps {
-  initialImageSrc: string;
+  turns: conversationData[];
+  isGenerating: boolean;
+  onEditImage: (imageUrl: string) => void;
+  onDeleteTurn: (turnId: string) => void;
 }
 
 interface ImageNode {
@@ -23,15 +26,15 @@ interface ImageNode {
   scaleY: number;
   width?: number;
   height?: number;
-  parentId?: string;
-  transformationType?: 'upload' | 'flip' | 'rotate' | 'crop' | 'remove-bg' | 'generate';
-  isLoading?: boolean;
+  type: 'input' | 'output' | 'placeholder';
+  turnId: string;
+  prompt?: string;
 }
 
 const Grid = React.memo(() => {
   const GRID_SIZE = 50;
-  const GRID_WIDTH = 5000;
-  const GRID_HEIGHT = 5000;
+  const GRID_WIDTH = 10000; // Large enough for "infinite" feel
+  const GRID_HEIGHT = 10000;
 
   return (
     <Group>
@@ -44,7 +47,7 @@ const Grid = React.memo(() => {
                  context.arc(i, j, 1, 0, Math.PI * 2, true);
               }
             }
-            context.fillStyle = "#333333"; // Darker dots for dark mode
+            context.fillStyle = "#333333"; 
             context.fill();
           }}
           listening={false}
@@ -53,219 +56,173 @@ const Grid = React.memo(() => {
   );
 });
 
-export default function EditorCanvas({ initialImageSrc }: EditorCanvasProps) {
+export default function EditorCanvas({ turns, isGenerating, onEditImage, onDeleteTurn }: EditorCanvasProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const stageRef = useRef<Konva.Stage>(null);
+  const [stageState, setStageState] = useState({ scale: 1, x: 0, y: 0 });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   
+  // Initialize size
   useEffect(() => {
     setSize({ width: window.innerWidth, height: window.innerHeight });
-    
-    const handleResize = () => {
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    
+    const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- State Management (Persistence) ---
-  const [nodes, setNodes] = useState<ImageNode[]>([]);
-  const [history, setHistory] = useState<ImageNode[][]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('editor-history');
-      let loadedNodes: ImageNode[] = [];
-      
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            loadedNodes = parsed;
-            setNodes(parsed);
-            setHistory([parsed]);
-            setHistoryIndex(0);
-          }
-        } catch (e) {
-          console.error("Failed to parse history", e);
-        }
-      }
-      
-      // Handle initialImageSrc (from URL)
-      // If we have an initial image, and it's NOT already in our loaded nodes, add it.
-      if (initialImageSrc) {
-         // Check if this src is already present to avoid duplicates on refresh
-         // Note: initialImageSrc might be a blob URL or signed URL that changes, so exact match might fail.
-         // But for now, let's assume if the user clicks "Edit", they want to see it.
-         // A simple heuristic: If loadedNodes is empty, definitely add it.
-         // If loadedNodes has items, we might want to append it as a new root?
-         
-         const alreadyExists = loadedNodes.some(n => n.src === initialImageSrc);
-         
-         if (!alreadyExists) {
-            const initialNode: ImageNode = {
-               id: `root-${Date.now()}`,
-               src: initialImageSrc,
-               x: window.innerWidth / 2 - 200, // Center X (approx)
-               y: window.innerHeight / 2 - 200, // Center Y (approx)
-               rotation: 0,
-               scaleX: 1,
-               scaleY: 1,
-               transformationType: 'upload',
-            };
-            
-            // If we had loaded nodes, append. If not, start fresh.
-            const newNodes = [...loadedNodes, initialNode];
-            setNodes(newNodes);
-            setHistory([newNodes]);
-            setHistoryIndex(0);
-         }
-      }
-    }
-  }, [initialImageSrc]);
-
-  // Save to localStorage whenever nodes change
-  useEffect(() => {
-    if (nodes.length > 0) {
-      localStorage.setItem('editor-history', JSON.stringify(nodes));
-    }
-  }, [nodes]);
-
-  // History helpers
-  const pushToHistory = (newNodes: ImageNode[]) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newNodes);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-    setNodes(newNodes);
-  };
-
-  const undo = () => {
-    if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setNodes(history[historyIndex - 1]);
-    }
-  };
-
-  const redo = () => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      setNodes(history[historyIndex + 1]);
-    }
-  };
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showHistorySidebar, setShowHistorySidebar] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [stageState, setStageState] = useState({
-    scale: 1,
-    x: 0,
-    y: 0,
-  });
-  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
-
-  const stageRef = useRef<Konva.Stage>(null);
-
-  // --- AI Integration ---
-  const generateMutation = useGenerateImage(ConversationType.GENERATE, undefined);
-
   // --- Layout Logic ---
+  const [localTransforms, setLocalTransforms] = useState<Record<string, Partial<ImageNode>>>({});
 
-  // Helper to convert file to base64
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  // Add new root image (Vertical Stack)
-  const addRootImage = async (file: File) => {
-    const base64 = await fileToBase64(file);
-    const rootNodes = nodes.filter(n => !n.parentId);
-    let maxY = window.innerHeight / 2 - 200; // Default center-ish
+  const nodes = useMemo(() => {
+    const calculatedNodes: ImageNode[] = [];
+    const GAP_X = 200; // Increased horizontal gap
+    const GAP_Y = 800; // Increased vertical gap
+    const IMAGE_SIZE = 400;
+    const START_X = 0;
+    const START_Y = 100;
     
-    // If we have existing roots, place below the last one
-    if (rootNodes.length > 0) {
-       // Find the lowest root
-       const lastRoot = rootNodes.reduce((prev, current) => (prev.y > current.y) ? prev : current);
-       maxY = lastRoot.y + (lastRoot.height || 400) + 50; // Vertical Gap
-    } else {
-       // First image, center it
-       maxY = window.innerHeight / 2 - 200;
-    }
+    let currentX = START_X;
+    let currentY = START_Y;
 
-    const newNode: ImageNode = {
-      id: `root-${Date.now()}`,
-      src: base64,
-      x: window.innerWidth / 2 - 200, // Center X
-      y: maxY,
-      rotation: 0,
-      scaleX: 1,
-      scaleY: 1,
-      transformationType: 'upload',
-    };
-    
-    pushToHistory([...nodes, newNode]);
-    setSelectedId(newNode.id);
-  };
+    turns.forEach((turn, index) => {
+       // Determine if this turn is a continuation of the previous one
+       let isContinuation = false;
+       if (index > 0) {
+           const prevTurn = turns[index - 1];
+           const prevOutputUrl = prevTurn.output_images?.[0]?.imageUrl;
+           const currInputUrl = turn.input_images?.[0]?.imageUrl;
+           
+           if (prevOutputUrl && currInputUrl) {
+               // Compare filenames (ignoring query params and bucket paths)
+               // This handles the case where the image is re-uploaded to a different bucket
+               const prevFilename = prevOutputUrl.split('?')[0].split('/').pop();
+               const currFilename = currInputUrl.split('?')[0].split('/').pop();
+               
+               console.log(`Turn ${index} Check:`, {
+                   prevFilename,
+                   currFilename,
+                   match: prevFilename === currFilename
+               });
 
-  // Add transformation node (Horizontal Chain)
-  const addTransformationNode = (parentId: string, newSrc: string, type: ImageNode['transformationType'], extraAttrs: Partial<ImageNode> = {}, explicitId?: string) => {
-    const HORIZONTAL_GAP = 50;
-    const parent = nodes.find(n => n.id === parentId);
-    if (!parent) return;
+               if (prevFilename && currFilename && prevFilename === currFilename) {
+                   isContinuation = true;
+               }
+           }
+       }
+       
+       if (isContinuation) {
+           // Continuation: The Input for this turn is the same as the Previous Output.
+           // We do NOT render the Input node again to avoid duplication.
+           // We just position the Output node to the right of the previous Output.
+           // Previous Output was at: currentX + GAP_X/2
+           // New Output should be at: (currentX + GAP_X/2) + IMAGE_SIZE + GAP_X
+           // So we shift currentX by IMAGE_SIZE + GAP_X
+           currentX += IMAGE_SIZE + GAP_X;
+       } else {
+           // New line or First item
+           if (index > 0) {
+               currentY += GAP_Y;
+           }
+           currentX = START_X;
+       }
 
-    // Calculate parent's visual width
-    // Use stored width or default to 400 if not yet loaded
-    const parentWidth = (parent.width || 400) * Math.abs(parent.scaleX);
-    
-    const newNode: ImageNode = {
-      id: explicitId || `node-${Date.now()}`,
-      src: newSrc,
-      x: parent.x + parentWidth + HORIZONTAL_GAP,
-      y: parent.y,
-      rotation: 0,
-      scaleX: 1,
-      scaleY: 1,
-      parentId,
-      transformationType: type,
-      ...extraAttrs
-    };
+       // Input Images (Left)
+       // Only render input if it's NOT a continuation
+       if (!isContinuation) {
+           const inputs = turn.input_images || [];
+           inputs.forEach((img, imgIndex) => {
+              const xPos = currentX - IMAGE_SIZE - GAP_X / 2 - (imgIndex * (IMAGE_SIZE + 20));
+              
+              calculatedNodes.push({
+                 id: `input-${turn.id}-${imgIndex}`,
+                 src: img.imageUrl,
+                 x: xPos,
+                 y: currentY,
+                 rotation: 0,
+                 scaleX: 1,
+                 scaleY: 1,
+                 width: IMAGE_SIZE,
+                 height: IMAGE_SIZE,
+                 type: 'input',
+                 turnId: turn.id,
+                 prompt: turn.userPrompt
+              });
+           });
+       }
 
-    pushToHistory([...nodes, newNode]);
-    setSelectedId(newNode.id);
-  };
-
-  // Update toolbar position
-  const updateToolbar = () => {
-     if (!selectedId) return;
-     // Find the node by name. DraggableImage sets name={`image-${id}`}
-     const node = stageRef.current?.findOne(`.image-${selectedId}`);
-     if (node) {
-       const box = node.getClientRect();
-       setToolbarPosition({
-         top: box.y,
-         left: box.x + box.width + 20, // Right side
+       // Output Images (Right)
+       const outputs = turn.output_images || [];
+       outputs.forEach((img, imgIndex) => {
+          const xPos = currentX + GAP_X / 2 + (imgIndex * (IMAGE_SIZE + 20));
+          
+          calculatedNodes.push({
+             id: `output-${turn.id}-${imgIndex}`,
+             src: img.imageUrl,
+             x: xPos,
+             y: currentY,
+             rotation: 0,
+             scaleX: 1,
+             scaleY: 1,
+             width: IMAGE_SIZE,
+             height: IMAGE_SIZE,
+             type: 'output',
+             turnId: turn.id,
+             prompt: turn.userPrompt
+          });
        });
+       
+       // Placeholder logic
+       const isTurnGenerating = turn.job_status === 'pending' || turn.job_status === 'processing' || turn.job_status === 'starting' || turn.job_status === 'QUEUED' || turn.job_status === 'RUNNING';
+       
+       if ((isGenerating && index === turns.length - 1) || (isTurnGenerating && outputs.length === 0)) {
+          const xPos = currentX + GAP_X / 2;
+          calculatedNodes.push({
+             id: `placeholder-${turn.id}`,
+             src: '',
+             x: xPos,
+             y: currentY,
+             rotation: 0,
+             scaleX: 1,
+             scaleY: 1,
+             width: IMAGE_SIZE,
+             height: IMAGE_SIZE,
+             type: 'placeholder',
+             turnId: turn.id,
+             prompt: "Generating..."
+          });
+       }
+    });
+
+    // Apply local transforms
+    return calculatedNodes.map(node => ({
+        ...node,
+        ...(localTransforms[node.id] || {})
+    }));
+
+  }, [turns, isGenerating, localTransforms]);
+
+  // Auto-scroll to latest turn
+  useEffect(() => {
+     if (turns.length > 0) {
+        const lastTurnIndex = turns.length - 1;
+        const GAP_Y = 600;
+        const targetY = 100 + (lastTurnIndex * GAP_Y);
+        
+        const newY = -targetY * stageState.scale + size.height / 2;
+        const newX = size.width / 2; 
+
+        setStageState(prev => ({
+            ...prev,
+            x: newX,
+            y: newY
+        }));
      }
-  };
+  }, [turns.length, isGenerating, size.height, size.width]);
 
-  // Handle node updates (drag/transform)
-  const handleNodeChange = (id: string, newAttrs: Partial<ImageNode>) => {
-    const newNodes = nodes.map(n => n.id === id ? { ...n, ...newAttrs } : n);
-    setNodes(newNodes);
-  };
 
-  const handleDragEnd = () => {
-    pushToHistory(nodes);
-  };
+  // --- Interactions ---
 
-  // Zoom logic
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
     const stage = stageRef.current;
@@ -291,230 +248,172 @@ export default function EditorCanvas({ initialImageSrc }: EditorCanvasProps) {
     });
   };
 
-  const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-    const clickedOnEmpty = e.target === e.target.getStage();
-    if (clickedOnEmpty) {
-      setSelectedId(null);
+  const updateToolbar = () => {
+    if (!selectedId) return;
+    const node = stageRef.current?.findOne(`.image-${selectedId}`);
+    if (node) {
+      const box = node.getClientRect();
+      setToolbarPosition({
+        top: box.y,
+        left: box.x + box.width + 20,
+      });
     }
   };
 
   useEffect(() => {
-    if (selectedId) {
-      updateToolbar();
-    }
-  }, [selectedId, nodes, stageState]);
+    if (selectedId) updateToolbar();
+  }, [selectedId, stageState]);
 
-  if (size.width === 0) return null;
+  const handleNodeChange = (id: string, newAttrs: any) => {
+      setLocalTransforms(prev => ({
+          ...prev,
+          [id]: { ...(prev[id] || {}), ...newAttrs }
+      }));
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[#0a0a0a]">
-      {/* Top Left Controls */}
-      <div className="absolute left-4 top-4 z-50 flex gap-2">
+      {/* Zoom Controls */}
+      <div className="absolute bottom-8 right-8 z-50 flex flex-col gap-2">
          <button 
-           onClick={undo} 
-           disabled={historyIndex <= 0}
-           className="rounded bg-[#1a1a1a] p-2 text-white shadow ring-1 ring-white/10 disabled:opacity-50 hover:bg-[#2a2a2a]"
-           title="Undo"
+            className="rounded-full bg-[#1a1a1a] p-3 text-white shadow-xl hover:bg-[#2a2a2a]"
+            onClick={() => setStageState(s => ({ ...s, scale: s.scale * 1.2 }))}
          >
-           <Undo2 size={20} />
+            <ZoomIn size={20} />
          </button>
          <button 
-           onClick={redo} 
-           disabled={historyIndex >= history.length - 1}
-           className="rounded bg-[#1a1a1a] p-2 text-white shadow ring-1 ring-white/10 disabled:opacity-50 hover:bg-[#2a2a2a]"
-           title="Redo"
+            className="rounded-full bg-[#1a1a1a] p-3 text-white shadow-xl hover:bg-[#2a2a2a]"
+            onClick={() => setStageState(s => ({ ...s, scale: s.scale / 1.2 }))}
          >
-           <Redo2 size={20} />
+            <ZoomOut size={20} />
          </button>
-         <div className="h-full w-px bg-white/10 mx-2" />
-         <button 
-           onClick={() => fileInputRef.current?.click()}
-           className="flex items-center gap-2 rounded bg-yellow-500 px-4 py-2 text-black font-medium shadow hover:bg-yellow-400"
-         >
-           <Plus size={18} />
-           <span>Add Image</span>
-         </button>
-         <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                addRootImage(e.target.files[0]);
-              }
-            }}
-         />
       </div>
-
-      {/* Top Right Sidebar Toggle */}
-      <div className="absolute right-4 top-4 z-50">
-        <button
-          onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-          className={`rounded p-2 shadow ring-1 ring-white/10 ${showHistorySidebar ? 'bg-yellow-500 text-black' : 'bg-[#1a1a1a] text-white'}`}
-          title="Toggle Layers"
-        >
-          <Layers size={20} />
-        </button>
-      </div>
-
-      {/* Sidebar */}
-      {showHistorySidebar && (
-        <div className="absolute right-4 top-16 z-40 h-[calc(100vh-100px)] w-64 overflow-y-auto rounded-xl bg-[#1a1a1a] p-4 shadow-xl ring-1 ring-white/10">
-           <h3 className="mb-4 flex items-center gap-2 font-semibold text-white">
-             <History size={18} />
-             Layers
-           </h3>
-           <div className="flex flex-col gap-2">
-             {nodes.map((node, index) => (
-               <div 
-                 key={node.id}
-                 onClick={() => setSelectedId(node.id)}
-                 className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors ${
-                   selectedId === node.id ? 'bg-yellow-500/20 ring-1 ring-yellow-500' : 'hover:bg-white/5'
-                 }`}
-               >
-                 <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-black">
-                    <img src={node.src} alt="" className="h-full w-full object-cover" />
-                 </div>
-                 <div className="flex flex-col overflow-hidden">
-                    <span className="truncate text-sm font-medium text-white">
-                      {node.transformationType === 'upload' ? 'Original' : 
-                       node.transformationType === 'generate' ? 'Generated' :
-                       node.transformationType}
-                    </span>
-                    <span className="text-xs text-gray-500">ID: {node.id.slice(-4)}</span>
-                 </div>
-               </div>
-             ))}
-             {nodes.length === 0 && (
-               <p className="text-center text-sm text-gray-500">No images</p>
-             )}
-           </div>
-        </div>
-      )}
 
       <Stage
         width={size.width}
         height={size.height}
         onWheel={handleWheel}
-        onMouseDown={checkDeselect}
-        onTouchStart={checkDeselect}
         draggable
-        ref={stageRef}
-        scaleX={stageState.scale}
-        scaleY={stageState.scale}
         x={stageState.x}
         y={stageState.y}
-        onDragMove={() => selectedId && updateToolbar()}
+        scaleX={stageState.scale}
+        scaleY={stageState.scale}
+        onDragEnd={(e) => {
+            setStageState(prev => ({
+                ...prev,
+                x: e.target.x(),
+                y: e.target.y()
+            }));
+        }}
+        onMouseDown={(e) => {
+            if (e.target === e.target.getStage()) {
+                setSelectedId(null);
+            }
+        }}
+        ref={stageRef}
       >
         <Layer>
           <Grid />
-          {nodes.map((node) => (
-            <React.Fragment key={node.id}>
-              <DraggableImage
-                id={node.id}
-                imageSrc={node.src}
-                isSelected={selectedId === node.id}
-                onSelect={() => setSelectedId(node.id)}
-                onChange={(newAttrs) => handleNodeChange(node.id, newAttrs)}
-                onDragEnd={handleDragEnd}
-                onTransformEnd={handleDragEnd}
-                x={node.x}
-                y={node.y}
-                rotation={node.rotation}
-                scaleX={node.scaleX}
-                scaleY={node.scaleY}
-              />
-              {node.isLoading && (
-                <Group x={node.x + (node.width || 0) / 2} y={node.y + (node.height || 0) / 2}>
-                   <Shape
-                      sceneFunc={(context, shape) => {
-                        context.beginPath();
-                        context.arc(0, 0, 20, 0, Math.PI * 2, false);
-                        context.fillStyle = 'rgba(0,0,0,0.7)';
-                        context.fill();
-                        context.font = '12px Arial';
-                        context.fillStyle = 'white';
-                        context.fillText('Loading...', -25, 4);
-                      }}
-                   />
-                </Group>
-              )}
-            </React.Fragment>
-          ))}
+          {nodes.map((node) => {
+            if (node.type === 'placeholder') return null; // Rendered as HTML overlay
+
+            return (
+            <Group key={node.id}>
+                {/* Prompt Text Above Image */}
+                {node.prompt && (
+                    <Text
+                        x={node.x}
+                        y={node.y - 40}
+                        text={node.prompt}
+                        fontSize={16}
+                        fill="white"
+                        width={node.width || 400}
+                        align="center"
+                        fontFamily="Inter, sans-serif"
+                        opacity={0.7}
+                    />
+                )}
+                
+                <DraggableImage
+                    id={node.id}
+                    imageSrc={node.src}
+                    x={node.x}
+                    y={node.y}
+                    width={node.width}
+                    height={node.height}
+                    rotation={node.rotation}
+                    scaleX={node.scaleX}
+                    scaleY={node.scaleY}
+                    isSelected={selectedId === node.id}
+                    onSelect={() => setSelectedId(node.id)}
+                    onChange={(attrs) => handleNodeChange(node.id, attrs)}
+                    onDragEnd={() => {}}
+                    onTransformEnd={() => {}}
+                />
+            </Group>
+            );
+          })}
         </Layer>
       </Stage>
+
+      {/* HTML Overlays for Placeholders */}
+      {nodes.filter(n => n.type === 'placeholder').map(node => (
+          <div
+            key={node.id}
+            className="absolute z-10 pointer-events-none"
+            style={{
+                left: node.x * stageState.scale + stageState.x,
+                top: node.y * stageState.scale + stageState.y,
+                width: (node.width || 400) * stageState.scale,
+                height: (node.height || 400) * stageState.scale,
+            }}
+          >
+             <div style={{ transform: `scale(${stageState.scale})`, transformOrigin: 'top left', width: node.width || 400, height: node.height || 400 }}>
+                <ImageCardLoading 
+                    width={node.width || 400} 
+                    loadingText="Generating..." 
+                    variant="cool"
+                />
+             </div>
+          </div>
+      ))}
 
       {selectedId && (
         <Toolbar
           position={toolbarPosition}
           onFlipX={() => {
-             const parent = nodes.find(n => n.id === selectedId);
-             if (parent) {
-               addTransformationNode(selectedId, parent.src, 'flip', { scaleX: -parent.scaleX });
-             }
+              const current = localTransforms[selectedId] || {};
+              // Get current scaleX from nodes or local
+              const node = nodes.find(n => n.id === selectedId);
+              const currentScaleX = current.scaleX ?? node?.scaleX ?? 1;
+              
+              handleNodeChange(selectedId, { scaleX: -currentScaleX });
           }}
           onRotate={() => {
-             const parent = nodes.find(n => n.id === selectedId);
-             if (parent) {
-               addTransformationNode(selectedId, parent.src, 'rotate', { rotation: parent.rotation + 90 });
-             }
-          }}
-          onCrop={() => console.log("Crop triggered")}
-          onReplace={(file) => {
-             addRootImage(file);
-          }}
-          onDelete={() => {
-            const newNodes = nodes.filter(n => n.id !== selectedId);
-            pushToHistory(newNodes);
-            setSelectedId(null);
+              const current = localTransforms[selectedId] || {};
+              const node = nodes.find(n => n.id === selectedId);
+              const currentRot = current.rotation ?? node?.rotation ?? 0;
+              
+              handleNodeChange(selectedId, { rotation: currentRot + 90 });
           }}
           onRemoveBg={() => {
-             const parent = nodes.find(n => n.id === selectedId);
-             if (parent) {
-                addTransformationNode(selectedId, parent.src, 'remove-bg');
-             }
+              console.log("Remove BG triggered for", selectedId);
+              // Implement API call here if needed
           }}
-          onPromptEdit={(prompt) => {
-             if (prompt && selectedId) {
-                const parent = nodes.find(n => n.id === selectedId);
-                if (!parent) return;
-
-                // Create a placeholder node with a stable ID
-                const placeholderId = `node-${Date.now()}`;
-                addTransformationNode(selectedId, "https://placehold.co/600x400?text=Generating...", 'generate', { isLoading: true }, placeholderId);
-                
-                // Call API
-                generateMutation.mutate({
-                  modelName: "flux-schnell", // Default model
-                  modelIdentifier: "flux-schnell",
-                  modelCredit: 1,
-                  modelProvider: "replicate",
-                  conversationType: ConversationType.GENERATE,
-                  inputImagePermanentPaths: [parent.src], // Pass parent image
-                  parameters: { prompt } as any,
-                }, {
-                  onSuccess: (data) => {
-                    // Update the specific placeholder node
-                    setNodes(prev => prev.map(n => {
-                      if (n.id === placeholderId) {
-                         const newSrc = data.output_images?.[0]?.imageUrl || "https://placehold.co/600x400?text=Error";
-                         return { ...n, src: newSrc, isLoading: false };
-                      }
-                      return n;
-                    }));
-                  },
-                  onError: () => {
-                     setNodes(prev => prev.map(n => {
-                       if (n.id === placeholderId) {
-                          return { ...n, src: "https://placehold.co/600x400?text=Failed", isLoading: false };
-                       }
-                       return n;
-                     }));
-                  }
-                });
-             }
+          onPromptEdit={() => {
+              const node = nodes.find(n => n.id === selectedId);
+              if (node) {
+                  onEditImage(node.src);
+              }
+          }}
+          onDelete={() => {
+              const node = nodes.find(n => n.id === selectedId);
+              console.log("Delete clicked. SelectedId:", selectedId, "Node:", node);
+              if (node) {
+                  console.log("Calling onDeleteTurn with:", node.turnId);
+                  onDeleteTurn(node.turnId);
+                  setSelectedId(null); // Deselect after delete
+              }
           }}
         />
       )}

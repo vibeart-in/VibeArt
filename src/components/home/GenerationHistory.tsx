@@ -110,9 +110,11 @@ MemoizedHistoryList.displayName = "MemoizedHistoryList";
 
 interface GenerationHistoryProps {
   isMobileDropdown?: boolean;
+  side?: "left" | "right";
+  forcedType?: ConversationType;
 }
 
-const GenerationHistory = ({ isMobileDropdown = false }: GenerationHistoryProps) => {
+const GenerationHistory = ({ isMobileDropdown = false, side = "left", forcedType }: GenerationHistoryProps) => {
   const params = useParams();
   const pathname = usePathname();
   const activeId = params.id as string | undefined;
@@ -121,13 +123,18 @@ const GenerationHistory = ({ isMobileDropdown = false }: GenerationHistoryProps)
    * OPTIMIZATION 3: Memoize derived path segment to prevent re-calculating on every render.
    */
   const conversationType = useMemo(() => {
+    if (forcedType) return forcedType;
+    
     const pathSegment = pathname.split("/")[1];
     const validConversationTypes = Object.values(ConversationType);
+    
+    console.log("GenerationHistory Debug:", { pathname, pathSegment, validTypes: validConversationTypes });
+
     if (pathSegment && validConversationTypes.includes(pathSegment as ConversationType)) {
       return pathSegment as ConversationType;
     }
     return null;
-  }, [pathname]);
+  }, [pathname, forcedType]);
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
@@ -270,9 +277,11 @@ const GenerationHistory = ({ isMobileDropdown = false }: GenerationHistoryProps)
     return <div className="flex w-full flex-col p-2">{content}</div>;
   }
 
+  const positionClass = side === "right" ? "right-4" : "left-4";
+
   return (
     <>
-      <div className="fixed left-4 top-1/2 z-50 -translate-y-1/2" aria-label="History rail">
+      <div className={`fixed ${positionClass} top-1/2 z-50 -translate-y-1/2`} aria-label="History rail">
         <div className="w-[75px] rounded-2xl bg-gradient-to-b from-[#0d0d0d] via-[#111111] to-[#151515] p-2 pt-3">
           {content}
         </div>

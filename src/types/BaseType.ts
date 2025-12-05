@@ -84,6 +84,7 @@ export enum ConversationType {
   ADVANCE = "advance_generate",
   CHECKPOINT = "checkpoint",
   LORA = "lora",
+  CANVA = "canva",
 }
 
 export interface ImageCard3DType {
@@ -126,6 +127,7 @@ export type conversationData = {
   userPrompt: string;
   model_name: string;
   prediction_id?: string;
+  created_at: string;
 };
 
 export type PresetData = {
