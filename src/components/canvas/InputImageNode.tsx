@@ -40,7 +40,7 @@ export default function InputImageNode({ data, selected }: NodeProps<InputImageN
           </div>
         )}
 
-        {/* Overlay Gradient (Optional, maybe lighter for input?) */}
+        {/* Overlay Gradient */}
         <div
           className={`pointer-events-none absolute inset-0 rounded-[28px] transition-opacity duration-300 ${
             selected ? "bg-black/10" : "bg-transparent group-hover:bg-black/10"
@@ -52,7 +52,7 @@ export default function InputImageNode({ data, selected }: NodeProps<InputImageN
       <div
         className="absolute left-0 right-0 top-4 flex items-center justify-center px-4 font-medium text-white/90"
         style={{
-          fontSize: `${14 / zoom}px`, // Slightly larger for clarity
+          fontSize: `${14 / zoom}px`,
         }}
       >
         <span className="drop-shadow-md">Input Image</span>

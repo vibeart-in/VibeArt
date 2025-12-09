@@ -1,0 +1,65 @@
+[33mc6414d7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mreact-flow[m[33m, [m[1;31morigin/react-flow[m[33m)[m feat: Add canvas page with input and output image nodes, supporting image upload, image generation, and node management.
+[33m5b60e8e[m feat: inital node setup
+[33m86f1966[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m Merge pull request #5 from vibeart-in/aruneditvideo
+[33m5bfb65e[m[33m ([m[1;31morigin/aruneditvideo[m[33m, [m[1;32maruneditvideo[m[33m)[m feat: Introduce `DragAndDropBox` component for image uploads with URL processing from query parameters and `EditMessageGroup` component.
+[33mdf2d411[m Merge pull request #4 from vibeart-in/arunabi
+[33me11b41c[m feat: add core UI components including preset and image modals, input boxes, parameter sections, and image card view.
+[33m5825033[m[33m ([m[1;31morigin/arunabi[m[33m, [m[1;32marunabi[m[33m)[m feat: add upgrade footer for free users and example generations gallery
+[33mab31120[m feat: add initial UI components, pages, and global styling for the VibeArt application.
+[33m570ee8e[m fix: Add gallery button and loading, Mobile responsive runninghub parameters
+[33m7c5678b[m fix: inputBox scroll fix
+[33m31482a9[m feat: add `UserSectionClient` for user authentication UI, `GalleryGrid` for image display, and `MainNavbar` for site navigation.
+[33m2cf8123[m feat: add ImageCardLoading component for animated loading states and PresetModal for selecting image generation presets.
+[33m60aa9e3[m feat: App input box mobile responsive
+[33m975788f[m Merge pull request #3 from vibeart-in/akaiapps
+[33mf67641e[m[33m ([m[1;31morigin/akaiapps[m[33m)[m fix: App card mobile style fix
+[33m3fb523a[m[33m ([m[1;32makaiapps[m[33m)[m feat: Enhance responsiveness and interactivity in AppGenerationCard and GroupImageLayout components
+[33m783db25[m chore: Add skleton loading for ai apps
+[33m6caac45[m feat: Update PresetModal layout for improved responsiveness
+[33me46585a[m feat: Enhance responsiveness and layout for mobile and desktop views across components
+[33m76a13c4[m[33m ([m[1;32makedit[m[33m)[m chore: fix format and linting
+[33md4f0dcb[m Merge branch 'master' of https://github.com/vibeart-in/VibeArt
+[33m9fc7ce4[m feat: Mobile responsive generation session and inputbox
+[33m55c0b88[m Merge pull request #2 from vibeart-in/aruntab
+[33mfac3ceb[m[33m ([m[1;31morigin/aruntab[m[33m, [m[1;32maruntab[m[33m)[m feat: Improve PresetModal and PresetCard with responsive design and code cleanup
+[33m9d4be0c[m feat: Enhance PresetModal with tag filtering and UI updates
+[33mee7d997[m feat: Add prompts upload and mobile responsive
+[33mf325383[m[33m ([m[1;31morigin/arun2[m[33m, [m[1;32marun2[m[33m)[m feat: Refactor image generation routes and components for consistency
+[33md8b0047[m Merge pull request #1 from vibeart-in/arunroute
+[33m766221b[m[33m ([m[1;31morigin/arunroute[m[33m, [m[1;32marunroute[m[33m)[m fix: Update import path for GenerateButton component
+[33m282d06f[m feat: Implement new AI generation pages and components
+[33m7f1a107[m feat: Add new AI generation pages and components for enhanced user experience
+[33m32b6b0c[m feat: Add New blog and improving SEO and performance of blog
+[33m4e87c52[m feat: Implement blog route
+[33md7a430a[m Removed next Image for img tag
+[33mdef6ffe[m feat: Added variable credits for video models
+[33m589a5fa[m fix: Home page and Main navbar
+[33m716c80f[m fix: AppGenerationCard multiple image fix
+[33md35f1b5[m feat: Add metatags
+[33me0f4a9e[m fix: App generation history fix
+[33m4139839[m Redeploy
+[33m7c3c630[m feat: Added presets and separate conversations
+[33m713d980[m feat: pricing and payment
+[33m6484779[m chore: linting fix
+[33m52b78d6[m feat: New style dialog box, refined conversation page and more fixes
+[33m392d2dd[m fix: Bug fixes
+[33me68f12e[m chore: fix linting with prettier and eslint
+[33mac52679[m feat: AI APP complete
+[33m1c8dcf6[m feat: Finished styling for AI apps
+[33m60dff58[m feat: Add edit chat and optimized images
+[33m6973b9b[m build error fix
+[33mab7910a[m feat: finished generate image workflow
+[33m8553eff[m feat: redesgin
+[33md002d89[m feat: pricing page complete
+[33m15976ec[m feat: Add pricing page
+[33m4b62b92[m feat: footer complete
+[33m558a341[m feat: upscale section complete
+[33mc7170c2[m style: upscale section start
+[33ma655c8b[m feat: privacy, edit section
+[33m414c002[m feat: scroll card
+[33m47ebdd2[m feat: Initial landing page
+[33m18721ed[m feat: Implement full image generation
+[33mcf16658[m feat: model select
+[33m46211ee[m feat: initial message and response done
+[33m460be49[m feat: Finish home page
+[33me34068f[m style: Input box style
