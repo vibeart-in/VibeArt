@@ -22,7 +22,7 @@ export default function EditMessageGroup({ group }: MessageGroupProps) {
   const handleEditClick = (e: React.MouseEvent, imageUrl: string) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const mediaData = {
       permanentPath: imageUrl,
       displayUrl: imageUrl,
@@ -49,8 +49,8 @@ export default function EditMessageGroup({ group }: MessageGroupProps) {
         <div className="sticky top-8 ml-0 flex flex-col items-center gap-4 justify-self-start md:justify-self-end lg:ml-44 lg:flex-row">
           <div className="flex max-w-[100px] flex-wrap gap-4 lg:max-w-[350px]">
             {input_images.map((image) => (
-              <motion.div 
-                key={image.id} 
+              <motion.div
+                key={image.id}
                 className="group relative w-[350px] cursor-pointer overflow-hidden rounded-3xl border-2 border-white/20"
                 onMouseEnter={() => setHoveredImageId(image.id)}
                 onMouseLeave={() => setHoveredImageId(null)}
@@ -65,23 +65,23 @@ export default function EditMessageGroup({ group }: MessageGroupProps) {
                   height={300}
                   alt="INPUT IMAGE"
                 />
-                
+
                 {/* Border overlay - same as MediaCardView */}
                 <div className="pointer-events-none absolute inset-0 rounded-3xl border-2 border-white/10" />
-                
+
                 {/* Hover Overlay with same gradient and animation as MediaCardView */}
                 <motion.div
                   className="absolute bottom-0 left-0 hidden w-full p-3 sm:p-4 md:block"
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ 
+                  animate={{
                     opacity: hoveredImageId === image.id ? 1 : 0,
-                    y: hoveredImageId === image.id ? 0 : 20
+                    y: hoveredImageId === image.id ? 0 : 20,
                   }}
                   transition={{ duration: 0.25 }}
                 >
                   {/* Gradient overlay background - same as MediaCardView */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
-                  
+
                   {/* Edit button with same styling as MediaCardView */}
                   <div className="pointer-events-auto relative">
                     <button

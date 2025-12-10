@@ -70,7 +70,11 @@ const Page = () => {
           </div>
         </div>
 
-        <ExampleGenerations limit={15} showcaseFor={ConversationType.VIDEO} className="!mt-44 origin-bottom scale-95 !pb-0 md:scale-100" />
+        <ExampleGenerations
+          limit={15}
+          showcaseFor={ConversationType.VIDEO}
+          className="!mt-44 origin-bottom scale-95 !pb-0 md:scale-100"
+        />
       </div>
     </section>
   );
