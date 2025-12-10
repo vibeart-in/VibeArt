@@ -26,7 +26,7 @@ type ImageNodeData = {
 // Define the specific Node type
 export type OutputImageNodeType = Node<ImageNodeData, "outputImage">;
 
-export default function OutputImageNode({ data, selected }: NodeProps<OutputImageNodeType>) {
+export default function OutputImage({ data, selected }: NodeProps<OutputImageNodeType>) {
   const { zoom } = useViewport();
   const { width = 2, height = 3 } = data;
   const [isHovered, setIsHovered] = useState(false);

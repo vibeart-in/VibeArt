@@ -17,8 +17,6 @@ function parseRatio(ratio: string | number): number {
   return h === 0 ? 1 : w / h;
 }
 
-
-
 export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
   ratio = "1:1",
   width = 400,

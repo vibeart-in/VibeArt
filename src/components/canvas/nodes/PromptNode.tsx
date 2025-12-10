@@ -1,20 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Handle, Position, NodeProps, Node, useViewport, NodeResizeControl } from "@xyflow/react";
 
-type PromptNodeData = {
+type PromptData = {
   label?: string;
   prompt?: string;
   onChange?: (value: string) => void; // optional callback to bubble changes
   [key: string]: unknown;
 };
 
-export type PromptNodeType = Node<PromptNodeData, "prompt">;
+export type PromptType = Node<PromptData, "prompt">;
 
 const MIN_WIDTH = 280;
 const MIN_HEIGHT = 200;
 const DEBOUNCE_MS = 300;
 
-export default function PromptNode({ data, selected }: NodeProps<PromptNodeType>) {
+export default function Prompt({ data, selected }: NodeProps<PromptType>) {
   const { zoom } = useViewport();
   const [prompt, setPrompt] = useState<string>(data.prompt ?? "");
   const hoverTimeout = useRef<number | null>(null);

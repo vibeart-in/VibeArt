@@ -312,7 +312,7 @@ export const MediaCardView = ({
       role="button"
       tabIndex={0}
       // note: added min-h fallback so card doesn't collapse while waiting for ratio
-      className="md: relative min-h-[90px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[12px] md:rounded-[28px] will-change-transform"
+      className="md: relative min-h-[90px] w-full min-w-[100px] cursor-pointer overflow-hidden rounded-[12px] will-change-transform md:rounded-[28px]"
       variants={parentVariants}
       initial="rest"
       animate="rest"
@@ -404,7 +404,7 @@ export const MediaCardView = ({
         )}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-[12px] md:rounded-[28px] border-2 border-white/10" />
+      <div className="pointer-events-none absolute inset-0 rounded-[12px] border-2 border-white/10 md:rounded-[28px]" />
 
       <motion.div
         className="absolute bottom-0 left-0 hidden w-full bg-gradient-to-t from-black/75 to-transparent p-3 will-change-[opacity,transform] sm:p-4 md:block"

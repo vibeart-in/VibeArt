@@ -288,7 +288,6 @@ const OtherParameters = ({
   );
 };
 
-
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
@@ -383,7 +382,9 @@ export const RunninghubParameters = forwardRef<
           values: currentValues, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
           currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
-          allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
+          allImageObjects: Object.values(imageObjects).filter(
+            (img): img is ImageObject => img !== null,
+          ),
           selectedPreset,
         };
       },

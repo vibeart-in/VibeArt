@@ -6,7 +6,7 @@ import {
   PhotoIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
-import { FireIcon } from "@phosphor-icons/react";
+import { FireIcon, GraphIcon } from "@phosphor-icons/react";
 import { ChevronDown, Folder } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -62,6 +62,11 @@ export default function MainNavbar() {
       name: "AI Apps",
       link: "/ai-apps",
       icon: <PuzzlePieceIcon className="size-5" />,
+    },
+    {
+      name: "Canvas",
+      link: "/canvas",
+      icon: <GraphIcon size={24} weight="fill" />,
     },
   ];
 
