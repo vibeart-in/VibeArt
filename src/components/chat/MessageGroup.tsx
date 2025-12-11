@@ -7,12 +7,13 @@ import MessageTurn from "./MessageTurn";
 
 interface MessageGroupProps {
   message: conversationData;
+  conversationId: string;
 }
 
-export default function MessageGroup({ message }: MessageGroupProps) {
+export default function MessageGroup({ message, conversationId }: MessageGroupProps) {
   return (
     <div className="md:ml-32">
-      <MessageTurn message={message} isEdit={false} />
+      <MessageTurn message={message} isEdit={false} conversationId={conversationId} />
     </div>
   );
 }

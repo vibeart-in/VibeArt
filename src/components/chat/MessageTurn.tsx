@@ -32,10 +32,11 @@ const getLoadingMessage = (status: string) => {
 interface MessageTurnProps {
   message: conversationData;
   isEdit?: boolean;
+  conversationId?: string;
 }
 
 // Renamed from MessageBox to MessageTurn
-export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
+export default function MessageTurn({ message, isEdit, conversationId }: MessageTurnProps) {
   const {
     job_status,
     output_images,
@@ -178,9 +179,16 @@ export default function MessageTurn({ message, isEdit }: MessageTurnProps) {
                   width={image.width || 800}
                   height={image.height || 800}
                   prompt={userPrompt}
+                  conversationId={conversationId}
+                  imageId={image.id}
                 />
               </div>
             ))
+          ) : job_status === "succeeded" && output_images.length === 0 ? (
+            <ErrorBox
+              src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/chibi_anime_girl_bowing_polite.webp"
+              error="Failed to load"
+            />
           ) : job_status === "pending" ||
             job_status === "processing" ||
             job_status === "QUEUED" ||
