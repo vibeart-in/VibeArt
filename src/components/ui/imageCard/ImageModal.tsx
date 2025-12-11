@@ -14,6 +14,8 @@ import {
 } from "@tabler/icons-react";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
+import { deleteImage } from "@/src/actions/deleteImage";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState, KeyboardEvent, MouseEvent } from "react";
@@ -37,6 +39,8 @@ interface MediaModalProps {
   mediaUrl: string;
   isMediaVideo: boolean;
   videoOptions?: VideoOptions;
+  imageId?: string;
+  conversationId?: string;
 }
 
 export const MediaModal = ({
@@ -50,8 +54,11 @@ export const MediaModal = ({
   mediaUrl,
   isMediaVideo,
   videoOptions = {},
+  imageId,
+  conversationId,
 }: MediaModalProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // --- Render gating: prevents building the heavy DOM when modal is closed.
   // shouldRender is true once the modal should exist in the DOM (either open now,
@@ -128,6 +135,32 @@ export const MediaModal = ({
     setIsZoomed(false);
     onClose();
   }, [onClose]);
+
+  const handleDelete = useCallback(async () => {
+    if (!imageId) return;
+    
+    const loadingToast = toast.loading("Deleting image...");
+    
+    try {
+      const result = await deleteImage(imageId);
+      
+      if (!result.success) {
+        throw new Error(result.error || "Failed to delete");
+      }
+
+      toast.success("Image deleted successfully", { id: loadingToast });
+      closeModal();
+      
+      if (conversationId) {
+        await queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+      } else {
+        router.refresh();
+      }
+    } catch (error: any) {
+      console.error("Failed to delete:", error);
+      toast.error(error.message || "Failed to delete", { id: loadingToast });
+    }
+  }, [imageId, conversationId, router, closeModal, queryClient]);
 
   const handleModalMediaLoad = useCallback(() => {
     setIsModalMediaLoading(false);
@@ -375,7 +408,7 @@ export const MediaModal = ({
                       size={28}
                     />
                   </button>
-                  <button type="button" aria-label="Delete image">
+                  <button type="button" aria-label="Delete image" onClick={handleDelete}>
                     <IconTrash
                       className="cursor-pointer transition-colors hover:text-red-400"
                       size={28}
