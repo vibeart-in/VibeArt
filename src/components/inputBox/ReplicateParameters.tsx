@@ -299,6 +299,11 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             filteredValues[key] = value;
           }
 
+          if (selectedStyle?.prompt) {
+            const existing = filteredValues["prompt"] || "";
+            filteredValues["prompt"] = existing ? `${existing} ${selectedStyle.prompt}` : selectedStyle.prompt;
+          }
+
           // Flatten permanent paths into an array (backwards-compatible) and also return a map for clarity
           const inputImagesFlat = Object.values(inputImagePermanentPathsMap).flat().filter(Boolean);
           return {
@@ -648,6 +653,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                   onSelectPrompt={handlePromptChange}
                   selectedStyle={selectedStyle}
                   onSelect={setSelectedStyle}
+                  currentPrompt={values.prompt}
                 />
               )}
             </div>
