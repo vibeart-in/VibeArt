@@ -47,6 +47,7 @@ const MidjourneyStylesModal: React.FC<Props> = ({
   triggerClassName,
   selectedStyle: controlledSelectedStyle,
   onSelect,
+  currentPrompt,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [internalSelectedStyle, setInternalSelectedStyle] = useState<MidjourneyStyleData | null>(
@@ -97,15 +98,13 @@ const MidjourneyStylesModal: React.FC<Props> = ({
       setInternalSelectedStyle(style);
     }
     
-    if (onSelectPrompt && style.prompt) {
-      onSelectPrompt(style.prompt);
-    }
-    
     // Auto-close with a small delay to allow state updates to settle
-    // This helps prevents visual glitches
     setTimeout(() => {
       setIsDialogOpen(false);
     }, 50);
+    
+    // We no longer update the prompt text here (as per user request)
+    // The style is stored in selectedStyle and appended during generation
   };
 
   const hasPreview = Boolean(selectedStyle?.cover);

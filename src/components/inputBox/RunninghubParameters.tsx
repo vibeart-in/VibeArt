@@ -372,8 +372,15 @@ export const RunninghubParameters = forwardRef<
           .filter((img): img is ImageObject => img !== null) // Filter out nulls
           .map((img) => img.permanentPath); // Extract the permanent path
 
+        const currentValues = values.map((p) => {
+          if ((p.description === "prompt" || p.fieldName === "prompt") && selectedStyle?.prompt) {
+             return { ...p, fieldValue: `${p.fieldValue} ${selectedStyle.prompt}` };
+          }
+          return p;
+        });
+
         return {
-          values: values, // This array contains the displayUrl for images
+          values: currentValues, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
           currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
           allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
@@ -644,6 +651,7 @@ export const RunninghubParameters = forwardRef<
               onSelectPrompt={handlePromptChange}
               selectedStyle={selectedStyle}
               onSelect={setSelectedStyle}
+              currentPrompt={promptParam?.fieldValue || ""}
             />
           </div>
         )}
