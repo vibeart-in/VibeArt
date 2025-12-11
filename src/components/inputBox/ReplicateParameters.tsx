@@ -17,6 +17,7 @@ import { SchemaParam, PresetData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 import { getIconForParam } from "@/src/utils/server/utils";
 
+import MidjourneyStylesModal from "./MidjourneyStylesModal";
 import PresetModal from "./PresetModal";
 import AnimatedCounter from "../ui/AnimatedCounter";
 import ImageUploadBox from "../ui/ImageUploadBox";
@@ -268,6 +269,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       Record<string, string[]>
     >(() => ({}));
     const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [isSpinning, setIsSpinning] = useState(false);
@@ -543,15 +545,22 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       !values.prompt?.trim() || values.prompt !== lastEnhancedPromptRef.current;
     const isDisabled = !canEnhanceOrGetRandom || isSpinning;
 
+    const memoizedIsMidjourney = useMemo(() => {
+      const name = modelName ? modelName.toLowerCase() : "";
+      return name === "midjourney - fast" || name === "midjourney - upscale";
+    }, [modelName]);
+
     return (
       <div className="flex w-full flex-col gap-8 md:flex-row md:gap-3">
         <div className="flex flex-col gap-4">
-          <PresetModal 
-            forModel={identifier} 
-            onSelectPrompt={handlePromptChange} 
-            selectedPreset={selectedPreset}
-            onSelect={setSelectedPreset}
-          />
+          {!memoizedIsMidjourney && (
+            <PresetModal
+              forModel={identifier}
+              onSelectPrompt={handlePromptChange}
+              selectedPreset={selectedPreset}
+              onSelect={setSelectedPreset}
+            />
+          )}
 
           {/* Render all image inputs (one per image param) */}
           <div className="flex gap-4 md:hidden">
@@ -630,6 +639,18 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+
+          <div className="flex w-full justify-between gap-2">
+            <div>
+              {memoizedIsMidjourney && (
+                <MidjourneyStylesModal
+                  onSelectPrompt={handlePromptChange}
+                  selectedStyle={selectedStyle}
+                  onSelect={setSelectedStyle}
+                />
+              )}
+            </div>
           </div>
 
           <MemoizedOtherParameters

@@ -137,3 +137,12 @@ export type PresetData = {
   tags?: string[] | null;
   for_model: string[];
 };
+
+export type MidjourneyStyleData = {
+  id: number;
+  created_at: string;
+  name: string;
+  prompt: string;
+  cover: string;
+  tags?: string[] | null;
+};

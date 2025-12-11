@@ -12,10 +12,12 @@ import React, {
   useState,
 } from "react";
 
-import { ConversationType, ModelData, NodeParam, PresetData } from "@/src/types/BaseType";
+import { ConversationType, ModelData, NodeParam, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+
 import { getIconForParam } from "@/src/utils/server/utils";
 
+import MidjourneyStylesModal from "./MidjourneyStylesModal";
 import ModelSelectModal from "./ModelSelectModal";
 import PresetModal from "./PresetModal";
 import { ImageObject } from "./ReplicateParameters";
@@ -301,6 +303,7 @@ export const RunninghubParameters = forwardRef<
   const [enableLoraStrength, setEnableLoraStrength] = useState(false);
   const [imageObjects, setImageObjects] = useState<Record<string, ImageObject | null>>({});
   const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedModels, setSelectedModels] = useState<ModelData | null>(null);
@@ -521,16 +524,22 @@ export const RunninghubParameters = forwardRef<
     }
   };
 
+  const memoizedIsMidjourney = useMemo(() => {
+    const name = modelName ? modelName.toLowerCase() : "";
+    return name === "midjourney - fast" || name === "midjourney - upscale";
+  }, [modelName]);
+
   return (
-    <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
-      {!(checkpointParam || loraParam) && (
-        <PresetModal 
-          forModel={identifier} 
-          onSelectPrompt={handlePromptChange} 
+      <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
+      {/* If it's Midjourney, show MidjourneyStylesModal instead of PresetModal */}
+      {!memoizedIsMidjourney && !(checkpointParam || loraParam) ? (
+        <PresetModal
+          forModel={identifier}
+          onSelectPrompt={handlePromptChange}
           selectedPreset={selectedPreset}
           onSelect={setSelectedPreset}
         />
-      )}
+      ) : null}
       <div className="grid grid-cols-2 gap-2">
         <AnimatePresence>
           {checkpointParam && (
@@ -613,6 +622,8 @@ export const RunninghubParameters = forwardRef<
           </div>
         </AnimatePresence>
 
+       
+
         <MemoizedOtherParameters
           otherParams={otherParams}
           handleChange={handleChange}
@@ -623,7 +634,19 @@ export const RunninghubParameters = forwardRef<
           setEnableLoraStrength={setEnableLoraStrength}
           hasLoraStrengthParam={hasLoraStrengthParam}
         />
+        
+        
+
       </div>
+      {memoizedIsMidjourney && (
+          <div className="w-full">
+            <MidjourneyStylesModal
+              onSelectPrompt={handlePromptChange}
+              selectedStyle={selectedStyle}
+              onSelect={setSelectedStyle}
+            />
+          </div>
+        )}
       {imageParams.map((param, index) => {
         return (
           <ImageUploadBox
