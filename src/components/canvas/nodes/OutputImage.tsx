@@ -7,6 +7,7 @@ import {
   NodeResizeControl,
   NodeToolbar,
 } from "@xyflow/react";
+import NodeLayout from "../NodeLayout";
 import React, { useState, useRef, useCallback } from "react";
 import { MoreHorizontal, Download, Pencil, Sparkles, ChevronDown, Plug } from "lucide-react";
 
@@ -50,43 +51,10 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
   }, []);
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      {selected && (
-        <NodeResizeControl
-          position="bottom-right"
-          minWidth={100}
-          minHeight={100}
-          keepAspectRatio
-          style={{
-            background: "transparent",
-            border: "none",
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{
-              position: "absolute",
-              bottom: -6,
-              right: -6,
-            }}
-          >
-            <path
-              d="M 3 17 A 14 14 0 0 0 17 3"
-              stroke="#c0c0bf80"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-          </svg>
-        </NodeResizeControl>
-      )}
-
+    <>
       <NodeToolbar isVisible={selected || isHovered} position={Position.Bottom} offset={30}>
         <div
-          className="flex items-center gap-1 rounded-2xl border border-[#2e2e2e] bg-[#151515] px-2 py-1.5 shadow-xl"
+          className="flex items-center gap-1 rounded-2xl border border-[#1D1D1D] bg-[#151515] px-2 py-1.5 shadow-xl"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -124,33 +92,53 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
           </div>
         </div>
       </NodeToolbar>
-      <div
-        className={`group relative cursor-default rounded-[28px] transition-all duration-300 ${
-          selected ? "ring-2 ring-[#e2e2e2]/50" : "hover:ring-2 hover:ring-[#e2e2e2]/30"
-        }`}
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
+      <NodeLayout
+        selected={selected}
+        title={data.category || "Image generation"}
+        subtitle={data.model}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="h-[400px] w-[320px] cursor-default rounded-[28px]"
+        handles={[
+          { type: "target", position: Position.Left },
+          { type: "source", position: Position.Right },
+        ]}
       >
-        {/* Input Handle - Target */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          className={`!bg-[#DFFF00] transition-opacity duration-300 ${
-            selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          }`}
-          style={{
-            width: `${16 / zoom}px`,
-            height: `${16 / zoom}px`,
-            left: `${-20 / zoom}px`,
-            borderWidth: `${3 / zoom}px`,
-            borderColor: "#1a1a1a",
-          }}
-        />
+        {selected && (
+          <NodeResizeControl
+            position="bottom-right"
+            minWidth={100}
+            minHeight={100}
+            keepAspectRatio
+            style={{
+              background: "transparent",
+              border: "none",
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                position: "absolute",
+                bottom: -6,
+                right: -6,
+              }}
+            >
+              <path
+                d="M 3 17 A 14 14 0 0 0 17 3"
+                stroke="#c0c0bf80"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </NodeResizeControl>
+        )}
 
         {/* Background Image */}
-        <div className="relative h-full w-full rounded-[28px] bg-gray-900">
+        <div className="relative h-full w-full rounded-[28px] bg-[#1D1D1D]">
           {data.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -160,88 +148,73 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
               draggable={false}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-500">
-              No Image
+            <div className="flex h-full w-full items-center justify-center">
+              {/* Empty state with "Try" prompt */}
             </div>
           )}
 
-          {/* Overlay Gradient - darker at bottom for text, darker at top for header */}
-          <div
-            className={`pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-b from-transparent via-transparent to-black/80 transition-opacity duration-300 ${
-              selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}
-          />
+          {/* Overlay Gradient - visible when image exists */}
+          {data.imageUrl && (
+            <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+          )}
         </div>
 
-        {/* Header Info - Always Visible */}
-        <div
-          className="absolute bottom-full left-0 right-0 flex items-center justify-between px-1 font-medium text-white/90"
-          style={{
-            marginBottom: `${8 / zoom}px`,
-          }}
-        >
-          <span
-            className="max-w-[60%] truncate font-light"
-            style={{
-              fontSize: `${12 / zoom}px`,
-            }}
-          >
-            {data.category || "Image generation"}
-          </span>
-          <span
-            className="max-w-[35%] truncate font-extralight opacity-80"
-            style={{
-              fontSize: `${10 / zoom}px`,
-            }}
-          >
-            {data.model}
-          </span>
-        </div>
-
-        {/* Footer / Prompt - Visible on Hover/Selected */}
-        <div
-          className={`absolute bottom-0 left-0 right-0 p-5 transition-opacity duration-300 ${
-            selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          }`}
-        >
-          {data.inputImageUrls && data.inputImageUrls.length > 0 && (
-            <div className="scrollbar-hide mb-3 flex items-center gap-2 overflow-x-auto pb-1">
-              {data.inputImageUrls.map((url, index) => (
-                <div
-                  key={index}
-                  className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt={`Input reference ${index + 1}`}
-                    className="size-16 object-cover"
-                  />
+        {/* Footer / Prompt - Visible when image exists or on hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-5">
+          {!data.imageUrl ? (
+            // Before generation: Show "Try [prompt]" text
+            <p className="text-[15px] font-light leading-relaxed text-white/70">
+              Try "{data.prompt || "Enter a prompt"}"
+            </p>
+          ) : (
+            // After generation: Show input images and prompt
+            <>
+              {data.inputImageUrls && data.inputImageUrls.length > 0 && (
+                <div className="scrollbar-hide mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+                  {data.inputImageUrls.map((url, index) => (
+                    <div
+                      key={index}
+                      className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt={`Input reference ${index + 1}`}
+                        className="size-16 object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+              <p className="line-clamp-3 text-[15px] font-light leading-relaxed text-white/90 drop-shadow-sm">
+                {data.prompt}
+              </p>
+            </>
           )}
-          <p className="line-clamp-3 text-[13px] font-light leading-relaxed text-white/90 drop-shadow-sm">
-            {data.prompt}
-          </p>
         </div>
 
-        {/* Output Handle - Visible on Hover/Selected */}
-        <Handle
-          type="source"
-          position={Position.Right}
-          className={`!bg-[#DFFF00] transition-opacity duration-300 ${
-            selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          }`}
-          style={{
-            width: `${16 / zoom}px`,
-            height: `${16 / zoom}px`,
-            right: `${-20 / zoom}px`,
-            borderWidth: `${3 / zoom}px`,
-            borderColor: "#1a1a1a",
+        {/* Generate Button - Bottom Right (yellow circle with up arrow) */}
+        <button
+          className="absolute bottom-5 right-5 flex size-12 items-center justify-center rounded-full bg-[#DFFF00] text-black shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+          onClick={() => {
+            // TODO: Implement image generation
+            console.log("Generate image with prompt:", data.prompt);
           }}
-        />
-      </div>
-    </div>
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        </button>
+      </NodeLayout>
+    </>
   );
 }
