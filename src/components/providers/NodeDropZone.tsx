@@ -4,10 +4,11 @@ import { useReactFlow } from "@xyflow/react";
 import { FileIcon, ImageIcon, VideoIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
 import { useNodeOperations } from "./NodeProvider";
 import { useCanvas } from "./CanvasProvider";
-import { uploadImage } from "@/src/utils/server/UploadImage";
 import { cn } from "@/src/lib/utils";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 
 type NodeDropzoneProviderProps = {
   children: ReactNode;
@@ -17,53 +18,81 @@ export const NodeDropzoneProvider = ({ children }: NodeDropzoneProviderProps) =>
   const { getViewport } = useReactFlow();
   const { addNode } = useNodeOperations();
   const project = useCanvas();
+
   const dropzone = useDropzone({
     noClick: true,
     autoFocus: false,
     noKeyboard: true,
     disabled: !project,
     onDrop: async (acceptedFiles) => {
-      const uploads = await Promise.all(
-        acceptedFiles.map(async (file) => {
-          const { displayUrl } = await uploadImage({ file });
+      if (acceptedFiles.length === 0) return;
+      const toastId = toast.loading(`Processing ${acceptedFiles.length} file(s)...`);
+
+      try {
+        // 1. Get Viewport Center
+        const viewport = getViewport();
+        const centerX = -viewport.x / viewport.zoom + window.innerWidth / 2 / viewport.zoom;
+        const centerY = -viewport.y / viewport.zoom + window.innerHeight / 2 / viewport.zoom;
+
+        // 2. Upload Files using the Server Action
+        const promises = acceptedFiles.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const result = await uploadImageAction(formData);
+
           return {
-            name: file.name,
-            data: { url: displayUrl, type: file.type },
+            originalFile: file,
+            result: result,
           };
-        }),
-      );
-
-      // Get the current viewport
-      const viewport = getViewport();
-
-      // Calculate the center of the current viewport
-      const centerX = -viewport.x / viewport.zoom + window.innerWidth / 2 / viewport.zoom;
-      const centerY = -viewport.y / viewport.zoom + window.innerHeight / 2 / viewport.zoom;
-
-      for (const { data, name } of uploads) {
-        let nodeType = "file";
-
-        if (data.type.startsWith("image/")) {
-          nodeType = "inputImage";
-        } else if (data.type.startsWith("video/")) {
-          nodeType = "inputVideo";
-        } else if (data.type.startsWith("audio/")) {
-          nodeType = "inputAudio";
-        }
-
-        addNode(nodeType, {
-          data: {
-            imageUrl: data.url,
-            content: {
-              type: data.type,
-              name,
-            },
-          },
-          position: {
-            x: centerX,
-            y: centerY,
-          },
         });
+
+        const uploads = await Promise.all(promises);
+
+        // 3. Create Nodes
+        let successCount = 0;
+        uploads.forEach(({ originalFile, result }, index) => {
+          if (!result.success || !result.data) {
+            toast.error(`Failed to upload ${originalFile.name}: ${result.error}`);
+            return;
+          }
+
+          successCount++;
+          // UPDATED: We now get 'url' (public) instead of 'displayUrl' (signed)
+          const { imageId, url, width, height } = result.data;
+
+          let nodeType = "file";
+          if (originalFile.type.startsWith("image/")) {
+            nodeType = "inputImage";
+          } else if (originalFile.type.startsWith("video/")) {
+            nodeType = "inputVideo";
+          }
+
+          addNode(nodeType, {
+            data: {
+              label: originalFile.name,
+              url: url,
+              imageId: imageId,
+              width: width,
+              height: height,
+            },
+            position: {
+              x: centerX + index * 40,
+              y: centerY + index * 40,
+            },
+          });
+        });
+
+        if (successCount === acceptedFiles.length) {
+          toast.success(`Successfully added ${successCount} node(s)`, { id: toastId });
+        } else if (successCount > 0) {
+          toast.warning(`Added ${successCount}/${acceptedFiles.length} node(s)`, { id: toastId });
+        } else {
+          toast.error("Failed to add nodes", { id: toastId });
+        }
+      } catch (error) {
+        console.error("Dropzone error:", error);
+        toast.error("An unexpected error occurred", { id: toastId });
       }
     },
   });

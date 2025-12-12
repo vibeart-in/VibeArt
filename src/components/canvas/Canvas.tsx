@@ -226,125 +226,125 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
-      {/* <NodeDropzoneProvider> */}
-      {/* <ContextMenu> */}
-      {/* <ContextMenuTrigger className="block h-full w-full"> */}
-      <ReactFlow
-        deleteKeyCode={["Backspace", "Delete"]}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        fitView
-        // isValidConnection={isValidConnection}
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onConnect={handleConnect}
-        onConnectStart={handleConnectStart}
-        onConnectEnd={handleConnectEnd}
-        onEdgesChange={handleEdgesChange}
-        onNodesChange={handleNodesChange}
-        // panOnScroll
-        selectionOnDrag={true}
-        colorMode="dark"
-        proOptions={{ hideAttribution: true }}
-        snapToGrid={true}
-        snapGrid={[42, 42]}
-        minZoom={0.1}
-        maxZoom={10}
-        defaultEdgeOptions={{
-          style: {
-            stroke: "#4b5563",
-            strokeWidth: 2,
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#4b5563",
-          },
-        }}
-        connectionLineStyle={{
-          stroke: "#DFFF00",
-          strokeWidth: 4,
-        }}
-        // {...rest}
-      >
-        <CustomControls nodes={nodes} setNodes={setNodes} minZoom={0.25} maxZoom={3} />
+      <NodeDropzoneProvider>
+        <ContextMenu>
+          <ContextMenuTrigger className="block h-full w-full">
+            <ReactFlow
+              deleteKeyCode={["Backspace", "Delete"]}
+              edges={edges}
+              edgeTypes={edgeTypes}
+              fitView
+              // isValidConnection={isValidConnection}
+              nodes={nodes}
+              nodeTypes={nodeTypes}
+              onConnect={handleConnect}
+              onConnectStart={handleConnectStart}
+              onConnectEnd={handleConnectEnd}
+              onEdgesChange={handleEdgesChange}
+              onNodesChange={handleNodesChange}
+              // panOnScroll
+              selectionOnDrag={true}
+              colorMode="dark"
+              proOptions={{ hideAttribution: true }}
+              snapToGrid={true}
+              snapGrid={[42, 42]}
+              minZoom={0.1}
+              maxZoom={10}
+              defaultEdgeOptions={{
+                style: {
+                  stroke: "#4b5563",
+                  strokeWidth: 2,
+                },
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                  color: "#4b5563",
+                },
+              }}
+              connectionLineStyle={{
+                stroke: "#DFFF00",
+                strokeWidth: 4,
+              }}
+              // {...rest}
+            >
+              <CustomControls nodes={nodes} setNodes={setNodes} minZoom={0.25} maxZoom={3} />
 
-        {children}
-      </ReactFlow>
-      {/* </ContextMenuTrigger>
-        <ContextMenuContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
-          <div className="mb-1 flex items-center border-b border-zinc-800 px-2 py-1.5">
-            <Search size={14} className="mr-2 text-zinc-500" />
-            <input
-              className="h-auto w-full border-none bg-transparent p-0 text-sm text-zinc-300 placeholder-zinc-500 outline-none focus:ring-0"
-              placeholder="Search"
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-          </div>
-
-          <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-            <Upload size={14} className="mr-2" />
-            Upload
-          </ContextMenuItem>
-          <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-            <Layers size={14} className="mr-2" />
-            Media
-          </ContextMenuItem>
-
-          <ContextMenuSeparator className="bg-zinc-800" />
-
-          <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
-            NODES
-          </ContextMenuLabel>
-
-          <ContextMenuItem
-            className="focus:bg-zinc-800 focus:text-zinc-100"
-            onClick={() => addNode("prompt")}
-          >
-            <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
-              <Type size={12} />
+              {children}
+            </ReactFlow>
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
+            <div className="mb-1 flex items-center border-b border-zinc-800 px-2 py-1.5">
+              <Search size={14} className="mr-2 text-zinc-500" />
+              <input
+                className="h-auto w-full border-none bg-transparent p-0 text-sm text-zinc-300 placeholder-zinc-500 outline-none focus:ring-0"
+                placeholder="Search"
+                onKeyDown={(e) => e.stopPropagation()}
+              />
             </div>
-            Text
-          </ContextMenuItem>
 
-          <ContextMenuItem
-            className="focus:bg-zinc-800 focus:text-zinc-100"
-            onClick={() => addNode("outputImage")}
-          >
-            <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
-              <ImageIcon size={12} />
-            </div>
-            Image Generator
-          </ContextMenuItem>
+            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+              <Upload size={14} className="mr-2" />
+              Upload
+            </ContextMenuItem>
+            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+              <Layers size={14} className="mr-2" />
+              Media
+            </ContextMenuItem>
 
-          <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-            <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
-              <Video size={12} />
-            </div>
-            Video Generator
-          </ContextMenuItem>
+            <ContextMenuSeparator className="bg-zinc-800" />
 
-          <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-            <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-teal-900/50 text-teal-500">
-              <Sparkles size={12} />
-            </div>
-            Assistant
-          </ContextMenuItem>
+            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
+              NODES
+            </ContextMenuLabel>
 
-          <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-            <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
-              <Maximize size={12} />
-            </div>
-            Image Upscaler
-          </ContextMenuItem>
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("prompt")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
+                <Type size={12} />
+              </div>
+              Text
+            </ContextMenuItem>
 
-          <ContextMenuSeparator className="bg-zinc-800" />
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("outputImage")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
+                <ImageIcon size={12} />
+              </div>
+              Image Generator
+            </ContextMenuItem>
 
-          <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
-            UTILITIES
-          </ContextMenuLabel>
-        </ContextMenuContent>
-      </ContextMenu> */}
-      {/* </NodeDropzoneProvider> */}
+            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
+                <Video size={12} />
+              </div>
+              Video Generator
+            </ContextMenuItem>
+
+            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-teal-900/50 text-teal-500">
+                <Sparkles size={12} />
+              </div>
+              Assistant
+            </ContextMenuItem>
+
+            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                <Maximize size={12} />
+              </div>
+              Image Upscaler
+            </ContextMenuItem>
+
+            <ContextMenuSeparator className="bg-zinc-800" />
+
+            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
+              UTILITIES
+            </ContextMenuLabel>
+          </ContextMenuContent>
+        </ContextMenu>
+      </NodeDropzoneProvider>
     </NodeOperationsProvider>
   );
 }
