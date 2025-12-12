@@ -13,7 +13,7 @@ import React, {
   useState,
 } from "react";
 
-import { SchemaParam, PresetData } from "@/src/types/BaseType";
+import { SchemaParam, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
 import { getIconForParam } from "@/src/utils/server/utils";
 
