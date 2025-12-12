@@ -8,7 +8,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { useMediaQuery } from "@/src/hooks/use-media-query";
-import { supabase } from "@/src/lib/supabase/client";
+import { createClient } from "@/src/lib/supabase/client";
 import { MidjourneyStyleData } from "@/src/types/BaseType";
 
 import StyleCard from "../ui/StyleCard";
@@ -31,9 +31,8 @@ type Props = {
 };
 
 const fetchStyles = async (): Promise<MidjourneyStyleData[]> => {
-  const { data, error } = await supabase
-    .from("midjourney_styles")
-    .select("*");
+  const supabase = createClient();
+  const { data, error } = await supabase.from("midjourney_styles").select("*");
 
   if (error) {
     console.error("Error fetching midjourney styles:", error);
@@ -65,7 +64,7 @@ const MidjourneyStylesModal: React.FC<Props> = ({
 
   const {
     data: styles = [],
-    
+
     isLoading,
     isError,
     error,
@@ -81,7 +80,6 @@ const MidjourneyStylesModal: React.FC<Props> = ({
   const allTags = useMemo(() => {
     const tags = styles.flatMap((style) => style.tags || []);
     return ["all", ...Array.from(new Set(tags))];
-    
   }, [styles]);
 
   // Filter styles based on selected tag
@@ -98,12 +96,12 @@ const MidjourneyStylesModal: React.FC<Props> = ({
     } else {
       setInternalSelectedStyle(style);
     }
-    
+
     // Auto-close with a small delay to allow state updates to settle
     setTimeout(() => {
       setIsDialogOpen(false);
     }, 50);
-    
+
     // We no longer update the prompt text here (as per user request)
     // The style is stored in selectedStyle and appended during generation
   };
