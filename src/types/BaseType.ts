@@ -146,3 +146,5 @@ export type MidjourneyStyleData = {
   cover: string;
   tags?: string[] | null;
 };
+
+export type StyleData = MidjourneyStyleData;

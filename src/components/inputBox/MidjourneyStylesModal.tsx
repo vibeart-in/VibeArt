@@ -27,6 +27,7 @@ type Props = {
   triggerClassName?: string;
   selectedStyle?: MidjourneyStyleData | null;
   onSelect?: (style: MidjourneyStyleData) => void;
+  currentPrompt?: string;
 };
 
 const fetchStyles = async (): Promise<MidjourneyStyleData[]> => {

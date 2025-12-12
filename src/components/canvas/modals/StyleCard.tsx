@@ -1,7 +1,7 @@
 "use client";
-import { MidjourneyStyleData } from "@/src/types/BaseType";
 import { motion, Variants } from "motion/react";
 import Image from "next/image";
+import { StyleData } from "@/src/types/BaseType";
 import React, { useState, useEffect } from "react";
 
 
@@ -16,8 +16,8 @@ const coverVariants: Variants = {
 };
 
 type StyleCardProps = {
-  style: MidjourneyStyleData;
-  onSelect: (style: MidjourneyStyleData) => void;
+  style: StyleData;
+  onSelect: (style: StyleData) => void;
 };
 
 const StyleCard = ({ style, onSelect }: StyleCardProps) => {
