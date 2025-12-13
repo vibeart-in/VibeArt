@@ -41,7 +41,7 @@ export default function ConversationClient({ conversationId }: { conversationId:
 
   return (
     <section className="relative flex h-screen flex-col bg-background text-white">
-      {messages && <ChatView messageGroups={messages} />}
+      {messages && <ChatView messageGroups={messages} conversationId={conversationId} />}
       <footer className="absolute bottom-4 z-10 w-full px-2">
         <div className="relative mx-auto flex w-full max-w-full flex-col items-center justify-center text-center">
           <InputBox conversationId={conversationId} />

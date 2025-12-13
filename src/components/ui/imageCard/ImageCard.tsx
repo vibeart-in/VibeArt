@@ -26,6 +26,8 @@ export interface ImageCardProps {
     modal?: VideoOptions;
   };
   autoRatio?: boolean;
+  conversationId?: string;
+  imageId?: string;
 }
 
 const ImageCard = ({
@@ -37,6 +39,8 @@ const ImageCard = ({
   isVideo,
   videoOptions,
   autoRatio = false,
+  conversationId,
+  imageId,
 }: ImageCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const MediaModal = dynamic(() => import("./ImageModal"), { ssr: false, loading: () => <div /> });
@@ -83,6 +87,8 @@ const ImageCard = ({
           cardContainerId={cardContainerId}
           isMediaVideo={isMediaVideo}
           videoOptions={videoOptions?.modal}
+          conversationId={conversationId}
+          imageId={imageId}
         />
       )}
     </div>
