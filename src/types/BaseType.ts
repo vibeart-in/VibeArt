@@ -137,3 +137,13 @@ export type PresetData = {
   tags?: string[] | null;
   for_model: string[];
 };
+
+export interface CanvasProject {
+  id: string;
+  user_id: string;
+  title: string | null;
+  image: { url?: string; public_url?: string; image_url?: string } | null;
+  created_at: string;
+  updated_at: string;
+  content: any;
+}

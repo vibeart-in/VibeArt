@@ -132,9 +132,7 @@ const PresetModal: React.FC<Props> = ({
       )}
 
       <div className={`size-full overflow-y-auto ${isMobile ? "" : "p-3 sm:p-4"}`}>
-        {isLoading && (
-          <div className="py-8 text-center text-sm text-white/70">Loading Prompts</div>
-        )}
+        {isLoading && <div className="py-8 text-center text-sm text-white/70">Loading Prompts</div>}
 
         {isError && (
           <div className="py-4 text-center text-sm text-rose-400">

@@ -303,11 +303,11 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             values: filteredValues,
             inputImages: inputImagesFlat, // legacy-friendly
             inputImageMap: inputImagePermanentPathsMap, // new, keyed by original param key
-            currentImage:
-              Object.values(multiImagesMap).flat()[0] ||
-              null,
+            currentImage: Object.values(multiImagesMap).flat()[0] || null,
             allImageObjects: [
-              ...Object.values(singleImageObjects).filter((img): img is ImageObject => img !== null),
+              ...Object.values(singleImageObjects).filter(
+                (img): img is ImageObject => img !== null,
+              ),
               ...Object.values(multiImagesMap).flat(),
             ],
             selectedPreset,
@@ -380,16 +380,16 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             const imageParam = parameters[targetKey];
 
             if (imageParam?.type === "array") {
-               setMultiImagesMap((prev) => ({ ...prev, [targetKey]: persistedImages }));
-               const normalizedKey = normalizeKey(targetKey);
-               setValues((prev) => ({ 
-                 ...prev, 
-                 [normalizedKey]: persistedImages.map(img => img.displayUrl) 
-               }));
-               setInputImagePermanentPathsMap((prev) => ({
-                 ...prev,
-                 [targetKey]: persistedImages.map(img => img.permanentPath),
-               }));
+              setMultiImagesMap((prev) => ({ ...prev, [targetKey]: persistedImages }));
+              const normalizedKey = normalizeKey(targetKey);
+              setValues((prev) => ({
+                ...prev,
+                [normalizedKey]: persistedImages.map((img) => img.displayUrl),
+              }));
+              setInputImagePermanentPathsMap((prev) => ({
+                ...prev,
+                [targetKey]: persistedImages.map((img) => img.permanentPath),
+              }));
             }
           }
         } catch (e) {
@@ -546,9 +546,9 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
     return (
       <div className="flex w-full flex-col gap-8 md:flex-row md:gap-3">
         <div className="flex flex-col gap-4">
-          <PresetModal 
-            forModel={identifier} 
-            onSelectPrompt={handlePromptChange} 
+          <PresetModal
+            forModel={identifier}
+            onSelectPrompt={handlePromptChange}
             selectedPreset={selectedPreset}
             onSelect={setSelectedPreset}
           />
@@ -570,7 +570,6 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                   />
                 );
               }
-
 
               return null;
             })}

@@ -286,7 +286,6 @@ const OtherParameters = ({
   );
 };
 
-
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
@@ -373,7 +372,9 @@ export const RunninghubParameters = forwardRef<
           values: values, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
           currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
-          allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
+          allImageObjects: Object.values(imageObjects).filter(
+            (img): img is ImageObject => img !== null,
+          ),
           selectedPreset,
         };
       },
@@ -524,9 +525,9 @@ export const RunninghubParameters = forwardRef<
   return (
     <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
       {!(checkpointParam || loraParam) && (
-        <PresetModal 
-          forModel={identifier} 
-          onSelectPrompt={handlePromptChange} 
+        <PresetModal
+          forModel={identifier}
+          onSelectPrompt={handlePromptChange}
           selectedPreset={selectedPreset}
           onSelect={setSelectedPreset}
         />
