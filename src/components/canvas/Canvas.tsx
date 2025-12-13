@@ -43,6 +43,8 @@ import {
   Video,
   Sparkles,
   Maximize,
+  LayoutTemplate,
+  Palette,
 } from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 
@@ -146,16 +148,30 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
   const handleConnect = useCallback<OnConnect>(
     (connection) => {
+      const sourceNode = getNode(connection.source);
+      let edgeColor = "#4b5563"; // Default color
+
+      if (sourceNode?.type === "presets") {
+        edgeColor = "#ef4444"; // Red
+      } else if (sourceNode?.type === "style") {
+        edgeColor = "#22c55e"; // Green
+      } else if (sourceNode?.type === "lora") {
+        edgeColor = "#8b5cf6"; // Violet
+      } else if (sourceNode?.type === "checkpoint") {
+        edgeColor = "#3b82f6"; // Blue
+      }
+
       const newEdge: Edge = {
         id: crypto.randomUUID(),
         type: "animated",
         ...connection,
+        style: { stroke: edgeColor, strokeWidth: 2 },
       };
       setEdges((eds: Edge[]) => eds.concat(newEdge));
       save();
       onConnect?.(connection);
     },
-    [save, onConnect],
+    [save, onConnect, getNode],
   );
 
   const handleConnectStart = useCallback<OnConnectStart>(() => {
@@ -335,6 +351,46 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
                 <Maximize size={12} />
               </div>
               Image Upscaler
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("presets")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
+                <LayoutTemplate size={12} />
+              </div>
+              Presets
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("style")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
+                <Palette size={12} />
+              </div>
+              Style
+            </ContextMenuItem>
+
+            <ContextMenuItem
+               className="focus:bg-zinc-800 focus:text-zinc-100"
+               onClick={() => addNode("checkpoint")}
+            >
+               <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                  <Palette size={12} />
+               </div>
+               Checkpoint
+            </ContextMenuItem>
+
+            <ContextMenuItem
+               className="focus:bg-zinc-800 focus:text-zinc-100"
+               onClick={() => addNode("lora")}
+            >
+               <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
+                  <Palette size={12} />
+               </div>
+               LoRA
             </ContextMenuItem>
 
             <ContextMenuSeparator className="bg-zinc-800" />
