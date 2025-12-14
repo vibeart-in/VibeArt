@@ -12,10 +12,12 @@ import React, {
   useState,
 } from "react";
 
-import { ConversationType, ModelData, NodeParam, PresetData } from "@/src/types/BaseType";
+import { ConversationType, ModelData, NodeParam, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
+
 import { getIconForParam } from "@/src/utils/server/utils";
 
+import MidjourneyStylesModal from "./MidjourneyStylesModal";
 import ModelSelectModal from "./ModelSelectModal";
 import PresetModal from "./PresetModal";
 import { ImageObject } from "./ReplicateParameters";
@@ -301,6 +303,7 @@ export const RunninghubParameters = forwardRef<
   const [enableLoraStrength, setEnableLoraStrength] = useState(false);
   const [imageObjects, setImageObjects] = useState<Record<string, ImageObject | null>>({});
   const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedModels, setSelectedModels] = useState<ModelData | null>(null);
@@ -369,8 +372,15 @@ export const RunninghubParameters = forwardRef<
           .filter((img): img is ImageObject => img !== null) // Filter out nulls
           .map((img) => img.permanentPath); // Extract the permanent path
 
+        const currentValues = values.map((p) => {
+          if ((p.description === "prompt" || p.fieldName === "prompt") && selectedStyle?.prompt) {
+             return { ...p, fieldValue: `${p.fieldValue} ${selectedStyle.prompt}` };
+          }
+          return p;
+        });
+
         return {
-          values: values, // This array contains the displayUrl for images
+          values: currentValues, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
           currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
           allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
@@ -521,16 +531,22 @@ export const RunninghubParameters = forwardRef<
     }
   };
 
+  const memoizedIsMidjourney = useMemo(() => {
+    const name = modelName ? modelName.toLowerCase() : "";
+    return name === "midjourney - fast" || name === "midjourney - upscale";
+  }, [modelName]);
+
   return (
-    <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
-      {!(checkpointParam || loraParam) && (
-        <PresetModal 
-          forModel={identifier} 
-          onSelectPrompt={handlePromptChange} 
+      <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
+      {/* If it's Midjourney, show MidjourneyStylesModal instead of PresetModal */}
+      {!memoizedIsMidjourney && !(checkpointParam || loraParam) ? (
+        <PresetModal
+          forModel={identifier}
+          onSelectPrompt={handlePromptChange}
           selectedPreset={selectedPreset}
           onSelect={setSelectedPreset}
         />
-      )}
+      ) : null}
       <div className="grid grid-cols-2 gap-2">
         <AnimatePresence>
           {checkpointParam && (
@@ -613,6 +629,8 @@ export const RunninghubParameters = forwardRef<
           </div>
         </AnimatePresence>
 
+       
+
         <MemoizedOtherParameters
           otherParams={otherParams}
           handleChange={handleChange}
@@ -623,7 +641,20 @@ export const RunninghubParameters = forwardRef<
           setEnableLoraStrength={setEnableLoraStrength}
           hasLoraStrengthParam={hasLoraStrengthParam}
         />
+        
+        
+
       </div>
+      {memoizedIsMidjourney && (
+          <div className="w-full">
+            <MidjourneyStylesModal
+              onSelectPrompt={handlePromptChange}
+              selectedStyle={selectedStyle}
+              onSelect={setSelectedStyle}
+              currentPrompt={promptParam?.fieldValue || ""}
+            />
+          </div>
+        )}
       {imageParams.map((param, index) => {
         return (
           <ImageUploadBox
