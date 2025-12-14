@@ -1,17 +1,11 @@
-import {
-  Handle,
-  Position,
-  NodeProps,
-  Node,
-  useViewport,
-  NodeResizeControl,
-  NodeToolbar,
-} from "@xyflow/react";
+import { Position, NodeProps, Node, NodeResizeControl, useReactFlow } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
-import React, { useState, useRef, useCallback } from "react";
-import { MoreHorizontal, Download, Pencil, Sparkles, ChevronDown, Plug } from "lucide-react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
+import { ArrowUp } from "lucide-react";
+import { TextShimmer } from "../../ui/text-shimmer";
+import { Textarea } from "../../ui/textarea";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Define the data shape
 type ImageNodeData = {
   label?: string;
   imageUrl?: string;
@@ -24,81 +18,58 @@ type ImageNodeData = {
   [key: string]: unknown;
 };
 
-// Define the specific Node type
 export type OutputImageNodeType = Node<ImageNodeData, "outputImage">;
 
-export default function OutputImage({ data, selected }: NodeProps<OutputImageNodeType>) {
-  const { zoom } = useViewport();
-  const { width = 2, height = 3 } = data;
-  const [isHovered, setIsHovered] = useState(false);
+const PLACEHOLDERS = [
+  {
+    url: "https://cdn.midjourney.com/a3b07153-28fd-4685-8536-63cb311647e9/0_0.png",
+    prompt: "An astronaut in a field of flowers",
+  },
+  {
+    url: "https://cdn.midjourney.com/526616d6-42f3-48c5-a966-a0ee874994c3/0_0.png",
+    prompt: "A moody cyberpunk street at night",
+  },
+  {
+    url: "https://cdn.midjourney.com/21e97ee6-c82f-44f5-aa2b-5fb4d83ea3fc/0_0.png",
+    prompt: "A portrait of a cyborg woman",
+  },
+];
+
+export default function OutputImage({ id, data, selected }: NodeProps<OutputImageNodeType>) {
+  const { updateNodeData } = useReactFlow();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+
+  useEffect(() => {
+    if (data.imageUrl) return;
+    const interval = setInterval(() => {
+      setCurrentPlaceholder((prev) => (prev + 1) % PLACEHOLDERS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [data.imageUrl]);
 
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    setIsHovered(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    timeoutRef.current = setTimeout(() => {
-      setIsHovered(false);
-    }, 300);
   }, []);
 
   return (
     <>
-      <NodeToolbar isVisible={selected || isHovered} position={Position.Bottom} offset={30}>
-        <div
-          className="flex items-center gap-1 rounded-2xl border border-[#1D1D1D] bg-[#151515] px-2 py-1.5 shadow-xl"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Left Section: Controls */}
-          <div className="flex items-center gap-1 pr-2">
-            <button className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <Plug className="size-3.5" />
-              <ChevronDown className="size-3 opacity-50" />
-            </button>
-            <button className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <span>
-                {width}:{height}
-              </span>
-              <ChevronDown className="size-3 opacity-50" />
-            </button>
-          </div>
-
-          {/* Separator */}
-          <div className="h-4 w-[1px] bg-[#333]"></div>
-
-          {/* Right Section: Actions */}
-          <div className="flex items-center gap-0.5 pl-2">
-            <button className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <Sparkles className="size-3.5" />
-            </button>
-            <button className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <Download className="size-3.5" />
-            </button>
-            <button className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <Pencil className="size-3.5" />
-            </button>
-            <button className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
-              <MoreHorizontal className="size-3.5" />
-            </button>
-          </div>
-        </div>
-      </NodeToolbar>
       <NodeLayout
         selected={selected}
         title={data.category || "Image generation"}
         subtitle={data.model}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="h-[400px] w-[320px] cursor-default rounded-[28px]"
+        className="h-full min-h-[450px] w-full min-w-[320px] cursor-default rounded-3xl bg-[#1D1D1D]"
         handles={[
           { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
@@ -107,8 +78,8 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
         {selected && (
           <NodeResizeControl
             position="bottom-right"
-            minWidth={100}
-            minHeight={100}
+            minWidth={320}
+            minHeight={450}
             keepAspectRatio
             style={{
               background: "transparent",
@@ -138,36 +109,68 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
         )}
 
         {/* Background Image */}
-        <div className="relative h-full w-full rounded-[28px] bg-[#1D1D1D]">
+        <div className="relative h-full w-full overflow-hidden rounded-3xl">
           {data.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={data.imageUrl}
               alt={data.prompt || "Generated Image"}
-              className="h-full w-full rounded-[28px] object-cover"
+              className="h-full w-full rounded-3xl object-cover"
               draggable={false}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              {/* Empty state with "Try" prompt */}
+            <div className="relative flex h-full w-full items-center justify-center">
+              <AnimatePresence mode="popLayout">
+                <motion.img
+                  key={currentPlaceholder}
+                  src={PLACEHOLDERS[currentPlaceholder].url}
+                  initial={{ opacity: 0, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                  className="absolute inset-0 h-full w-full object-cover opacity-60"
+                  alt="Placeholder"
+                />
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/40" />
             </div>
           )}
 
           {/* Overlay Gradient - visible when image exists */}
           {data.imageUrl && (
-            <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-black/20 via-transparent to-black/60" />
           )}
         </div>
 
         {/* Footer / Prompt - Visible when image exists or on hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
+        <div className="absolute bottom-0 left-0 right-0 p-3">
           {!data.imageUrl ? (
-            // Before generation: Show "Try [prompt]" text
-            <p className="text-[15px] font-light leading-relaxed text-white/70">
-              Try "{data.prompt || "Enter a prompt"}"
-            </p>
+            <div className="relative w-full focus-within:outline-none focus-within:ring-0">
+              {!data.prompt && (
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-2">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentPlaceholder}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <TextShimmer className="font-medium" spread={3} duration={2}>
+                        {`Try "${PLACEHOLDERS[currentPlaceholder].prompt}"`}
+                      </TextShimmer>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              )}
+              <Textarea
+                maxHeight={150}
+                className="nodrag !border-0 text-sm font-medium text-white/90 !shadow-none !outline-none !ring-0 focus:!shadow-none focus:!outline-none focus:!ring-0 focus-visible:ring-0"
+                value={data.prompt || ""}
+                onChange={(e) => updateNodeData(id, { prompt: e.target.value })}
+              />
+            </div>
           ) : (
-            // After generation: Show input images and prompt
             <>
               {data.inputImageUrls && data.inputImageUrls.length > 0 && (
                 <div className="scrollbar-hide mb-3 flex items-center gap-2 overflow-x-auto pb-1">
@@ -193,26 +196,13 @@ export default function OutputImage({ data, selected }: NodeProps<OutputImageNod
           )}
         </div>
 
-        {/* Generate Button - Bottom Right (yellow circle with up arrow) */}
         <button
-          className="absolute bottom-5 right-5 flex size-12 items-center justify-center rounded-full bg-[#DFFF00] text-black shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+          className={`absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-accent text-black shadow-lg transition-all hover:scale-110 hover:shadow-xl ${selected ? "opacity-100" : "opacity-0"}`}
           onClick={() => {
-            // TODO: Implement image generation
             console.log("Generate image with prompt:", data.prompt);
           }}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
+          <ArrowUp size={18} strokeWidth={3} />
         </button>
       </NodeLayout>
     </>

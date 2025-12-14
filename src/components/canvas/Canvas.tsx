@@ -346,7 +346,28 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               Assistant
             </ContextMenuItem>
 
-            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() =>
+                addNode("outputImage", {
+                  data: {
+                    label: "Upscaled Image",
+                    imageUrl:
+                      "https://cdn.midjourney.com/815a059b-16c0-4e1f-a2bd-7a9e9f355b53/0_3.png",
+                    inputImageUrls: [
+                      "https://cdn.midjourney.com/26408988-4b2b-46ab-a06e-3f5770c55a72/0_2.png",
+                      "https://cdn.midjourney.com/4625e122-d77e-4fa7-ab9c-f48e1ca53e45/0_0.png",
+                    ],
+                    prompt:
+                      "high quality, 8k, photorealistic, intricate detail, multicolored neon lights, cyberpunk city street at night, rain, reflection, sci-fi",
+                    model: "SVD-XT",
+                    category: "Image Generation",
+                    width: 816,
+                    height: 1456,
+                  },
+                })
+              }
+            >
               <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
                 <Maximize size={12} />
               </div>
