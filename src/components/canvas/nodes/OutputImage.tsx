@@ -33,6 +33,10 @@ const PLACEHOLDERS = [
     url: "https://cdn.midjourney.com/21e97ee6-c82f-44f5-aa2b-5fb4d83ea3fc/0_0.png",
     prompt: "A portrait of a cyborg woman",
   },
+  {
+    url: "https://i.pinimg.com/736x/3f/21/c6/3f21c6feafc766c314200d7f5ed9156f.jpg",
+    prompt: "A portrait of a burning woman",
+  },
 ];
 
 export default function OutputImage({ id, data, selected }: NodeProps<OutputImageNodeType>) {
@@ -69,7 +73,7 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
         subtitle={data.model}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="h-full min-h-[450px] w-full min-w-[320px] cursor-default rounded-3xl bg-[#1D1D1D]"
+        className="flex h-full min-h-[450px] w-full min-w-[320px] cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
         handles={[
           { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
@@ -109,7 +113,7 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
         )}
 
         {/* Background Image */}
-        <div className="relative h-full w-full overflow-hidden rounded-3xl">
+        <div className="relative min-h-[450px] w-full flex-1 overflow-hidden rounded-3xl">
           {data.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -119,7 +123,7 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
               draggable={false}
             />
           ) : (
-            <div className="relative flex h-full w-full items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center">
               <AnimatePresence mode="popLayout">
                 <motion.img
                   key={currentPlaceholder}
@@ -128,7 +132,7 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
                   animate={{ opacity: 1, filter: "blur(0px)" }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 1.2, ease: "easeInOut" }}
-                  className="absolute inset-0 h-full w-full object-cover opacity-60"
+                  className="absolute inset-0 h-full w-full object-cover"
                   alt="Placeholder"
                 />
               </AnimatePresence>
@@ -138,7 +142,7 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
 
           {/* Overlay Gradient - visible when image exists */}
           {data.imageUrl && (
-            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/80" />
           )}
         </div>
 

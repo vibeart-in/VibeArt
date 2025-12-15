@@ -4,6 +4,7 @@ import { Handle, Position, useViewport } from "@xyflow/react";
 import React, { ReactNode } from "react";
 import NodeToolbar from "./NodeToolbar";
 import Magnet from "../ui/Magnet"; // Your provided Magnet component
+import { IconCirclePlus, IconSquareRoundedPlus } from "@tabler/icons-react";
 
 export type HandleConfig = {
   type: "source" | "target";
@@ -40,27 +41,48 @@ export default function NodeLayout({
 }: NodeLayoutProps) {
   const { zoom } = useViewport();
 
-  // Positioning logic for the Magnet Container
-  const getMagnetPositionStyle = (position: Position) => {
-    const offset = -6; // Adjust this to move handle closer/further from edge
+  // Positioning logic for the Magnet Handle Container
+  const getHandlePositionStyle = (position: Position): React.CSSProperties => {
+    const isVertical = position === Position.Left || position === Position.Right;
+    const size = isVertical ? { height: "6rem", width: "4rem" } : { width: "6rem", height: "4rem" };
 
-    const baseStyle: React.CSSProperties = {
-      position: "absolute",
-      zIndex: 50,
-      pointerEvents: "none", // Allow clicks to pass through the wrapper area...
-    };
+    // Base transform for centering
+    const baseTransform = isVertical ? "translateY(-50%)" : "translateX(-50%)";
+
+    // Distance from the node edge
+    const offset = "-32px";
 
     switch (position) {
       case Position.Left:
-        return { ...baseStyle, left: `${offset}px`, top: "50%", transform: "translateY(-50%)" };
+        return {
+          ...size,
+          left: offset,
+          top: "50%",
+          transform: `${baseTransform} translateX(-50%)`, // Push further out
+        };
       case Position.Right:
-        return { ...baseStyle, right: `${offset}px`, top: "50%", transform: "translateY(-50%)" };
+        return {
+          ...size,
+          right: offset,
+          top: "50%",
+          transform: `${baseTransform} translateX(50%)`,
+        };
       case Position.Top:
-        return { ...baseStyle, top: `${offset}px`, left: "50%", transform: "translateX(-50%)" };
+        return {
+          ...size,
+          top: offset,
+          left: "50%",
+          transform: `${baseTransform} translateY(-50%)`,
+        };
       case Position.Bottom:
-        return { ...baseStyle, bottom: `${offset}px`, left: "50%", transform: "translateX(-50%)" };
+        return {
+          ...size,
+          bottom: offset,
+          left: "50%",
+          transform: `${baseTransform} translateY(50%)`,
+        };
       default:
-        return baseStyle;
+        return {};
     }
   };
 
@@ -109,46 +131,37 @@ export default function NodeLayout({
 
       {/* Magnetic Handles */}
       {handles.map((handle, index) => {
-        // Calculate size based on zoom
-        const size = Math.max(10, 16 / zoom);
-
         return (
-          <Magnet
+          <Handle
             key={`${handle.type}-${handle.position}-${index}`}
-            padding={40} // Detection range
-            magnetStrength={5} // Lower = follows mouse more closely
-            // activeTransition="transform 0.1s ease-out"
-            // inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-            wrapperClassName="absolute"
-            // Important: Override display to ensure positioning works
+            type={handle.type}
+            position={handle.position}
+            id={handle.id}
+            className={`group/handle absolute z-0 flex items-center justify-center bg-transparent transition-opacity duration-300 ${
+              selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            } ${handle.className || ""}`}
             style={{
-              ...getMagnetPositionStyle(handle.position),
-              display: "block",
+              ...getHandlePositionStyle(handle.position),
+              border: "none", // Override default xyflow handle styles
+              borderRadius: 0,
+              background: "transparent",
             }}
           >
-            {/* The Actual XYFlow Handle */}
-            <Handle
-              type={handle.type}
-              position={handle.position}
-              id={handle.id}
-              // This style ensures the handle is the actual visible, clickable element
-              // style={{
-              //   position: "relative", // Must be relative inside the magnet
-              //   transform: "none",
-              //   width: `${size}px`,
-              //   height: `${size}px`,
-              //   background: "#DFFF00", // Yellow color
-              //   border: "1px solid rgba(0,0,0,0.2)",
-              //   borderRadius: "50%",
-              //   pointerEvents: "auto", // FORCE events on the handle
-              //   zIndex: 51,
-              // }}
-              // Retain your visibility logic (fade in on node hover)
-              className={`transition-opacity duration-300 ${
-                selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              } ${handle.className || ""}`}
-            />
-          </Magnet>
+            <Magnet
+              padding={0} // Detect within the box
+              magnetStrength={2}
+              activeTransition="transform 0.1s ease-out"
+              inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+              wrapperClassName="w-full h-full"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconSquareRoundedPlus />
+            </Magnet>
+          </Handle>
         );
       })}
     </div>
