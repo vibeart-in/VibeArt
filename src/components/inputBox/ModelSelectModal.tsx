@@ -27,6 +27,7 @@ interface ModelSelectModalProps {
   conversationType: ConversationType;
   onSelectModel: (model: ModelData) => void;
   triggerClassName?: string;
+  variant?: "default" | "node";
 }
 
 const ModelSelectModal: React.FC<ModelSelectModalProps> = ({
@@ -37,6 +38,7 @@ const ModelSelectModal: React.FC<ModelSelectModalProps> = ({
   conversationType,
   onSelectModel,
   triggerClassName,
+  variant = "default",
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -66,16 +68,28 @@ const ModelSelectModal: React.FC<ModelSelectModalProps> = ({
         width={150}
         height={95}
       />
-      <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
-        <p className="truncate font-satoshi text-sm font-medium text-accent">
-          {modelName || "Select Model"}
-        </p>
-      </div>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-        <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
-          <PencilSimpleIcon size={20} weight="fill" />
-        </span>
-      </div>
+      {variant === "default" && (
+        <>
+          <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
+            <p className="truncate font-satoshi text-sm font-medium text-accent">
+              {modelName || "Select Model"}
+            </p>
+          </div>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="rounded-xl bg-black/50 px-2 py-1 text-xs text-white/90">
+              <PencilSimpleIcon size={20} weight="fill" />
+            </span>
+          </div>
+        </>
+      )}
+
+      {variant === "node" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <p className="text-center font-satoshi text-sm font-bold text-white drop-shadow-md">
+            {modelName || "Select Model"}
+          </p>
+        </div>
+      )}
     </div>
   );
 

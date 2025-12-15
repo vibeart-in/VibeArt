@@ -27,6 +27,7 @@ type Props = {
   triggerClassName?: string;
   selectedPreset?: PresetData | null;
   onSelect?: (preset: PresetData) => void;
+  variant?: "default" | "node";
 };
 
 const fetchPresets = async (forModel?: string): Promise<PresetData[]> => {
@@ -56,6 +57,7 @@ const PresetModal: React.FC<Props> = ({
   triggerClassName,
   selectedPreset: controlledSelectedPreset,
   onSelect,
+  variant = "default",
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [internalSelectedPreset, setInternalSelectedPreset] = useState<PresetData | null>(null);
@@ -186,7 +188,7 @@ const PresetModal: React.FC<Props> = ({
         </div>
       )}
 
-      {hasPreview && (
+      {hasPreview && variant === "default" && (
         <>
           <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
             <p className="truncate font-satoshi text-sm font-medium text-accent">
@@ -200,6 +202,14 @@ const PresetModal: React.FC<Props> = ({
             </span>
           </div>
         </>
+      )}
+
+      {hasPreview && variant === "node" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <p className="text-center font-satoshi text-sm font-bold text-white drop-shadow-md">
+            {selectedPreset?.name ?? "Selected Preset"}
+          </p>
+        </div>
       )}
     </div>
   );

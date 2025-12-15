@@ -42,12 +42,13 @@ const fetchStyles = async (): Promise<MidjourneyStyleData[]> => {
   return (data as MidjourneyStyleData[]) || [];
 };
 
-const MidjourneyStylesModal: React.FC<Props> = ({
+const MidjourneyStylesModal: React.FC<Props & { variant?: "default" | "node" }> = ({
   onSelectPrompt,
   triggerClassName,
   selectedStyle: controlledSelectedStyle,
   onSelect,
   currentPrompt,
+  variant = "default",
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [internalSelectedStyle, setInternalSelectedStyle] = useState<MidjourneyStyleData | null>(
@@ -187,7 +188,7 @@ const MidjourneyStylesModal: React.FC<Props> = ({
         </div>
       )}
 
-      {hasPreview && (
+      {hasPreview && variant === "default" && (
         <>
           <div className="absolute inset-x-2 bottom-2 rounded-md bg-black/30 p-1 text-center transition-opacity group-hover:opacity-0">
             <p className="truncate font-satoshi text-sm font-medium text-accent">
@@ -201,6 +202,14 @@ const MidjourneyStylesModal: React.FC<Props> = ({
             </span>
           </div>
         </>
+      )}
+
+      {hasPreview && variant === "node" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <p className="text-center font-satoshi text-sm font-bold text-white drop-shadow-md">
+            {selectedStyle?.name ?? "Selected Style"}
+          </p>
+        </div>
       )}
     </div>
   );
