@@ -24,7 +24,6 @@ import CustomControls from "./Controls";
 import { useCanvas } from "../providers/CanvasProvider";
 import { nodeTypes } from "./nodes/Nodetypes";
 import { NodeOperationsProvider } from "../providers/NodeProvider";
-import { randomUUID } from "crypto";
 import { updateProjectAction } from "@/src/actions/canvas/update";
 import {
   ContextMenu,
@@ -47,6 +46,7 @@ import {
   Palette,
 } from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
+import { DevTools } from "../devtools";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project } = useCanvas();
@@ -149,6 +149,8 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   const handleConnect = useCallback<OnConnect>(
     (connection) => {
       const sourceNode = getNode(connection.source);
+      const targetNode = getNode(connection.target);
+
       let edgeColor = "#4b5563"; // Default color
 
       if (sourceNode?.type === "presets") {
@@ -163,7 +165,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
       const newEdge: Edge = {
         id: crypto.randomUUID(),
-        type: "animated",
+        type: "active",
         ...connection,
         style: { stroke: edgeColor, strokeWidth: 2 },
       };
@@ -262,8 +264,8 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               selectionOnDrag={true}
               colorMode="dark"
               proOptions={{ hideAttribution: true }}
-              snapToGrid={true}
-              snapGrid={[42, 42]}
+              // snapToGrid={true}
+              // snapGrid={[42, 42]}
               minZoom={0.1}
               maxZoom={10}
               defaultEdgeOptions={{
@@ -283,7 +285,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               // {...rest}
             >
               <CustomControls nodes={nodes} setNodes={setNodes} minZoom={0.25} maxZoom={3} />
-
+              <DevTools position="bottom-left" />
               {children}
             </ReactFlow>
           </ContextMenuTrigger>
@@ -395,23 +397,23 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             </ContextMenuItem>
 
             <ContextMenuItem
-               className="focus:bg-zinc-800 focus:text-zinc-100"
-               onClick={() => addNode("checkpoint")}
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("checkpoint")}
             >
-               <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
-                  <Palette size={12} />
-               </div>
-               Checkpoint
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                <Palette size={12} />
+              </div>
+              Checkpoint
             </ContextMenuItem>
 
             <ContextMenuItem
-               className="focus:bg-zinc-800 focus:text-zinc-100"
-               onClick={() => addNode("lora")}
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("lora")}
             >
-               <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
-                  <Palette size={12} />
-               </div>
-               LoRA
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
+                <Palette size={12} />
+              </div>
+              LoRA
             </ContextMenuItem>
 
             <ContextMenuSeparator className="bg-zinc-800" />

@@ -9,6 +9,7 @@ import { RealtimeProvider } from "../components/providers/RealtimeProvider";
 import { SkipToContent } from "../components/SkipToContent";
 import { Toaster } from "../components/ui/sonner";
 import { TanStackProvider } from "../lib/TanstackProvider";
+import { JotaiProviders } from "../lib/JotaiProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -102,15 +103,17 @@ export default function RootLayout({
       <body className={`${geistSans.className} ${satoshi.variable} antialiased`}>
         <SkipToContent />
         <TanStackProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            forcedTheme="dark"
-            disableTransitionOnChange
-          >
-            <RealtimeProvider>{children}</RealtimeProvider>
-            <Toaster position="top-right" richColors />
-          </ThemeProvider>
+          <JotaiProviders>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              forcedTheme="dark"
+              disableTransitionOnChange
+            >
+              <RealtimeProvider>{children}</RealtimeProvider>
+              <Toaster position="top-right" richColors />
+            </ThemeProvider>
+          </JotaiProviders>
         </TanStackProvider>
       </body>
     </html>

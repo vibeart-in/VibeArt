@@ -1,10 +1,10 @@
 "use client";
 
-import { Handle, Position, useViewport } from "@xyflow/react";
-import React, { ReactNode } from "react";
+import { Handle, NodeResizeControl, Position, useViewport } from "@xyflow/react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import NodeToolbar from "./NodeToolbar";
-import Magnet from "../ui/Magnet"; // Your provided Magnet component
-import { IconCirclePlus, IconSquareRoundedPlus } from "@tabler/icons-react";
+import Magnet from "../ui/Magnet";
+import { IconSquareRoundedPlus } from "@tabler/icons-react";
 
 export type HandleConfig = {
   type: "source" | "target";
@@ -15,20 +15,21 @@ export type HandleConfig = {
 
 interface NodeLayoutProps {
   id?: string;
+  toolbarType?: "default" | "text" | "image";
+  textEditor?: any; // Tiptap editor instance
   selected?: boolean;
   className?: string;
   style?: React.CSSProperties;
   title?: string;
-  titleLabel?: string;
   subtitle?: string;
   children?: ReactNode;
-  headerActions?: ReactNode;
   handles?: HandleConfig[];
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  minWidth?: number;
+  minHeight?: number;
 }
 
 export default function NodeLayout({
+  id,
   selected,
   className = "",
   style,
@@ -36,21 +37,49 @@ export default function NodeLayout({
   subtitle,
   children,
   handles = [],
-  onMouseEnter,
-  onMouseLeave,
+  minWidth = 200,
+  minHeight = 200,
+  toolbarType = "default",
+  textEditor,
 }: NodeLayoutProps) {
   const { zoom } = useViewport();
 
-  // Positioning logic for the Magnet Handle Container
+  // --- 1. Internal Hover Logic ---
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    };
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    // Add a small delay so UI doesn't flicker if mouse moves fast
+    hoverTimeout.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 250);
+  }, []);
+
+  // Use this to toggle visibility of handles/toolbar
+  const isActive = selected || isHovered;
+
+  // --- 2. Positioning Logic (Same as before) ---
   const getHandlePositionStyle = (position: Position): React.CSSProperties => {
     const isVertical = position === Position.Left || position === Position.Right;
     const size = isVertical ? { height: "6rem", width: "4rem" } : { width: "6rem", height: "4rem" };
-
-    // Base transform for centering
     const baseTransform = isVertical ? "translateY(-50%)" : "translateX(-50%)";
-
-    // Distance from the node edge
-    const offset = "-32px";
+    const offset = "-24px";
 
     switch (position) {
       case Position.Left:
@@ -58,7 +87,7 @@ export default function NodeLayout({
           ...size,
           left: offset,
           top: "50%",
-          transform: `${baseTransform} translateX(-50%)`, // Push further out
+          transform: `${baseTransform} translateX(-50%)`,
         };
       case Position.Right:
         return {
@@ -88,20 +117,28 @@ export default function NodeLayout({
 
   return (
     <div
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`group relative transition-all duration-300 ${
         selected ? "ring-2 ring-[#e2e2e2]/50" : ""
       } ${className}`}
-      style={style}
+      style={{
+        minWidth,
+        minHeight,
+        ...style,
+      }}
     >
       <NodeToolbar
-        handleMouseEnter={onMouseEnter}
-        handleMouseLeave={onMouseLeave}
-        isHovered={selected}
+        // Pass the handlers if the toolbar needs to keep the node awake
+        handleMouseEnter={handleMouseEnter}
+        handleMouseLeave={handleMouseLeave}
+        isHovered={isActive} // Use the combined state
+        id={id}
+        toolbarType={toolbarType}
+        selected={!!selected}
+        textEditor={textEditor}
       />
 
-      {/* Header Info */}
       {(title || subtitle) && (
         <div
           className="absolute bottom-full left-0 right-0 flex items-center justify-between px-1 font-medium text-white/90"
@@ -129,7 +166,37 @@ export default function NodeLayout({
       {/* Main Content */}
       {children}
 
-      {/* Magnetic Handles */}
+      {/* Resize Control */}
+      {selected && (
+        <NodeResizeControl
+          position="bottom-right"
+          minWidth={minWidth}
+          minHeight={minHeight}
+          style={{ background: "transparent", border: "none", zIndex: 50 }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              position: "absolute",
+              bottom: -6,
+              right: -6,
+            }}
+          >
+            <path
+              d="M 3 17 A 14 14 0 0 0 17 3"
+              stroke="#c0c0bf80"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          </svg>
+        </NodeResizeControl>
+      )}
+
+      {/* Handles */}
       {handles.map((handle, index) => {
         return (
           <Handle
@@ -137,18 +204,19 @@ export default function NodeLayout({
             type={handle.type}
             position={handle.position}
             id={handle.id}
+            // Use 'isActive' to control visibility
             className={`group/handle absolute z-0 flex items-center justify-center bg-transparent transition-opacity duration-300 ${
-              selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
             } ${handle.className || ""}`}
             style={{
               ...getHandlePositionStyle(handle.position),
-              border: "none", // Override default xyflow handle styles
+              border: "none",
               borderRadius: 0,
               background: "transparent",
             }}
           >
             <Magnet
-              padding={0} // Detect within the box
+              padding={0}
               magnetStrength={2}
               activeTransition="transform 0.1s ease-out"
               inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"

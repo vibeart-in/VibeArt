@@ -849,3 +849,20 @@
     outline-offset: 2px;
   }
 }
+
+/* Tiptap Placeholder Styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  height: 0;
+}

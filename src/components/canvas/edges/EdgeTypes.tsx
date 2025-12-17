@@ -1,6 +1,7 @@
-import { AnimatedEdge } from "./CustomEdge";
+import ActiveEdge from "./ActiveEdge";
+import { LoadingEdge } from "./LoadingEdge";
 
 export const edgeTypes = {
-  animated: AnimatedEdge,
-  //   temporary: TemporaryEdge,
+  loading: LoadingEdge,
+  active: ActiveEdge,
 };

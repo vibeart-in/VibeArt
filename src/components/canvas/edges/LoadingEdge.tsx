@@ -65,7 +65,7 @@ const getEdgeParams = (source: InternalNode<Node>, target: InternalNode<Node>) =
   };
 };
 
-export const AnimatedEdge = ({ id, source, target, markerEnd, style }: EdgeProps) => {
+export const LoadingEdge = ({ id, source, target, markerEnd, style }: EdgeProps) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 

@@ -2,13 +2,13 @@
 
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { IconPhotoFilled } from "@tabler/icons-react";
-import { Node, NodeProps, Position, useReactFlow, useViewport } from "@xyflow/react";
+import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { Loader2, UploadCloud } from "lucide-react";
 import NodeLayout from "../NodeLayout";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-type InputImageNodeData = {
+export type InputImageNodeData = {
   label?: string;
   url?: string;
   imageId?: string;
@@ -22,7 +22,7 @@ export type InputImageNodeType = Node<InputImageNodeData, "inputImage">;
 const BASE_WIDTH = 300;
 
 export default function InputImage({ id, data, selected }: NodeProps<InputImageNodeType>) {
-  const { zoom } = useViewport();
+  // console.log("INPUTIMAGE", data);
   const { updateNode } = useReactFlow();
 
   const [isUploading, setIsUploading] = useState(false);
