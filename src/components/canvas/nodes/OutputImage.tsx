@@ -22,19 +22,19 @@ export type OutputImageNodeType = Node<OutputImageNodeData, "outputImage">;
 
 const PLACEHOLDERS = [
   {
-    url: "https://cdn.midjourney.com/a3b07153-28fd-4685-8536-63cb311647e9/0_0.png",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/5daa4c31fc80f9fb0694d395998ee3b2.jpg",
     prompt: "An astronaut in a field of flowers",
   },
   {
-    url: "https://cdn.midjourney.com/526616d6-42f3-48c5-a966-a0ee874994c3/0_0.png",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/8a17b1c1dcebb918050eb417b343e3fd.jpg",
     prompt: "A moody cyberpunk street at night",
   },
   {
-    url: "https://cdn.midjourney.com/21e97ee6-c82f-44f5-aa2b-5fb4d83ea3fc/0_0.png",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/138864f441bad71a9d5b496f044e76f5.jpg",
     prompt: "A portrait of a cyborg woman",
   },
   {
-    url: "https://i.pinimg.com/736x/3f/21/c6/3f21c6feafc766c314200d7f5ed9156f.jpg",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/57dd0213ddcc344454fb198e24be2e66.jpg",
     prompt: "A portrait of a burning woman",
   },
 ];

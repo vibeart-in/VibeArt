@@ -1,4 +1,4 @@
-import { Node, useHandleConnections, useNodesData, useReactFlow } from "@xyflow/react";
+import { Node, useNodeConnections, useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useMemo } from "react";
 
 import type { InputImageNodeData } from "../components/canvas/nodes/InputImage";
@@ -43,7 +43,7 @@ export const getDimensionsFromNodes = (
  * Hook to retrieve aggregated data from upstream nodes (connected to 'target').
  */
 export const useUpstreamData = (handleType: "target" | "source" = "target") => {
-  const connections = useHandleConnections({ type: handleType });
+  const connections = useNodeConnections({ handleType });
   const nodesData = useNodesData<XYNode>(connections.map((connection) => connection.source));
 
   return useMemo(() => {

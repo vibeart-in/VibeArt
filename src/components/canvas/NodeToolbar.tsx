@@ -8,9 +8,7 @@ import {
   Italic,
   Underline as UnderlineIcon,
   List,
-  AlignLeft,
   Minus,
-  Type,
   Check,
 } from "lucide-react";
 import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
@@ -28,7 +26,7 @@ interface NodeToolbarProps {
   handleMouseLeave: () => void;
   width?: number;
   height?: number;
-  textEditor?: any; // Generic any to avoid strict Tiptap dependency issues in this file if types aren't perfect, but ideally Editor
+  textEditor?: any;
 }
 
 const COLORS = [
@@ -56,7 +54,7 @@ export default function NodeToolbar({
   if (toolbarType === "text" && id && editor) {
     return (
       <FlowNodeToolbar
-        className=""
+        className={selected ? "opacity-100" : "opacity-50 hover:opacity-100"}
         isVisible={selected || isHovered}
         position={Position.Bottom}
         offset={20}
@@ -209,7 +207,7 @@ export default function NodeToolbar({
   // Default Image Toolbar
   return (
     <FlowNodeToolbar
-      className=""
+      className={selected ? "opacity-100" : "opacity-50 hover:opacity-100"}
       isVisible={selected || isHovered}
       position={Position.Bottom}
       offset={20}

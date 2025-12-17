@@ -2,7 +2,6 @@
 
 import {
   Edge,
-  MarkerType,
   Node,
   ReactFlow,
   ReactFlowProps,
@@ -16,7 +15,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "@xyflow/react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import "@xyflow/react/dist/style.css";
 import { edgeTypes } from "./edges/EdgeTypes";
@@ -44,12 +43,16 @@ import {
   Maximize,
   LayoutTemplate,
   Palette,
+  Camera,
 } from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 import { DevTools } from "../devtools";
+import { toJpeg, toPng } from "html-to-image";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
-  const { project } = useCanvas();
+  const { project, setIsDraggingEdge } = useCanvas();
   const {
     onConnect,
     onConnectStart,
@@ -71,6 +74,9 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     lastSaved: Date | null;
   }>({ isSaving: false, lastSaved: null });
 
+  const significantChangesRef = useRef(0);
+  const CHANGE_THRESHOLD = 3;
+
   const { getEdges, toObject, screenToFlowPosition, getNodes, getNode, updateNode } =
     useReactFlow();
 
@@ -91,12 +97,82 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
       }
 
       setSaveState((prev) => ({ ...prev, lastSaved: new Date() }));
+      // saveThumbnail();
     } catch (error) {
       console.error("Error saving project", error);
     } finally {
       setSaveState((prev) => ({ ...prev, isSaving: false }));
     }
   }, 1000);
+
+  const saveThumbnail = useDebouncedCallback(async () => {
+    if (!project?.id || nodes.length === 0) return;
+
+    try {
+      const nodesBounds = getNodesBounds(nodes);
+      // 1. Reduce resolution (1280x720 is plenty for a thumbnail)
+      const imageWidth = 1280;
+      const imageHeight = 720;
+
+      const transform = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0);
+      const viewport = document.querySelector(".react-flow__viewport") as HTMLElement;
+
+      if (!viewport) return;
+
+      const dataUrl = await toJpeg(viewport, {
+        backgroundColor: "#111",
+        width: imageWidth,
+        height: imageHeight,
+        quality: 0.6,
+        skipFonts: true,
+        style: {
+          width: imageWidth.toString(),
+          height: imageHeight.toString(),
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom})`,
+        },
+      });
+
+      console.log("NEW THUMBNAIL");
+      console.log(
+        "%c ",
+        `
+  font-size: 1px;
+  padding: 300px 400px;
+  background: url(${dataUrl}) no-repeat;
+  background-size: contain;
+  `,
+      );
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      // 3. Change filename to .jpg
+      const file = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await uploadImageAction(formData);
+      if (uploadRes.success && uploadRes.data) {
+        await updateProjectAction(project.id, {
+          image: uploadRes.data.imageId,
+        });
+      }
+      significantChangesRef.current = 0;
+      console.log("Thumbnail updated after significant changes");
+    } catch (e) {
+      console.error("Failed to generate thumbnail", e);
+    }
+  }, 5000);
+
+  // 4. Create a helper to track changes
+  const trackChange = useCallback(
+    (count = 1) => {
+      significantChangesRef.current += count;
+      if (significantChangesRef.current >= CHANGE_THRESHOLD) {
+        saveThumbnail();
+      }
+    },
+    [saveThumbnail],
+  );
 
   const addNode = useCallback(
     (type: string, options?: Record<string, unknown>) => {
@@ -112,11 +188,13 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
         ...rest,
       };
 
-      setNodes((nds: Node[]) => nds.concat(newNode));
+      setNodes((nds) => nds.concat(newNode));
+
+      trackChange(1); // Increment counter
       save();
       return newNode.id;
     },
-    [save],
+    [save, trackChange],
   );
 
   const duplicateNode = useCallback(
@@ -180,12 +258,14 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     // Delete any drop nodes when starting to drag a node
     setNodes((nds: Node[]) => nds.filter((n: Node) => n.type !== "drop"));
     setEdges((eds: Edge[]) => eds.filter((e: Edge) => e.type !== "temporary"));
+    setIsDraggingEdge(true);
     save();
-  }, [save]);
+  }, [save, setIsDraggingEdge]);
 
   const handleConnectEnd = useCallback<OnConnectEnd>(
     (event, connectionState) => {
       // when a connection is dropped on the pane it's not valid
+      setIsDraggingEdge(false);
 
       if (!connectionState.isValid) {
         // we need to remove the wrapper bounds, in order to get the correct position
@@ -215,7 +295,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
         );
       }
     },
-    [addNode, screenToFlowPosition],
+    [addNode, screenToFlowPosition, setIsDraggingEdge],
   );
 
   const handleEdgesChange = useCallback<OnEdgesChange>(
@@ -234,12 +314,22 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     (changes) => {
       setNodes((current) => {
         const updated = applyNodeChanges(changes, current);
-        save();
+
+        // Filter for 'add' or 'remove' events
+        const structuralChanges = changes.filter(
+          (c) => c.type === "add" || c.type === "remove",
+        ).length;
+
+        if (structuralChanges > 0) {
+          trackChange(structuralChanges);
+        }
+
+        save(); // JSON data still saves normally (1s debounce)
         onNodesChange?.(changes);
         return updated;
       });
     },
-    [save, onNodesChange],
+    [save, trackChange, onNodesChange],
   );
 
   return (
@@ -268,23 +358,31 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               // snapGrid={[42, 42]}
               minZoom={0.1}
               maxZoom={10}
-              defaultEdgeOptions={{
-                style: {
-                  stroke: "#4b5563",
-                  strokeWidth: 2,
-                },
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
-                  color: "#4b5563",
-                },
-              }}
-              connectionLineStyle={{
-                stroke: "#DFFF00",
-                strokeWidth: 4,
-              }}
+              // defaultEdgeOptions={{
+              //   style: {
+              //     stroke: "#4b5563",
+              //     strokeWidth: 2,
+              //   },
+              //   markerEnd: {
+              //     type: MarkerType.ArrowClosed,
+              //     color: "#4b5563",
+              //   },
+              // }}
+              // connectionLineStyle={{
+              //   stroke: "#DFFF00",
+              //   strokeWidth: 4,
+              // }}
+              connectionLineContainerStyle={{ zIndex: 0 }}
               // {...rest}
             >
-              <CustomControls nodes={nodes} setNodes={setNodes} minZoom={0.25} maxZoom={3} />
+              <CustomControls
+                nodes={nodes}
+                setNodes={setNodes}
+                minZoom={0.25}
+                maxZoom={3}
+                isSaving={saveState.isSaving}
+                lastSaved={saveState.lastSaved}
+              />
               <DevTools position="bottom-left" />
               {children}
             </ReactFlow>

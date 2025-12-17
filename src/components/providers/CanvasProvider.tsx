@@ -1,10 +1,12 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useState } from "react";
 import { CanvasProject } from "@/src/types/BaseType";
 
 interface CanvasContextType {
   project: CanvasProject | null;
+  isDraggingEdge: boolean;
+  setIsDraggingEdge: (isDragging: boolean) => void;
 }
 
 const CanvasContext = createContext<CanvasContextType | undefined>(undefined);
@@ -16,7 +18,13 @@ export function CanvasProvider({
   children: ReactNode;
   project: CanvasProject | null;
 }) {
-  return <CanvasContext.Provider value={{ project }}>{children}</CanvasContext.Provider>;
+  const [isDraggingEdge, setIsDraggingEdge] = useState(false);
+
+  return (
+    <CanvasContext.Provider value={{ project, isDraggingEdge, setIsDraggingEdge }}>
+      {children}
+    </CanvasContext.Provider>
+  );
 }
 
 export const useCanvas = () => {

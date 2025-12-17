@@ -1,6 +1,6 @@
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { UserSectionClient } from "@/src/components/home/UserSectionClient";
-import SideToolbar from "@/src/components/canvas/SideToolbar";
+// import SideToolbar from "@/src/components/canvas/SideToolbar";
 import Canvas from "@/src/components/canvas/Canvas";
 import { Background, BackgroundVariant, Panel } from "@xyflow/react";
 import { createClient } from "@/src/lib/supabase/server";
@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <div className="h-screen w-screen">
       <CanvasProvider project={project}>
         <Canvas>
-          <SideToolbar />
+          {/* <SideToolbar /> */}
           <Panel
             position="top-left"
             className="flex items-center gap-2 rounded-3xl bg-black/50 px-4 py-2 backdrop-blur-md"

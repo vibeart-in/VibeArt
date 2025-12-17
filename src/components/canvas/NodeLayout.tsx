@@ -5,6 +5,7 @@ import React, { ReactNode, useCallback, useEffect, useRef, useState } from "reac
 import NodeToolbar from "./NodeToolbar";
 import Magnet from "../ui/Magnet";
 import { IconSquareRoundedPlus } from "@tabler/icons-react";
+import { useCanvas } from "../providers/CanvasProvider";
 
 export type HandleConfig = {
   type: "source" | "target";
@@ -43,6 +44,7 @@ export default function NodeLayout({
   textEditor,
 }: NodeLayoutProps) {
   const { zoom } = useViewport();
+  const { isDraggingEdge } = useCanvas();
 
   // --- 1. Internal Hover Logic ---
   const [isHovered, setIsHovered] = useState(false);
@@ -74,12 +76,21 @@ export default function NodeLayout({
   // Use this to toggle visibility of handles/toolbar
   const isActive = selected || isHovered;
 
-  // --- 2. Positioning Logic (Same as before) ---
-  const getHandlePositionStyle = (position: Position): React.CSSProperties => {
+  // --- 2. Positioning Logic ---
+  const getHandlePositionStyle = (
+    position: Position,
+  ): React.CSSProperties & { "--x-translate"?: string; "--y-translate"?: string } => {
     const isVertical = position === Position.Left || position === Position.Right;
     const size = isVertical ? { height: "6rem", width: "4rem" } : { width: "6rem", height: "4rem" };
-    const baseTransform = isVertical ? "translateY(-50%)" : "translateX(-50%)";
-    const offset = "-24px";
+
+    // Position the logical handle center exactly on the node border.
+    // Half of 4rem (handle thickness) is 2rem. To touch the border, use -2rem.
+    const offset = "-0rem";
+
+    // We want the visual "plus" icon to float outside the node.
+    // Since the handle is at the border (0px), this pushes the icon outwards.
+    // Try 30px - 40px for a good floating distance.
+    const floatDistance = "54px";
 
     switch (position) {
       case Position.Left:
@@ -87,28 +98,32 @@ export default function NodeLayout({
           ...size,
           left: offset,
           top: "50%",
-          transform: `${baseTransform} translateX(-50%)`,
+          transform: "translateY(-50%)",
+          "--x-translate": `-${floatDistance}`,
         };
       case Position.Right:
         return {
           ...size,
           right: offset,
           top: "50%",
-          transform: `${baseTransform} translateX(50%)`,
+          transform: "translateY(-50%)",
+          "--x-translate": floatDistance,
         };
       case Position.Top:
         return {
           ...size,
           top: offset,
           left: "50%",
-          transform: `${baseTransform} translateY(-50%)`,
+          transform: "translateX(-50%)",
+          "--y-translate": `-${floatDistance}`,
         };
       case Position.Bottom:
         return {
           ...size,
           bottom: offset,
           left: "50%",
-          transform: `${baseTransform} translateY(50%)`,
+          transform: "translateX(-50%)",
+          "--y-translate": floatDistance,
         };
       default:
         return {};
@@ -198,6 +213,12 @@ export default function NodeLayout({
 
       {/* Handles */}
       {handles.map((handle, index) => {
+        const {
+          "--x-translate": xTrans,
+          "--y-translate": yTrans,
+          ...handleStyle
+        } = getHandlePositionStyle(handle.position);
+
         return (
           <Handle
             key={`${handle.type}-${handle.position}-${index}`}
@@ -209,26 +230,29 @@ export default function NodeLayout({
               isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
             } ${handle.className || ""}`}
             style={{
-              ...getHandlePositionStyle(handle.position),
+              ...handleStyle,
               border: "none",
               borderRadius: 0,
               background: "transparent",
             }}
           >
-            <Magnet
-              padding={0}
-              magnetStrength={2}
-              activeTransition="transform 0.1s ease-out"
-              inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-              wrapperClassName="w-full h-full"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IconSquareRoundedPlus />
-            </Magnet>
+            {!isDraggingEdge && (
+              <Magnet
+                padding={0}
+                magnetStrength={2}
+                activeTransition="transform 0.1s ease-out"
+                inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                wrapperClassName="w-full h-full"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transform: `translate(${xTrans || 0}, ${yTrans || 0})`,
+                }}
+              >
+                <IconSquareRoundedPlus />
+              </Magnet>
+            )}
           </Handle>
         );
       })}
