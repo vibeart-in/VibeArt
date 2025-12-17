@@ -32,7 +32,7 @@ const generateImage = async (formData: GenerationParams) => {
   return result;
 };
 
-export function useGenerateImage(conversationType: ConversationType, conversationId?: string) {
+export function useGenerateImage(conversationType: ConversationType, conversationId?: string, options?: { skipRedirect?: boolean }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const queryKey = ["messages", conversationId];
@@ -80,7 +80,8 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
       }
     },
     onSettled: (data) => {
-      if (!conversationId && data?.conversationId) {
+      // Only redirect if NOT skipping redirect, AND we didn't have an ID before, AND we got one now
+      if (!conversationId && data?.conversationId && !options?.skipRedirect) {
         router.push(`/${conversationType}/${data.conversationId}`);
       } else {
         queryClient.invalidateQueries({ queryKey });

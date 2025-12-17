@@ -39,12 +39,21 @@ const PLACEHOLDERS = [
   },
 ];
 
+import { useCanvasGeneration } from "@/src/hooks/useCanvasGeneration";
+import { Loader2 } from "lucide-react";
+
 export default function OutputImage({ id, data, selected }: NodeProps<OutputImageNodeType>) {
   const { updateNodeData } = useReactFlow();
 
   useSyncUpstreamData(id, data);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+
+  const handleSuccess = (imageUrl: string, width: number, height: number) => {
+      updateNodeData(id, { imageUrl, width, height });
+  };
+  
+  const { generate, status } = useCanvasGeneration({ onSuccess: handleSuccess });
 
   useEffect(() => {
     if (data.imageUrl) return;
@@ -56,6 +65,12 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
 
   // Derived state for the list view
   const inputImages = data.inputImageUrls || [];
+
+  const handleGenerate = () => {
+    if (!data.prompt) return;
+    const firstImage = inputImages.length > 0 ? inputImages[0] : undefined;
+    generate(data.prompt, firstImage);
+  };
 
   return (
     <NodeLayout
@@ -99,6 +114,13 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/40" />
           </div>
+        )}
+
+        {/* Loading Overlay */}
+        {(status === "loading" || status === "polling" || status === "running") && (
+             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <Loader2 className="animate-spin text-accent" size={48} />
+             </div>
         )}
 
         {data.imageUrl && (
@@ -154,6 +176,12 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
               onChange={(e) => {
                 updateNodeData(id, { prompt: e.target.value });
               }}
+              onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleGenerate();
+                  }
+              }}
             />
           </div>
         ) : (
@@ -165,9 +193,8 @@ export default function OutputImage({ id, data, selected }: NodeProps<OutputImag
 
       <button
         className={`absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-accent text-black shadow-lg transition-all hover:scale-110 hover:shadow-xl ${selected ? "opacity-100" : "opacity-0"}`}
-        onClick={() => {
-          console.log("Generate:", { prompt: data.prompt, images: inputImages });
-        }}
+        onClick={handleGenerate}
+        disabled={status === "loading" || status === "polling" || status === "running"}
       >
         <ArrowUp size={18} strokeWidth={3} />
       </button>
