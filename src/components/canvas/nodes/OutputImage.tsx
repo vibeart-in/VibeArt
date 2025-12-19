@@ -175,16 +175,18 @@ export default function OutputImage({
       parameters = params;
     } else {
       // Replicate case: Record<string, any>
+      const defaults = (typeof model.parameters === "object" && !Array.isArray(model.parameters))
+        ? Object.entries(model.parameters).reduce((acc, [key, val]) => {
+            // @ts-ignore
+            if (val.default !== undefined) acc[key] = val.default;
+            return acc;
+          }, {} as Record<string, any>)
+        : {};
+
       parameters = {
+        ...defaults,
         prompt: data.prompt,
-        // Add other defaults from model.parameters if it's a Record
-        ...(typeof model.parameters === "object" && !Array.isArray(model.parameters)
-          ? Object.entries(model.parameters).reduce((acc, [key, val]) => {
-              // @ts-ignore
-              if (val.default) acc[key] = val.default;
-              return acc;
-            }, {} as Record<string, any>)
-          : {}),
+        ...(inputImages.length > 0 ? { "image input": [inputImages[0]] } : {}),
       } as unknown as InputBoxParameter;
     }
 
