@@ -15,6 +15,7 @@ import {
 } from "@/src/types/BaseType";
 import { useConversationMessages } from "@/src/hooks/useConversationMessages";
 import { AITextLoading } from "@/src/components/ui/ImageCardLoading";
+import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 
 export type OutputImageNodeData = {
   imageUrl?: string;
@@ -125,6 +126,11 @@ export default function OutputImage({
     return () => clearInterval(interval);
   }, [data.imageUrl]);
 
+  // Constants for sizing
+  const BASE_WIDTH = 320;
+  const aspectRatio = data.width && data.height ? data.height / data.width : 1.4;
+  const nodeHeight = BASE_WIDTH * aspectRatio;
+
   // Derived state for the list view
   const inputImages = data.inputImageUrls || [];
 
@@ -186,7 +192,8 @@ export default function OutputImage({
       parameters = {
         ...defaults,
         prompt: data.prompt,
-        ...(inputImages.length > 0 ? { "image input": [inputImages[0]] } : {}),
+        aspect_ratio: inputImages.length > 0 ? "match_input_image" : defaults.aspect_ratio || "1:1",
+        ...(inputImages.length > 0 ? { "image_input": [inputImages[0]] } : {}),
       } as unknown as InputBoxParameter;
     }
 
@@ -222,41 +229,31 @@ export default function OutputImage({
   const jobStatus = messages?.[0]?.job_status || "processing";
   const loadingText = getLoadingMessage(jobStatus);
 
-  // Constants for Loading Animation (from ImageCardLoading)
-  const variant = "cool"; 
-  const rainbowVariants = {
-    default:
-      "repeating-linear-gradient(100deg, #dbeafe 10%, #f0abfc 15%, #bae6fd 20%, #a5f3fc 25%, #dbeafe 30%)",
-    warm: "repeating-linear-gradient(100deg, #ffe4e6 10%, #fecaca 15%, #fcd34d 20%, #fdba74 25%, #fecaca 30%)",
-    cool: "repeating-linear-gradient(100deg, #c7d2fe 10%, #a5b4fc 15%, #d8b4fe 20%, #f0abfc 25%, #a5f3fc 30%)",
-    neon: "repeating-linear-gradient(100deg, #ff80ab 10%, #00ffc3 15%, #80d0ff 20%, #a58eff 25%, #ffc078 30%)",
-  };
-  const stripePattern =
-    "repeating-linear-gradient(100deg, #000 0%, #000 7%, transparent 10%, transparent 12%, #000 16%)";
-  const rainbowPattern = rainbowVariants[variant] || rainbowVariants.default;
-
   return (
     <NodeLayout
       selected={selected}
       title={data.category || "Image generation"}
       subtitle={data?.model}
-      minWidth={320}
-      minHeight={450}
+      minWidth={BASE_WIDTH}
+      minHeight={nodeHeight}
       className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
-      // REMOVED: aspect ratio style to prevent node resizing
+      style={{
+        width: `${BASE_WIDTH}px`,
+        height: `${nodeHeight}px`,
+      }}
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
     >
       {/* Background Image Area */}
-      <div className="relative min-h-[450px] w-full flex-1 overflow-hidden rounded-3xl">
+      <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={data.imageUrl}
             alt={data.prompt || "Generated Image"}
-            className="min-h-[450px] w-full rounded-3xl object-cover"
+            className="h-full w-full rounded-3xl object-cover"
             draggable={false}
           />
         ) : (
@@ -282,41 +279,8 @@ export default function OutputImage({
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/80" />
         )}
 
-        {/* Rich Loading Overlay */}
-        {isGenerating && (
-            <div className="absolute inset-0 z-20 overflow-hidden bg-black/60 backdrop-blur-sm">
-                 {/* Background Gradient Layer used in ImageCardLoading */}
-                <div
-                    className="absolute inset-0 size-full"
-                    style={{
-                    backgroundImage: `${stripePattern}`,
-                    backgroundSize: "300% 200%",
-                    backgroundPosition: "50% 50%",
-                    filter: "blur(30px) opacity(90%) saturate(150%)",
-                    }}
-                >
-                    <div
-                    className="animate-rainbow-flow absolute inset-0 mix-blend-difference"
-                    style={{
-                        backgroundImage: `${stripePattern}, ${rainbowPattern}`,
-                        backgroundSize: "200% 100%",
-                        backgroundAttachment: "fixed",
-                    }}
-                    />
-                </div>
-
-                {/* Content with Text Shimmer */}
-                <div className="relative z-10 flex size-full flex-col items-center justify-center px-4 text-center text-white">
-                    <div className="mb-2 text-2xl font-semibold">
-                       <AITextLoading text={loadingText} />
-                    </div>
-                    <div className="animate-text-shimmer mb-6 bg-gradient-to-r from-white/50 via-white to-white/50 bg-clip-text text-sm text-transparent opacity-70">
-                       Please chill, while we create your image
-                    </div>
-                </div>
-            </div>
-        )}
-
+        {/* Modern Loading Overlay */}
+        {isGenerating && <ModernCardLoader text={loadingText} />}
       </div>
 
       {/* Footer Area */}
