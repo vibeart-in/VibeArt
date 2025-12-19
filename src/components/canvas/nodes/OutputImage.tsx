@@ -72,11 +72,22 @@ export default function OutputImage({
   data,
   selected,
 }: NodeProps<OutputImageNodeType>) {
-  const { updateNodeData } = useReactFlow();
+  const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+
+  // Sync dimensions to React Flow store when upstream data changes (aspect ratio sync)
+  useEffect(() => {
+    if (data.width && data.height) {
+      const ratio = data.height / data.width;
+      updateNode(id, {
+        width: 320,
+        height: 320 * ratio,
+      });
+    }
+  }, [data.width, data.height, id, updateNode]);
 
   // --- Hooks for Generation ---
   // 1. Get models to find "Seedream 4 Fast"
@@ -110,10 +121,15 @@ export default function OutputImage({
       latestMsg.output_images &&
       latestMsg.output_images.length > 0
     ) {
-      const generatedUrl = latestMsg.output_images[0].imageUrl;
+      const output = latestMsg.output_images[0];
+      const generatedUrl = output.imageUrl;
       // Only update if it's different to avoid loops
       if (generatedUrl !== data.imageUrl) {
-        updateNodeData(id, { imageUrl: generatedUrl });
+        updateNodeData(id, {
+          imageUrl: generatedUrl,
+          width: output.width || data.width,
+          height: output.height || data.height,
+        });
       }
     }
   }, [messages, data.imageUrl, id, updateNodeData]);
@@ -236,11 +252,8 @@ export default function OutputImage({
       subtitle={data?.model}
       minWidth={BASE_WIDTH}
       minHeight={nodeHeight}
+      keepAspectRatio={true}
       className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
-      style={{
-        width: `${BASE_WIDTH}px`,
-        height: `${nodeHeight}px`,
-      }}
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },

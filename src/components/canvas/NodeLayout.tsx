@@ -27,6 +27,7 @@ interface NodeLayoutProps {
   handles?: HandleConfig[];
   minWidth?: number;
   minHeight?: number;
+  keepAspectRatio?: boolean;
 }
 
 export default function NodeLayout({
@@ -42,6 +43,7 @@ export default function NodeLayout({
   minHeight = 200,
   toolbarType = "default",
   textEditor,
+  keepAspectRatio,
 }: NodeLayoutProps) {
   const { zoom } = useViewport();
   const { isDraggingEdge } = useCanvas();
@@ -187,6 +189,7 @@ export default function NodeLayout({
           position="bottom-right"
           minWidth={minWidth}
           minHeight={minHeight}
+          keepAspectRatio={keepAspectRatio}
           style={{ background: "transparent", border: "none", zIndex: 50 }}
         >
           <svg
