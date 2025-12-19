@@ -11,7 +11,7 @@ export async function updateProjectAction(
   payload: {
     title?: string;
     content?: any;
-    image?: string; // UUID of the image if updating the cover
+    cover?: string; // UUID of the image if updating the cover
   },
 ): ServerActionRes {
   try {

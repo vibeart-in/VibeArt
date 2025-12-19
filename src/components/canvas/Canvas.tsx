@@ -111,8 +111,8 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     try {
       const nodesBounds = getNodesBounds(nodes);
       // 1. Reduce resolution (1280x720 is plenty for a thumbnail)
-      const imageWidth = 1280;
-      const imageHeight = 720;
+      const imageWidth = 1920;
+      const imageHeight = 1080;
 
       const transform = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0);
       const viewport = document.querySelector(".react-flow__viewport") as HTMLElement;
@@ -136,11 +136,11 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
       console.log(
         "%c ",
         `
-  font-size: 1px;
-  padding: 300px 400px;
-  background: url(${dataUrl}) no-repeat;
-  background-size: contain;
-  `,
+        font-size: 1px;
+        padding: 300px 400px;
+        background: url(${dataUrl}) no-repeat;
+        background-size: contain;
+        `,
       );
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -149,11 +149,15 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
       const formData = new FormData();
       formData.append("file", file);
+      if (project?.id) {
+        formData.append("canvasId", project.id);
+        formData.append("customFileName", "thumbnail.jpg");
+      }
 
       const uploadRes = await uploadImageAction(formData);
       if (uploadRes.success && uploadRes.data) {
         await updateProjectAction(project.id, {
-          image: uploadRes.data.imageId,
+          cover: uploadRes.data.imageId,
         });
       }
       significantChangesRef.current = 0;

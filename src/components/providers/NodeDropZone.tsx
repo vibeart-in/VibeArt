@@ -17,7 +17,7 @@ type NodeDropzoneProviderProps = {
 export const NodeDropzoneProvider = ({ children }: NodeDropzoneProviderProps) => {
   const { getViewport } = useReactFlow();
   const { addNode } = useNodeOperations();
-  const project = useCanvas();
+  const { project } = useCanvas();
 
   const dropzone = useDropzone({
     noClick: true,
@@ -38,6 +38,7 @@ export const NodeDropzoneProvider = ({ children }: NodeDropzoneProviderProps) =>
         const promises = acceptedFiles.map(async (file) => {
           const formData = new FormData();
           formData.append("file", file);
+          if (project?.id) formData.append("canvasId", project.id);
 
           const result = await uploadImageAction(formData);
 

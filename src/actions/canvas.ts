@@ -3,7 +3,7 @@
 import { createClient } from "@/src/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function createCanvas() {
+export async function createCanvas(title: string = "Untitled Canvas") {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,7 +17,7 @@ export async function createCanvas() {
     .from("canvas")
     .insert({
       user_id: user.id,
-      title: "Untitled Canvas",
+      title,
     })
     .select("id")
     .single();
