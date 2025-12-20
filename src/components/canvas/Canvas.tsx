@@ -519,6 +519,16 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
               UTILITIES
             </ContextMenuLabel>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("colorCorrection")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
+                <Palette size={12} />
+              </div>
+              Color Correction
+            </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
       </NodeDropzoneProvider>
