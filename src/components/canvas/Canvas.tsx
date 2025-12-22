@@ -44,6 +44,7 @@ import {
   LayoutTemplate,
   Palette,
   Camera,
+  Crop,
 } from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 import { DevTools } from "../devtools";
@@ -528,6 +529,16 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
                 <Palette size={12} />
               </div>
               Color Correction
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("crop")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
+                <Crop size={12} />
+              </div>
+              Crop
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>

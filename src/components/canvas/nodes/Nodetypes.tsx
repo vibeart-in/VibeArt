@@ -4,6 +4,7 @@ import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptCompon
 import TextNode from "./TextNode";
 import DropNode from "./DropNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
+import CropNode from "./CropNode";
 
 export const nodeTypes = {
   drop: DropNode,
@@ -15,4 +16,5 @@ export const nodeTypes = {
   checkpoint: CheckpointNode,
   lora: LoraNode,
   colorCorrection: ColorCorrectionNode,
+  crop: CropNode,
 };

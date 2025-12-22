@@ -5,8 +5,10 @@ import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useUpstreamData } from "@/src/utils/xyflow";
-import { ImageIcon } from "lucide-react";
-import ColorCorrectionToolbar from "../ColorCorrectionToolbar";
+import { ImageIcon, Sun, Contrast, Eye, Droplets, Palette, CircleDot, Sparkles, ChevronDown, RotateCcw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import FilterSlider from "./FilterSlider";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 export type ColorCorrectionNodeData = {
   imageUrl?: string;
@@ -38,7 +40,16 @@ const DEFAULT_FILTERS = {
   opacity: 100,
 };
 
-const BASE_WIDTH = 320;
+const PRESETS = [
+  { name: "Vivid", filters: { ...DEFAULT_FILTERS, brightness: 110, contrast: 120, saturation: 140 } },
+  { name: "Warm", filters: { ...DEFAULT_FILTERS, sepia: 30, saturation: 110 } },
+  { name: "Cool", filters: { ...DEFAULT_FILTERS, hue: 180, saturation: 80 } },
+  { name: "Vintage", filters: { ...DEFAULT_FILTERS, sepia: 50, contrast: 90, brightness: 90 } },
+  { name: "B&W", filters: { ...DEFAULT_FILTERS, grayscale: 100, contrast: 120 } },
+  { name: "Dreamy", filters: { ...DEFAULT_FILTERS, brightness: 110, blur: 1, saturation: 80 } },
+];
+
+const BASE_WIDTH = 380;
 const EMPTY_HEIGHT = 300;
 
 export default function ColorCorrectionNode({
@@ -47,7 +58,6 @@ export default function ColorCorrectionNode({
   selected,
 }: NodeProps<ColorCorrectionNodeType>) {
   const { updateNodeData, updateNode } = useReactFlow();
-  const [isHovered, setIsHovered] = useState(false);
 
   // Get image and dimensions from upstream connections
   const { images, dimensions } = useUpstreamData("target");
@@ -79,27 +89,31 @@ export default function ColorCorrectionNode({
     }
   }, [upstreamImage, dimensions, data.imageUrl, data.width, data.height, id, updateNodeData]);
 
-  // Update React Flow node dimensions based on image size
-  useEffect(() => {
+  // Calculate node dimensions
+  const nodeHeight = useMemo(() => {
     if (data.width && data.height) {
       const ratio = data.height / data.width;
-      updateNode(id, {
-        width: BASE_WIDTH,
-        height: BASE_WIDTH * ratio,
-      });
-    } else {
-      // Empty state: fixed dimensions
-      updateNode(id, {
-        width: BASE_WIDTH,
-        height: EMPTY_HEIGHT,
-      });
+      return BASE_WIDTH * ratio + 240; // Add space for controls
     }
-  }, [data.width, data.height, id, updateNode]);
+    return EMPTY_HEIGHT + 240; // Add space for controls
+  }, [data.width, data.height]);
+
+  // Update React Flow node dimensions
+  useEffect(() => {
+    updateNode(id, {
+      width: BASE_WIDTH,
+      height: nodeHeight,
+    });
+  }, [nodeHeight, id, updateNode]);
 
   const filters = data.filters || DEFAULT_FILTERS;
 
   const handleFilterChange = (newFilters: typeof DEFAULT_FILTERS) => {
     updateNodeData(id, { filters: newFilters });
+  };
+
+  const handleChange = (key: keyof typeof DEFAULT_FILTERS, value: number) => {
+    handleFilterChange({ ...filters, [key]: value });
   };
 
   const handleReset = () => {
@@ -116,27 +130,41 @@ export default function ColorCorrectionNode({
     };
   }, [filters]);
 
+  const lightFilters = [
+    { key: "brightness" as const, label: "Brightness", icon: Sun, min: 0, max: 200 },
+    { key: "contrast" as const, label: "Contrast", icon: Contrast, min: 0, max: 200 },
+    { key: "opacity" as const, label: "Opacity", icon: Eye, min: 0, max: 100 },
+  ];
+
+  const colorFilters = [
+    { key: "saturation" as const, label: "Saturation", icon: Droplets, min: 0, max: 200 },
+    { key: "hue" as const, label: "Hue", icon: Palette, min: 0, max: 360, unit: "°", default: 0 },
+  ];
+
+  const effectFilters = [
+    { key: "blur" as const, label: "Blur", icon: CircleDot, min: 0, max: 20, unit: "px", default: 0 },
+    { key: "grayscale" as const, label: "Grayscale", icon: Contrast, min: 0, max: 100, default: 0 },
+    { key: "sepia" as const, label: "Sepia", icon: Sparkles, min: 0, max: 100, default: 0 },
+  ];
+
   return (
-    <>
-      <NodeLayout
-        selected={selected}
-        title="Color Correction"
-        subtitle="Utilities"
-        handles={[
-          { type: "target", position: Position.Left },
-          { type: "source", position: Position.Right },
-        ]}
-        className="group flex h-full w-full cursor-default flex-col"
-        style={{
-          width: `${BASE_WIDTH}px`,
-          height: data.width && data.height ? `${BASE_WIDTH * (data.height / data.width)}px` : `${EMPTY_HEIGHT}px`,
-        }}
-      >
-        <div
-          className="relative h-full w-full overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-gray-900 to-black shadow-xl"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+    <NodeLayout
+      selected={selected}
+      title="Color correction"
+      subtitle=""
+      handles={[
+        { type: "target", position: Position.Left },
+        { type: "source", position: Position.Right },
+      ]}
+      className="group flex h-full w-full cursor-default flex-col"
+      style={{
+        width: `${BASE_WIDTH}px`,
+        height: `${nodeHeight}px`,
+      }}
+    >
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
+        {/* Image Section */}
+        <div className="relative flex-shrink-0" style={{ height: data.width && data.height ? `${BASE_WIDTH * (data.height / data.width)}px` : `${EMPTY_HEIGHT}px` }}>
           {data.imageUrl ? (
             <>
               <motion.img
@@ -150,14 +178,7 @@ export default function ColorCorrectionNode({
                 draggable={false}
               />
               {/* Subtle overlay gradient */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-              
-              {/* Filter indicator badge */}
-              {hasChanges && (
-                <div className="absolute right-3 top-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 backdrop-blur-md">
-                  <span className="text-xs font-medium text-amber-200">Filtered</span>
-                </div>
-              )}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
             </>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-gray-500">
@@ -171,21 +192,116 @@ export default function ColorCorrectionNode({
             </div>
           )}
         </div>
-      </NodeLayout>
 
-      {/* Integrated Toolbar */}
-      
-      <ColorCorrectionToolbar
-        id={id}
-        selected={selected}
-        isHovered={isHovered}
-        handleMouseEnter={() => setIsHovered(true)}
-        handleMouseLeave={() => setIsHovered(false)}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={handleReset}
-        hasChanges={hasChanges}
-      />
-    </>
+        {/* Controls Section */}
+        <div className="flex flex-col border-t border-white/10 bg-black/40 backdrop-blur-xl">
+          {/* Header with Adjustments and Presets */}
+          <div className="flex items-center justify-between px-4 py-1">
+            <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
+            <div className="flex items-center gap-2">
+              {/* Presets Dropdown */}
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-300 transition-all hover:bg-white/10 hover:text-white">
+                    <span>Presets</span>
+                    <ChevronDown className="size-3 opacity-50" />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    className="z-50 min-w-[140px] rounded-xl border border-[#1D1D1D] bg-[#0A0A0A] p-1.5 shadow-2xl animate-in fade-in zoom-in-95"
+                    sideOffset={8}
+                  >
+                    {PRESETS.map((preset) => (
+                      <DropdownMenu.Item
+                        key={preset.name}
+                        onClick={() => handleFilterChange(preset.filters)}
+                        className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white focus:outline-none"
+                      >
+                        {preset.name}
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <Tabs defaultValue="light" className="w-full">
+            <div className="px-3">
+              <TabsList className="grid w-full grid-cols-3 bg-white/5 p-1">
+                <TabsTrigger
+                  value="light"
+                  className="rounded-lg text-xs text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                >
+                  Light
+                </TabsTrigger>
+                <TabsTrigger
+                  value="color"
+                  className="rounded-lg text-xs text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                >
+                  Color
+                </TabsTrigger>
+                <TabsTrigger
+                  value="effects"
+                  className="rounded-lg text-xs text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                >
+                  Effects
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="light" className="mt-0 space-y-3 px-4 py-4">
+              {lightFilters.map((filter) => (
+                <FilterSlider
+                  key={filter.key}
+                  label={filter.label}
+                  icon={filter.icon}
+                  value={filters[filter.key]}
+                  onChange={(v) => handleChange(filter.key, v)}
+                  min={filter.min}
+                  max={filter.max}
+                  defaultValue={DEFAULT_FILTERS[filter.key]}
+                  unit="%"
+                />
+              ))}
+            </TabsContent>
+
+            <TabsContent value="color" className="mt-0 space-y-3 px-4 py-4">
+              {colorFilters.map((filter) => (
+                <FilterSlider
+                  key={filter.key}
+                  label={filter.label}
+                  icon={filter.icon}
+                  value={filters[filter.key]}
+                  onChange={(v) => handleChange(filter.key, v)}
+                  min={filter.min}
+                  max={filter.max}
+                  defaultValue={filter.default ?? DEFAULT_FILTERS[filter.key]}
+                  unit={filter.unit ?? "%"}
+                />
+              ))}
+            </TabsContent>
+
+            <TabsContent value="effects" className="mt-0 space-y-3 px-4 py-4">
+              {effectFilters.map((filter) => (
+                <FilterSlider
+                  key={filter.key}
+                  label={filter.label}
+                  icon={filter.icon}
+                  value={filters[filter.key]}
+                  onChange={(v) => handleChange(filter.key, v)}
+                  min={filter.min}
+                  max={filter.max}
+                  defaultValue={filter.default ?? DEFAULT_FILTERS[filter.key]}
+                  unit={filter.unit ?? "%"}
+                />
+              ))}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </NodeLayout>
   );
 }
