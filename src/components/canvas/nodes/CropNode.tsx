@@ -91,15 +91,17 @@ export default function CropNode({
 
   // Node Dimensions
   const nodeHeight = useMemo(() => {
+      const PADDING = 32; // p-4 = 16px * 2
+      const HEADER_FOOTER = 150; 
+
       if (data.croppedImageUrl && data.crop) {
           // Use cropped aspect ratio
           const ratio = data.crop.height / data.crop.width;
-          return BASE_WIDTH * ratio + 180;
+          return (BASE_WIDTH - PADDING) * ratio + HEADER_FOOTER;
       }
       if (imageSize) {
-          const displayWidth = BASE_WIDTH;
           const ratio = imageSize.height / imageSize.width;
-          return displayWidth * ratio + 180; // + Control footer height
+          return (BASE_WIDTH - PADDING) * ratio + HEADER_FOOTER;
       }
       return 400;
   }, [imageSize, data.croppedImageUrl, data.crop]);
@@ -111,7 +113,6 @@ export default function CropNode({
 
   // Helper to force a save by triggering a negligible dimension change
   const triggerSave = useCallback(() => {
-      // Toggle a tiny amount to width to trigger onNodesChange -> save()
       updateNode(id, { width: BASE_WIDTH + Math.random() * 0.01 });
   }, [id, updateNode]);
 
@@ -119,6 +120,7 @@ export default function CropNode({
 
   const getScale = () => {
       if (!imageSize || !containerRef.current) return 1;
+      // Dimensions inside the container (accounting for any potential scaling context, though simple clientWidth usually is fine)
       return containerRef.current.clientWidth / imageSize.width;
   };
 
@@ -134,8 +136,8 @@ export default function CropNode({
     if (!isDragging || !dragStart || !imageSize) return;
 
     const scale = getScale();
-    const deltaX = (e.clientX - dragStart.x) / scale;
-    const deltaY = (e.clientY - dragStart.y) / scale;
+    const deltaX = Math.round((e.clientX - dragStart.x) / scale);
+    const deltaY = Math.round((e.clientY - dragStart.y) / scale);
 
     setLocalCrop((prev) => {
       let newCrop = { ...prev };
@@ -384,59 +386,47 @@ export default function CropNode({
         height: `${nodeHeight}px`,
       }}
     >
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0A] shadow-2xl">
+      <div className="flex h-full w-full flex-col overflow-hidden p-4 rounded-3xl border border-white/10 bg-[#111111] shadow-2xl">
         
         {/* Main Crop Area */}
         <div 
-          ref={containerRef}
-          className="relative w-full flex-1 overflow-hidden bg-black"
+          className="relative w-full flex-1 overflow-hidden bg-black "
           style={{ minHeight: "200px" }}
         >
           {data.imageUrl ? (
             <>
               {/* 1. BLURRED BACKGROUND (The "not selected" part) */}
+              <div className="absolute inset-4 rounded-lg bg-black/50" />
+
+              {/* Invisible Reference Image for measuring dimensions on load */}
               <img
-                src={data.imageUrl}
-                alt="Source"
-                className="absolute inset-0 h-full w-full object-contain opacity-50 blur-sm brightness-50 grayscale-[30%]"
-                style={{
-                    transform: `scale(${imageSize ? 1 : 1})`, // Just to ensure it renders
-                }} 
+                  ref={imageRef}
+                  src={data.imageUrl}
+                  onLoad={onImageLoad}
+                  className="invisible absolute left-0 top-0 w-full"
+                  alt="reference"
               />
 
               {data.croppedImageUrl ? (
                    // Show Result State
-                   <div className="absolute inset-0 flex items-center justify-center bg-black">
+                   <div className="absolute inset-4 flex items-center justify-center overflow-hidden rounded-lg bg-black">
                        <img src={data.croppedImageUrl} className="h-full w-full object-contain" />
-                       <button 
-                        onClick={() => updateNodeData(id, { croppedImageUrl: undefined })}
-                        className="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/80"
-                       >
-                           <RotateCcw size={16} />
-                       </button>
                    </div>
               ) : (
                 // Cropping State
                 <div 
-                    className="relative mx-auto"
+                    ref={containerRef}
+                    className="relative mx-auto rounded-lg"
                     style={{
                         width: '100%',
                         height: imageSize ? `${imageSize.height * scale}px` : '100%',
                     }}
                 >
-                    {/* Invisible Reference Image for sizing the container correctly */}
-                    <img
-                        ref={imageRef}
-                        src={data.imageUrl}
-                        onLoad={onImageLoad}
-                        className="invisible absolute left-0 top-0 w-full"
-                        alt="reference"
-                    />
 
                     {/* 2. SHARP FOREGROUND (Clipped inside Crop Box) */}
                     {/* The Crop Box Window */}
                     <div
-                        className="absolute border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
+                        className="absolute border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] bg-transparent"
                         style={{
                             left: `${localCrop.x * scale}px`,
                             top: `${localCrop.y * scale}px`,
@@ -465,14 +455,14 @@ export default function CropNode({
                         {/* Grid Lines (Rule of Thirds) */}
                         {isDragging && (
                             <div className="pointer-events-none absolute inset-0 flex flex-col justify-evenly">
-                                <div className="h-px w-full bg-white/30 shadow-sm" />
-                                <div className="h-px w-full bg-white/30 shadow-sm" />
+                                <div className="h-px w-full border-t border-dashed border-white/70" />
+                                <div className="h-px w-full border-t border-dashed border-white/70" />
                             </div>
                         )}
                         {isDragging && (
                             <div className="pointer-events-none absolute inset-0 flex justify-evenly">
-                                <div className="h-full w-px bg-white/30 shadow-sm" />
-                                <div className="h-full w-px bg-white/30 shadow-sm" />
+                                <div className="h-full w-px border-l border-dashed border-white/70" />
+                                <div className="h-full w-px border-l border-dashed border-white/70" />
                             </div>
                         )}
                         
@@ -481,54 +471,65 @@ export default function CropNode({
                         {aspectRatio === "Free" && (
                             <>
                                 <div 
-                                    className="absolute -top-1.5 left-1/2 h-4 w-4 -translate-x-1/2 cursor-n-resize active:scale-125"
+                                    className="absolute -top-3 left-1/2 h-6 w-12 -translate-x-1/2 cursor-n-resize active:scale-125 flex items-center justify-center p-2"
                                     onPointerDown={(e) => handlePointerDown(e, "n")} 
                                 >
-                                   <div className="h-1.5 w-6 -translate-x-1 rounded-full bg-white shadow-sm" />
+                                   <div className="h-1 w-6 rounded-full bg-white/80 shadow-sm" />
                                 </div>
                                 <div 
-                                     className="absolute -bottom-1.5 left-1/2 h-4 w-4 -translate-x-1/2 cursor-s-resize active:scale-125"
+                                     className="absolute -bottom-3 left-1/2 h-6 w-12 -translate-x-1/2 cursor-s-resize active:scale-125 flex items-center justify-center"
                                      onPointerDown={(e) => handlePointerDown(e, "s")} 
                                 >
-                                    <div className="h-1.5 w-6 -translate-x-1 rounded-full bg-white shadow-sm" />
+                                    <div className="h-1 w-6 rounded-full bg-white/80 shadow-sm" />
                                 </div>
                                 <div 
-                                     className="absolute -left-1.5 top-1/2 h-4 w-4 -translate-y-1/2 cursor-w-resize active:scale-125"
+                                     className="absolute -left-3 top-1/2 h-12 w-6 -translate-y-1/2 cursor-w-resize active:scale-125 flex items-center justify-center"
                                      onPointerDown={(e) => handlePointerDown(e, "w")} 
                                 >
-                                     <div className="h-6 w-1.5 -translate-y-1 rounded-full bg-white shadow-sm" />
+                                     <div className="h-6 w-1 rounded-full bg-white/80 shadow-sm" />
                                 </div>
                                  <div 
-                                     className="absolute -right-1.5 top-1/2 h-4 w-4 -translate-y-1/2 cursor-e-resize active:scale-125"
+                                     className="absolute -right-3 top-1/2 h-12 w-6 -translate-y-1/2 cursor-e-resize active:scale-125 flex items-center justify-center"
                                      onPointerDown={(e) => handlePointerDown(e, "e")} 
                                 >
-                                     <div className="h-6 w-1.5 -translate-y-1 rounded-full bg-white shadow-sm" />
+                                     <div className="h-6 w-1 rounded-full bg-white/80 shadow-sm" />
                                 </div>
                             </>
                         )}
 
 
-                        {/* Corners */}
+                        {/* Corners - Large Hit Areas with Visual L-Brackets */}
+                        {/* NW */}
                         <div 
-                            className="absolute -left-1.5 -top-1.5 h-4 w-4 border-l-4 border-t-4 border-white active:scale-125"
+                            className="absolute -left-3 -top-3 h-8 w-8 cursor-nw-resize active:scale-110"
                             onPointerDown={(e) => handlePointerDown(e, "nw")} 
-                            style={{ cursor: "nw-resize" }}
-                        />
+                        >
+                             <div className="absolute bottom-2 right-2 h-3 w-3 border-l-4 border-t-4 border-white" />
+                        </div>
+                        
+                        {/* NE */}
                         <div 
-                            className="absolute -right-1.5 -top-1.5 h-4 w-4 border-r-4 border-t-4 border-white active:scale-125"
+                            className="absolute -right-3 -top-3 h-8 w-8 cursor-ne-resize active:scale-110"
                             onPointerDown={(e) => handlePointerDown(e, "ne")}
-                            style={{ cursor: "ne-resize" }}
-                        />
+                        >
+                            <div className="absolute bottom-2 left-2 h-3 w-3 border-r-4 border-t-4 border-white" />
+                        </div>
+                        
+                        {/* SW */}
                          <div 
-                            className="absolute -bottom-1.5 -left-1.5 h-4 w-4 border-b-4 border-l-4 border-white active:scale-125"
+                            className="absolute -bottom-3 -left-3 h-8 w-8 cursor-sw-resize active:scale-110"
                             onPointerDown={(e) => handlePointerDown(e, "sw")} 
-                            style={{ cursor: "sw-resize" }}
-                        />
+                        >
+                            <div className="absolute top-2 right-2 h-3 w-3 border-b-4 border-l-4 border-white" />
+                        </div>
+                        
+                        {/* SE */}
                         <div 
-                            className="absolute -bottom-1.5 -right-1.5 h-4 w-4 border-b-4 border-r-4 border-white active:scale-125"
+                            className="absolute -bottom-3 -right-3 h-8 w-8 cursor-se-resize active:scale-110"
                             onPointerDown={(e) => handlePointerDown(e, "se")} 
-                            style={{ cursor: "se-resize" }}
-                        />
+                        >
+                            <div className="absolute top-2 left-2 h-3 w-3 border-b-4 border-r-4 border-white" />
+                        </div>
                     </div>
                 </div>
               )}
