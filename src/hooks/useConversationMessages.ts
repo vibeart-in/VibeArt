@@ -5,8 +5,6 @@ import { createClient } from "../lib/supabase/client";
 import { conversationData, conversationImageObject } from "../types/BaseType"; // Make sure to import ImageObject
 import { getSignedUrls } from "../utils/client/getSignedUrls";
 
-//
-
 /**
  * Processes an array of image objects from the DB, creating signed URLs for both
  * the full image and its thumbnail.

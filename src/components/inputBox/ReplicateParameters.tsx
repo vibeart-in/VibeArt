@@ -208,7 +208,7 @@ const areOtherParamsEqual = (prevProps: any, nextProps: any) => {
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
+export const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
 
 export const ReplicateParameters = forwardRef<ReplicateParametersHandle, ReplicateParametersProps>(
   ({ parameters, modelName, identifier }, ref) => {
@@ -269,7 +269,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       Record<string, string[]>
     >(() => ({}));
     const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
+    const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [isSpinning, setIsSpinning] = useState(false);
@@ -301,7 +301,9 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
 
           if (selectedStyle?.prompt) {
             const existing = filteredValues["prompt"] || "";
-            filteredValues["prompt"] = existing ? `${existing} ${selectedStyle.prompt}` : selectedStyle.prompt;
+            filteredValues["prompt"] = existing
+              ? `${existing} ${selectedStyle.prompt}`
+              : selectedStyle.prompt;
           }
 
           // Flatten permanent paths into an array (backwards-compatible) and also return a map for clarity

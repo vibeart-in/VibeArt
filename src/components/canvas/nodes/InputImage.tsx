@@ -7,6 +7,7 @@ import { Loader2, UploadCloud } from "lucide-react";
 import NodeLayout from "../NodeLayout";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { useCanvas } from "../../providers/CanvasProvider";
 
 export type InputImageNodeData = {
   label?: string;
@@ -21,9 +22,10 @@ export type InputImageNodeType = Node<InputImageNodeData, "inputImage">;
 
 const BASE_WIDTH = 300;
 
-export default function InputImage({ id, data, selected }: NodeProps<InputImageNodeType>) {
+const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeType>) => {
   // console.log("INPUTIMAGE", data);
   const { updateNode } = useReactFlow();
+  const { project } = useCanvas();
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -39,6 +41,7 @@ export default function InputImage({ id, data, selected }: NodeProps<InputImageN
         setIsUploading(true);
         const formData = new FormData();
         formData.append("file", file);
+        if (project?.id) formData.append("canvasId", project.id);
 
         const result = await uploadImageAction(formData);
 
@@ -132,4 +135,6 @@ export default function InputImage({ id, data, selected }: NodeProps<InputImageN
       )}
     </NodeLayout>
   );
-}
+});
+
+export default InputImage;

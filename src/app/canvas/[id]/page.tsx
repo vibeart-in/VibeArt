@@ -1,6 +1,5 @@
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { UserSectionClient } from "@/src/components/home/UserSectionClient";
-// import SideToolbar from "@/src/components/canvas/SideToolbar";
 import Canvas from "@/src/components/canvas/Canvas";
 import { Background, BackgroundVariant, Panel } from "@xyflow/react";
 import { createClient } from "@/src/lib/supabase/server";

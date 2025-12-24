@@ -4,6 +4,17 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, LayoutGrid, List, MoreHorizontal } from "lucide-react";
 import { useState, useTransition } from "react";
 import { motion } from "motion/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dotted-dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Button } from "../ui/button";
 import { createCanvas } from "@/src/actions/canvas";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,11 +34,22 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isPending, startTransition] = useTransition();
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCanvasTitle, setNewCanvasTitle] = useState("");
+
   const handleNewCanvas = () => {
+    setNewCanvasTitle("");
+    setIsDialogOpen(true);
+  };
+
+  const createProject = () => {
+    if (!newCanvasTitle.trim()) return;
+
     startTransition(async () => {
       try {
-        const id = await createCanvas();
+        const id = await createCanvas(newCanvasTitle);
         router.push(`/canvas/${id}`);
+        setIsDialogOpen(false);
       } catch (error) {
         console.error("Failed to create canvas", error);
         // You might want to show a toast here
@@ -169,6 +191,63 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           ))}
         </div>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Canvas</DialogTitle>
+            <DialogDescription>
+              Enter the details for your new project. Click create when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={newCanvasTitle}
+                onChange={(e) => setNewCanvasTitle(e.target.value)}
+                placeholder="My Awesome Project"
+                className="col-span-3 border-neutral-800 bg-neutral-900"
+              />
+            </div>
+            {/* Dummy Settings */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="desc" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="desc"
+                placeholder="Optional description"
+                className="col-span-3 border-neutral-800 bg-neutral-900"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="visibility" className="text-right">
+                Visibility
+              </Label>
+              <select
+                id="visibility"
+                className="col-span-3 flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option>Private</option>
+                <option>Public</option>
+                <option>Team</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createProject} disabled={isPending || !newCanvasTitle.trim()}>
+              {isPending ? "Creating..." : "Create Canvas"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

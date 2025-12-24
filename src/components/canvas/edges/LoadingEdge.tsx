@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import {
   BaseEdge,
   type EdgeProps,
@@ -65,7 +66,7 @@ const getEdgeParams = (source: InternalNode<Node>, target: InternalNode<Node>) =
   };
 };
 
-export const LoadingEdge = ({ id, source, target, markerEnd, style }: EdgeProps) => {
+export const LoadingEdge = memo(({ id, source, target, markerEnd, style }: EdgeProps) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
@@ -92,4 +93,4 @@ export const LoadingEdge = ({ id, source, target, markerEnd, style }: EdgeProps)
       </circle>
     </>
   );
-};
+});
