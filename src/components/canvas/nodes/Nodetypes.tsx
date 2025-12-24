@@ -3,6 +3,8 @@ import OutputImage from "./OutputImage";
 import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
 import TextNode from "./TextNode";
 import DropNode from "./DropNode";
+import ColorCorrectionNode from "./ColorCorrectionNode";
+import CropNode from "./CropNode";
 
 export const nodeTypes = {
   drop: DropNode,
@@ -13,4 +15,6 @@ export const nodeTypes = {
   style: StyleNode,
   checkpoint: CheckpointNode,
   lora: LoraNode,
+  colorCorrection: ColorCorrectionNode,
+  crop: CropNode,
 };

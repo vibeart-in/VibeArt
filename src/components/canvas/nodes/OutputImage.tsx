@@ -312,6 +312,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           </div>
         )}
 
+        {/* Overlay gradient only if image exists */}
         {data.imageUrl && (
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/30" />
         )}
@@ -332,7 +333,11 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                 className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
+                <img
+                  src={url}
+                  alt={`Input ${index + 1}`}
+                  className="size-12 object-cover"
+                />
               </div>
             ))}
           </div>
@@ -350,7 +355,11 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <TextShimmer className="font-medium" spread={3} duration={2}>
+                    <TextShimmer
+                      className="font-medium"
+                      spread={3}
+                      duration={2}
+                    >
                       {`Try "${PLACEHOLDERS[currentPlaceholder].prompt}"`}
                     </TextShimmer>
                   </motion.div>
