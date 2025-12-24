@@ -16,7 +16,7 @@ export type HandleConfig = {
 
 interface NodeLayoutProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image";
+  toolbarType?: "default" | "text" | "image" | "generate";
   textEditor?: any; // Tiptap editor instance
   selected?: boolean;
   className?: string;
@@ -28,6 +28,7 @@ interface NodeLayoutProps {
   minWidth?: number;
   minHeight?: number;
   keepAspectRatio?: boolean;
+  toolbarHidden?: boolean;
 }
 
 export default function NodeLayout({
@@ -44,8 +45,8 @@ export default function NodeLayout({
   toolbarType = "default",
   textEditor,
   keepAspectRatio,
+  toolbarHidden,
 }: NodeLayoutProps) {
-  const { zoom } = useViewport();
   const { isDraggingEdge } = useCanvas();
 
   // --- 1. Internal Hover Logic ---
@@ -145,43 +146,22 @@ export default function NodeLayout({
         ...style,
       }}
     >
-      <NodeToolbar
-        // Pass the handlers if the toolbar needs to keep the node awake
-        handleMouseEnter={handleMouseEnter}
-        handleMouseLeave={handleMouseLeave}
-        isHovered={isActive} // Use the combined state
-        id={id}
-        toolbarType={toolbarType}
-        selected={!!selected}
-        textEditor={textEditor}
-      />
-
-      {(title || subtitle) && (
-        <div
-          className="absolute bottom-full left-0 right-0 flex items-center justify-between px-1 font-medium text-white/90"
-          style={{ marginBottom: `${8 / zoom}px` }}
-        >
-          {title && (
-            <span
-              className="max-w-[60%] truncate font-light"
-              style={{ fontSize: `${12 / zoom}px` }}
-            >
-              {title}
-            </span>
-          )}
-          {subtitle && (
-            <span
-              className="max-w-[35%] truncate font-extralight opacity-80"
-              style={{ fontSize: `${10 / zoom}px` }}
-            >
-              {subtitle}
-            </span>
-          )}
-        </div>
+      {isActive && !toolbarHidden && (
+        <NodeToolbar
+          handleMouseEnter={handleMouseEnter}
+          handleMouseLeave={handleMouseLeave}
+          isHovered={isActive}
+          id={id}
+          toolbarType={toolbarType}
+          selected={!!selected}
+          textEditor={textEditor}
+        />
       )}
 
+      <NodeLabels title={title} subtitle={subtitle} />
+
       {/* Main Content */}
-      {children}
+      <div className="h-full w-full">{children}</div>
 
       {/* Resize Control */}
       {selected && (
@@ -262,3 +242,30 @@ export default function NodeLayout({
     </div>
   );
 }
+
+const NodeLabels = React.memo(({ title, subtitle }: { title?: string; subtitle?: string }) => {
+  const { zoom } = useViewport();
+
+  if (!title && !subtitle) return null;
+
+  return (
+    <div
+      className="absolute bottom-full left-0 right-0 flex items-center justify-between px-1 font-medium text-white/90"
+      style={{ marginBottom: `${8 / zoom}px` }}
+    >
+      {title && (
+        <span className="max-w-[60%] truncate font-light" style={{ fontSize: `${12 / zoom}px` }}>
+          {title}
+        </span>
+      )}
+      {subtitle && (
+        <span
+          className="max-w-[35%] truncate font-extralight opacity-80"
+          style={{ fontSize: `${10 / zoom}px` }}
+        >
+          {subtitle}
+        </span>
+      )}
+    </div>
+  );
+});

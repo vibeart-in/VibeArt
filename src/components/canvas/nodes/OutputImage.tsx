@@ -1,21 +1,18 @@
-import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
+import { Position, NodeProps, Node, useReactFlow, NodeToolbar } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { ArrowUp, Loader2 } from "lucide-react";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSyncUpstreamData } from "@/src/utils/xyflow";
-import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import {
-  ConversationType,
-  InputBoxParameter,
-  NodeParam,
-} from "@/src/types/BaseType";
-import { useConversationMessages } from "@/src/hooks/useConversationMessages";
-import { AITextLoading } from "@/src/components/ui/ImageCardLoading";
+import { ConversationType, InputBoxParameter, ModelData, NodeParam } from "@/src/types/BaseType";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
+import { useCanvas } from "../../providers/CanvasProvider";
+import { MemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 
 export type OutputImageNodeData = {
   imageUrl?: string;
@@ -50,28 +47,7 @@ const PLACEHOLDERS = [
   },
 ];
 
-const getLoadingMessage = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "Queued...";
-    case "QUEUED":
-      return "Higres-Generation...";
-    case "starting":
-      return "Starting...";
-    case "processing":
-      return "Generating...";
-    case "RUNNING":
-      return "Generating...";
-    default:
-      return "Loading...";
-  }
-};
-
-export default function OutputImage({
-  id,
-  data,
-  selected,
-}: NodeProps<OutputImageNodeType>) {
+const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNodeType>) => {
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
@@ -92,47 +68,40 @@ export default function OutputImage({
   // --- Hooks for Generation ---
   // 1. Get models to find "Seedream 4 Fast"
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
+  const { project } = useCanvas();
+  const generateMutation = useGenerateCanvasImage(project?.id || "");
 
-  // 2. Setup generation hook (ConversationType.GENERATE)
-  // We don't pass conversationId here initially because we might be starting a new one.
-  // Actually, if we have data.conversationId, we could pass it, but useGenerateImage
-  // handles creating new ones if id is missing.
-  const generateMutation = useGenerateImage(
-    ConversationType.GENERATE,
-    data.conversationId,
-    { redirectOnSuccess: false },
-  );
+  const [model, setModel] = useState<ModelData | null>(() => {
+    const targetModelName = data.model || "Seedream 4 Fast";
+    return models?.find((m) => m.model_name === targetModelName) || null;
+  });
 
-  // 3. Poll for messages if we have a conversationId
-  const { data: messages } = useConversationMessages(data.conversationId || "");
+  const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
 
-  // Update node with generated image when it appears
+  // Update model when data.model or models change
   useEffect(() => {
-    if (!messages || messages.length === 0) return;
-
-    // Messages are usually sorted newest first or we check the latest
-    // The hook returns conversationData[], usually ordered.
-    // Let's look at the first one (most recent usually)
-    const latestMsg = messages[0];
-
-    // If we have output images and the job succeeded
-    if (
-      latestMsg?.job_status === "succeeded" &&
-      latestMsg.output_images &&
-      latestMsg.output_images.length > 0
-    ) {
-      const output = latestMsg.output_images[0];
-      const generatedUrl = output.imageUrl;
-      // Only update if it's different to avoid loops
-      if (generatedUrl !== data.imageUrl) {
-        updateNodeData(id, {
-          imageUrl: generatedUrl,
-          width: output.width || data.width,
-          height: output.height || data.height,
-        });
-      }
+    const targetModelName = data.model || "Seedream 4 Fast";
+    const foundModel = models?.find((m) => m.model_name === targetModelName);
+    if (foundModel) {
+      setModel(foundModel);
     }
-  }, [messages, data.imageUrl, id, updateNodeData]);
+  }, [data.model, models]);
+
+  const initialValues = useMemo(() => {
+    if (!model?.parameters) return {};
+    const out: Record<string, any> = {};
+    for (const [key, param] of Object.entries(model.parameters)) {
+      const nk = normalizeKey(key);
+      if (param.default !== undefined) out[nk] = param.default;
+      else if (param.type === "boolean") out[nk] = false;
+      else if (param.enum) out[nk] = param.enum[0];
+      else if (param.type === "integer") out[nk] = param.minimum ?? 0;
+      else out[nk] = "";
+    }
+    return out;
+  }, [model?.parameters]);
+
+  const [values, setValues] = useState<Record<string, any>>(initialValues);
 
   useEffect(() => {
     if (data.imageUrl) return;
@@ -151,99 +120,130 @@ export default function OutputImage({
   const inputImages = data.inputImageUrls || [];
 
   const handleGenerate = () => {
-    if (!data.prompt) return;
+    if (!data.prompt || !project?.id || !model) return;
 
-    // Find default model
-    const targetModelName = "Seedream 4 Fast";
-    const model = models?.find((m) => m.model_name === targetModelName);
-
-    if (!model) {
-      console.error(`Model '${targetModelName}' not found.`);
-      // Fallback to first model or alert user
-      alert(`Model ${targetModelName} not found. Please try again later.`);
-      return;
-    }
-
-    // Prepare parameters based on model provider
     let parameters: InputBoxParameter = {};
 
     if (model.provider === "running_hub") {
-      
-
       const schema = model.parameters as NodeParam[];
-      // Clone schema to params
-      const params: NodeParam[] = schema.map((p) => ({
-        ...p,
-        fieldValue:
-          p.fieldName === "prompt" || p.description === "prompt"
-            ? data.prompt || ""
-            : p.fieldValue, // default
-      }));
+      const params: NodeParam[] = schema.map((p) => {
+        const normalizedKey = normalizeKey(p.fieldName);
 
-      // Look for input image field if we have an input image
+        // Check if this is the prompt field
+        if (p.fieldName === "prompt" || p.description === "prompt") {
+          return {
+            ...p,
+            fieldValue: data.prompt || "",
+          };
+        }
+
+        // Use value from values state if available, otherwise use default
+        return {
+          ...p,
+          fieldValue: values[normalizedKey] !== undefined ? values[normalizedKey] : p.fieldValue,
+        };
+      });
+
+      // Handle input images for running_hub
       if (inputImages.length > 0) {
         const imageParamIndex = params.findIndex(
-           (p) => (p.fieldName.toLowerCase().includes("image") || p.description.toLowerCase().includes("image")) && p.fieldName !== "prompt"
+          (p) =>
+            (p.fieldName.toLowerCase().includes("image") ||
+              p.description.toLowerCase().includes("image")) &&
+            p.fieldName !== "prompt",
         );
-        
+
         if (imageParamIndex !== -1) {
-           params[imageParamIndex] = {
-             ...params[imageParamIndex],
-             fieldValue: inputImages[0]
-           };
+          params[imageParamIndex] = {
+            ...params[imageParamIndex],
+            fieldValue: inputImages[0],
+          };
         }
       }
 
       parameters = params;
     } else {
-      // Replicate case: Record<string, any>
-      const defaults = (typeof model.parameters === "object" && !Array.isArray(model.parameters))
-        ? Object.entries(model.parameters).reduce((acc, [key, val]) => {
-            // @ts-ignore
-            if (val.default !== undefined) acc[key] = val.default;
-            return acc;
-          }, {} as Record<string, any>)
-        : {};
-
+      // For replicate and other providers, use values state
       parameters = {
-        ...defaults,
+        ...values,
         prompt: data.prompt,
-        aspect_ratio: inputImages.length > 0 ? "match_input_image" : defaults.aspect_ratio || "1:1",
-        ...(inputImages.length > 0 ? { "image_input": [inputImages[0]] } : {}),
+        ...(inputImages.length > 0 ? { image_input: [inputImages[0]] } : {}),
       } as unknown as InputBoxParameter;
     }
 
     // Call mutation
     generateMutation.mutate(
       {
+        canvasId: project?.id || "",
         parameters,
-        // conversationId: data.conversationId, // Optional: continue conversation if exists
         modelName: model.model_name,
         modelIdentifier: model.identifier,
-        modelCredit: typeof model.cost === "number" ? model.cost : 0, // Simplified credit handling
+        modelCredit: typeof model.cost === "number" ? model.cost : 0,
         modelProvider: model.provider,
-        conversationType: ConversationType.GENERATE,
-        inputImagePermanentPaths: inputImages,
       },
       {
         onSuccess: (res) => {
-          if (res.conversationId) {
-            updateNodeData(id, { conversationId: res.conversationId });
-          }
-        },
-        onError: (err) => {
-          console.error("Generation failed:", err);
-          alert("Generation failed: " + err.message);
+          updateNodeData(id, { activeJobId: res.jobId, status: "starting" });
         },
       },
     );
   };
 
-  const isGenerating =
-    generateMutation.isPending || (messages && (messages[0]?.job_status === "RUNNING" || messages[0]?.job_status === "processing" || messages[0]?.job_status === "starting" || messages[0]?.job_status === "QUEUED" || messages[0]?.job_status === "pending"));
+  const handleModelSelect = useCallback(
+    (modelName: string) => {
+      const selectedModel = models?.find((m) => m.model_name === modelName);
+      if (selectedModel) {
+        setModel(selectedModel);
+        updateNodeData(id, { model: modelName });
+      }
+    },
+    [models, updateNodeData, id],
+  );
 
-  const jobStatus = messages?.[0]?.job_status || "processing";
-  const loadingText = getLoadingMessage(jobStatus);
+  function isImageParam(key: string, param: any) {
+    const explicit = new Set([
+      "image_input",
+      "image input",
+      "input_image",
+      "style reference images",
+      "style_reference_images",
+      "image",
+      "last_frame",
+      "image prompt",
+      "Image",
+      "last_frame_image",
+      "reference_images",
+      "first_frame_image",
+    ]);
+    if (explicit.has(key)) return true;
+  }
+
+  // TODO: Implement parameter filtering when needed
+  const imageInputKeys = useMemo(() => {
+    return model?.parameters
+      ? Object.keys(model.parameters).filter((k) => isImageParam(k, model.parameters[k]))
+      : [];
+  }, [model]);
+
+  const otherEntries = useMemo(
+    () =>
+      model?.parameters
+        ? Object.entries(model.parameters).filter(([k]) => {
+            return !imageInputKeys.includes(k) && k !== "prompt";
+          })
+        : [],
+    [model, imageInputKeys],
+  );
+
+  const handleChange = useCallback(
+    (rawKey: string, value: any) => {
+      const key = normalizeKey(rawKey);
+      setValues((prev) => ({ ...prev, [key]: value }));
+    },
+    [], // stable
+  );
+
+  const isGenerating = !!data.activeJobId;
 
   return (
     <NodeLayout
@@ -258,8 +258,33 @@ export default function OutputImage({
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
+      toolbarType="generate"
+      // toolbarHidden={true}
     >
-      {/* Background Image Area */}
+      {/* <NodeToolbar
+        isVisible={selected}
+        position={Position.Bottom}
+        offset={20}
+        className="flex items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
+      >
+        <Select
+          value={data.model || "Seedream 4 Fast"}
+          onValueChange={handleModelSelect}
+          // onValueChange={(value) => updateNodeData(id, { model: value })}
+        >
+          <SelectTrigger className="h-8 border-none bg-transparent hover:bg-white/10">
+            <SelectValue placeholder="Select Model" />
+          </SelectTrigger>
+          <SelectContent>
+            {models?.map((model) => (
+              <SelectItem key={model.id} value={model.model_name}>
+                {model.model_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </NodeToolbar> */}
+
       <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -283,22 +308,22 @@ export default function OutputImage({
                 alt="Placeholder"
               />
             </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10" />
           </div>
         )}
 
-        {/* Overlay gradient only if image exists */}
         {data.imageUrl && (
-          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/80" />
+          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/30" />
         )}
 
-        {/* Modern Loading Overlay */}
-        {isGenerating && <ModernCardLoader text={loadingText} />}
+        {isGenerating && <ModernCardLoader text={"Generating"} />}
       </div>
 
-      {/* Footer Area */}
-      <div className="absolute bottom-0 left-0 right-0 p-3">
-        {/* Input Images List */}
+      <div
+        className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
+      >
         {inputImages.length > 0 && (
           <div className="scrollbar-hide relative z-10 mb-3 flex items-center gap-2 overflow-x-auto pb-1">
             {inputImages.map((url, index) => (
@@ -307,21 +332,16 @@ export default function OutputImage({
                 className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Input ${index + 1}`}
-                  className="size-12 object-cover"
-                />
+                <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
               </div>
             ))}
           </div>
         )}
 
-        {/* Text Area / Prompt */}
         {!data.imageUrl ? (
           <div className="relative w-full focus-within:outline-none focus-within:ring-0">
             {!data.prompt && (
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-2">
+              <div className="pointer-events-none absolute bottom-10 left-0 right-0 p-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentPlaceholder}
@@ -330,21 +350,13 @@ export default function OutputImage({
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <TextShimmer
-                      className="font-medium"
-                      spread={3}
-                      duration={2}
-                    >
+                    <TextShimmer className="font-medium" spread={3} duration={2}>
                       {`Try "${PLACEHOLDERS[currentPlaceholder].prompt}"`}
                     </TextShimmer>
                   </motion.div>
                 </AnimatePresence>
               </div>
             )}
-            {/* Note: We don't need `updateNodeData` here manually if we want strictly 1-way sync, 
-                but usually we want 2-way for text. 
-                Since `useSyncUpstreamData` checks equality, it won't overwrite your typing 
-                unless the upstream node changes specifically. */}
             <Textarea
               maxHeight={150}
               className="nodrag !border-0 text-sm font-medium text-white/90 !shadow-none !outline-none !ring-0 focus:!shadow-none focus:!outline-none focus:!ring-0 focus-visible:ring-0"
@@ -352,6 +364,12 @@ export default function OutputImage({
               onChange={(e) => {
                 updateNodeData(id, { prompt: e.target.value });
               }}
+            />
+            {/* TODO: Re-enable when parameter filtering is implemented */}
+            <MemoizedOtherParameters
+              otherEntries={otherEntries}
+              values={values}
+              handleChange={handleChange}
             />
           </div>
         ) : (
@@ -366,8 +384,14 @@ export default function OutputImage({
         onClick={handleGenerate}
         disabled={isGenerating}
       >
-        {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <ArrowUp size={18} strokeWidth={3} />}
+        {isGenerating ? (
+          <Loader2 size={18} className="animate-spin" />
+        ) : (
+          <ArrowUp size={18} strokeWidth={3} />
+        )}
       </button>
     </NodeLayout>
   );
-}
+});
+
+export default OutputImage;

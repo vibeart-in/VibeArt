@@ -11,11 +11,11 @@ import {
   OnConnectStart,
   OnConnectEnd,
   OnEdgesChange,
+  useNodesState,
+  useEdgesState,
   OnNodesChange,
-  applyNodeChanges,
-  applyEdgeChanges,
 } from "@xyflow/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import "@xyflow/react/dist/style.css";
 import { edgeTypes } from "./edges/EdgeTypes";
@@ -50,6 +50,7 @@ import { DevTools } from "../devtools";
 import { toJpeg, toPng } from "html-to-image";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project, setIsDraggingEdge } = useCanvas();
@@ -66,8 +67,12 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
   const content = project?.content as { nodes: Node[]; edges: Edge[] };
 
-  const [nodes, setNodes] = useState<Node[]>(initialNodes ?? content?.nodes ?? []);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges ?? content?.edges ?? []);
+  const [nodes, setNodes, onNodesChangeInternal] = useNodesState(
+    initialNodes ?? content?.nodes ?? [],
+  );
+  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(
+    initialEdges ?? content?.edges ?? [],
+  );
   const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [saveState, setSaveState] = useState<{
     isSaving: boolean;
@@ -79,6 +84,8 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
   const { getEdges, toObject, screenToFlowPosition, getNodes, getNode, updateNode } =
     useReactFlow();
+
+  useCanvasJobOrchestrator(project?.id ?? "");
 
   const save = useDebouncedCallback(async () => {
     if (saveState.isSaving || !project?.user_id || !project?.id) {
@@ -103,7 +110,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     } finally {
       setSaveState((prev) => ({ ...prev, isSaving: false }));
     }
-  }, 1000);
+  }, 5000);
 
   const saveThumbnail = useDebouncedCallback(async () => {
     if (!project?.id || nodes.length === 0) return;
@@ -304,37 +311,33 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
 
   const handleEdgesChange = useCallback<OnEdgesChange>(
     (changes) => {
-      setEdges((current) => {
-        const updated = applyEdgeChanges(changes, current);
-        save();
-        onEdgesChange?.(changes);
-        return updated;
-      });
+      onEdgesChangeInternal(changes);
+      save();
+      onEdgesChange?.(changes);
     },
-    [save, onEdgesChange],
+    [save, onEdgesChange, onEdgesChangeInternal],
   );
 
   const handleNodesChange = useCallback<OnNodesChange>(
     (changes) => {
-      setNodes((current) => {
-        const updated = applyNodeChanges(changes, current);
+      onNodesChangeInternal(changes);
 
-        // Filter for 'add' or 'remove' events
-        const structuralChanges = changes.filter(
-          (c) => c.type === "add" || c.type === "remove",
-        ).length;
+      // Filter for 'add' or 'remove' events
+      const structuralChanges = changes.filter(
+        (c) => c.type === "add" || c.type === "remove",
+      ).length;
 
-        if (structuralChanges > 0) {
-          trackChange(structuralChanges);
-        }
+      if (structuralChanges > 0) {
+        trackChange(structuralChanges);
+      }
 
-        save(); // JSON data still saves normally (1s debounce)
-        onNodesChange?.(changes);
-        return updated;
-      });
+      save(); // JSON data still saves normally (1s debounce)
+      onNodesChange?.(changes);
     },
-    [save, trackChange, onNodesChange],
+    [save, trackChange, onNodesChange, onNodesChangeInternal],
   );
+
+  const nodeOpsValue = useMemo(() => ({ addNode, duplicateNode }), [addNode, duplicateNode]);
 
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>

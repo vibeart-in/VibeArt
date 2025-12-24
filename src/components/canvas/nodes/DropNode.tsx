@@ -1,7 +1,8 @@
+import React, { memo } from "react";
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
 import { Image as ImageIcon, Video, Sparkles, X } from "lucide-react";
 
-export default function DropNode({ id, data }: NodeProps) {
+const DropNode = memo(({ id, data }: NodeProps) => {
   const { setNodes, setEdges } = useReactFlow();
 
   const handleSelect = (type: string) => {
@@ -79,7 +80,9 @@ export default function DropNode({ id, data }: NodeProps) {
       </div>
     </div>
   );
-}
+});
+
+export default DropNode;
 
 /* ---------- Option Row ---------- */
 

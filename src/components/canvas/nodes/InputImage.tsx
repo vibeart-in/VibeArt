@@ -22,7 +22,7 @@ export type InputImageNodeType = Node<InputImageNodeData, "inputImage">;
 
 const BASE_WIDTH = 300;
 
-export default function InputImage({ id, data, selected }: NodeProps<InputImageNodeType>) {
+const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeType>) => {
   // console.log("INPUTIMAGE", data);
   const { updateNode } = useReactFlow();
   const { project } = useCanvas();
@@ -135,4 +135,6 @@ export default function InputImage({ id, data, selected }: NodeProps<InputImageN
       )}
     </NodeLayout>
   );
-}
+});
+
+export default InputImage;

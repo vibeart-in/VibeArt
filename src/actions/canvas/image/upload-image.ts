@@ -100,11 +100,19 @@ export async function uploadImageAction(formData: FormData) {
     if (dbError || !dbRecord)
       return { success: false, error: dbError?.message || "Failed to save image record" };
 
+    // ✅ NEW: Automatically link this image to the canvas input_images array
+    const { error: linkError } = await supabase.rpc("append_input_image_to_canvas", {
+      p_canvas_id: canvasId,
+      p_image_id: dbRecord.id,
+    });
+
+    if (linkError) console.error("Failed to link image to canvas:", linkError);
+
     return {
       success: true,
       data: {
         imageId: dbRecord.id,
-        url: publicUrl, // This is permanent now
+        url: publicUrl,
         width: metadata.width,
         height: metadata.height,
       },
