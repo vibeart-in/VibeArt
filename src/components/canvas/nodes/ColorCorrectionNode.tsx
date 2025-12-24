@@ -5,13 +5,15 @@ import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useUpstreamData } from "@/src/utils/xyflow";
-import { ImageIcon, Sun, Contrast, Eye, Droplets, Palette, CircleDot, Sparkles, ChevronDown, RotateCcw } from "lucide-react";
+import { ImageIcon, Sun, Contrast, Eye, Droplets, Palette, CircleDot, Sparkles, ChevronDown, RotateCcw, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import FilterSlider from "./FilterSlider";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
 
 export type ColorCorrectionNodeData = {
   imageUrl?: string;
+  processedImageUrl?: string;
   width?: number;
   height?: number;
   filters?: {
@@ -58,6 +60,7 @@ export default function ColorCorrectionNode({
   selected,
 }: NodeProps<ColorCorrectionNodeType>) {
   const { updateNodeData, updateNode } = useReactFlow();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Get image and dimensions from upstream connections
   const { images, dimensions } = useUpstreamData("target");
@@ -125,10 +128,52 @@ export default function ColorCorrectionNode({
   // Generate CSS filter string
   const filterStyle = useMemo(() => {
     return {
-      filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%) hue-rotate(${filters.hue}deg) blur(${filters.blur}px) grayscale(${filters.grayscale}%) sepia(${filters.sepia}%)`,
-      opacity: filters.opacity / 100,
+      filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%) hue-rotate(${filters.hue}deg) blur(${filters.blur}px) grayscale(${filters.grayscale}%) sepia(${filters.sepia}%) opacity(${filters.opacity}%)`,
     };
   }, [filters]);
+
+  // Generate processed image for downstream consumption
+  useEffect(() => {
+    if (!data.imageUrl) {
+      if (data.processedImageUrl) {
+        updateNodeData(id, { processedImageUrl: undefined });
+      }
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = data.imageUrl!;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          // Use the same filter string as the CSS
+          ctx.filter = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%) hue-rotate(${filters.hue}deg) blur(${filters.blur}px) grayscale(${filters.grayscale}%) sepia(${filters.sepia}%) opacity(${filters.opacity}%)`;
+          ctx.drawImage(img, 0, 0);
+
+          setIsProcessing(true);
+          uploadCanvasToSupabase(canvas, `corrected_${Date.now()}.jpg`)
+            .then((publicUrl) => {
+              if (publicUrl !== data.processedImageUrl) {
+                updateNodeData(id, { processedImageUrl: publicUrl });
+              }
+            })
+            .catch((err) => {
+              console.error("Failed to upload corrected image:", err);
+            })
+            .finally(() => {
+              setIsProcessing(false);
+            });
+        }
+      };
+    }, 1500); // 1.5s Debounce to prevent excessive uploads during slider movement
+
+    return () => clearTimeout(timer);
+  }, [id, data.imageUrl, filters, updateNodeData]);
 
   const lightFilters = [
     { key: "brightness" as const, label: "Brightness", icon: Sun, min: 0, max: 200 },
@@ -197,7 +242,10 @@ export default function ColorCorrectionNode({
         <div className="flex flex-col border-t border-white/10 bg-black/40 backdrop-blur-xl">
           {/* Header with Adjustments and Presets */}
           <div className="flex items-center justify-between px-4 py-1">
-            <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
+            <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
+                {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-gray-500" />}
+            </div>
             <div className="flex items-center gap-2">
               {/* Presets Dropdown */}
               <DropdownMenu.Root>

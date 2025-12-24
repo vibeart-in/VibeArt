@@ -9,11 +9,10 @@ import {
   RotateCcw,
   Check,
   ChevronDown,
-  Scaling,
-  Scan,
-  MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
 
 export type CropNodeData = {
   imageUrl?: string;
@@ -52,6 +51,7 @@ export default function CropNode({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Local state for crop to ensure smooth dragging 
   // (updating node data on every mouse move might be too slow/jittery)
@@ -325,9 +325,19 @@ export default function CropNode({
             localCrop.height
         );
         
-        const croppedDataUrl = canvas.toDataURL("image/png");
-        updateNodeData(id, { croppedImageUrl: croppedDataUrl });
-        triggerSave();
+        try {
+            setIsUploading(true);
+            const publicUrl = await uploadCanvasToSupabase(canvas, `cropped_${Date.now()}.jpg`);
+            updateNodeData(id, { croppedImageUrl: publicUrl });
+            triggerSave();
+        } catch (err) {
+            console.error("Failed to upload cropped image:", err);
+            // Fallback to base64 if upload fails? User asked for supabase specifically, 
+            // so we should probably alert if it fails.
+            alert("Failed to upload cropped image to storage.");
+        } finally {
+            setIsUploading(false);
+        }
     }
   };
 
@@ -639,9 +649,9 @@ export default function CropNode({
                 <button 
                     onClick={handleCrop}
                     className="flex items-center gap-2 rounded-lg bg-[#D9E92B] px-4 py-1.5 text-xs font-bold text-black transition-transform active:scale-95 disabled:opacity-50"
-                    disabled={!data.imageUrl}
+                    disabled={!data.imageUrl || isUploading}
                 >
-                    Crop
+                    {isUploading ? <Loader2 size={14} className="animate-spin" /> : "Crop"}
                 </button>
             </div>
         </div>
