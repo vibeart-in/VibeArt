@@ -45,6 +45,7 @@ import {
   Palette,
   Camera,
   Crop,
+  Brush,
 } from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 import { DevTools } from "../devtools";
@@ -546,6 +547,16 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
                 <Crop size={12} />
               </div>
               Crop
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={() => addNode("sketch")}
+            >
+              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
+                <Brush size={12} />
+              </div>
+              Painter
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>

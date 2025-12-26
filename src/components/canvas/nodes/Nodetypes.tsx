@@ -5,6 +5,7 @@ import TextNode from "./TextNode";
 import DropNode from "./DropNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
 import CropNode from "./CropNode";
+import SketchNode from "./SketchNode";
 
 export const nodeTypes = {
   drop: DropNode,
@@ -17,4 +18,5 @@ export const nodeTypes = {
   lora: LoraNode,
   colorCorrection: ColorCorrectionNode,
   crop: CropNode,
+  sketch: SketchNode,
 };
