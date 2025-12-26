@@ -16,6 +16,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Slider } from "../../ui/slider";
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
 import { cn } from "@/src/lib/utils";
+import { useCanvas } from "../../providers/CanvasProvider";
 
 
 // Point structure for vector paths
@@ -35,7 +36,7 @@ export type SketchNodeData = {
   paths?: Path[]; // Store custom paths
   backgroundColor?: string; // Persist bg color
   [key: string]: unknown;
-};
+}; 
 
 export type SketchNodeType = Node<SketchNodeData, "sketch">;
 
@@ -52,6 +53,7 @@ export default function SketchNode({
 }: NodeProps<SketchNodeType>) {
   const { updateNodeData, updateNode } = useReactFlow();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { project } = useCanvas();
   
   // Tools state
   const [isEraser, setIsEraser] = useState(false);
@@ -297,11 +299,12 @@ export default function SketchNode({
         ctx.drawImage(canvas, 0, 0);
 
         // 3. Upload
-        const url = await uploadCanvasToSupabase(tempCanvas, `sketch_${Date.now()}.jpg`);
-        
+        const filename = `sketch_${id}`;
+        const url = await uploadCanvasToSupabase(tempCanvas, project?.id || "",filename);
+              
         // 4. Save to Node Persistence
         updateNodeData(id, { 
-            processedImageUrl: url,
+            processedImageUrl: `${url}?t=${Date.now()}`,
             paths: currentPaths 
         });
 

@@ -5,11 +5,23 @@ import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useUpstreamData } from "@/src/utils/xyflow";
-import { ImageIcon, Sun, Contrast, Eye, Droplets, Palette, CircleDot, Sparkles, ChevronDown, RotateCcw, Loader2 } from "lucide-react";
+import {
+  ImageIcon,
+  Sun,
+  Contrast,
+  Eye,
+  Droplets,
+  Palette,
+  CircleDot,
+  Sparkles,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import FilterSlider from "./FilterSlider";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
+import { useCanvas } from "../../providers/CanvasProvider";
 
 export type ColorCorrectionNodeData = {
   imageUrl?: string;
@@ -43,7 +55,10 @@ const DEFAULT_FILTERS = {
 };
 
 const PRESETS = [
-  { name: "Vivid", filters: { ...DEFAULT_FILTERS, brightness: 110, contrast: 120, saturation: 140 } },
+  {
+    name: "Vivid",
+    filters: { ...DEFAULT_FILTERS, brightness: 110, contrast: 120, saturation: 140 },
+  },
   { name: "Warm", filters: { ...DEFAULT_FILTERS, sepia: 30, saturation: 110 } },
   { name: "Cool", filters: { ...DEFAULT_FILTERS, hue: 180, saturation: 80 } },
   { name: "Vintage", filters: { ...DEFAULT_FILTERS, sepia: 50, contrast: 90, brightness: 90 } },
@@ -65,6 +80,7 @@ export default function ColorCorrectionNode({
   // Get image and dimensions from upstream connections
   const { images, dimensions } = useUpstreamData("target");
   const upstreamImage = images[0];
+  const { project } = useCanvas();
 
   // Sync upstream image and dimensions to node data
   useEffect(() => {
@@ -156,10 +172,10 @@ export default function ColorCorrectionNode({
           ctx.drawImage(img, 0, 0);
 
           setIsProcessing(true);
-          uploadCanvasToSupabase(canvas, `corrected_${Date.now()}.jpg`)
+          uploadCanvasToSupabase(canvas, project?.id || "", `corrected_${id}`)
             .then((publicUrl) => {
               if (publicUrl !== data.processedImageUrl) {
-                updateNodeData(id, { processedImageUrl: publicUrl });
+                updateNodeData(id, { processedImageUrl: `${publicUrl}?t=${Date.now()}` });
               }
             })
             .catch((err) => {
@@ -187,7 +203,15 @@ export default function ColorCorrectionNode({
   ];
 
   const effectFilters = [
-    { key: "blur" as const, label: "Blur", icon: CircleDot, min: 0, max: 20, unit: "px", default: 0 },
+    {
+      key: "blur" as const,
+      label: "Blur",
+      icon: CircleDot,
+      min: 0,
+      max: 20,
+      unit: "px",
+      default: 0,
+    },
     { key: "grayscale" as const, label: "Grayscale", icon: Contrast, min: 0, max: 100, default: 0 },
     { key: "sepia" as const, label: "Sepia", icon: Sparkles, min: 0, max: 100, default: 0 },
   ];
@@ -201,15 +225,23 @@ export default function ColorCorrectionNode({
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
-      className="group flex h-full w-full cursor-default flex-col"
+      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       style={{
         width: `${BASE_WIDTH}px`,
         height: `${nodeHeight}px`,
       }}
     >
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
         {/* Image Section */}
-        <div className="relative flex-shrink-0" style={{ height: data.width && data.height ? `${BASE_WIDTH * (data.height / data.width)}px` : `${EMPTY_HEIGHT}px` }}>
+        <div
+          className="relative flex-shrink-0"
+          style={{
+            height:
+              data.width && data.height
+                ? `${BASE_WIDTH * (data.height / data.width)}px`
+                : `${EMPTY_HEIGHT}px`,
+          }}
+        >
           {data.imageUrl ? (
             <>
               <motion.img
@@ -239,12 +271,12 @@ export default function ColorCorrectionNode({
         </div>
 
         {/* Controls Section */}
-        <div className="flex flex-col border-t border-white/10 bg-black/40 backdrop-blur-xl">
+        <div className="flex flex-col bg-black/40 backdrop-blur-xl">
           {/* Header with Adjustments and Presets */}
           <div className="flex items-center justify-between px-4 py-1">
             <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
-                {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-gray-500" />}
+              <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
+              {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-gray-500" />}
             </div>
             <div className="flex items-center gap-2">
               {/* Presets Dropdown */}

@@ -29,6 +29,7 @@ interface NodeLayoutProps {
   minHeight?: number;
   keepAspectRatio?: boolean;
   toolbarHidden?: boolean;
+  resizeHidden?: boolean;
 }
 
 export default function NodeLayout({
@@ -46,6 +47,7 @@ export default function NodeLayout({
   textEditor,
   keepAspectRatio,
   toolbarHidden,
+  resizeHidden,
 }: NodeLayoutProps) {
   const { isDraggingEdge } = useCanvas();
 
@@ -164,7 +166,7 @@ export default function NodeLayout({
       <div className="h-full w-full">{children}</div>
 
       {/* Resize Control */}
-      {selected && (
+      {!resizeHidden && selected && (
         <NodeResizeControl
           position="bottom-right"
           minWidth={minWidth}

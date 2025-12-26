@@ -8,6 +8,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import NodeLayout from "../NodeLayout";
 import { useUpstreamData } from "@/src/utils/xyflow";
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
+import { useCanvas } from "../../providers/CanvasProvider";
 
 // --- Types ---
 export type CropNodeData = {
@@ -23,10 +24,19 @@ type AspectRatio = "Free" | "1:1" | "4:3" | "16:9" | "9:16" | "3:4";
 const BASE_WIDTH = 400;
 const MIN_CROP_SIZE = 40;
 
-export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>) {
-  const { updateNodeData } = useReactFlow();
+// Helper to safely parse aspect ratio strings without using eval
+const parseAspectRatio = (ratioStr?: string): number | null => {
+  if (!ratioStr || ratioStr === "Free") return null;
+  const [w, h] = ratioStr.split(":").map(Number);
+  if (!w || !h || isNaN(w) || isNaN(h)) return null;
+  return w / h;
+};
+
+const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
+  const { updateNodeData, updateNode } = useReactFlow();
   const { images } = useUpstreamData("target");
   const upstreamImage = images[0];
+  const { project } = useCanvas();
 
   // --- State ---
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
@@ -45,10 +55,11 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
 
   // --- Scaling Logic ---
   // How many image pixels per 1 CSS pixel
-  const scale = imageSize ? containerWidth / imageSize.width : 1;
+  const scale = imageSize && containerWidth ? containerWidth / imageSize.width : 1;
 
   // Sync upstream image changes
   useEffect(() => {
+    // Only update if actually different to avoid loops
     if (upstreamImage && upstreamImage !== data.imageUrl) {
       updateNodeData(id, {
         imageUrl: upstreamImage,
@@ -63,24 +74,30 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
-      setContainerWidth(entries[0].contentRect.width);
+      if (entries[0]) {
+        setContainerWidth(entries[0].contentRect.width);
+      }
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
 
-  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth, naturalHeight } = e.currentTarget;
-    setImageSize({ width: naturalWidth, height: naturalHeight });
+  const onImageLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const { naturalWidth, naturalHeight } = e.currentTarget;
+      setImageSize({ width: naturalWidth, height: naturalHeight });
 
-    if (!data.crop) {
-      const initialCrop = { x: 0, y: 0, width: naturalWidth, height: naturalHeight };
-      setLocalCrop(initialCrop);
-      updateNodeData(id, { crop: initialCrop });
-    } else {
-      setLocalCrop(data.crop);
-    }
-  };
+      // Initialize crop if not present or just size update
+      if (!data.crop) {
+        const initialCrop = { x: 0, y: 0, width: naturalWidth, height: naturalHeight };
+        setLocalCrop(initialCrop);
+        updateNodeData(id, { crop: initialCrop });
+      } else {
+        setLocalCrop(data.crop);
+      }
+    },
+    [data.crop, id, updateNodeData],
+  );
 
   // --- Drag & Resize Logic ---
   const handlePointerDown = (e: React.PointerEvent, type: string = "move") => {
@@ -91,7 +108,7 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
       type,
       startX: e.clientX,
       startY: e.clientY,
-      startCrop: { ...localCrop },
+      startCrop: { ...localCrop }, // Snapshot state at start
     });
   };
 
@@ -103,11 +120,9 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
       const deltaY = (e.clientY - dragType.startY) / scale;
 
       setLocalCrop((prev) => {
+        // Calculate based on start state to avoid drift
         let n = { ...dragType.startCrop };
-        const ratio =
-          data.aspectRatio && data.aspectRatio !== "Free"
-            ? eval(data.aspectRatio.replace(":", "/"))
-            : null;
+        const ratio = parseAspectRatio(data.aspectRatio);
 
         if (dragType.type === "move") {
           n.x = Math.max(0, Math.min(n.x + deltaX, imageSize.width - n.width));
@@ -116,6 +131,7 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
           // Resizing Logic
           if (dragType.type.includes("e")) n.width = Math.max(MIN_CROP_SIZE, n.width + deltaX);
           if (dragType.type.includes("s")) n.height = Math.max(MIN_CROP_SIZE, n.height + deltaY);
+
           if (dragType.type.includes("w")) {
             const wChange = Math.min(n.width - MIN_CROP_SIZE, deltaX);
             n.x += wChange;
@@ -129,12 +145,13 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
 
           // Apply Aspect Ratio Constraints
           if (ratio) {
-            if (
-              dragType.type === "e" ||
-              dragType.type === "w" ||
-              dragType.type.includes("e") ||
-              dragType.type.includes("w")
-            ) {
+            // Determine if we are primarily adjusting width or height based on handle
+            // If dragging E/W, width is primary. If S/N, height is primary.
+            // Diagonal (SE, NE, etc) -> usually width driven or check which delta is larger?
+            // Standard behavior: width drives height usually unless strictly resizing height.
+            const isWidthDriver = dragType.type.includes("e") || dragType.type.includes("w");
+
+            if (isWidthDriver) {
               n.height = n.width / ratio;
             } else {
               n.width = n.height * ratio;
@@ -142,20 +159,22 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
           }
 
           // Global Bounds Clamping
-          if (n.x < 0) {
-            n.x = 0;
-          }
-          if (n.y < 0) {
-            n.y = 0;
-          }
+          if (n.x < 0) n.x = 0;
+          if (n.y < 0) n.y = 0;
+
           if (n.x + n.width > imageSize.width) n.width = imageSize.width - n.x;
           if (n.y + n.height > imageSize.height) n.height = imageSize.height - n.y;
 
-          // Final ratio re-correction after clamping
+          // Re-verify ratio after clamping
           if (ratio) {
-            if (n.width / n.height !== ratio) {
-              n.width = Math.min(n.width, n.height * ratio);
-              n.height = n.width / ratio;
+            const currentR = n.width / n.height;
+            if (Math.abs(currentR - ratio) > 0.01) {
+              // Clamp caused ratio drift, force fit inside bounds
+              if (n.width / ratio <= n.height) {
+                n.height = n.width / ratio; // adjust height to match width
+              } else {
+                n.width = n.height * ratio; // adjust width to match height
+              }
             }
           }
         }
@@ -169,6 +188,7 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
     if (isDragging) {
       setIsDragging(false);
       setDragType(null);
+      // Sync final state to flow
       updateNodeData(id, { crop: localCrop });
     }
   }, [id, localCrop, updateNodeData, isDragging]);
@@ -190,17 +210,22 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
     setIsUploading(true);
 
     try {
-      const canvas = document.createElement("canvas");
-      canvas.width = localCrop.width;
-      canvas.height = localCrop.height;
-      const ctx = canvas.getContext("2d");
+      const CropCanvas = document.createElement("canvas");
+      CropCanvas.width = localCrop.width;
+      CropCanvas.height = localCrop.height;
+      const ctx = CropCanvas.getContext("2d");
+      if (!ctx) throw new Error("Context failed");
 
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = data.imageUrl;
-      await new Promise((res) => (img.onload = res));
 
-      ctx?.drawImage(
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      ctx.drawImage(
         img,
         localCrop.x,
         localCrop.y,
@@ -212,11 +237,13 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
         localCrop.height,
       );
 
-      const publicUrl = await uploadCanvasToSupabase(canvas, `crop_${id}_${Date.now()}.jpg`);
-      updateNodeData(id, { croppedImageUrl: publicUrl });
+      // Unique filename to prevent caching issues on repeat crops
+      const filename = `crop_${id}`;
+      const publicUrl = await uploadCanvasToSupabase(CropCanvas, project?.id || "", filename);
+      updateNodeData(id, { croppedImageUrl: `${publicUrl}?t=${Date.now()}` });
     } catch (err) {
       console.error(err);
-      alert("Upload failed");
+      // alert("Upload failed"); // Better to use a toast or status indicator
     } finally {
       setIsUploading(false);
     }
@@ -224,13 +251,14 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
 
   const setPresetRatio = (ratio: AspectRatio) => {
     updateNodeData(id, { aspectRatio: ratio });
-    if (ratio === "Free" || !imageSize) return;
+    const targetR = parseAspectRatio(ratio);
 
-    const [rw, rh] = ratio.split(":").map(Number);
-    const targetR = rw / rh;
+    if (!targetR || !imageSize) return;
+
     setLocalCrop((prev) => {
       let nw = prev.width;
       let nh = nw / targetR;
+
       if (nh > imageSize.height) {
         nh = imageSize.height;
         nw = nh * targetR;
@@ -241,22 +269,30 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
 
   // --- Dynamic Node Height ---
   const nodeHeight = useMemo(() => {
-    const HEADER_FOOTER = 170; // Adjusted for the new two-row footer
+    const HEADER_FOOTER = 170; // Fixed offset for header/footer
     const contentWidth = BASE_WIDTH - 32;
 
-    // If we have a result, calculate height based on the crop dimensions
-    if (data.croppedImageUrl && data.crop) {
-      const aspectRatio = data.crop.height / data.crop.width;
-      return contentWidth * aspectRatio + HEADER_FOOTER;
+    // Use cropped result aspect if available
+    if (data.croppedImageUrl && data.crop && data.crop.width > 0) {
+      const ratio = data.crop.height / data.crop.width;
+      return contentWidth * ratio + HEADER_FOOTER;
     }
 
-    // Otherwise, use the original image dimensions
-    if (imageSize) {
+    // Use original image aspect
+    if (imageSize && imageSize.width > 0) {
       return contentWidth * (imageSize.height / imageSize.width) + HEADER_FOOTER;
     }
 
-    return 400;
+    return 400; // Default
   }, [imageSize, data.croppedImageUrl, data.crop]);
+
+  // Update React Flow node dimensions when height changes
+  useEffect(() => {
+    updateNode(id, {
+      width: BASE_WIDTH,
+      height: nodeHeight,
+    });
+  }, [nodeHeight, id, updateNode]);
 
   return (
     <NodeLayout
@@ -268,23 +304,26 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
         { type: "target", position: Position.Left, id: "target" },
         { type: "source", position: Position.Right, id: "source" },
       ]}
-      style={{ width: BASE_WIDTH, height: nodeHeight }}
+      style={{ width: BASE_WIDTH }}
+      toolbarHidden={true}
+      resizeHidden={true}
     >
       <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-[#0d0d0d]">
-        {/* Workspace */}
         {/* Workspace */}
         <div className="relative flex-1 bg-black/20 p-4" ref={containerRef}>
           {data.imageUrl ? (
             <div className="relative h-full w-full">
               {!data.croppedImageUrl ? (
                 <>
-                  {/* Reference Image (only show during editing) */}
+                  {/* Reference Image (Reference/Bg) - blurred */}
                   <img
                     src={data.imageUrl}
                     onLoad={onImageLoad}
-                    className="pointer-events-none w-full opacity-50 blur-[2px] grayscale"
+                    draggable={false}
+                    className="pointer-events-none w-full select-none opacity-50 blur-[2px] grayscale"
                     alt="bg"
                   />
+                  {/* Crop Window / Handles */}
                   <div
                     className="absolute border-2 border-[#D9E92B]"
                     style={{
@@ -296,11 +335,12 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
                     }}
                     onPointerDown={(e) => handlePointerDown(e)}
                   >
-                    {/* Sharp Preview */}
+                    {/* Sharp Preview inside crop area */}
                     <div className="absolute inset-0 overflow-hidden">
                       <img
                         src={data.imageUrl}
-                        className="absolute max-w-none"
+                        draggable={false}
+                        className="absolute max-w-none select-none"
                         style={{
                           width: containerWidth,
                           left: -localCrop.x * scale,
@@ -329,14 +369,13 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
                   </div>
                 </>
               ) : (
-                /* Final Cropped Preview - snaps to the new aspect ratio */
+                /* Final Cropped Preview */
                 <div className="relative h-full w-full overflow-hidden rounded-lg">
                   <img
                     src={data.croppedImageUrl}
                     className="h-full w-full object-cover"
                     alt="result"
                   />
-                  {/* Reset button logic already in the footer, but keeping a quick-clear if needed */}
                 </div>
               )}
             </div>
@@ -348,7 +387,6 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
           )}
         </div>
 
-        {/* Footer Controls */}
         {/* Footer Controls */}
         <div className="flex flex-col gap-4 bg-[#0d0d0d] p-4">
           {/* First Row: Aspect Ratio & Reset */}
@@ -373,7 +411,7 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
             <button
               onClick={() => {
                 updateNodeData(id, {
-                  croppedImageUrl: undefined, // This is the key to reverting the height
+                  croppedImageUrl: undefined,
                   aspectRatio: "Free",
                 });
                 if (imageSize) {
@@ -413,4 +451,6 @@ export default function CropNode({ id, data, selected }: NodeProps<CropNodeType>
       </div>
     </NodeLayout>
   );
-}
+};
+
+export default React.memo(CropNode);

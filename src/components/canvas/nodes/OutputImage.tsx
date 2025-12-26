@@ -9,10 +9,11 @@ import { useSyncUpstreamData } from "@/src/utils/xyflow";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType, InputBoxParameter, ModelData, NodeParam } from "@/src/types/BaseType";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { useCanvas } from "../../providers/CanvasProvider";
 import { MemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
+import { useAtom } from "jotai";
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
 
 export type OutputImageNodeData = {
   imageUrl?: string;
@@ -54,7 +55,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
-  // Sync dimensions to React Flow store when upstream data changes (aspect ratio sync)
   useEffect(() => {
     if (data.width && data.height) {
       const ratio = data.height / data.width;
@@ -65,32 +65,41 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     }
   }, [data.width, data.height, id, updateNode]);
 
-  // --- Hooks for Generation ---
-  // 1. Get models to find "Seedream 4 Fast"
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
   const { project } = useCanvas();
   const generateMutation = useGenerateCanvasImage(project?.id || "");
 
-  const [model, setModel] = useState<ModelData | null>(() => {
-    const targetModelName = data.model || "Seedream 4 Fast";
-    return models?.find((m) => m.model_name === targetModelName) || null;
-  });
+  const [selectedModelName, setSelectedModelName] = useAtom(selectedModelAtom(id));
+
+  // Sync data.model to atom on init
+  useEffect(() => {
+    if (data.model && !selectedModelName) {
+      setSelectedModelName(data.model);
+    }
+  }, [data.model, selectedModelName, setSelectedModelName]);
+
+  // Sync atom to data.model
+  useEffect(() => {
+    if (selectedModelName && selectedModelName !== data.model) {
+      updateNodeData(id, { model: selectedModelName });
+    }
+  }, [selectedModelName, data.model, updateNodeData, id]);
+
+  // Derive model strictly from the atom state
+  const selectedModel = useMemo(() => {
+    const targetName = selectedModelName;
+    if (!targetName && models && models.length > 0) {
+      return models.find((m) => m.model_name === (data.model || "Seedream 4 Fast")) || null;
+    }
+    return models?.find((m) => m.model_name === targetName) || null;
+  }, [models, selectedModelName, data.model]);
 
   const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
 
-  // Update model when data.model or models change
-  useEffect(() => {
-    const targetModelName = data.model || "Seedream 4 Fast";
-    const foundModel = models?.find((m) => m.model_name === targetModelName);
-    if (foundModel) {
-      setModel(foundModel);
-    }
-  }, [data.model, models]);
-
   const initialValues = useMemo(() => {
-    if (!model?.parameters) return {};
+    if (!selectedModel?.parameters) return {};
     const out: Record<string, any> = {};
-    for (const [key, param] of Object.entries(model.parameters)) {
+    for (const [key, param] of Object.entries(selectedModel.parameters)) {
       const nk = normalizeKey(key);
       if (param.default !== undefined) out[nk] = param.default;
       else if (param.type === "boolean") out[nk] = false;
@@ -99,9 +108,14 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       else out[nk] = "";
     }
     return out;
-  }, [model?.parameters]);
+  }, [selectedModel?.parameters]);
 
   const [values, setValues] = useState<Record<string, any>>(initialValues);
+
+  // Update values when model changes
+  useEffect(() => {
+    setValues(initialValues);
+  }, [initialValues]);
 
   useEffect(() => {
     if (data.imageUrl) return;
@@ -111,25 +125,21 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     return () => clearInterval(interval);
   }, [data.imageUrl]);
 
-  // Constants for sizing
   const BASE_WIDTH = 320;
   const aspectRatio = data.width && data.height ? data.height / data.width : 1.4;
   const nodeHeight = BASE_WIDTH * aspectRatio;
-
-  // Derived state for the list view
   const inputImages = data.inputImageUrls || [];
 
   const handleGenerate = () => {
-    if (!data.prompt || !project?.id || !model) return;
+    if (!data.prompt || !project?.id || !selectedModel) return;
 
     let parameters: InputBoxParameter = {};
 
-    if (model.provider === "running_hub") {
-      const schema = model.parameters as NodeParam[];
+    if (selectedModel.provider === "running_hub") {
+      const schema = selectedModel.parameters as NodeParam[];
       const params: NodeParam[] = schema.map((p) => {
         const normalizedKey = normalizeKey(p.fieldName);
 
-        // Check if this is the prompt field
         if (p.fieldName === "prompt" || p.description === "prompt") {
           return {
             ...p,
@@ -137,7 +147,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           };
         }
 
-        // Use value from values state if available, otherwise use default
         return {
           ...p,
           fieldValue: values[normalizedKey] !== undefined ? values[normalizedKey] : p.fieldValue,
@@ -176,10 +185,10 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       {
         canvasId: project?.id || "",
         parameters,
-        modelName: model.model_name,
-        modelIdentifier: model.identifier,
-        modelCredit: typeof model.cost === "number" ? model.cost : 0,
-        modelProvider: model.provider,
+        modelName: selectedModel.model_name,
+        modelIdentifier: selectedModel.identifier,
+        modelCredit: typeof selectedModel.cost === "number" ? selectedModel.cost : 0,
+        modelProvider: selectedModel.provider,
       },
       {
         onSuccess: (res) => {
@@ -188,17 +197,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       },
     );
   };
-
-  const handleModelSelect = useCallback(
-    (modelName: string) => {
-      const selectedModel = models?.find((m) => m.model_name === modelName);
-      if (selectedModel) {
-        setModel(selectedModel);
-        updateNodeData(id, { model: modelName });
-      }
-    },
-    [models, updateNodeData, id],
-  );
 
   function isImageParam(key: string, param: any) {
     const explicit = new Set([
@@ -220,19 +218,21 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
   // TODO: Implement parameter filtering when needed
   const imageInputKeys = useMemo(() => {
-    return model?.parameters
-      ? Object.keys(model.parameters).filter((k) => isImageParam(k, model.parameters[k]))
+    return selectedModel?.parameters
+      ? Object.keys(selectedModel.parameters).filter((k) =>
+          isImageParam(k, selectedModel?.parameters[k]),
+        )
       : [];
-  }, [model]);
+  }, [selectedModel]);
 
   const otherEntries = useMemo(
     () =>
-      model?.parameters
-        ? Object.entries(model.parameters).filter(([k]) => {
+      selectedModel?.parameters
+        ? Object.entries(selectedModel.parameters).filter(([k]) => {
             return !imageInputKeys.includes(k) && k !== "prompt";
           })
         : [],
-    [model, imageInputKeys],
+    [selectedModel, imageInputKeys],
   );
 
   const handleChange = useCallback(
@@ -259,32 +259,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         { type: "source", position: Position.Right },
       ]}
       toolbarType="generate"
-      // toolbarHidden={true}
     >
-      {/* <NodeToolbar
-        isVisible={selected}
-        position={Position.Bottom}
-        offset={20}
-        className="flex items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
-      >
-        <Select
-          value={data.model || "Seedream 4 Fast"}
-          onValueChange={handleModelSelect}
-          // onValueChange={(value) => updateNodeData(id, { model: value })}
-        >
-          <SelectTrigger className="h-8 border-none bg-transparent hover:bg-white/10">
-            <SelectValue placeholder="Select Model" />
-          </SelectTrigger>
-          <SelectContent>
-            {models?.map((model) => (
-              <SelectItem key={model.id} value={model.model_name}>
-                {model.model_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </NodeToolbar> */}
-
       <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -333,11 +308,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                 className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Input ${index + 1}`}
-                  className="size-12 object-cover"
-                />
+                <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
               </div>
             ))}
           </div>
@@ -355,11 +326,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <TextShimmer
-                      className="font-medium"
-                      spread={3}
-                      duration={2}
-                    >
+                    <TextShimmer className="font-medium" spread={3} duration={2}>
                       {`Try "${PLACEHOLDERS[currentPlaceholder].prompt}"`}
                     </TextShimmer>
                   </motion.div>
@@ -376,6 +343,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             />
             {/* TODO: Re-enable when parameter filtering is implemented */}
             <MemoizedOtherParameters
+              key={selectedModel?.model_name}
               otherEntries={otherEntries}
               values={values}
               handleChange={handleChange}

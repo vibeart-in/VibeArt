@@ -11,9 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
 
 interface GenerateToolbarProps {
+  id?: string;
   selected: boolean;
   isHovered: boolean;
   handleMouseEnter: () => void;
@@ -22,6 +25,7 @@ interface GenerateToolbarProps {
 }
 
 export default function GenerateToolbar({
+  id,
   selected,
   isHovered,
   handleMouseEnter,
@@ -29,13 +33,13 @@ export default function GenerateToolbar({
   onGenerate,
 }: GenerateToolbarProps) {
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
-  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
       setSelectedModel(models[0].model_name);
     }
-  }, [models, selectedModel]);
+  }, [models, selectedModel, setSelectedModel]);
 
   return (
     <FlowNodeToolbar
@@ -56,7 +60,7 @@ export default function GenerateToolbar({
         </button>
 
         {/* Model Section */}
-        <Select value={selectedModel} onValueChange={setSelectedModel}>
+        <Select value={selectedModel || ""} onValueChange={setSelectedModel}>
           <SelectTrigger className="flex h-9 items-center gap-2 rounded-full border-0 bg-[#1A1A1A] pl-1 pr-3 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
             <SelectValue placeholder="Select model" />
             <ChevronDown className="size-3 opacity-50" />

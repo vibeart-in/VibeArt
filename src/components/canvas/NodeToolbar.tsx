@@ -51,6 +51,7 @@ export default function NodeToolbar({
         handleMouseEnter={handleMouseEnter}
         handleMouseLeave={handleMouseLeave}
         onGenerate={onGenerate}
+        id={id}
       />
     );
   }

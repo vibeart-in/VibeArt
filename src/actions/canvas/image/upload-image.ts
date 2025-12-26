@@ -8,7 +8,7 @@ export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file" };
-
+ 
     const supabase = await createClient();
 
     // 1. Auth Check
