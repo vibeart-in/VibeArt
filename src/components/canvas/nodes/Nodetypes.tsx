@@ -1,22 +1,31 @@
+import { NodeTypes } from "@xyflow/react";
+
+// Import all node components
 import InputImage from "./InputImage";
 import OutputImage from "./OutputImage";
-import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
 import TextNode from "./TextNode";
-import DropNode from "./DropNode";
+import SketchNode from "./SketchNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
 import CropNode from "./CropNode";
-import SketchNode from "./SketchNode";
+import DropNode from "./DropNode";
+import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
+import UpscaleNode from "./UpscaleNode";
+import AnimeToRealNode from "./AnimeToRealNode";
 
-export const nodeTypes = {
-  drop: DropNode,
-  outputImage: OutputImage,
+// Register all node types for React Flow
+export const nodeTypes: NodeTypes = {
   inputImage: InputImage,
+  outputImage: OutputImage,
   prompt: TextNode,
-  presets: PresetsNode,
-  style: StyleNode,
-  checkpoint: CheckpointNode,
-  lora: LoraNode,
+  text: TextNode,
+  sketch: SketchNode,
   colorCorrection: ColorCorrectionNode,
   crop: CropNode,
-  sketch: SketchNode,
+  drop: DropNode,
+  checkpoint: CheckpointNode,
+  lora: LoraNode,
+  presets: PresetsNode,
+  style: StyleNode,
+  upscale: UpscaleNode,
+  animeToReal: AnimeToRealNode,
 };
