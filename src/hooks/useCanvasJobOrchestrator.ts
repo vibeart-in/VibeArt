@@ -31,8 +31,9 @@ export function useCanvasJobOrchestrator(canvasId: string) {
               .select("images(*)")
               .eq("job_id", updatedJob.id);
 
-            if (jobImages?.[0]) {
-              const img = (jobImages[0] as any).images;
+            if (jobImages && jobImages.length > 0) {
+              const outputImages = jobImages.map((row: any) => row.images);
+              
               // Update the specific node
               setNodes((nds) =>
                 nds.map((node) =>
@@ -41,7 +42,8 @@ export function useCanvasJobOrchestrator(canvasId: string) {
                         ...node,
                         data: {
                           ...node.data,
-                          imageUrl: img.image_url,
+                          imageUrl: outputImages[0].image_url, // Default fallback
+                          outputImages: outputImages, // Pass full list
                           activeJobId: null,
                           status: null,
                         },
