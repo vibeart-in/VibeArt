@@ -31,6 +31,9 @@ import {
   ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
 } from "../ui/context-menu";
 import {
   Search,
@@ -53,6 +56,7 @@ import { toJpeg, toPng } from "html-to-image";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
+import { AI_APPS } from "@/src/constants/aiApps";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project, setIsDraggingEdge } = useCanvas();
@@ -455,25 +459,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               Assistant
             </ContextMenuItem>
 
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("upscale")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
-                <Maximize size={12} />
-              </div>
-              Image Upscaler
-            </ContextMenuItem>
 
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("animeToReal")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
-                <Sparkles size={12} />
-              </div>
-              Anime to Real
-            </ContextMenuItem>
 
             <ContextMenuSeparator className="bg-zinc-800" />
 
@@ -516,6 +502,32 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
               </div>
               LoRA
             </ContextMenuItem>
+
+            <ContextMenuSeparator className="bg-zinc-800" />
+
+            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
+              AI APPS
+            </ContextMenuLabel>
+
+            <ContextMenuSub>
+              <ContextMenuSubTrigger className="focus:bg-zinc-800 focus:text-zinc-100">
+                <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
+                  <Sparkles size={12} />
+                </div>
+                Explore Apps
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
+                {AI_APPS.map((app) => (
+                  <ContextMenuItem
+                    key={app.id}
+                    className="focus:bg-zinc-800 focus:text-zinc-100"
+                    onClick={() => addNode("aiApp", { data: { appData: app } })}
+                  >
+                    <div className="truncate">{app.app_name}</div>
+                  </ContextMenuItem>
+                ))}
+              </ContextMenuSubContent>
+            </ContextMenuSub>
 
             <ContextMenuSeparator className="bg-zinc-800" />
 

@@ -9,8 +9,7 @@ import ColorCorrectionNode from "./ColorCorrectionNode";
 import CropNode from "./CropNode";
 import DropNode from "./DropNode";
 import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
-import UpscaleNode from "./UpscaleNode";
-import AnimeToRealNode from "./AnimeToRealNode";
+import AiAppNode from "./AiAppNode";
 
 // Register all node types for React Flow
 export const nodeTypes: NodeTypes = {
@@ -26,6 +25,7 @@ export const nodeTypes: NodeTypes = {
   lora: LoraNode,
   presets: PresetsNode,
   style: StyleNode,
-  upscale: UpscaleNode,
-  animeToReal: AnimeToRealNode,
+  aiApp: AiAppNode,
 };
+
+
