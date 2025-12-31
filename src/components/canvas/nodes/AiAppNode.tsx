@@ -73,8 +73,12 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         processedImagesHash: imagesSignature, // Mark as processed
     };
 
-    // Update main image if changed
-    if (data.imageUrl !== mainImage.image_url) {
+    // Update main image logic - Check for URL OR dimension changes
+    if (
+        data.imageUrl !== mainImage.image_url || 
+        data.width !== mainImage.width || 
+        data.height !== mainImage.height
+    ) {
         updates.imageUrl = mainImage.image_url;
         // IMPORTANT: Update dimensions to match image so node resizes correctly
         updates.width = mainImage.width; 
@@ -257,7 +261,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
           <img
             src={data.imageUrl}
             alt="Result"
-            className="h-full w-full rounded-3xl object-cover"
+            className="h-full w-full rounded-3xl object-contain bg-transparent"
             draggable={false}
           />
         ) : (inputImageUrl && inputImageUrl !== "") ? (
