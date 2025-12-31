@@ -261,7 +261,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
           <img
             src={data.imageUrl}
             alt="Result"
-            className="h-full w-full rounded-3xl object-contain bg-transparent"
+            className="h-full w-full rounded-3xl object-fill bg-transparent"
             draggable={false}
           />
         ) : (inputImageUrl && inputImageUrl !== "") ? (
