@@ -20,31 +20,21 @@ export type AiAppNodeData = {
   status?: string;
   appData?: AiApp;
   outputImages?: any[];
-<<<<<<< HEAD
   processedImagesHash?: string;
-=======
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
   [key: string]: unknown;
 };
 
 export type AiAppNodeType = Node<AiAppNodeData, "aiApp">;
 
 const BASE_WIDTH = 320;
-<<<<<<< HEAD
 const GRID_GAP = 50;
 const OUTPUT_NODE_WIDTH = 300;
-=======
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
 
 const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) => {
   const { updateNode, updateNodeData, addNodes, addEdges, getNode } = useReactFlow();
   const { project } = useCanvas();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
-=======
-  const processedImagesRef = React.useRef<string>("");
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
 
   useSyncUpstreamData(id, data);
 
@@ -52,7 +42,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
 
   // Handle Multi-Image Output Logic
   useEffect(() => {
-<<<<<<< HEAD
     if (!data.outputImages || data.outputImages.length === 0) {
       return;
     }
@@ -63,19 +52,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
     if (data.processedImagesHash === imagesSignature) {
         return;
     }
-=======
-    // Only proceed if we have output images and haven't processed this exact set yet
-    const imagesSignature = JSON.stringify(data.outputImages?.map((img: any) => img.id) || []);
-    if (
-      !data.outputImages || 
-      data.outputImages.length === 0 || 
-      processedImagesRef.current === imagesSignature
-    ) {
-      return;
-    }
-
-    processedImagesRef.current = imagesSignature;
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
 
     const images = data.outputImages as any[];
     
@@ -92,7 +68,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         }
     });
 
-<<<<<<< HEAD
     // 2. Prepare updates for current node
     const updates: Partial<AiAppNodeData> = {
         processedImagesHash: imagesSignature, // Mark as processed
@@ -104,13 +79,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         // IMPORTANT: Update dimensions to match image so node resizes correctly
         updates.width = mainImage.width; 
         updates.height = mainImage.height;
-=======
-    // 2. Update current node with main image
-    if (data.imageUrl !== mainImage.image_url) {
-        // We delay this slightly to ensure render cycle consistency 
-        // or just fire it. 
-        updateNodeData(id, { imageUrl: mainImage.image_url });
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
     }
 
     // 3. Spawn nodes for remaining images
@@ -121,22 +89,11 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         const currentNode = getNode(id);
         const currentX = currentNode?.position.x ?? 0;
         const currentY = currentNode?.position.y ?? 0;
-<<<<<<< HEAD
         const currentWidth = currentNode?.measured?.width ?? BASE_WIDTH;
         
         const newNodes: any[] = [];
         const newEdges: any[] = [];
         const startX = currentX + currentWidth + 100; // Start to the right
-        
-        // Calculate dynamic row height based on max aspect ratio of images
-        let maxAspectRatio = 0;
-        remainingImages.forEach(img => {
-            const ratio = (img.height || 1) / (img.width || 1);
-            if (ratio > maxAspectRatio) maxAspectRatio = ratio;
-        });
-        
-        // Safe row height: Width * MaxRatio + Gap
-        const rowHeight = (OUTPUT_NODE_WIDTH * maxAspectRatio) + GRID_GAP;
         
         remainingImages.forEach((img, index) => {
             const newNodeId = crypto.randomUUID();
@@ -146,27 +103,14 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
             const rowIndex = Math.floor(index / 4);
             
             // Calculate offsets
+            // We use fixed spacing. Adjust output node height estimate if needed.
+            // Assuming output nodes will be approx 300-400px high.
             const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
-            const yOffset = rowIndex * rowHeight; 
+            const yOffset = rowIndex * (400 + GRID_GAP); // Generous vertical spacing
             
+
             const xPos = startX + xOffset;
             const yPos = currentY + yOffset;
-=======
-        const currentWidth = currentNode?.measured?.width ?? BASE_WIDTH; // approximation if measured not ready
-
-        const newNodes: any[] = [];
-        const newEdges: any[] = [];
-        
-        remainingImages.forEach((img, index) => {
-            const newNodeId = crypto.randomUUID();
-            // Position to the right, stacked vertically
-            // x: currentX + width + padding
-            // y: currentY + (index * vertical_spacing)
-            // But let's stagger them a bit more nicely
-            
-            const xPos = currentX + currentWidth + 50;
-            const yPos = currentY + (index * 400); 
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
 
             // Create Output Node
             newNodes.push({
@@ -175,13 +119,8 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                 position: { x: xPos, y: yPos },
                 data: {
                     imageUrl: img.image_url,
-<<<<<<< HEAD
                     width: img.width, // Pass actual dimensions
                     height: img.height
-=======
-                    width: 300, 
-                    height: 300 * ((img.height || 1) / (img.width || 1))
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
                 },
             });
 
@@ -198,16 +137,11 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         addNodes(newNodes);
         addEdges(newEdges);
     }
-<<<<<<< HEAD
     
     // Apply all updates to current node
     updateNodeData(id, updates);
 
   }, [data.outputImages, data.processedImagesHash, data.imageUrl, id, updateNodeData, addNodes, addEdges, getNode]);
-=======
-
-  }, [data.outputImages, id, updateNodeData, addNodes, addEdges, getNode]);
->>>>>>> 590dbbd623a1630ddd38940930897e723a851fdb
 
   // Update node dimensions based on image aspect ratio
   useEffect(() => {
