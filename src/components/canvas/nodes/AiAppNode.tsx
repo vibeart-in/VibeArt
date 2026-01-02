@@ -10,19 +10,7 @@ import { NodeParam } from "@/src/types/BaseType";
 import { useCanvas } from "../../providers/CanvasProvider";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { AiApp, AiAppParameter } from "@/src/constants/aiApps";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
-import { Switch } from "@/src/components/ui/switch";
-import { Textarea } from "@/src/components/ui/textarea";
-import AnimatedCounter from "@/src/components/ui/AnimatedCounter";
-import { getIconForParam } from "@/src/utils/server/utils";
-import { Label } from "@/src/components/ui/label";
+import AppParameterRenderer from "@/src/components/ai-apps/AppParameterRenderer";
 
 export type AiAppNodeData = {
   imageUrl?: string;
@@ -378,9 +366,9 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
              // Input / Form State
              <div className="relative h-full w-full flex flex-col bg-[#141414] overflow-hidden">
                  {/* Header Section */}
-                 <div className="flex w-full shrink-0 items-start gap-4 border-b border-zinc-800 bg-[#1A1A1A] p-4">
+                 <div className="flex w-full shrink-0 items-start gap-3 border-b border-zinc-800 bg-[#1A1A1A] p-3">
                      {/* Cover Image */}
-                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-700 shadow-sm">
+                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-zinc-700 shadow-sm">
                         {isVideoCover ? (
                           <video
                             src={appData.cover_image}
@@ -401,10 +389,10 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                      </div>
                      
                      <div className="flex min-w-0 flex-1 flex-col justify-center">
-                        <h3 className="line-clamp-2 text-sm font-semibold text-zinc-100 leading-tight" title={appData.app_name}>
+                        <h3 className="line-clamp-2 text-xs font-semibold text-zinc-100 leading-tight" title={appData.app_name}>
                             {appData.app_name}
                         </h3>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <div className="mt-1.5 flex flex-wrap gap-1">
                             <div className="flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5" title="Cost">
                                <span className="text-[10px] font-medium text-zinc-400">{appData.cost}</span>
                                <span className="text-[9px] text-zinc-600">cr</span>
@@ -417,11 +405,11 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                  </div>
                  
                  {/* Scrollable Content */}
-                 <div className="flex flex-1 flex-col p-4 gap-4 overflow-y-auto min-h-0 custom-scrollbar pb-16">
+                 <div className="flex flex-1 flex-col p-3 gap-3 overflow-y-auto min-h-0 custom-scrollbar pb-14">
                      {/* Image Input Section */}
                      {parseParameters(appData).some(p => p.fieldName === 'image') && (
                         inputImageUrl ? (
-                            <div className="relative w-full h-32 shrink-0 rounded-xl overflow-hidden border border-zinc-700/50">
+                            <div className="relative w-full h-24 shrink-0 rounded-lg overflow-hidden border border-zinc-700/50">
                                 <img src={inputImageUrl} alt="Input" className="w-full h-full object-cover opacity-80" />
                                 <div className="absolute inset-0 bg-black/20" />
                                 <div className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
@@ -429,11 +417,11 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                                 </div>
                             </div>
                         ) : (
-                            <div className="group relative flex h-32 shrink-0 flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-900/30 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-800/50">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-zinc-500 shadow-inner group-hover:scale-110 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
-                                    <Sparkles size={18} className="opacity-70 text-zinc-400" />
+                            <div className="group relative flex h-24 shrink-0 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-900/30 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-800/50">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-zinc-500 shadow-inner group-hover:scale-110 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
+                                    <Sparkles size={14} className="opacity-70 text-zinc-400" />
                                 </div>
-                                <p className="mt-3 text-xs font-medium text-zinc-400 group-hover:text-zinc-200">
+                                <p className="mt-2 text-[10px] font-medium text-zinc-400 group-hover:text-zinc-200">
                                     Connect Input Image
                                 </p>
                                 <p className="mt-1 text-[10px] text-zinc-600">
@@ -444,118 +432,16 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                      )}
 
                     {/* Dynamic Parameters */}
-                    <div className="flex flex-col gap-4">
-                        {parseParameters(appData).map((param) => {
-                            const key = param.description;
-                            const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
-
-                            if (param.fieldName === 'image' || param.fieldName === 'video') return null;
-
-                            if (param.fieldName === "prompt" || param.fieldName === "text" || param.description === "Prompt") {
-                                return (
-                                    <div key={key} className="flex flex-col gap-1.5">
-                                        <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                        <Textarea
-                                            value={currentValue}
-                                            onChange={(e) => handleParamChange(key, e.target.value)}
-                                            className="min-h-[80px] w-full resize-none rounded-xl border-zinc-700 bg-zinc-900/50 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            placeholder={`Enter ${param.description.toLowerCase()}...`}
-                                        />
-                                    </div>
-                                );
-                            }
-
-                             if (['aspect_ratio', 'size', 'select', 'model_selected'].includes(param.fieldName) || param.description === "Portrait or landscape mode") {
-                                 let options: string[] = [];
-                                 try {
-                                     if (param.fieldData) {
-                                         const parsed = JSON.parse(param.fieldData);
-                                         options = parsed[0] || [];
-                                     }
-                                 } catch (e) {
-                                      // ignore
-                                 }
-
-                                 // Specific hardcoded check for "Portrait or landscape mode" if fieldData fails
-                                 if (options.length === 0 && param.description === "Portrait or landscape mode") {
-                                     // Assuming values 1 and 2
-                                     // Actually options should be label:value pairs but AppInputBox uses "Vertical"/"Landscape" -> "1"/"2" via specialized logic.
-                                     // For now let's just show raw options if possible or dummy valid ones.
-                                     // AppInputBox has explicit checks. Let's replicate simple versions.
-                                     // If "Portrait or landscape mode", let's offer "Vertical" and "Landscape"
-                                     // But we need to map back to "1" and "2"? 
-                                     // AppInputBox: SelectItem value={"1"}>Vertical</SelectItem>
-                                     // Let's implement that specific case.
-                                     return (
-                                        <div key={key} className="flex flex-col gap-1.5">
-                                            <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                            <Select
-                                                value={currentValue}
-                                                onValueChange={(val) => handleParamChange(key, val)}
-                                            >
-                                                <SelectTrigger className="h-9 w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200">
-                                                    <SelectValue placeholder="Select..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="1">Vertical</SelectItem>
-                                                    <SelectItem value="2">Landscape</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                     );
-                                 }
-
-                                 if (options.length > 0) {
-                                    return (
-                                        <div key={key} className="flex flex-col gap-1.5">
-                                            <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                            <Select
-                                                value={currentValue}
-                                                onValueChange={(val) => handleParamChange(key, val)}
-                                            >
-                                                <SelectTrigger className="h-9 w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200">
-                                                    <SelectValue placeholder="Select..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {options.map(opt => (
-                                                        <SelectItem key={opt} value={opt}>
-                                                            <span className="text-xs">{opt}</span>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    );
-                                 }
-                             }
-
-                            if (param.fieldName === 'int' || param.fieldName === 'width' || param.fieldName === 'height' || param.description.includes('Duration')) {
-                                return (
-                                   <div key={key} className="flex flex-col gap-1.5">
-                                       <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                       <input 
-                                           type="number"
-                                           value={currentValue}
-                                           onChange={(e) => handleParamChange(key, e.target.value)}
-                                           className="h-9 w-full rounded-xl border border-zinc-700 bg-zinc-900/50 px-3 py-1 text-xs text-zinc-200 focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
-                                       />
-                                   </div>
-                                )
-                            }
-                            
-                            // Default text input
-                            return (
-                               <div key={key} className="flex flex-col gap-1.5">
-                                   <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                   <Textarea
-                                        value={currentValue}
-                                        onChange={(e) => handleParamChange(key, e.target.value)}
-                                        placeholder={param.description}
-                                        className="min-h-[40px] w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200"
-                                   />
-                               </div>
-                            );
-                        })}
+                    <div className="flex flex-col gap-1.5">
+                        <AppParameterRenderer
+                            values={parseParameters(appData).map(p => ({
+                                ...p,
+                                fieldValue: data.parameterValues?.[p.description] ?? p.fieldValue ?? ""
+                            }))}
+                            handleChange={handleParamChange}
+                            mode="canvas"
+                            inputImageUrl={inputImageUrl}
+                        />
                     </div>
                  </div>
 
@@ -570,20 +456,20 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                   )}
 
                  {/* Generate Button Wrapper */}
-                 <div className="p-4 pt-0">
+                 <div className="p-3 pt-0">
                     <button
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:from-indigo-600 hover:to-purple-600 active:scale-95 disabled:opacity-50 disabled:grayscale`}
+                      className={`flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 py-2 text-xs font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:from-indigo-600 hover:to-purple-600 active:scale-95 disabled:opacity-50 disabled:grayscale`}
                       onClick={handleGenerate}
                       disabled={isGenerating || (parseParameters(appData).some(p => p.fieldName === 'image') && !inputImageUrl)}
                     >
                       {isGenerating ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" />
+                          <Loader2 size={14} className="animate-spin" />
                           <span>Generating...</span>
                         </>
                       ) : (
                         <>
-                          <Play size={16} fill="currentColor" />
+                          <Play size={14} fill="currentColor" />
                           <span>Generate</span>
                         </>
                       )}
