@@ -7,8 +7,8 @@ import { redirect } from "next/navigation";
 import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
 import { CanvasProject } from "@/src/types/BaseType";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function Page({ params }: { params: { id: string } }) {
+  const { id } = params;
   const supabase = await createClient();
 
   const {

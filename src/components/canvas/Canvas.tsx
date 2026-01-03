@@ -14,6 +14,7 @@ import {
   useNodesState,
   useEdgesState,
   OnNodesChange,
+  MarkerType,
 } from "@xyflow/react";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -24,39 +25,13 @@ import { useCanvas } from "../providers/CanvasProvider";
 import { nodeTypes } from "./nodes/Nodetypes";
 import { NodeOperationsProvider } from "../providers/NodeProvider";
 import { updateProjectAction } from "@/src/actions/canvas/update";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-} from "../ui/context-menu";
-import {
-  Search,
-  Upload,
-  Layers,
-  Type,
-  Image as ImageIcon,
-  Video,
-  Sparkles,
-  Maximize,
-  LayoutTemplate,
-  Palette,
-  Camera,
-  Crop,
-  Brush,
-} from "lucide-react";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 import { DevTools } from "../devtools";
 import { toJpeg, toPng } from "html-to-image";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
-import { AI_APPS } from "@/src/constants/aiApps";
+import { CanvasContextMenu } from "./CanvasContextMenu";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project, setIsDraggingEdge } = useCanvas();
@@ -348,224 +323,57 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
       <NodeDropzoneProvider>
-        <ContextMenu>
-          <ContextMenuTrigger className="block h-full w-full">
-            <ReactFlow
-              deleteKeyCode={["Backspace", "Delete"]}
-              edges={edges}
-              edgeTypes={edgeTypes}
-              fitView
-              // isValidConnection={isValidConnection}
+        <CanvasContextMenu addNode={addNode}>
+          <ReactFlow
+            deleteKeyCode={["Backspace", "Delete"]}
+            edges={edges}
+            edgeTypes={edgeTypes}
+            fitView
+            // isValidConnection={isValidConnection}
+            nodes={nodes}
+            nodeTypes={nodeTypes}
+            onConnect={handleConnect}
+            onConnectStart={handleConnectStart}
+            onConnectEnd={handleConnectEnd}
+            onEdgesChange={handleEdgesChange}
+            onNodesChange={handleNodesChange}
+            // panOnScroll
+            selectionOnDrag={true}
+            colorMode="dark"
+            proOptions={{ hideAttribution: true }}
+            // snapToGrid={true}
+            // snapGrid={[42, 42]}
+            minZoom={0.1}
+            maxZoom={10}
+            defaultEdgeOptions={{
+              style: {
+                stroke: "#4b5563",
+                strokeWidth: 2,
+              },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                color: "#4b5563",
+              },
+            }}
+            connectionLineStyle={{
+              stroke: "#DFFF00",
+              strokeWidth: 4,
+            }}
+            connectionLineContainerStyle={{ zIndex: 0 }}
+            // {...rest}
+          >
+            <CustomControls
               nodes={nodes}
-              nodeTypes={nodeTypes}
-              onConnect={handleConnect}
-              onConnectStart={handleConnectStart}
-              onConnectEnd={handleConnectEnd}
-              onEdgesChange={handleEdgesChange}
-              onNodesChange={handleNodesChange}
-              // panOnScroll
-              selectionOnDrag={true}
-              colorMode="dark"
-              proOptions={{ hideAttribution: true }}
-              // snapToGrid={true}
-              // snapGrid={[42, 42]}
-              minZoom={0.1}
-              maxZoom={10}
-              // defaultEdgeOptions={{
-              //   style: {
-              //     stroke: "#4b5563",
-              //     strokeWidth: 2,
-              //   },
-              //   markerEnd: {
-              //     type: MarkerType.ArrowClosed,
-              //     color: "#4b5563",
-              //   },
-              // }}
-              // connectionLineStyle={{
-              //   stroke: "#DFFF00",
-              //   strokeWidth: 4,
-              // }}
-              connectionLineContainerStyle={{ zIndex: 0 }}
-              // {...rest}
-            >
-              <CustomControls
-                nodes={nodes}
-                setNodes={setNodes}
-                minZoom={0.25}
-                maxZoom={3}
-                isSaving={saveState.isSaving}
-                lastSaved={saveState.lastSaved}
-              />
-              <DevTools position="bottom-left" />
-              {children}
-            </ReactFlow>
-          </ContextMenuTrigger>
-          <ContextMenuContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
-            <div className="mb-1 flex items-center border-b border-zinc-800 px-2 py-1.5">
-              <Search size={14} className="mr-2 text-zinc-500" />
-              <input
-                className="h-auto w-full border-none bg-transparent p-0 text-sm text-zinc-300 placeholder-zinc-500 outline-none focus:ring-0"
-                placeholder="Search"
-                onKeyDown={(e) => e.stopPropagation()}
-              />
-            </div>
-
-            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-              <Upload size={14} className="mr-2" />
-              Upload
-            </ContextMenuItem>
-            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-              <Layers size={14} className="mr-2" />
-              Media
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="bg-zinc-800" />
-
-            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
-              NODES
-            </ContextMenuLabel>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("prompt")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
-                <Type size={12} />
-              </div>
-              Text
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("outputImage")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
-                <ImageIcon size={12} />
-              </div>
-              Image Generator
-            </ContextMenuItem>
-
-            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
-                <Video size={12} />
-              </div>
-              Video Generator
-            </ContextMenuItem>
-
-            <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-teal-900/50 text-teal-500">
-                <Sparkles size={12} />
-              </div>
-              Assistant
-            </ContextMenuItem>
-
-
-
-            <ContextMenuSeparator className="bg-zinc-800" />
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("presets")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
-                <LayoutTemplate size={12} />
-              </div>
-              Presets
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("style")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
-                <Palette size={12} />
-              </div>
-              Style
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("checkpoint")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
-                <Palette size={12} />
-              </div>
-              Checkpoint
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("lora")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
-                <Palette size={12} />
-              </div>
-              LoRA
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="bg-zinc-800" />
-
-            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
-              AI APPS
-            </ContextMenuLabel>
-
-            <ContextMenuSub>
-              <ContextMenuSubTrigger className="focus:bg-zinc-800 focus:text-zinc-100">
-                <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
-                  <Sparkles size={12} />
-                </div>
-                Explore Apps
-              </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
-                {AI_APPS.map((app) => (
-                  <ContextMenuItem
-                    key={app.id}
-                    className="focus:bg-zinc-800 focus:text-zinc-100"
-                    onClick={() => addNode("aiApp", { data: { appData: app } })}
-                  >
-                    <div className="truncate">{app.app_name}</div>
-                  </ContextMenuItem>
-                ))}
-              </ContextMenuSubContent>
-            </ContextMenuSub>
-
-            <ContextMenuSeparator className="bg-zinc-800" />
-
-            <ContextMenuLabel className="ml-0 pl-2 text-xs font-normal text-zinc-500">
-              UTILITIES
-            </ContextMenuLabel>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("colorCorrection")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
-                <Palette size={12} />
-              </div>
-              Color Correction
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("crop")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
-                <Crop size={12} />
-              </div>
-              Crop
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="focus:bg-zinc-800 focus:text-zinc-100"
-              onClick={() => addNode("sketch")}
-            >
-              <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
-                <Brush size={12} />
-              </div>
-              Painter
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
+              setNodes={setNodes}
+              minZoom={0.25}
+              maxZoom={3}
+              isSaving={saveState.isSaving}
+              lastSaved={saveState.lastSaved}
+            />
+            <DevTools position="bottom-left" />
+            {children}
+          </ReactFlow>
+        </CanvasContextMenu>
       </NodeDropzoneProvider>
     </NodeOperationsProvider>
   );

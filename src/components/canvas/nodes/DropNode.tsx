@@ -82,6 +82,8 @@ const DropNode = memo(({ id, data }: NodeProps) => {
   );
 });
 
+DropNode.displayName = "DropNode";
+
 export default DropNode;
 
 /* ---------- Option Row ---------- */

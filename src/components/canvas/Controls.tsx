@@ -146,4 +146,6 @@ const CustomControls = React.memo(
   },
 );
 
+CustomControls.displayName = "CustomControls"
+
 export default CustomControls;

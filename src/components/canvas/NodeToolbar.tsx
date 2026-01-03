@@ -14,6 +14,7 @@ interface NodeToolbarProps {
   height?: number;
   textEditor?: any;
   onGenerate?: () => void;
+  initialModel?: string;
 }
 
 export default function NodeToolbar({
@@ -25,6 +26,7 @@ export default function NodeToolbar({
   handleMouseLeave,
   textEditor,
   onGenerate,
+  initialModel,
 }: NodeToolbarProps) {
   const editor = textEditor as Editor | undefined;
 
@@ -52,6 +54,7 @@ export default function NodeToolbar({
         handleMouseLeave={handleMouseLeave}
         onGenerate={onGenerate}
         id={id}
+        initialModel={initialModel}
       />
     );
   }

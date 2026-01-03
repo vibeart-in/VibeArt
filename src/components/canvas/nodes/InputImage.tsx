@@ -20,7 +20,7 @@ export type InputImageNodeData = {
 
 export type InputImageNodeType = Node<InputImageNodeData, "inputImage">;
 
-const BASE_WIDTH = 300;
+const BASE_WIDTH = 500;
 
 const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeType>) => {
   // console.log("INPUTIMAGE", data);
@@ -136,5 +136,7 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
     </NodeLayout>
   );
 });
+
+InputImage.displayName = "InputImage";
 
 export default InputImage;

@@ -24,5 +24,7 @@ export const defaultNodeStyle: NodeStyle = {
 // Atom family to store style for each node by ID
 export const nodeStyleAtom = atomFamily((id: string) => atom<NodeStyle>(defaultNodeStyle));
 
+import { ModelData } from "@/src/types/BaseType";
+
 // Atom family to store selected model for each node by ID
-export const selectedModelAtom = atomFamily((id: string) => atom<string | null>(null));
+export const selectedModelAtom = atomFamily((id: string) => atom<ModelData | null>(null));

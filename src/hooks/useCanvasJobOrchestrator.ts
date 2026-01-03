@@ -1,10 +1,10 @@
 // hooks/useCanvasJobOrchestrator.ts
 import { useEffect } from "react";
-import { useReactFlow } from "@xyflow/react";
+import { useReactFlow, Edge } from "@xyflow/react";
 import { createClient } from "../lib/supabase/client";
 
 export function useCanvasJobOrchestrator(canvasId: string) {
-  const { getNodes, setNodes } = useReactFlow();
+  const { getNodes, setNodes, getEdges, setEdges } = useReactFlow();
   const supabase = createClient();
 
   useEffect(() => {
@@ -33,10 +33,60 @@ export function useCanvasJobOrchestrator(canvasId: string) {
 
             if (jobImages && jobImages.length > 0) {
               const outputImages = jobImages.map((row: any) => row.images);
-              
-              // Update the specific node
-              setNodes((nds) =>
-                nds.map((node) =>
+
+              const currentEdges = getEdges();
+              const incomingEdges = currentEdges.filter((e: Edge) => e.target === targetNode.id);
+              const outgoingEdges = currentEdges.filter((e: Edge) => e.source === targetNode.id);
+
+              const newNodes: any[] = [];
+              const newEdges: any[] = [];
+
+              // Create nodes for additional images
+              outputImages.slice(1).forEach((img: any, index: number) => {
+                const newId = crypto.randomUUID();
+                // Shift position to the right
+                const offset = (index + 1) * 550;
+
+                const newNode = {
+                  ...targetNode,
+                  id: newId,
+                  selected: false,
+                  position: {
+                    x: targetNode.position.x + offset,
+                    y: targetNode.position.y,
+                  },
+                  data: {
+                    ...targetNode.data,
+                    imageUrl: img.image_url,
+                    outputImages: outputImages,
+                    activeJobId: null,
+                    status: null,
+                  },
+                };
+                newNodes.push(newNode);
+
+                // Duplicate connections
+                incomingEdges.forEach((edge: Edge) => {
+                  newEdges.push({
+                    ...edge,
+                    id: crypto.randomUUID(),
+                    target: newId,
+                  });
+                });
+                outgoingEdges.forEach((edge: Edge) => {
+                  newEdges.push({
+                    ...edge,
+                    id: crypto.randomUUID(),
+                    source: newId,
+                  });
+                });
+              });
+
+              setEdges((eds: Edge[]) => [...eds, ...newEdges]);
+
+              // Update the specific node and add new ones
+              setNodes((nds) => {
+                const updated = nds.map((node) =>
                   node.id === targetNode.id
                     ? {
                         ...node,
@@ -49,8 +99,9 @@ export function useCanvasJobOrchestrator(canvasId: string) {
                         },
                       }
                     : node,
-                ),
-              );
+                );
+                return [...updated, ...newNodes];
+              });
             }
           } else {
             // Just update the status text (e.g., "Processing", "Queued")
@@ -69,5 +120,5 @@ export function useCanvasJobOrchestrator(canvasId: string) {
     return () => {
       channel.unsubscribe();
     };
-  }, [canvasId, getNodes, setNodes]);
+  }, [canvasId, getNodes, setNodes, getEdges, setEdges]);
 }

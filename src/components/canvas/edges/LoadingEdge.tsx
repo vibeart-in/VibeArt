@@ -94,3 +94,5 @@ export const LoadingEdge = memo(({ id, source, target, markerEnd, style }: EdgeP
     </>
   );
 });
+
+LoadingEdge.displayName = "LoadingEdge";

@@ -25,7 +25,7 @@ export type TextType = Node<TextData, "text">;
 
 const DEBOUNCE_MS = 300;
 
-const TextNode = React.memo(({ id, data, selected }: NodeProps<TextType>) => {
+const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<TextType>) {
   const { updateNodeData } = useReactFlow();
   const changeDebounce = useRef<number | null>(null);
 

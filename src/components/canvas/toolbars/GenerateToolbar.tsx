@@ -22,6 +22,7 @@ interface GenerateToolbarProps {
   handleMouseEnter: () => void;
   handleMouseLeave: () => void;
   onGenerate?: () => void;
+  initialModel?: string;
 }
 
 export default function GenerateToolbar({
@@ -31,15 +32,23 @@ export default function GenerateToolbar({
   handleMouseEnter,
   handleMouseLeave,
   onGenerate,
+  initialModel,
 }: GenerateToolbarProps) {
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
-      setSelectedModel(models[0].model_name);
+      if (initialModel) {
+        const found = models.find((m) => m.model_name === initialModel);
+        if (found) {
+          setSelectedModel(found);
+          return;
+        }
+      }
+      setSelectedModel(models[0]);
     }
-  }, [models, selectedModel, setSelectedModel]);
+  }, [models, selectedModel, setSelectedModel, initialModel]);
 
   return (
     <FlowNodeToolbar
@@ -60,7 +69,13 @@ export default function GenerateToolbar({
         </button>
 
         {/* Model Section */}
-        <Select value={selectedModel || ""} onValueChange={setSelectedModel}>
+        <Select
+          value={selectedModel?.model_name || ""}
+          onValueChange={(val) => {
+            const found = models?.find((m) => m.model_name === val);
+            if (found) setSelectedModel(found);
+          }}
+        >
           <SelectTrigger className="flex h-9 items-center gap-2 rounded-full border-0 bg-[#1A1A1A] pl-1 pr-3 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
             <SelectValue placeholder="Select model" />
             <ChevronDown className="size-3 opacity-50" />

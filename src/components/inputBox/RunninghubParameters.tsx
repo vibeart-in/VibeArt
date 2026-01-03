@@ -291,7 +291,7 @@ const OtherParameters = ({
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-const MemoizedOtherParameters = React.memo(OtherParameters);
+export const RunninghubMemoizedOtherParameters = React.memo(OtherParameters);
 
 export const RunninghubParameters = forwardRef<
   RunninghubParametersHandle,
@@ -632,7 +632,7 @@ export const RunninghubParameters = forwardRef<
 
        
 
-        <MemoizedOtherParameters
+        <RunninghubMemoizedOtherParameters
           otherParams={otherParams}
           handleChange={handleChange}
           showNegativePrompt={showNegativePrompt}

@@ -6,14 +6,14 @@ import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSyncUpstreamData } from "@/src/utils/xyflow";
-import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { ConversationType, InputBoxParameter, ModelData, NodeParam } from "@/src/types/BaseType";
+import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { useCanvas } from "../../providers/CanvasProvider";
-import { MemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
+import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 import { useAtom } from "jotai";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
 
 export type OutputImageNodeData = {
   imageUrl?: string;
@@ -48,56 +48,84 @@ const PLACEHOLDERS = [
   },
 ];
 
+const BASE_WIDTH = 500;
+const EXPLICIT_IMAGE_PARAMS = new Set([
+  "image_input",
+  "image input",
+  "input_image",
+  "style reference images",
+  "style_reference_images",
+  "image",
+  "last_frame",
+  "image prompt",
+  "Image",
+  "last_frame_image",
+  "reference_images",
+  "first_frame_image",
+]);
+
+const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
+const isImageParam = (key: string) => EXPLICIT_IMAGE_PARAMS.has(key);
+
 const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNodeType>) => {
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+  const [prompt, setPrompt] = useState(data.prompt || "");
+
+  // Sync prop to state (handles external updates like undo/redo)
+  useEffect(() => {
+    if (data.prompt !== prompt) {
+      setPrompt(data.prompt || "");
+    }
+  }, [data.prompt]);
+
+  // Debounce prompt updates to node data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (prompt !== data.prompt) {
+        updateNodeData(id, { prompt });
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [prompt, id, updateNodeData, data.prompt]);
 
   useEffect(() => {
     if (data.width && data.height) {
-      const ratio = data.height / data.width;
-      updateNode(id, {
-        width: 320,
-        height: 320 * ratio,
-      });
+      if (data.width !== BASE_WIDTH) {
+        const ratio = data.height / data.width;
+        updateNode(id, {
+          width: BASE_WIDTH,
+          height: BASE_WIDTH * ratio,
+        });
+      }
     }
   }, [data.width, data.height, id, updateNode]);
 
-  const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
   const { project } = useCanvas();
   const generateMutation = useGenerateCanvasImage(project?.id || "");
 
-  const [selectedModelName, setSelectedModelName] = useAtom(selectedModelAtom(id));
-
-  // Sync data.model to atom on init
-  useEffect(() => {
-    if (data.model && !selectedModelName) {
-      setSelectedModelName(data.model);
-    }
-  }, [data.model, selectedModelName, setSelectedModelName]);
+  const [selectedModel] = useAtom(selectedModelAtom(id));
 
   // Sync atom to data.model
   useEffect(() => {
-    if (selectedModelName && selectedModelName !== data.model) {
-      updateNodeData(id, { model: selectedModelName });
+    if (selectedModel && selectedModel.model_name !== data.model) {
+      updateNodeData(id, { model: selectedModel.model_name });
     }
-  }, [selectedModelName, data.model, updateNodeData, id]);
-
-  // Derive model strictly from the atom state
-  const selectedModel = useMemo(() => {
-    const targetName = selectedModelName;
-    if (!targetName && models && models.length > 0) {
-      return models.find((m) => m.model_name === (data.model || "Seedream 4 Fast")) || null;
-    }
-    return models?.find((m) => m.model_name === targetName) || null;
-  }, [models, selectedModelName, data.model]);
-
-  const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
+  }, [selectedModel, data.model, updateNodeData, id]);
 
   const initialValues = useMemo(() => {
     if (!selectedModel?.parameters) return {};
+
+    // For RunningHub, parameters is an array of NodeParam
+    if (selectedModel.provider === "running_hub" && Array.isArray(selectedModel.parameters)) {
+      return selectedModel.parameters;
+    }
+
+    // For Replicate, parameters is an object Record<string, SchemaParam>
     const out: Record<string, any> = {};
     for (const [key, param] of Object.entries(selectedModel.parameters)) {
       const nk = normalizeKey(key);
@@ -108,9 +136,9 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       else out[nk] = "";
     }
     return out;
-  }, [selectedModel?.parameters]);
+  }, [selectedModel?.parameters, selectedModel?.provider]);
 
-  const [values, setValues] = useState<Record<string, any>>(initialValues);
+  const [values, setValues] = useState<any>(initialValues);
 
   // Update values when model changes
   useEffect(() => {
@@ -125,32 +153,32 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     return () => clearInterval(interval);
   }, [data.imageUrl]);
 
-  const BASE_WIDTH = 320;
   const aspectRatio = data.width && data.height ? data.height / data.width : 1.4;
   const nodeHeight = BASE_WIDTH * aspectRatio;
   const inputImages = data.inputImageUrls || [];
 
-  const handleGenerate = () => {
-    if (!data.prompt || !project?.id || !selectedModel) return;
+  const handleGenerate = useCallback(() => {
+    if (!prompt || !project?.id || !selectedModel) return;
 
     let parameters: InputBoxParameter = {};
 
     if (selectedModel.provider === "running_hub") {
-      const schema = selectedModel.parameters as NodeParam[];
-      const params: NodeParam[] = schema.map((p) => {
-        const normalizedKey = normalizeKey(p.fieldName);
+      // For running_hub, values is NodeParam[]
+      let params: NodeParam[] = Array.isArray(values) ? [...values] : [];
 
+      // If values (state) is empty but model has defaults, fall back to initial
+      if (params.length === 0 && Array.isArray(selectedModel.parameters)) {
+        params = [...selectedModel.parameters];
+      }
+
+      params = params.map((p) => {
         if (p.fieldName === "prompt" || p.description === "prompt") {
           return {
             ...p,
-            fieldValue: data.prompt || "",
+            fieldValue: prompt || "",
           };
         }
-
-        return {
-          ...p,
-          fieldValue: values[normalizedKey] !== undefined ? values[normalizedKey] : p.fieldValue,
-        };
+        return p;
       });
 
       // Handle input images for running_hub
@@ -175,7 +203,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       // For replicate and other providers, use values state
       parameters = {
         ...values,
-        prompt: data.prompt,
+        prompt: prompt,
         ...(inputImages.length > 0 ? { image_input: [inputImages[0]] } : {}),
       } as unknown as InputBoxParameter;
     }
@@ -196,32 +224,21 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         },
       },
     );
-  };
-
-  function isImageParam(key: string, param: any) {
-    const explicit = new Set([
-      "image_input",
-      "image input",
-      "input_image",
-      "style reference images",
-      "style_reference_images",
-      "image",
-      "last_frame",
-      "image prompt",
-      "Image",
-      "last_frame_image",
-      "reference_images",
-      "first_frame_image",
-    ]);
-    if (explicit.has(key)) return true;
-  }
+  }, [
+    prompt,
+    project?.id,
+    selectedModel,
+    values,
+    inputImages,
+    generateMutation,
+    updateNodeData,
+    id,
+  ]);
 
   // TODO: Implement parameter filtering when needed
   const imageInputKeys = useMemo(() => {
     return selectedModel?.parameters
-      ? Object.keys(selectedModel.parameters).filter((k) =>
-          isImageParam(k, selectedModel?.parameters[k]),
-        )
+      ? Object.keys(selectedModel.parameters).filter((k) => isImageParam(k))
       : [];
   }, [selectedModel]);
 
@@ -235,18 +252,52 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     [selectedModel, imageInputKeys],
   );
 
-  const handleChange = useCallback(
+  const otherParams = useMemo(() => {
+    // For running_hub, parameters might be an object that needs to be converted to NodeParam[]
+    if (selectedModel?.provider === "running_hub") {
+      // Usage of values state for otherParams to ensure updates are reflected
+      if (Array.isArray(values)) {
+        return values.filter(
+          (p: NodeParam) => p.description !== "prompt" && p.fieldName !== "image",
+        );
+      }
+      // Fallback to model parameters
+      if (Array.isArray(selectedModel.parameters)) {
+        return selectedModel.parameters.filter(
+          (p) => p.description !== "prompt" && p.fieldName !== "image",
+        );
+      }
+    }
+
+    return [];
+  }, [selectedModel, values]);
+
+  const handleReplicateChange = useCallback(
     (rawKey: string, value: any) => {
       const key = normalizeKey(rawKey);
-      setValues((prev) => ({ ...prev, [key]: value }));
+      setValues((prev: Record<string, any>) => ({ ...prev, [key]: value }));
     },
     [], // stable
   );
+
+  const handleRunninghubChange = useCallback((description: string, newFieldValue: any) => {
+    setValues((currentParams: any) => {
+      if (Array.isArray(currentParams)) {
+        return currentParams.map((param: NodeParam) =>
+          param.description === description
+            ? { ...param, fieldValue: String(newFieldValue ?? "") }
+            : param,
+        );
+      }
+      return currentParams;
+    });
+  }, []);
 
   const isGenerating = !!data.activeJobId;
 
   return (
     <NodeLayout
+      id={id}
       selected={selected}
       title={data.category || "Image generation"}
       subtitle={data?.model}
@@ -259,6 +310,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         { type: "source", position: Position.Right },
       ]}
       toolbarType="generate"
+      initialModel={data.model}
     >
       <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
         {data.imageUrl ? (
@@ -336,18 +388,29 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             <Textarea
               maxHeight={150}
               className="nodrag !border-0 text-sm font-medium text-white/90 !shadow-none !outline-none !ring-0 focus:!shadow-none focus:!outline-none focus:!ring-0 focus-visible:ring-0"
-              value={data.prompt || ""}
+              value={prompt}
               onChange={(e) => {
-                updateNodeData(id, { prompt: e.target.value });
+                setPrompt(e.target.value);
               }}
             />
-            {/* TODO: Re-enable when parameter filtering is implemented */}
-            <MemoizedOtherParameters
-              key={selectedModel?.model_name}
-              otherEntries={otherEntries}
-              values={values}
-              handleChange={handleChange}
-            />
+
+            {selectedModel?.provider === "replicate" && (
+              <ReplicateMemoizedOtherParameters
+                key={selectedModel?.id}
+                otherEntries={otherEntries}
+                values={values}
+                handleChange={handleReplicateChange}
+              />
+            )}
+
+            {selectedModel?.provider === "running_hub" && (
+              <RunninghubMemoizedOtherParameters
+                key={selectedModel?.id}
+                otherParams={otherParams}
+                values={values}
+                handleChange={handleRunninghubChange}
+              />
+            )}
           </div>
         ) : (
           <p className="line-clamp-3 text-[15px] font-light leading-relaxed text-white/90 drop-shadow-sm">
@@ -370,5 +433,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     </NodeLayout>
   );
 });
+
+OutputImage.displayName = "OutputImage";
 
 export default OutputImage;

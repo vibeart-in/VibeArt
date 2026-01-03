@@ -208,7 +208,7 @@ const areOtherParamsEqual = (prevProps: any, nextProps: any) => {
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-export const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
+export const ReplicateMemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
 
 export const ReplicateParameters = forwardRef<ReplicateParametersHandle, ReplicateParametersProps>(
   ({ parameters, modelName, identifier }, ref) => {
@@ -660,7 +660,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             </div>
           </div>
 
-          <MemoizedOtherParameters
+          <ReplicateMemoizedOtherParameters
             otherEntries={otherEntries}
             values={values}
             handleChange={handleChange}

@@ -83,4 +83,6 @@ const ActiveEdge = memo(
   },
 );
 
+ActiveEdge.displayName = "ActiveEdge";
+
 export default ActiveEdge;

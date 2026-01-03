@@ -30,6 +30,7 @@ interface NodeLayoutProps {
   keepAspectRatio?: boolean;
   toolbarHidden?: boolean;
   resizeHidden?: boolean;
+  initialModel?: string; // New prop for initializing model
 }
 
 export default function NodeLayout({
@@ -48,6 +49,7 @@ export default function NodeLayout({
   keepAspectRatio,
   toolbarHidden,
   resizeHidden,
+  initialModel,
 }: NodeLayoutProps) {
   const { isDraggingEdge } = useCanvas();
 
@@ -157,6 +159,7 @@ export default function NodeLayout({
           toolbarType={toolbarType}
           selected={!!selected}
           textEditor={textEditor}
+          initialModel={initialModel}
         />
       )}
 
@@ -271,3 +274,5 @@ const NodeLabels = React.memo(({ title, subtitle }: { title?: string; subtitle?:
     </div>
   );
 });
+
+NodeLabels.displayName = "NodeLabels";

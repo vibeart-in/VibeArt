@@ -123,6 +123,7 @@ const ModelNode = React.memo(
     );
   },
 );
+ModelNode.displayName = "ModelNode";
 
 // Preset node component
 const PresetNode = React.memo(
@@ -159,6 +160,7 @@ const PresetNode = React.memo(
     );
   },
 );
+PresetNode.displayName = "PresetNode";
 
 // Style node component
 const StyleNodeComponent = React.memo(
@@ -196,6 +198,7 @@ const StyleNodeComponent = React.memo(
     );
   },
 );
+StyleNodeComponent.displayName = "StyleNodeComponent";
 
 // Main component factory
 const PromptComponent = React.memo((props: NodeProps<AllNodeTypes>) => {
@@ -226,6 +229,8 @@ const PromptComponent = React.memo((props: NodeProps<AllNodeTypes>) => {
 
   return null;
 });
+
+PromptComponent.displayName = "PromptComponent";
 
 export { PromptComponent };
 
