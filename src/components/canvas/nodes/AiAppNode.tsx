@@ -10,19 +10,11 @@ import { NodeParam } from "@/src/types/BaseType";
 import { useCanvas } from "../../providers/CanvasProvider";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { AiApp, AiAppParameter } from "@/src/constants/aiApps";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
 import { Switch } from "@/src/components/ui/switch";
-import { Textarea } from "@/src/components/ui/textarea";
 import AnimatedCounter from "@/src/components/ui/AnimatedCounter";
 import { getIconForParam } from "@/src/utils/server/utils";
 import { Label } from "@/src/components/ui/label";
+import { AppSectionLabel, AppParamTextarea, AppParamSelect } from "@/src/components/ai-apps/AppFormComponents";
 
 export type AiAppNodeData = {
   imageUrl?: string;
@@ -72,7 +64,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
   useSyncUpstreamData(id, data);
   
   // Fetch full app details if missing (e.g. only ID/Name provided)
-  // We check for 'parameters' as a sign of full data
   const { data: fetchedAppData, isLoading: isFetchingApp } = useAiAppDetails(
     data.appData && !data.appData.parameters ? data.appData.id : undefined
   );
@@ -94,18 +85,15 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
 
     const imagesSignature = JSON.stringify(data.outputImages.map((img: any) => img.id));
 
-    // Check against persisted hash to prevent duplicate spawning on reload
     if (data.processedImagesHash === imagesSignature) {
         return;
     }
 
     const images = data.outputImages as any[];
     
-    // 1. Find the "Main" image (largest resolution: width * height)
     let mainImage = images[0];
     let maxArea = 0;
     
-    // Calculate areas and find max
     images.forEach(img => {
         const area = (img.width || 0) * (img.height || 0);
         if (area > maxArea) {
@@ -114,28 +102,23 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         }
     });
 
-    // 2. Prepare updates for current node
     const updates: Partial<AiAppNodeData> = {
-        processedImagesHash: imagesSignature, // Mark as processed
+        processedImagesHash: imagesSignature,
     };
 
-    // Update main image logic - Check for URL OR dimension changes
     if (
         data.imageUrl !== mainImage.image_url || 
         data.width !== mainImage.width || 
         data.height !== mainImage.height
     ) {
         updates.imageUrl = mainImage.image_url;
-        // IMPORTANT: Update dimensions to match image so node resizes correctly
         updates.width = mainImage.width; 
         updates.height = mainImage.height;
     }
 
-    // 3. Spawn nodes for remaining images
     const remainingImages = images.filter(img => img.id !== mainImage.id);
     
     if (remainingImages.length > 0) {
-        // Get current node position for relative placement
         const currentNode = getNode(id);
         const currentX = currentNode?.position.x ?? 0;
         const currentY = currentNode?.position.y ?? 0;
@@ -143,38 +126,29 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         
         const newNodes: any[] = [];
         const newEdges: any[] = [];
-        const startX = currentX + currentWidth + 100; // Start to the right
+        const startX = currentX + currentWidth + 100;
         
         remainingImages.forEach((img, index) => {
             const newNodeId = crypto.randomUUID();
-            
-            // Grid Layout Logic (4 per row)
             const colIndex = index % 4;
             const rowIndex = Math.floor(index / 4);
-            
-            // Calculate offsets
-            // We use fixed spacing. Adjust output node height estimate if needed.
-            // Assuming output nodes will be approx 300-400px high.
             const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
-            const yOffset = rowIndex * (400 + GRID_GAP); // Generous vertical spacing
-            
+            const yOffset = rowIndex * (400 + GRID_GAP);
 
             const xPos = startX + xOffset;
             const yPos = currentY + yOffset;
 
-            // Create Output Node
             newNodes.push({
                 id: newNodeId,
                 type: "outputImage", 
                 position: { x: xPos, y: yPos },
                 data: {
                     imageUrl: img.image_url,
-                    width: img.width, // Pass actual dimensions
+                    width: img.width,
                     height: img.height
                 },
             });
 
-            // Connect to current node
             newEdges.push({
                 id: `e-${id}-${newNodeId}`,
                 source: id,
@@ -188,24 +162,18 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         addEdges(newEdges);
     }
     
-    // Apply all updates to current node
     updateNodeData(id, updates);
-
   }, [data.outputImages, data.processedImagesHash, data.imageUrl, id, updateNodeData, addNodes, addEdges, getNode]);
 
   const appData = data.appData;
   
-  // Initialize parameter values if needed
   useEffect(() => {
     if (appData && !data.parameterValues) {
         const params = parseParameters(appData);
         const initialValues: Record<string, any> = {};
         params.forEach(p => {
-            // Use existing value or default if available (not defined in type yet, but good practice)
-           // For now just empty or from field value if static
            if (p.fieldValue) initialValues[p.description] = p.fieldValue;
         });
-        // Avoid infinite loop if empty, only update if keys differ significantly or empty
         if (Object.keys(initialValues).length > 0) {
              updateNodeData(id, { parameterValues: initialValues });
         }
@@ -222,7 +190,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
     });
   };
 
-  // Update node dimensions based on image aspect ratio
   useEffect(() => {
     if (data.width && data.height) {
       const ratio = data.height / data.width;
@@ -236,27 +203,31 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
   const aspectRatio = data.width && data.height ? data.height / data.width : 1;
   const nodeHeight = BASE_WIDTH * aspectRatio;
 
-  // Extract first image from inputImageUrls array (synced by useSyncUpstreamData)
   const inputImageUrl = data.inputImageUrls?.[0];
+  const secondImageUrl = data.inputImageUrls?.[1];
   const isGenerating = !!data.activeJobId;
-  // const appData = data.appData; // Moved up
+
   const handleGenerate = () => {
     if (!inputImageUrl || !appData || isGenerating) return;
 
     try {
       const appParams = parseParameters(appData);
+      const isPoseTransfer = appData.app_name.includes("Pose transfer");
       
-      // Validation: Check required fields
       const missingFields: string[] = [];
       const currentValues = data.parameterValues || {};
 
       appParams.forEach(p => {
-          if (p.fieldName === 'image') return; // Handled by input connection
-          // Simple validation: if it's a text field or select and empty
+          if (p.fieldName === 'image') return;
+          if (p.fieldName === 'doodle' && isPoseTransfer) return;
           if ((p.fieldName === 'prompt' || p.fieldName === 'text' || p.fieldName === 'select') && !currentValues[p.description]) {
              if (!p.fieldValue) missingFields.push(p.description);
           }
       });
+
+      if (isPoseTransfer && !secondImageUrl) {
+          missingFields.push("Doodle/Pose Image");
+      }
 
       if (missingFields.length > 0) {
           setValidationError(`Please fill in: ${missingFields.join(', ')}`);
@@ -264,9 +235,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       }
       setValidationError(null);
 
-      // Create parameters for the app
       const parameters: NodeParam[] = appParams.map(p => {
-        // Image param comes from connection
         if (p.fieldName === "image") {
           return {
             nodeId: p.nodeId,
@@ -276,7 +245,15 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
           };
         }
         
-        // Other params come from state or default
+        if (p.fieldName === "doodle" && isPoseTransfer) {
+            return {
+                nodeId: p.nodeId,
+                fieldName: p.fieldName,
+                fieldValue: secondImageUrl || "",
+                description: p.description
+            };
+        }
+        
         return {
           nodeId: p.nodeId,
           fieldName: p.fieldName,
@@ -321,10 +298,8 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
     );
   }
 
-  // Check if we have only partial data (missing parameters)
   const isPartialData = appData && !appData.parameters;
 
-  // If fetching, or if we only have partial data, show loading
   if (isFetchingApp || !appData || isPartialData) {
       return (
         <NodeLayout
@@ -341,8 +316,9 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       );
   }
 
-  // Check if cover image is a video (mp4)
   const isVideoCover = appData.cover_image?.endsWith(".mp4");
+  const isPoseTransfer = appData.app_name.includes("Pose transfer");
+  const durationVal = Number(appData.duration || 0);
 
   return (
     <NodeLayout
@@ -351,8 +327,8 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       subtitle={appData?.description ? (appData.description.slice(0, 30) + (appData.description.length > 30 ? "..." : "")) : ""}
       minWidth={BASE_WIDTH}
       minHeight={nodeHeight}
-      keepAspectRatio={!data.imageUrl} // Only keep aspect ratio strictly if showing result or if defined? Actually let's allow dynamic height for forms
-      className={`flex h-full w-full cursor-default flex-col rounded-3xl transition-colors duration-200 ${
+      keepAspectRatio={!data.imageUrl}
+      className={`flex h-auto w-full cursor-default flex-col rounded-3xl transition-colors duration-200 ${
         inputImageUrl || data.imageUrl ? "bg-[#1D1D1D]" : "bg-[#141414] border border-zinc-800"
       }`}
       handles={[
@@ -360,9 +336,8 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         { type: "source", position: Position.Right },
       ]}
     >
-      <div className="relative flex-1 overflow-hidden rounded-3xl flex flex-col h-full">
+      <div className="relative flex-1 overflow-hidden rounded-3xl flex flex-col h-auto">
         {data.imageUrl ? (
-             // Result State - Full Height Image
              <div className="relative h-full w-full">
                 <img
                     src={data.imageUrl}
@@ -375,223 +350,208 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                 </div>
              </div>
         ) : (
-             // Input / Form State
-             <div className="relative h-full w-full flex flex-col bg-[#141414] overflow-hidden">
-                 {/* Header Section */}
-                 <div className="flex w-full shrink-0 items-start gap-4 border-b border-zinc-800 bg-[#1A1A1A] p-4">
-                     {/* Cover Image */}
-                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-700 shadow-sm">
-                        {isVideoCover ? (
-                          <video
-                            src={appData.cover_image}
-                            className="h-full w-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
-                        ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={appData.cover_image}
-                            alt="Cover"
-                            className="h-full w-full object-cover"
-                          />
-                        )}
-                     </div>
-                     
-                     <div className="flex min-w-0 flex-1 flex-col justify-center">
-                        <h3 className="line-clamp-2 text-sm font-semibold text-zinc-100 leading-tight" title={appData.app_name}>
+             <div className="relative h-auto w-full flex flex-col bg-[#141414] overflow-hidden">
+                 {/* Modern Header Section */}
+                 <div className="relative w-full h-[240px] shrink-0 overflow-hidden">
+                    {isVideoCover ? (
+                      <video
+                        src={appData.cover_image}
+                        className="h-full w-full object-cover"
+                        autoPlay muted loop playsInline
+                      />
+                    ) : (
+                      <img
+                        src={appData.cover_image}
+                        alt="Cover"
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent" />
+                    
+                    <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col gap-3">
+                        <h3 className="text-3xl font-bold text-white tracking-tight leading-tight">
                             {appData.app_name}
                         </h3>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                            <div className="flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5" title="Cost">
-                               <span className="text-[10px] font-medium text-zinc-400">{appData.cost}</span>
-                               <span className="text-[9px] text-zinc-600">cr</span>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 rounded-full bg-[#1A1A1A]/80 border border-zinc-800 px-3.5 py-1 backdrop-blur-md">
+                               <span className="text-xs font-semibold text-zinc-300">{appData.cost} credit</span>
                             </div>
-                            <div className="flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5" title="Duration">
-                               <span className="text-[10px] font-medium text-zinc-400">{appData.duration}s</span>
+                            <div className="flex items-center gap-1.5 rounded-full bg-[#1A1A1A]/80 border border-zinc-800 px-3.5 py-1 backdrop-blur-md">
+                               <span className="text-xs font-semibold text-zinc-300">
+                                   {durationVal >= 60 ? `${Math.floor(durationVal / 60)} mins` : `${durationVal}s`}
+                               </span>
                             </div>
                         </div>
-                     </div>
+                    </div>
                  </div>
                  
                  {/* Scrollable Content */}
-                 <div className="flex flex-1 flex-col p-4 gap-4 overflow-y-auto min-h-0 custom-scrollbar pb-16">
-                     {/* Image Input Section */}
-                     {parseParameters(appData).some(p => p.fieldName === 'image') && (
-                        inputImageUrl ? (
-                            <div className="relative w-full h-32 shrink-0 rounded-xl overflow-hidden border border-zinc-700/50">
-                                <img src={inputImageUrl} alt="Input" className="w-full h-full object-cover opacity-80" />
-                                <div className="absolute inset-0 bg-black/20" />
-                                <div className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
-                                    Connected Input
+                 <div className="flex flex-1 flex-col p-5 gap-4 min-h-0 pb-5">
+                      {/* Image Input Section */}
+                      {parseParameters(appData).some(p => p.fieldName === 'image') && (
+                        isPoseTransfer ? (
+                            <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-2">
+                                    <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Model Image</Label>
+                                    {inputImageUrl ? (
+                                        <div className="relative group w-full h-40 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-xl">
+                                            <img 
+                                                src={inputImageUrl} 
+                                                alt="Model" 
+                                                className="w-full h-full object-contain" 
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">Model Connected</span>
+                                            </div>
+                                            <div className="absolute bottom-3 left-3 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
+                                                Ready
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:bg-zinc-800/40 hover:border-zinc-700">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
+                                                <Sparkles size={18} className="opacity-50" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">Connect Model</p>
+                                                <p className="text-[10px] text-zinc-600">Connect model image node</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Doodle / Pose</Label>
+                                    {secondImageUrl ? (
+                                        <div className="relative group w-full h-40 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-xl">
+                                            <img 
+                                                src={secondImageUrl} 
+                                                alt="Doodle" 
+                                                className="w-full h-full object-contain" 
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">Pose Connected</span>
+                                            </div>
+                                            <div className="absolute bottom-3 left-3 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
+                                                Ready
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:bg-zinc-800/40 hover:border-zinc-700">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
+                                                <Play size={18} className="opacity-50" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">Connect Pose</p>
+                                                <p className="text-[10px] text-zinc-600">Connect pose image node</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
-                            <div className="group relative flex h-32 shrink-0 flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-900/30 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-800/50">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-zinc-500 shadow-inner group-hover:scale-110 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
-                                    <Sparkles size={18} className="opacity-70 text-zinc-400" />
+                            inputImageUrl ? (
+                                <div className="relative group w-full h-44 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-2xl">
+                                    <img 
+                                        src={inputImageUrl} 
+                                        alt="Input" 
+                                        className="w-full h-full object-contain" 
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-xs font-bold text-white uppercase tracking-widest bg-black/60 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">Connected Input</span>
+                                    </div>
+                                    <div className="absolute bottom-3 right-3 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-1 text-[10px] font-bold text-[#CCFF00] backdrop-blur-md">
+                                        Active Input
+                                    </div>
                                 </div>
-                                <p className="mt-3 text-xs font-medium text-zinc-400 group-hover:text-zinc-200">
-                                    Connect Input Image
-                                </p>
-                                <p className="mt-1 text-[10px] text-zinc-600">
-                                    Drag output from previous node
-                                </p>
-                            </div>
+                            ) : (
+                                <div className="group relative flex h-28 shrink-0 items-center gap-5 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-6 transition-all duration-300 hover:border-zinc-600 hover:bg-[#1A1A1A]/50 hover:shadow-lg">
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300 transition-all">
+                                        <Sparkles size={24} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="text-[15px] font-bold text-zinc-300 group-hover:text-white transition-colors">Connect input image</p>
+                                        <p className="text-xs text-zinc-500 leading-relaxed mt-1">Connect an image node to<br />enable generation</p>
+                                    </div>
+                                </div>
+                            )
                         )
-                     )}
+                      )}
 
                     {/* Dynamic Parameters */}
                     <div className="flex flex-col gap-4">
                         {parseParameters(appData).map((param) => {
                             const key = param.description;
                             const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
+                            if (param.fieldName === 'image' || param.fieldName === 'video' || (isPoseTransfer && param.fieldName === 'doodle')) return null;
+                            if (['aspect_ratio', 'size', 'select', 'model_selected'].includes(param.fieldName) || param.description === "Portrait or landscape mode") return null;
 
-                            if (param.fieldName === 'image' || param.fieldName === 'video') return null;
-
-                            if (param.fieldName === "prompt" || param.fieldName === "text" || param.description === "Prompt") {
-                                return (
-                                    <div key={key} className="flex flex-col gap-1.5">
-                                        <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                        <Textarea
-                                            value={currentValue}
-                                            onChange={(e) => handleParamChange(key, e.target.value)}
-                                            className="min-h-[80px] w-full resize-none rounded-xl border-zinc-700 bg-zinc-900/50 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            placeholder={`Enter ${param.description.toLowerCase()}...`}
-                                        />
-                                    </div>
-                                );
-                            }
-
-                             if (['aspect_ratio', 'size', 'select', 'model_selected'].includes(param.fieldName) || param.description === "Portrait or landscape mode") {
-                                 let options: string[] = [];
-                                 try {
-                                     if (param.fieldData) {
-                                         const parsed = JSON.parse(param.fieldData);
-                                         options = parsed[0] || [];
-                                     }
-                                 } catch (e) {
-                                      // ignore
-                                 }
-
-                                 // Specific hardcoded check for "Portrait or landscape mode" if fieldData fails
-                                 if (options.length === 0 && param.description === "Portrait or landscape mode") {
-                                     // Assuming values 1 and 2
-                                     // Actually options should be label:value pairs but AppInputBox uses "Vertical"/"Landscape" -> "1"/"2" via specialized logic.
-                                     // For now let's just show raw options if possible or dummy valid ones.
-                                     // AppInputBox has explicit checks. Let's replicate simple versions.
-                                     // If "Portrait or landscape mode", let's offer "Vertical" and "Landscape"
-                                     // But we need to map back to "1" and "2"? 
-                                     // AppInputBox: SelectItem value={"1"}>Vertical</SelectItem>
-                                     // Let's implement that specific case.
-                                     return (
-                                        <div key={key} className="flex flex-col gap-1.5">
-                                            <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                            <Select
-                                                value={currentValue}
-                                                onValueChange={(val) => handleParamChange(key, val)}
-                                            >
-                                                <SelectTrigger className="h-9 w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200">
-                                                    <SelectValue placeholder="Select..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="1">Vertical</SelectItem>
-                                                    <SelectItem value="2">Landscape</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                     );
-                                 }
-
-                                 if (options.length > 0) {
-                                    return (
-                                        <div key={key} className="flex flex-col gap-1.5">
-                                            <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                            <Select
-                                                value={currentValue}
-                                                onValueChange={(val) => handleParamChange(key, val)}
-                                            >
-                                                <SelectTrigger className="h-9 w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200">
-                                                    <SelectValue placeholder="Select..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {options.map(opt => (
-                                                        <SelectItem key={opt} value={opt}>
-                                                            <span className="text-xs">{opt}</span>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    );
-                                 }
-                             }
-
-                            if (param.fieldName === 'int' || param.fieldName === 'width' || param.fieldName === 'height' || param.description.includes('Duration')) {
-                                return (
-                                   <div key={key} className="flex flex-col gap-1.5">
-                                       <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                       <input 
-                                           type="number"
-                                           value={currentValue}
-                                           onChange={(e) => handleParamChange(key, e.target.value)}
-                                           className="h-9 w-full rounded-xl border border-zinc-700 bg-zinc-900/50 px-3 py-1 text-xs text-zinc-200 focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
-                                       />
-                                   </div>
-                                )
-                            }
-                            
-                            // Default text input
                             return (
-                               <div key={key} className="flex flex-col gap-1.5">
-                                   <Label className="text-xs font-medium text-zinc-400 ml-1">{param.description}</Label>
-                                   <Textarea
+                                <div key={key} className="flex flex-col gap-2.5">
+                                    <AppSectionLabel text={param.description} />
+                                    <AppParamTextarea
                                         value={currentValue}
-                                        onChange={(e) => handleParamChange(key, e.target.value)}
-                                        placeholder={param.description}
-                                        className="min-h-[40px] w-full rounded-xl border-zinc-700 bg-zinc-900/50 text-xs text-zinc-200"
-                                   />
-                               </div>
+                                        onChange={(val) => handleParamChange(key, val)}
+                                        placeholder={`Type your ${param.description.toLowerCase()}...`}
+                                    />
+                                </div>
                             );
                         })}
                     </div>
                  </div>
 
-                 {/* Error Message */}
-                  {validationError && (
-                      <div className="px-4 pb-2">
-                        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 p-2 text-xs text-red-400 border border-red-500/20">
+                 {validationError && (
+                      <div className="px-6 pb-2">
+                        <div className="flex items-center gap-2 rounded-xl bg-red-500/10 p-3 text-xs text-red-400 border border-red-500/20">
                             <TriangleAlert size={14} className="shrink-0" />
                             <span className="leading-tight">{validationError}</span>
                         </div>
                       </div>
                   )}
 
-                 {/* Generate Button Wrapper */}
-                 <div className="p-4 pt-0">
+                  {/* Bottom Action Bar */}
+                  <div className="p-6 pt-0 flex items-center gap-3">
+                    <div className="flex-1 flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar">
+                        {parseParameters(appData)
+                            .filter(p => ['aspect_ratio', 'size', 'select', 'model_selected'].includes(p.fieldName) || p.description === "Portrait or landscape mode")
+                            .map((param) => {
+                                const key = param.description;
+                                const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
+                                let options: string[] = [];
+                                try {
+                                    if (param.fieldData) {
+                                        const parsed = JSON.parse(param.fieldData);
+                                        options = parsed[0] || [];
+                                    } else if (param.description === "Portrait or landscape mode") {
+                                        options = ["1", "2"];
+                                    }
+                                } catch (e) { /* ignore */ }
+
+                                return (
+                                    <AppParamSelect
+                                        key={key}
+                                        value={currentValue}
+                                        onValueChange={(val) => handleParamChange(key, val)}
+                                        placeholder={param.description}
+                                        options={
+                                            param.description === "Portrait or landscape mode" && options.length === 2
+                                            ? [{ label: "Vertical", value: "1" }, { label: "Landscape", value: "2" }]
+                                            : options.map(opt => ({ label: opt, value: opt }))
+                                        }
+                                    />
+                                );
+                        })}
+                    </div>
+
                     <button
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:from-indigo-600 hover:to-purple-600 active:scale-95 disabled:opacity-50 disabled:grayscale`}
+                      className={`flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#CCFF00] px-8 h-11 text-sm font-bold text-black shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all hover:scale-[1.05] hover:bg-[#DDFF33] active:scale-95 disabled:opacity-50 disabled:grayscale`}
                       onClick={handleGenerate}
                       disabled={isGenerating || (parseParameters(appData).some(p => p.fieldName === 'image') && !inputImageUrl)}
                     >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          <span>Generating...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Play size={16} fill="currentColor" />
-                          <span>Generate</span>
-                        </>
-                      )}
+                      {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <span>Generate</span>}
                     </button>
-                 </div>
+                  </div>
              </div>
         )}
-
         {isGenerating && <ModernCardLoader text="Generating..." />}
       </div>
     </NodeLayout>

@@ -20,16 +20,8 @@ import AnimatedCounter from "../ui/AnimatedCounter";
 import GenerateButton from "../ui/GenerateButton";
 import GradualBlurMemo from "../ui/GradualBlur";
 import ImageUploadBox from "../ui/ImageUploadBox";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { AppSectionLabel, AppParamTextarea, AppParamSelect } from "./AppFormComponents";
 import { Switch } from "../ui/switch";
-import { Textarea } from "../ui/textarea";
 import VideoUploadBox from "../ui/VideoUploadBox";
 
 const popVariants: Variants = {
@@ -339,66 +331,48 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                 return (
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">{param.description}</span>
-                    <div key={param.nodeId} className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
+                    <AppParamSelect
+                        key={param.nodeId}
+                        className="min-w-[130px]"
+                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={String(param.fieldValue)}
                         onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {param.fieldName !== "aspect_ratio" &&
-                            param.description !== "aspect_ratio" &&
-                            getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {options.map((opt) => {
-                              const isAspect =
-                                param.fieldName === "aspect_ratio" ||
-                                param.description === "aspect_ratio";
-
-                              // Detect ratio-like options (e.g. "16:9")
-                              const ratioRegex = /^\d+:\d+$/;
-                              const isRatio = ratioRegex.test(opt);
-
-                              let preview = null;
-
-                              if (isAspect) {
+                        placeholder={param.description}
+                        options={options}
+                        triggerIcon={param.fieldName !== "aspect_ratio" && param.description !== "aspect_ratio" ? getIconForParam(param.description ?? key) : null}
+                        renderOption={(opt) => {
+                            const optionLabel = typeof opt === 'string' ? opt : opt.label;
+                            // Aspect Ratio Logic
+                            const isAspect = param.fieldName === "aspect_ratio" || param.description === "aspect_ratio";
+                            const ratioRegex = /^\d+:\d+$/;
+                            const isRatio = ratioRegex.test(optionLabel);
+                            
+                            let preview = null;
+                            if (isAspect) {
                                 if (isRatio) {
-                                  // Numeric aspect ratio visualization
-                                  const [w, h] = opt.split(":").map(Number);
-                                  const aspectRatio = w / h;
-                                  const baseHeight = 15;
-                                  const previewWidth = baseHeight * aspectRatio;
-
-                                  preview = (
-                                    <div
-                                      className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
-                                      style={{
-                                        width: `${previewWidth}px`,
-                                        height: `${baseHeight}px`,
-                                      }}
-                                    />
-                                  );
+                                    const [w, h] = optionLabel.split(":").map(Number);
+                                    const aspectRatio = w / h;
+                                    const baseHeight = 15;
+                                    const previewWidth = baseHeight * aspectRatio;
+                                    preview = (
+                                        <div
+                                            className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
+                                            style={{ width: `${previewWidth}px`, height: `${baseHeight}px` }}
+                                        />
+                                    );
                                 } else {
-                                  // Non-ratio text options like "match_input_image" or "auto"
-                                  preview = <IconAspectRatio size={15} />;
+                                    preview = <IconAspectRatio size={15} />;
                                 }
-                              }
-
-                              return (
-                                <SelectItem key={opt} value={opt}>
-                                  <div className="flex items-center gap-2">
+                            }
+                            
+                            return (
+                                <div className="flex items-center gap-2">
                                     {preview}
-                                    <span className="text-sm">{opt}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                                    <span className="text-sm">{optionLabel}</span>
+                                </div>
+                            );
+                        }}
+                    />
                   </div>
                 );
               }
@@ -407,74 +381,59 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                 return (
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">{param.description}</span>
-                    <div className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
+                    <AppParamSelect
+                        className="min-w-[130px]"
+                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={String(param.fieldValue)}
                         onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value={"1"}>Vertical</SelectItem>
-                            <SelectItem value={"2"}>Landscape</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        placeholder={param.description}
+                        options={[
+                            { label: "Vertical", value: "1" },
+                            { label: "Landscape", value: "2" }
+                        ]}
+                        triggerIcon={getIconForParam(param.description ?? key)}
+                    />
                   </div>
                 );
               }
 
               if (param.description === "Camera movement") {
-                return (
-                  <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
-                    <span className="text-center text-sm font-semibold">{param.description}</span>
-                    <div className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
-                        onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value={"1"}>None</SelectItem>
-                            <SelectItem value={"2"}>Turn to front</SelectItem>
-                            <SelectItem value={"3"}>Approach</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                );
+                  return (
+                      <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                        <span className="text-center text-sm font-semibold">{param.description}</span>
+                        <AppParamSelect
+                            className="min-w-[130px]"
+                            triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={String(param.fieldValue)}
+                            onValueChange={(val) => handleChange(key, val)}
+                            placeholder={param.description}
+                            options={[
+                                { label: "None", value: "1" },
+                                { label: "Turn to front", value: "2" },
+                                { label: "Approach", value: "3" }
+                            ]}
+                            triggerIcon={getIconForParam(param.description ?? key)}
+                        />
+                      </div>
+                  );
               }
 
               if (param.description === "Object gender") {
                 return (
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">Gender</span>
-                    <div className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
+                    <AppParamSelect
+                        className="min-w-[130px]"
+                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={String(param.fieldValue)}
                         onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value={"1"}>Women</SelectItem>
-                            <SelectItem value={"2"}>Mam</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        placeholder={param.description}
+                        options={[
+                            { label: "Women", value: "1" },
+                            { label: "Mam", value: "2" }
+                        ]}
+                        triggerIcon={getIconForParam(param.description ?? key)}
+                    />
                   </div>
                 );
               }
@@ -482,25 +441,20 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
               if (param.description === "Character action selection") {
                 return (
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
-                    <span className="text-center text-sm font-semibold">Gender</span>
-                    <div className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
+                    <span className="text-center text-sm font-semibold">{param.description}</span>
+                    <AppParamSelect
+                        className="min-w-[130px]"
+                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={String(param.fieldValue)}
                         onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value={"1"}>Clean the figurine</SelectItem>
-                            <SelectItem value={"2"}>Figurine sits on hands</SelectItem>
-                            <SelectItem value={"3"}>Custom action</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        placeholder={param.description}
+                        options={[
+                            { label: "Clean the figurine", value: "1" },
+                            { label: "Figurine sits on hands", value: "2" },
+                            { label: "Custom action", value: "3" }
+                        ]}
+                        triggerIcon={getIconForParam(param.description ?? key)}
+                    />
                   </div>
                 );
               }
@@ -511,56 +465,46 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                     <span className="text-center text-sm font-semibold">
                       POV Interactive preset
                     </span>
-                    <div className="min-w-[130px]">
-                      <Select
-                        value={param.fieldValue}
+                    <AppParamSelect
+                        className="min-w-[130px]"
+                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={String(param.fieldValue)}
                         onValueChange={(val) => handleChange(key, val)}
-                      >
-                        <SelectTrigger className="w-full">
-                          {getIconForParam(param.description ?? key)}
-                          <SelectValue placeholder={param.description} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value={"1"}>None</SelectItem>
-                            <SelectItem value={"2"}>Click me</SelectItem>
-                            <SelectItem value={"3"}>Help me warm my hands</SelectItem>
-                            <SelectItem value={"4"}>I look at [your]</SelectItem>
-                            <SelectItem value={"5"}>Palm painting heart</SelectItem>
-                            <SelectItem value={"6"}>Apply band-aid</SelectItem>
-                            <SelectItem value={"7"}>I send [item]</SelectItem>
-                            <SelectItem value={"8"}>Kiss me</SelectItem>
-                            <SelectItem value={"9"}>Look at me</SelectItem>
-                            <SelectItem value={"10"}>Take off shoes</SelectItem>
-                            <SelectItem value={"11"}>Take off stockings</SelectItem>
-                            <SelectItem value={"12"}>Take off shoes and hit me</SelectItem>
-                            <SelectItem value={"13"}>Make my hair</SelectItem>
-                            <SelectItem value={"14"}>Feed [food]</SelectItem>
-                            <SelectItem value={"15"}>Quiet</SelectItem>
-                            <SelectItem value={"16"}>Comb hair</SelectItem>
-                            <SelectItem value={"17"}>Stethoscope</SelectItem>
-                            {/* <SelectItem value={"18"}>I touch you</SelectItem> */}
-                            <SelectItem value={"19"}>Make a funny face</SelectItem>
-                            <SelectItem value={"20"}>Snatch my glasses</SelectItem>
-                            <SelectItem value={"21"}>Hold your hand</SelectItem>
-                            <SelectItem value={"22"}>Send me [item]</SelectItem>
-                            <SelectItem value={"23"}>Pinch cheeks</SelectItem>
-                            <SelectItem value={"24"}>Combo punch me</SelectItem>
-                            {/* <SelectItem value={"25"}>Kneel down</SelectItem> */}
-                            <SelectItem value={"26"}>Sit down and cross your legs</SelectItem>
-                            {/* <SelectItem value={"27"}>Sit down and cross your legs</SelectItem> */}
-                            {/* <SelectItem value={"28"}>Sit down and cross your legs</SelectItem> */}
-                            <SelectItem value={"29"}>Continuous shooting</SelectItem>
-                            {/* <SelectItem value={"30"}></SelectItem> */}
-                            <SelectItem value={"31"}>Stretching</SelectItem>
-                            <SelectItem value={"32"}>Pick up things</SelectItem>
-                            <SelectItem value={"33"}>Make your hair</SelectItem>
-                            <SelectItem value={"34"}>Bow</SelectItem>
-                            <SelectItem value={"35"}>Fall down</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        placeholder={param.description}
+                        options={[
+                            { label: "None", value: "1" },
+                            { label: "Click me", value: "2" },
+                            { label: "Help me warm my hands", value: "3" },
+                            { label: "I look at [your]", value: "4" },
+                            { label: "Palm painting heart", value: "5" },
+                            { label: "Apply band-aid", value: "6" },
+                            { label: "I send [item]", value: "7" },
+                            { label: "Kiss me", value: "8" },
+                            { label: "Look at me", value: "9" },
+                            { label: "Take off shoes", value: "10" },
+                            { label: "Take off stockings", value: "11" },
+                            { label: "Take off shoes and hit me", value: "12" },
+                            { label: "Make my hair", value: "13" },
+                            { label: "Feed [food]", value: "14" },
+                            { label: "Quiet", value: "15" },
+                            { label: "Comb hair", value: "16" },
+                            { label: "Stethoscope", value: "17" },
+                            { label: "Make a funny face", value: "19" },
+                            { label: "Snatch my glasses", value: "20" },
+                            { label: "Hold your hand", value: "21" },
+                            { label: "Send me [item]", value: "22" },
+                            { label: "Pinch cheeks", value: "23" },
+                            { label: "Combo punch me", value: "24" },
+                            { label: "Sit down and cross your legs", value: "26" },
+                            { label: "Continuous shooting", value: "29" },
+                            { label: "Stretching", value: "31" },
+                            { label: "Pick up things", value: "32" },
+                            { label: "Make your hair", value: "33" },
+                            { label: "Bow", value: "34" },
+                            { label: "Fall down", value: "35" }
+                        ]}
+                        triggerIcon={getIconForParam(param.description ?? key)}
+                    />
                   </div>
                 );
               }
@@ -629,7 +573,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                 );
               }
 
-              if (
+               if (
                 param.fieldName === "prompt" ||
                 param.fieldName === "text" ||
                 param.description === "Prompt"
@@ -637,12 +581,11 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                 return (
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-xs font-semibold">{param.description}</span>
-                    <Textarea
+                    <AppParamTextarea
                       value={param.fieldValue as string}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      className="hide-scrollbar max-h-full min-w-[200px] border pl-4"
-                      maxHeight={60}
-                      // placeholder={param.description}
+                      onChange={(val) => handleChange(key, val)}
+                      className="hide-scrollbar max-h-[60px] min-w-[200px] border pl-4 bg-background"
+                      placeholder={param.description}
                     />
                   </div>
                 );
