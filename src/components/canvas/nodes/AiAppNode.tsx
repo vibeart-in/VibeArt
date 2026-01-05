@@ -235,23 +235,17 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       }
       setValidationError(null);
 
+      let imageIndex = 0;
       const parameters: NodeParam[] = appParams.map(p => {
         if (p.fieldName === "image") {
+          const value = data.inputImageUrls?.[imageIndex] || "";
+          imageIndex++;
           return {
             nodeId: p.nodeId,
             fieldName: p.fieldName,
-            fieldValue: inputImageUrl,
+            fieldValue: value,
             description: p.description
           };
-        }
-        
-        if (p.fieldName === "doodle" && isPoseTransfer) {
-            return {
-                nodeId: p.nodeId,
-                fieldName: p.fieldName,
-                fieldValue: secondImageUrl || "",
-                description: p.description
-            };
         }
         
         return {
@@ -317,7 +311,6 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
   }
 
   const isVideoCover = appData.cover_image?.endsWith(".mp4");
-  const isPoseTransfer = appData.app_name.includes("Pose transfer");
   const durationVal = Number(appData.duration || 0);
 
   return (
@@ -389,92 +382,45 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                  <div className="flex flex-1 flex-col p-5 gap-4 min-h-0 pb-5">
                       {/* Image Input Section */}
                       {parseParameters(appData).some(p => p.fieldName === 'image') && (
-                        isPoseTransfer ? (
-                            <div className="flex flex-col gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Model Image</Label>
-                                    {inputImageUrl ? (
-                                        <div className="relative group w-full h-40 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-xl">
-                                            <img 
-                                                src={inputImageUrl} 
-                                                alt="Model" 
-                                                className="w-full h-full object-contain" 
-                                            />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">Model Connected</span>
-                                            </div>
-                                            <div className="absolute bottom-3 left-3 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
-                                                Ready
-                                            </div>
+                        <div className="flex flex-col gap-4">
+                            {parseParameters(appData)
+                                .filter(p => p.fieldName === 'image')
+                                .map((param, index) => {
+                                    const inputImage = data.inputImageUrls?.[index];
+                                    return (
+                                        <div key={param.description || index} className="flex flex-col gap-2">
+                                            <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">{param.description}</Label>
+                                            
+                                            {inputImage ? (
+                                                <div className="relative group w-full h-40 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-xl">
+                                                    <img 
+                                                        src={inputImage} 
+                                                        alt={param.description} 
+                                                        className="w-full h-full object-contain" 
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">Connected</span>
+                                                    </div>
+                                                    <div className="absolute bottom-3 left-3 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
+                                                        Ready
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:bg-zinc-800/40 hover:border-zinc-700">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
+                                                        <Sparkles size={18} className="opacity-50" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                         <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">Connect {param.description}</p>
+                                                         <p className="text-[10px] text-zinc-600">Connect image node</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:bg-zinc-800/40 hover:border-zinc-700">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
-                                                <Sparkles size={18} className="opacity-50" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">Connect Model</p>
-                                                <p className="text-[10px] text-zinc-600">Connect model image node</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Doodle / Pose</Label>
-                                    {secondImageUrl ? (
-                                        <div className="relative group w-full h-40 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-xl">
-                                            <img 
-                                                src={secondImageUrl} 
-                                                alt="Doodle" 
-                                                className="w-full h-full object-contain" 
-                                            />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">Pose Connected</span>
-                                            </div>
-                                            <div className="absolute bottom-3 left-3 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
-                                                Ready
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:bg-zinc-800/40 hover:border-zinc-700">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300 transition-all">
-                                                <Play size={18} className="opacity-50" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">Connect Pose</p>
-                                                <p className="text-[10px] text-zinc-600">Connect pose image node</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            inputImageUrl ? (
-                                <div className="relative group w-full h-44 shrink-0 rounded-2xl overflow-hidden border border-zinc-800 bg-[#111] shadow-2xl">
-                                    <img 
-                                        src={inputImageUrl} 
-                                        alt="Input" 
-                                        className="w-full h-full object-contain" 
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="text-xs font-bold text-white uppercase tracking-widest bg-black/60 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">Connected Input</span>
-                                    </div>
-                                    <div className="absolute bottom-3 right-3 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-1 text-[10px] font-bold text-[#CCFF00] backdrop-blur-md">
-                                        Active Input
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="group relative flex h-28 shrink-0 items-center gap-5 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-6 transition-all duration-300 hover:border-zinc-600 hover:bg-[#1A1A1A]/50 hover:shadow-lg">
-                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300 transition-all">
-                                        <Sparkles size={24} className="opacity-40 group-hover:opacity-100 transition-opacity" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="text-[15px] font-bold text-zinc-300 group-hover:text-white transition-colors">Connect input image</p>
-                                        <p className="text-xs text-zinc-500 leading-relaxed mt-1">Connect an image node to<br />enable generation</p>
-                                    </div>
-                                </div>
-                            )
-                        )
+                                    );
+                                })
+                            }
+                        </div>
                       )}
 
                     {/* Dynamic Parameters */}
