@@ -14,7 +14,7 @@ import { Switch } from "@/src/components/ui/switch";
 import AnimatedCounter from "@/src/components/ui/AnimatedCounter";
 import { getIconForParam } from "@/src/utils/server/utils";
 import { Label } from "@/src/components/ui/label";
-import { AppSectionLabel, AppParamTextarea, AppParamSelect } from "@/src/components/ai-apps/AppFormComponents";
+import { AppParameterRenderer } from "@/src/components/ai-apps/AppFormComponents";
 
 export type AiAppNodeData = {
   imageUrl?: string;
@@ -479,23 +479,14 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
 
                     {/* Dynamic Parameters */}
                     <div className="flex flex-col gap-4">
-                        {parseParameters(appData).map((param) => {
-                            const key = param.description;
-                            const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
-                            if (param.fieldName === 'image' || param.fieldName === 'video' || (isPoseTransfer && param.fieldName === 'doodle')) return null;
-                            if (['aspect_ratio', 'size', 'select', 'model_selected'].includes(param.fieldName) || param.description === "Portrait or landscape mode") return null;
-
-                            return (
-                                <div key={key} className="flex flex-col gap-2.5">
-                                    <AppSectionLabel text={param.description} />
-                                    <AppParamTextarea
-                                        value={currentValue}
-                                        onChange={(val) => handleParamChange(key, val)}
-                                        placeholder={`Type your ${param.description.toLowerCase()}...`}
-                                    />
-                                </div>
-                            );
-                        })}
+                        <AppParameterRenderer
+                            values={parseParameters(appData).map(param => ({
+                                ...param,
+                                fieldValue: data.parameterValues?.[param.description] ?? param.fieldValue ?? ""
+                            }))}
+                            handleChange={handleParamChange}
+                            mode="canvas"
+                        />
                     </div>
                  </div>
 
@@ -511,35 +502,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                   {/* Bottom Action Bar */}
                   <div className="p-6 pt-0 flex items-center gap-3">
                     <div className="flex-1 flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar">
-                        {parseParameters(appData)
-                            .filter(p => ['aspect_ratio', 'size', 'select', 'model_selected'].includes(p.fieldName) || p.description === "Portrait or landscape mode")
-                            .map((param) => {
-                                const key = param.description;
-                                const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
-                                let options: string[] = [];
-                                try {
-                                    if (param.fieldData) {
-                                        const parsed = JSON.parse(param.fieldData);
-                                        options = parsed[0] || [];
-                                    } else if (param.description === "Portrait or landscape mode") {
-                                        options = ["1", "2"];
-                                    }
-                                } catch (e) { /* ignore */ }
-
-                                return (
-                                    <AppParamSelect
-                                        key={key}
-                                        value={currentValue}
-                                        onValueChange={(val) => handleParamChange(key, val)}
-                                        placeholder={param.description}
-                                        options={
-                                            param.description === "Portrait or landscape mode" && options.length === 2
-                                            ? [{ label: "Vertical", value: "1" }, { label: "Landscape", value: "2" }]
-                                            : options.map(opt => ({ label: opt, value: opt }))
-                                        }
-                                    />
-                                );
-                        })}
+                         {/* Parameters are now handled in the main scrollable area */}
                     </div>
 
                     <button
