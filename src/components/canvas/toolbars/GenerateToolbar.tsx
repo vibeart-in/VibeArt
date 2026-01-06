@@ -1,7 +1,7 @@
 "use client";
 
-import { Sparkles, ChevronDown, Settings, Palette } from "lucide-react";
-import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
+import { Sparkles, ChevronDown, Settings, Palette, Download } from "lucide-react";
+import { Position, NodeToolbar as FlowNodeToolbar, useNodesData } from "@xyflow/react";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType } from "@/src/types/BaseType";
 import {
@@ -37,6 +37,9 @@ export default function GenerateToolbar({
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
+  const nodesData = useNodesData(id || "");
+  const imageUrl = (nodesData?.data as any)?.imageUrl;
+
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
       if (initialModel) {
@@ -49,6 +52,24 @@ export default function GenerateToolbar({
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel, setSelectedModel, initialModel]);
+
+  const handleDownload = async () => {
+    if (!imageUrl) return;
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
 
   return (
     <FlowNodeToolbar
@@ -101,6 +122,17 @@ export default function GenerateToolbar({
         <button className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
           <Sparkles className="size-4" />
         </button>
+
+        {/* Download Button */}
+        {imageUrl && (
+          <button
+            onClick={handleDownload}
+            className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            title="Download Generated Image"
+          >
+            <Download className="size-4" />
+          </button>
+        )}
       </div>
     </FlowNodeToolbar>
   );

@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AI_APPS } from "@/src/constants/aiApps";
+import { IconWindowMaximize } from "@tabler/icons-react";
 
 interface CanvasContextMenuProps {
   children: ReactNode;
@@ -152,6 +153,25 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
           </div>
         ),
         action: () => handleAddNode("sketch"),
+      },
+      {
+        label: "Upscale",
+        icon: (
+          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
+            <IconWindowMaximize size={12} />
+          </div>
+        ),
+        action: () => handleAddNode("upscale"),
+      },
+      {
+        label: "Group",
+        icon: (
+          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
+            <LayoutTemplate size={12} />
+          </div>
+        ),
+        action: () =>
+          handleAddNode("group", { zIndex: -1, width: 400, height: 400, data: { label: "Group" } }),
       },
       ...AI_APPS.map((app) => ({
         label: app.app_name,
@@ -336,6 +356,33 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                     <Brush size={12} />
                   </div>
                   Painter
+                </ContextMenuItem>
+
+                <ContextMenuItem
+                  className="focus:bg-zinc-800 focus:text-zinc-100"
+                  onClick={() => handleAddNode("upscale")}
+                >
+                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
+                    <IconWindowMaximize size={12} />
+                  </div>
+                  Upscale
+                </ContextMenuItem>
+
+                <ContextMenuItem
+                  className="focus:bg-zinc-800 focus:text-zinc-100"
+                  onClick={() =>
+                    handleAddNode("group", {
+                      zIndex: -1,
+                      width: 400,
+                      height: 400,
+                      data: { label: "Group" },
+                    })
+                  }
+                >
+                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
+                    <LayoutTemplate size={12} />
+                  </div>
+                  Group
                 </ContextMenuItem>
               </ContextMenuSubContent>
             </ContextMenuSub>

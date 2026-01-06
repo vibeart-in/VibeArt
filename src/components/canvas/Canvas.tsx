@@ -379,6 +379,20 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   );
 }
 
+function checkIntersection(n1: Node, n2: Node) {
+  const n1w = n1.measured?.width ?? n1.width ?? 0;
+  const n1h = n1.measured?.height ?? n1.height ?? 0;
+  const n2w = n2.measured?.width ?? n2.width ?? 0;
+  const n2h = n2.measured?.height ?? n2.height ?? 0;
+
+  const n1x = n1.position.x;
+  const n1y = n1.position.y;
+  const n2x = n2.position.x;
+  const n2y = n2.position.y;
+
+  return n1x + n1w > n2x && n1x < n2x + n2w && n1y + n1h > n2y && n1y < n2y + n2h;
+}
+
 export default function Canvas(props: ReactFlowProps) {
   return (
     <ReactFlowProvider>

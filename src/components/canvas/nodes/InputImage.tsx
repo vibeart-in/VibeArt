@@ -79,6 +79,7 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
         height: `${nodeHeight}px`,
         borderRadius: "28px",
       }}
+      toolbarHidden={true}
     >
       <input
         type="file"

@@ -10,6 +10,8 @@ import CropNode from "./CropNode";
 import DropNode from "./DropNode";
 import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
 import AiAppNode from "./AiAppNode";
+import GroupNode from "./GroupNode";
+import UpscaleNode from "./UpscaleNode";
 
 // Register all node types for React Flow
 export const nodeTypes: NodeTypes = {
@@ -26,6 +28,6 @@ export const nodeTypes: NodeTypes = {
   presets: PresetsNode,
   style: StyleNode,
   aiApp: AiAppNode,
+  group: GroupNode,
+  upscale: UpscaleNode,
 };
-
-

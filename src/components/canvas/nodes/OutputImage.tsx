@@ -1,7 +1,7 @@
 import { Position, NodeProps, Node, useReactFlow, NodeToolbar } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp, Loader2, Copy, Check } from "lucide-react";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +19,9 @@ export type OutputImageNodeData = {
   imageUrl?: string;
   prompt?: string;
   inputImageUrls?: string[];
-  width?: number;
+  width?: number; // Note: This might be node width OR image width depending on upstream
   height?: number;
+  outputImages?: { width: number; height: number; url: string }[];
   category?: string;
   model?: string;
   conversationId?: string;
@@ -48,7 +49,7 @@ const PLACEHOLDERS = [
   },
 ];
 
-const BASE_WIDTH = 500;
+const BASE_WIDTH = 450;
 const EXPLICIT_IMAGE_PARAMS = new Set([
   "image_input",
   "image input",
@@ -74,40 +75,27 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [prompt, setPrompt] = useState(data.prompt || "");
+  const [isCopied, setIsCopied] = useState(false);
 
-  // Sync prop to state (handles external updates like undo/redo)
+  // Sync prop to state
   useEffect(() => {
     if (data.prompt !== prompt) {
       setPrompt(data.prompt || "");
     }
   }, [data.prompt]);
 
-  // Debounce prompt updates to node data
+  // Debounce prompt updates
   useEffect(() => {
     const timer = setTimeout(() => {
       if (prompt !== data.prompt) {
         updateNodeData(id, { prompt });
       }
     }, 400);
-
     return () => clearTimeout(timer);
   }, [prompt, id, updateNodeData, data.prompt]);
 
-  useEffect(() => {
-    if (data.width && data.height) {
-      if (data.width !== BASE_WIDTH) {
-        const ratio = data.height / data.width;
-        updateNode(id, {
-          width: BASE_WIDTH,
-          height: BASE_WIDTH * ratio,
-        });
-      }
-    }
-  }, [data.width, data.height, id, updateNode]);
-
   const { project } = useCanvas();
   const generateMutation = useGenerateCanvasImage(project?.id || "");
-
   const [selectedModel] = useAtom(selectedModelAtom(id));
 
   // Sync atom to data.model
@@ -117,15 +105,12 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     }
   }, [selectedModel, data.model, updateNodeData, id]);
 
+  // --- Parameter Initialization Logic (Unchanged) ---
   const initialValues = useMemo(() => {
     if (!selectedModel?.parameters) return {};
-
-    // For RunningHub, parameters is an array of NodeParam
     if (selectedModel.provider === "running_hub" && Array.isArray(selectedModel.parameters)) {
       return selectedModel.parameters;
     }
-
-    // For Replicate, parameters is an object Record<string, SchemaParam>
     const out: Record<string, any> = {};
     for (const [key, param] of Object.entries(selectedModel.parameters)) {
       const nk = normalizeKey(key);
@@ -140,7 +125,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
   const [values, setValues] = useState<any>(initialValues);
 
-  // Update values when model changes
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
@@ -153,8 +137,60 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     return () => clearInterval(interval);
   }, [data.imageUrl]);
 
-  const aspectRatio = data.width && data.height ? data.height / data.width : 1.4;
-  const nodeHeight = BASE_WIDTH * aspectRatio;
+  // --- RESIZE & ASPECT RATIO LOGIC START ---
+
+  // 1. Determine dimensions strictly from Output if available, ignoring 'data.width' if it's an input param
+  const aspectRatio = useMemo(() => {
+    const outputImg = data.outputImages?.[0];
+
+    // Priority 1: Generated Image Dimensions
+    if (outputImg?.width && outputImg?.height) {
+      return outputImg.height / outputImg.width;
+    }
+
+    // Priority 2: Existing Image URL (if loading from persistence without outputImages array)
+    // We assume standard portrait if we have an image but no metadata, or 1:1
+    if (data.imageUrl) {
+      return 1.0;
+    }
+
+    // Priority 3: Default Placeholder Aspect Ratio (Vertical for text area space)
+    return 1.2;
+  }, [data.outputImages, data.imageUrl]);
+
+  const targetHeight = BASE_WIDTH * aspectRatio;
+
+  // 2. Enforce Node Size
+  useEffect(() => {
+    // We only trigger update if the current stored dimensions differ significantly from target
+    // We check `data.width` because React Flow usually syncs current node size back to data.width/height
+    // depending on your onNodesChange setup. If not, we trust the calculation.
+
+    const currentWidth = data.width;
+    const currentHeight = data.height;
+
+    const isSizeMismatch =
+      !currentWidth ||
+      !currentHeight ||
+      Math.abs(currentWidth - BASE_WIDTH) > 1 ||
+      Math.abs(currentHeight - targetHeight) > 1;
+
+    // Only update if we have a generated image OR if it's the initialization phase
+    // We don't want to constantly fight the user if they manually resized,
+    // BUT we do want to snap to aspect ratio when an image is generated.
+    if (isSizeMismatch) {
+      // Check if this mismatch is due to a new generation
+      if (data.imageUrl || !currentWidth) {
+        updateNode(id, {
+          width: BASE_WIDTH,
+          height: targetHeight,
+        });
+      }
+    }
+  }, [aspectRatio, targetHeight, data.width, data.height, data.imageUrl, id, updateNode]);
+
+  // --- RESIZE LOGIC END ---
+
   const inputImages = data.inputImageUrls || [];
 
   const handleGenerate = useCallback(() => {
@@ -163,52 +199,49 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     let parameters: InputBoxParameter = {};
 
     if (selectedModel.provider === "running_hub") {
-      // For running_hub, values is NodeParam[]
       let params: NodeParam[] = Array.isArray(values) ? [...values] : [];
-
-      // If values (state) is empty but model has defaults, fall back to initial
       if (params.length === 0 && Array.isArray(selectedModel.parameters)) {
         params = [...selectedModel.parameters];
       }
-
       params = params.map((p) => {
         if (p.fieldName === "prompt" || p.description === "prompt") {
-          return {
-            ...p,
-            fieldValue: prompt || "",
-          };
+          return { ...p, fieldValue: prompt || "" };
         }
         return p;
       });
 
-      // Handle input images for running_hub
       if (inputImages.length > 0) {
         const imageParamIndex = params.findIndex(
-          (p) =>
-            (p.fieldName.toLowerCase().includes("image") ||
-              p.description.toLowerCase().includes("image")) &&
-            p.fieldName !== "prompt",
+          (p) => isImageParam(p.fieldName) || isImageParam(p.description || ""),
         );
-
         if (imageParamIndex !== -1) {
-          params[imageParamIndex] = {
-            ...params[imageParamIndex],
-            fieldValue: inputImages[0],
-          };
+          params[imageParamIndex] = { ...params[imageParamIndex], fieldValue: inputImages[0] };
+        }
+      }
+      parameters = params;
+    } else {
+      const imageParams: Record<string, any> = {};
+      const paramsDef = selectedModel?.parameters;
+
+      if (inputImages.length > 0 && paramsDef && !Array.isArray(paramsDef)) {
+        const imageKey = Object.keys(paramsDef).find((k) => isImageParam(k));
+        if (imageKey) {
+          const def = paramsDef[imageKey];
+          if (def.type === "array") {
+            imageParams[imageKey] = inputImages;
+          } else {
+            imageParams[imageKey] = inputImages[0];
+          }
         }
       }
 
-      parameters = params;
-    } else {
-      // For replicate and other providers, use values state
       parameters = {
         ...values,
         prompt: prompt,
-        ...(inputImages.length > 0 ? { image_input: [inputImages[0]] } : {}),
+        ...imageParams,
       } as unknown as InputBoxParameter;
     }
 
-    // Call mutation
     generateMutation.mutate(
       {
         canvasId: project?.id || "",
@@ -235,7 +268,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     id,
   ]);
 
-  // TODO: Implement parameter filtering when needed
   const imageInputKeys = useMemo(() => {
     return selectedModel?.parameters
       ? Object.keys(selectedModel.parameters).filter((k) => isImageParam(k))
@@ -253,32 +285,25 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   );
 
   const otherParams = useMemo(() => {
-    // For running_hub, parameters might be an object that needs to be converted to NodeParam[]
     if (selectedModel?.provider === "running_hub") {
-      // Usage of values state for otherParams to ensure updates are reflected
       if (Array.isArray(values)) {
         return values.filter(
           (p: NodeParam) => p.description !== "prompt" && p.fieldName !== "image",
         );
       }
-      // Fallback to model parameters
       if (Array.isArray(selectedModel.parameters)) {
         return selectedModel.parameters.filter(
           (p) => p.description !== "prompt" && p.fieldName !== "image",
         );
       }
     }
-
     return [];
   }, [selectedModel, values]);
 
-  const handleReplicateChange = useCallback(
-    (rawKey: string, value: any) => {
-      const key = normalizeKey(rawKey);
-      setValues((prev: Record<string, any>) => ({ ...prev, [key]: value }));
-    },
-    [], // stable
-  );
+  const handleReplicateChange = useCallback((rawKey: string, value: any) => {
+    const key = normalizeKey(rawKey);
+    setValues((prev: Record<string, any>) => ({ ...prev, [key]: value }));
+  }, []);
 
   const handleRunninghubChange = useCallback((description: string, newFieldValue: any) => {
     setValues((currentParams: any) => {
@@ -302,7 +327,8 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       title={data.category || "Image generation"}
       subtitle={data?.model}
       minWidth={BASE_WIDTH}
-      minHeight={nodeHeight}
+      // Use targetHeight here to ensure container has size even before updateNode fires
+      minHeight={targetHeight}
       keepAspectRatio={true}
       className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
@@ -312,7 +338,14 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       toolbarType="generate"
       initialModel={data.model}
     >
-      <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
+      {/* 
+         We ensure this container has a minimum height so placeholders show up 
+         immediately, even if the NodeLayout hasn't fully expanded yet.
+      */}
+      <div
+        className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
+        style={{ minHeight: "300px" }}
+      >
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -339,7 +372,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           </div>
         )}
 
-        {/* Overlay gradient only if image exists */}
         {data.imageUrl && (
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/30" />
         )}
@@ -413,9 +445,30 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             )}
           </div>
         ) : (
-          <p className="line-clamp-3 text-[15px] font-light leading-relaxed text-white/90 drop-shadow-sm">
-            {data.prompt}
-          </p>
+          <div className="group/prompt relative">
+            <p className="line-clamp-3 text-[15px] font-light leading-relaxed text-white/90 drop-shadow-sm">
+              {data.prompt}
+            </p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (data.prompt) {
+                  navigator.clipboard.writeText(data.prompt);
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2000);
+                }
+              }}
+              className="absolute -top-1 right-10 opacity-0 transition-opacity group-hover/prompt:opacity-100"
+            >
+              <div className="rounded-md bg-black/40 p-1.5 backdrop-blur-sm transition-colors hover:bg-black/60">
+                {isCopied ? (
+                  <Check className="size-3 text-green-400" />
+                ) : (
+                  <Copy className="size-3 text-white/70" />
+                )}
+              </div>
+            </button>
+          </div>
         )}
       </div>
 
