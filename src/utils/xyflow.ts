@@ -17,8 +17,17 @@ export type XYNodeSnapshot = Pick<XYNode, "id" | "type" | "data">;
 export const getTextFromNodes = (nodes: XYNodeSnapshot[]): string => {
   if (!nodes.length) return "";
   return nodes
-    .filter((node) => node.type === "prompt" || node.type === "text")
+    .filter((node) => node.type === "prompt" || node.type === "text" || node.type === "presets")
     .map((node) => node.data?.prompt || node.data?.text)
+    .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    .join(" ");
+};
+
+export const getStylePromptsFromNodes = (nodes: XYNodeSnapshot[]): string => {
+  if (!nodes.length) return "";
+  return nodes
+    .filter((node) => node.type === "style")
+    .map((node) => node.data?.stylePrompt)
     .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
     .join(" ");
 };
@@ -58,6 +67,7 @@ export const useUpstreamData = (handleType: "target" | "source" = "target") => {
       nodes,
       images: getImagesFromNodes(nodes),
       prompt: getTextFromNodes(nodes),
+      stylePrompt: getStylePromptsFromNodes(nodes),
       dimensions: getDimensionsFromNodes(nodes),
     };
   }, [nodesData]);

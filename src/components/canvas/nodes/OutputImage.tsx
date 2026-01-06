@@ -5,7 +5,7 @@ import { ArrowUp, Loader2, Copy, Check } from "lucide-react";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSyncUpstreamData } from "@/src/utils/xyflow";
+import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
 import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
@@ -18,6 +18,7 @@ import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubPara
 export type OutputImageNodeData = {
   imageUrl?: string;
   prompt?: string;
+  stylePrompt?: string; // Hidden style prompt
   inputImageUrls?: string[];
   width?: number; // Note: This might be node width OR image width depending on upstream
   height?: number;
@@ -31,6 +32,7 @@ export type OutputImageNodeData = {
 export type OutputImageNodeType = Node<OutputImageNodeData, "outputImage">;
 
 const PLACEHOLDERS = [
+  // ... (keep placeholders)
   {
     url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/5daa4c31fc80f9fb0694d395998ee3b2.jpg",
     prompt: "An astronaut in a field of flowers",
@@ -72,6 +74,13 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
+  const { stylePrompt } = useUpstreamData("target");
+
+  useEffect(() => {
+    if (stylePrompt !== data.stylePrompt) {
+      updateNodeData(id, { stylePrompt });
+    }
+  }, [stylePrompt, data.stylePrompt, id, updateNodeData]);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [prompt, setPrompt] = useState(data.prompt || "");
@@ -194,7 +203,10 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   const inputImages = data.inputImageUrls || [];
 
   const handleGenerate = useCallback(() => {
-    if (!prompt || !project?.id || !selectedModel) return;
+    if ((!prompt && !data.stylePrompt) || !project?.id || !selectedModel) return;
+
+    // Combine visible prompt with hidden style prompt
+    const finalPrompt = [prompt, data.stylePrompt].filter(Boolean).join(" ");
 
     let parameters: InputBoxParameter = {};
 
@@ -205,7 +217,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       }
       params = params.map((p) => {
         if (p.fieldName === "prompt" || p.description === "prompt") {
-          return { ...p, fieldValue: prompt || "" };
+          return { ...p, fieldValue: finalPrompt || "" };
         }
         return p;
       });
@@ -237,7 +249,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
       parameters = {
         ...values,
-        prompt: prompt,
+        prompt: finalPrompt,
         ...imageParams,
       } as unknown as InputBoxParameter;
     }
@@ -259,6 +271,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     );
   }, [
     prompt,
+    data.stylePrompt,
     project?.id,
     selectedModel,
     values,
