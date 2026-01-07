@@ -3,6 +3,7 @@ import { NodeTypes } from "@xyflow/react";
 // Import all node components
 import InputImage from "./InputImage";
 import OutputImage from "./OutputImage";
+import OutputImageOpenSource from "./OutputImageOpenSource";
 import TextNode from "./TextNode";
 import SketchNode from "./SketchNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
@@ -17,6 +18,7 @@ import UpscaleNode from "./UpscaleNode";
 export const nodeTypes: NodeTypes = {
   inputImage: InputImage,
   outputImage: OutputImage,
+  outputImageAdvanced: OutputImageOpenSource,
   prompt: TextNode,
   text: TextNode,
   sketch: SketchNode,

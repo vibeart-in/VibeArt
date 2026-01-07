@@ -83,6 +83,15 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
         action: () => handleAddNode("outputImage"),
       },
       {
+        label: "Image Generator (Advanced)",
+        icon: (
+          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+            <ImageIcon size={12} />
+          </div>
+        ),
+        action: () => handleAddNode("outputImageAdvanced"),
+      },
+      {
         label: "Video Generator",
         icon: (
           <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
@@ -263,6 +272,16 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                     <ImageIcon size={12} />
                   </div>
                   Image Generator
+                </ContextMenuItem>
+
+                <ContextMenuItem
+                  className="focus:bg-zinc-800 focus:text-zinc-100"
+                  onClick={() => handleAddNode("outputImageAdvanced")}
+                >
+                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                    <ImageIcon size={12} />
+                  </div>
+                  Image Generator (Advanced)
                 </ContextMenuItem>
 
                 <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">

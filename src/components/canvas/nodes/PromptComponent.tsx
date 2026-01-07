@@ -85,15 +85,17 @@ const NODE_CONFIGS: Record<string, NodeConfig> = {
 // Model node component (Checkpoint and LoRA)
 const ModelNode = React.memo(
   ({
+    id,
     data,
     selected,
     config,
   }: NodeProps<CheckpointNodeType | LoraNodeType> & { config: NodeConfig }) => {
+    const { updateNodeData } = useReactFlow();
     const [selectedModel, setSelectedModel] = useState<ModelData | undefined>(data.selectedModel);
 
     const handleSelect = (model: ModelData) => {
       setSelectedModel(model);
-      data.selectedModel = model;
+      updateNodeData(id, { selectedModel: model });
     };
 
     return (

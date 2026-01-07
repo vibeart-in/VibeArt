@@ -32,6 +32,18 @@ export const getStylePromptsFromNodes = (nodes: XYNodeSnapshot[]): string => {
     .join(" ");
 };
 
+export const getCheckpointFromNodes = (nodes: XYNodeSnapshot[]): any | undefined => {
+  const checkpointNode = nodes.find((node) => node.type === "checkpoint");
+  return checkpointNode?.data?.selectedModel;
+};
+
+export const getLorasFromNodes = (nodes: XYNodeSnapshot[]): any[] => {
+  return nodes
+    .filter((node) => node.type === "lora")
+    .map((node) => node.data?.selectedModel)
+    .filter((model): model is any => !!model);
+};
+
 export const getImagesFromNodes = (nodes: XYNodeSnapshot[]): string[] => {
   return nodes
     .map((node) => 
@@ -68,6 +80,8 @@ export const useUpstreamData = (handleType: "target" | "source" = "target") => {
       images: getImagesFromNodes(nodes),
       prompt: getTextFromNodes(nodes),
       stylePrompt: getStylePromptsFromNodes(nodes),
+      checkpoint: getCheckpointFromNodes(nodes),
+      loras: getLorasFromNodes(nodes),
       dimensions: getDimensionsFromNodes(nodes),
     };
   }, [nodesData]);
