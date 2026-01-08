@@ -37,13 +37,18 @@ export default function GenerateToolbar({
   const { data: generateModels } = useModelsByUsecase(ConversationType.GENERATE);
   const { data: advanceModels } = useModelsByUsecase(ConversationType.ADVANCE);
   
+  const nodesData = useNodesData(id || "");
+
   const models = useMemo(() => {
-    return [...(generateModels || []), ...(advanceModels || [])];
-  }, [generateModels, advanceModels]);
+    const nodeType = nodesData?.type;
+    if (nodeType === "outputImageAdvanced") {
+      return advanceModels || [];
+    }
+    return generateModels || [];
+  }, [generateModels, advanceModels, nodesData?.type]);
 
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
-  const nodesData = useNodesData(id || "");
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
   useEffect(() => {
