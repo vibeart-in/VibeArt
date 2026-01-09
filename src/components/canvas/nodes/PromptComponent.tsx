@@ -1,4 +1,4 @@
-import { Handle, Position, NodeProps, Node } from "@xyflow/react";
+import { Handle, Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
 import React, { useState } from "react";
 import ModelSelectModal from "../../inputBox/ModelSelectModal";
@@ -85,15 +85,17 @@ const NODE_CONFIGS: Record<string, NodeConfig> = {
 // Model node component (Checkpoint and LoRA)
 const ModelNode = React.memo(
   ({
+    id,
     data,
     selected,
     config,
   }: NodeProps<CheckpointNodeType | LoraNodeType> & { config: NodeConfig }) => {
+    const { updateNodeData } = useReactFlow();
     const [selectedModel, setSelectedModel] = useState<ModelData | undefined>(data.selectedModel);
 
     const handleSelect = (model: ModelData) => {
       setSelectedModel(model);
-      data.selectedModel = model;
+      updateNodeData(id, { selectedModel: model });
     };
 
     return (
@@ -127,14 +129,16 @@ ModelNode.displayName = "ModelNode";
 
 // Preset node component
 const PresetNode = React.memo(
-  ({ data, selected, config }: NodeProps<PresetsNodeType> & { config: NodeConfig }) => {
+  ({ id, data, selected, config }: NodeProps<PresetsNodeType> & { config: NodeConfig }) => {
+    const { updateNodeData } = useReactFlow();
     const [selectedPreset, setSelectedPreset] = useState<PresetData | undefined>(
       data.selectedPreset,
     );
 
     const handleSelect = (preset: PresetData) => {
       setSelectedPreset(preset);
-      data.selectedPreset = preset;
+      // data.selectedPreset = preset;
+      updateNodeData(id, { selectedPreset: preset, prompt: preset.prompt });
     };
 
     return (
@@ -164,14 +168,16 @@ PresetNode.displayName = "PresetNode";
 
 // Style node component
 const StyleNodeComponent = React.memo(
-  ({ data, selected, config }: NodeProps<StyleNodeType> & { config: NodeConfig }) => {
+  ({ id, data, selected, config }: NodeProps<StyleNodeType> & { config: NodeConfig }) => {
+    const { updateNodeData } = useReactFlow();
     const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | undefined>(
       data.selectedStyle,
     );
 
     const handleSelect = (style: MidjourneyStyleData) => {
       setSelectedStyle(style);
-      data.selectedStyle = style;
+      // data.selectedStyle = style;
+      updateNodeData(id, { selectedStyle: style, stylePrompt: style.prompt });
     };
 
     return (

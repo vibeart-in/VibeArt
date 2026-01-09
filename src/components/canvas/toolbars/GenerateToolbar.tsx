@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAtom } from "jotai";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 
@@ -32,10 +32,21 @@ export default function GenerateToolbar({
   handleMouseLeave,
   initialModel,
 }: GenerateToolbarProps) {
-  const { data: models } = useModelsByUsecase(ConversationType.GENERATE);
+  const { data: generateModels } = useModelsByUsecase(ConversationType.GENERATE);
+  const { data: advanceModels } = useModelsByUsecase(ConversationType.ADVANCE);
+  
+  const nodesData = useNodesData(id || "");
+
+  const models = useMemo(() => {
+    const nodeType = nodesData?.type;
+    if (nodeType === "outputImageAdvanced") {
+      return advanceModels || [];
+    }
+    return generateModels || [];
+  }, [generateModels, advanceModels, nodesData?.type]);
+
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
-  const nodesData = useNodesData(id || "");
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
   useEffect(() => {

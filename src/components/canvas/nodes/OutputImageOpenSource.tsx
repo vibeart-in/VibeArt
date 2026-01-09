@@ -6,7 +6,7 @@ import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
-import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
+import { InputBoxParameter, NodeParam, SchemaParam } from "@/src/types/BaseType";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { useCanvas } from "../../providers/CanvasProvider";
@@ -29,7 +29,7 @@ export type OutputImageNodeData = {
   [key: string]: unknown;
 };
 
-export type OutputImageNodeType = Node<OutputImageNodeData, "outputImage">;
+export type OutputImageNodeType = Node<OutputImageNodeData, "outputImageAdvanced">;
 
 const PLACEHOLDERS = [
   // ... (keep placeholders)
@@ -74,7 +74,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
-  const { stylePrompt } = useUpstreamData("target");
+  const { stylePrompt, checkpoint, loras } = useUpstreamData("target");
 
   useEffect(() => {
     if (stylePrompt !== data.stylePrompt) {
@@ -105,23 +105,27 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
 
   const { project } = useCanvas();
   const generateMutation = useGenerateCanvasImage(project?.id || "");
-  const [selectedModel] = useAtom(selectedModelAtom(id));
+  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id));
+
+  const activeModel = checkpoint || selectedModel;
 
   // Sync atom to data.model
   useEffect(() => {
-    if (selectedModel && selectedModel.model_name !== data.model) {
-      updateNodeData(id, { model: selectedModel.model_name });
+    if (activeModel && activeModel.model_name !== data.model) {
+      updateNodeData(id, { model: activeModel.model_name });
     }
-  }, [selectedModel, data.model, updateNodeData, id]);
+  }, [activeModel, data.model, updateNodeData, id]);
 
   // --- Parameter Initialization Logic (Unchanged) ---
   const initialValues = useMemo(() => {
-    if (!selectedModel?.parameters) return {};
-    if (selectedModel.provider === "running_hub" && Array.isArray(selectedModel.parameters)) {
-      return selectedModel.parameters;
+    if (!activeModel?.parameters) return {};
+    if (activeModel.provider === "running_hub" && Array.isArray(activeModel.parameters)) {
+      return activeModel.parameters;
     }
+    if (Array.isArray(activeModel.parameters)) return {};
     const out: Record<string, any> = {};
-    for (const [key, param] of Object.entries(selectedModel.parameters)) {
+    const params = activeModel.parameters as Record<string, SchemaParam>;
+    for (const [key, param] of Object.entries(params)) {
       const nk = normalizeKey(key);
       if (param.default !== undefined) out[nk] = param.default;
       else if (param.type === "boolean") out[nk] = false;
@@ -130,7 +134,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       else out[nk] = "";
     }
     return out;
-  }, [selectedModel?.parameters, selectedModel?.provider]);
+  }, [activeModel?.parameters, activeModel?.provider]);
 
   const [values, setValues] = useState<any>(initialValues);
 
@@ -203,24 +207,35 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   const inputImages = data.inputImageUrls || [];
 
   const handleGenerate = useCallback(() => {
-    if ((!prompt && !data.stylePrompt) || !project?.id || !selectedModel) return;
+    if ((!prompt && !data.stylePrompt) || !project?.id || !activeModel) return;
 
     // Combine visible prompt with hidden style prompt
     const finalPrompt = [prompt, data.stylePrompt].filter(Boolean).join(" ");
 
     let parameters: InputBoxParameter = {};
 
-    if (selectedModel.provider === "running_hub") {
+    if (activeModel.provider === "running_hub") {
       let params: NodeParam[] = Array.isArray(values) ? [...values] : [];
-      if (params.length === 0 && Array.isArray(selectedModel.parameters)) {
-        params = [...selectedModel.parameters];
+      if (params.length === 0 && Array.isArray(activeModel.parameters)) {
+        params = [...activeModel.parameters];
       }
-      params = params.map((p) => {
-        if (p.fieldName === "prompt" || p.description === "prompt") {
-          return { ...p, fieldValue: finalPrompt || "" };
-        }
-        return p;
-      });
+      
+      // Update existing prompt parameter or add new one
+      const promptParamIndex = params.findIndex(
+        (p) => p.fieldName === "prompt" || p.description === "prompt"
+      );
+      
+      if (promptParamIndex !== -1) {
+        params[promptParamIndex] = { ...params[promptParamIndex], fieldValue: finalPrompt || "" };
+      } else {
+        // Add prompt if it doesn't exist
+        params.push({
+          nodeId: id,
+          fieldName: "prompt",
+          fieldValue: finalPrompt || "",
+          description: "prompt"
+        });
+      }
 
       if (inputImages.length > 0) {
         const imageParamIndex = params.findIndex(
@@ -230,10 +245,33 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           params[imageParamIndex] = { ...params[imageParamIndex], fieldValue: inputImages[0] };
         }
       }
+
+      // Add checkpoint parameter if from upstream
+      if (checkpoint) {
+        params.push({
+          nodeId: id,
+          fieldName: "ckpt_name",
+          fieldValue: checkpoint.identifier || checkpoint.model_name,
+          description: "checkpoint_name"
+        });
+      }
+
+      // Add LoRA parameters if from upstream
+      if (loras.length > 0) {
+        loras.forEach((lora, index) => {
+          params.push({
+            nodeId: `${id}_lora_${index}`,
+            fieldName: "lora_name",
+            fieldValue: lora.identifier || lora.model_name,
+            description: "lora_name"
+          });
+        });
+      }
+
       parameters = params;
     } else {
       const imageParams: Record<string, any> = {};
-      const paramsDef = selectedModel?.parameters;
+      const paramsDef = activeModel?.parameters;
 
       if (inputImages.length > 0 && paramsDef && !Array.isArray(paramsDef)) {
         const imageKey = Object.keys(paramsDef).find((k) => isImageParam(k));
@@ -258,10 +296,10 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       {
         canvasId: project?.id || "",
         parameters,
-        modelName: selectedModel.model_name,
-        modelIdentifier: selectedModel.identifier,
-        modelCredit: typeof selectedModel.cost === "number" ? selectedModel.cost : 0,
-        modelProvider: selectedModel.provider,
+        modelName: activeModel.model_name,
+        modelIdentifier: activeModel.identifier,
+        modelCredit: typeof activeModel.cost === "number" ? activeModel.cost : 0,
+        modelProvider: activeModel.provider,
       },
       {
         onSuccess: (res) => {
@@ -273,7 +311,8 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     prompt,
     data.stylePrompt,
     project?.id,
-    selectedModel,
+    activeModel,
+    loras,
     values,
     inputImages,
     generateMutation,
@@ -282,36 +321,36 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   ]);
 
   const imageInputKeys = useMemo(() => {
-    return selectedModel?.parameters
-      ? Object.keys(selectedModel.parameters).filter((k) => isImageParam(k))
+    return activeModel?.parameters
+      ? Object.keys(activeModel.parameters).filter((k) => isImageParam(k))
       : [];
-  }, [selectedModel]);
+  }, [activeModel]);
 
   const otherEntries = useMemo(
     () =>
-      selectedModel?.parameters
-        ? Object.entries(selectedModel.parameters).filter(([k]) => {
+      activeModel?.parameters
+        ? Object.entries(activeModel.parameters).filter(([k]) => {
             return !imageInputKeys.includes(k) && k !== "prompt";
           })
         : [],
-    [selectedModel, imageInputKeys],
+    [activeModel, imageInputKeys],
   );
 
   const otherParams = useMemo(() => {
-    if (selectedModel?.provider === "running_hub") {
+    if (activeModel?.provider === "running_hub") {
       if (Array.isArray(values)) {
         return values.filter(
           (p: NodeParam) => p.description !== "prompt" && p.fieldName !== "image",
         );
       }
-      if (Array.isArray(selectedModel.parameters)) {
-        return selectedModel.parameters.filter(
-          (p) => p.description !== "prompt" && p.fieldName !== "image",
+      if (Array.isArray(activeModel.parameters)) {
+        return activeModel.parameters.filter(
+          (p: any) => p.description !== "prompt" && p.fieldName !== "image",
         );
       }
     }
     return [];
-  }, [selectedModel, values]);
+  }, [activeModel, values]);
 
   const handleReplicateChange = useCallback((rawKey: string, value: any) => {
     const key = normalizeKey(rawKey);
@@ -439,18 +478,18 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
               }}
             />
 
-            {selectedModel?.provider === "replicate" && (
+            {activeModel?.provider === "replicate" && (
               <ReplicateMemoizedOtherParameters
-                key={selectedModel?.id}
+                key={activeModel?.id}
                 otherEntries={otherEntries}
                 values={values}
                 handleChange={handleReplicateChange}
               />
             )}
 
-            {selectedModel?.provider === "running_hub" && (
+            {activeModel?.provider === "running_hub" && (
               <RunninghubMemoizedOtherParameters
-                key={selectedModel?.id}
+                key={activeModel?.id}
                 otherParams={otherParams}
                 values={values}
                 handleChange={handleRunninghubChange}
