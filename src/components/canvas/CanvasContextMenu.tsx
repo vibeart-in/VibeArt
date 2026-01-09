@@ -23,6 +23,7 @@ import {
   Brush,
   Wrench,
   Zap,
+  Eraser,
 } from "lucide-react";
 import { AI_APPS } from "@/src/constants/aiApps";
 import { IconWindowMaximize } from "@tabler/icons-react";
@@ -162,6 +163,15 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
           </div>
         ),
         action: () => handleAddNode("upscale"),
+      },
+      {
+        label: "Remove Background",
+        icon: (
+          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
+            <Eraser size={12} />
+          </div>
+        ),
+        action: () => handleAddNode("removeBackground"),
       },
       {
         label: "Group",
@@ -366,6 +376,16 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                     <IconWindowMaximize size={12} />
                   </div>
                   Upscale
+                </ContextMenuItem>
+
+                <ContextMenuItem
+                  className="focus:bg-zinc-800 focus:text-zinc-100"
+                  onClick={() => handleAddNode("removeBackground")}
+                >
+                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
+                    <Eraser size={12} />
+                  </div>
+                  Remove Background
                 </ContextMenuItem>
 
                 <ContextMenuItem

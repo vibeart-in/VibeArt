@@ -21,7 +21,6 @@ interface GenerateToolbarProps {
   isHovered: boolean;
   handleMouseEnter: () => void;
   handleMouseLeave: () => void;
-  onGenerate?: () => void;
   initialModel?: string;
 }
 
@@ -31,7 +30,6 @@ export default function GenerateToolbar({
   isHovered,
   handleMouseEnter,
   handleMouseLeave,
-  onGenerate,
   initialModel,
 }: GenerateToolbarProps) {
   const { data: models } = useModelsByUsecase(ConversationType.GENERATE);

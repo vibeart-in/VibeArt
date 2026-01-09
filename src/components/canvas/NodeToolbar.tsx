@@ -1,11 +1,17 @@
 "use client";
 
 import { Editor } from "@tiptap/react";
-import { TextToolbar, ImageToolbar, GenerateToolbar } from "./toolbars";
+import {
+  TextToolbar,
+  ImageToolbar,
+  GenerateToolbar,
+  UpscaleToolbar,
+  RemoveBackgroundToolbar,
+} from "./toolbars";
 
 interface NodeToolbarProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image" | "generate";
+  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground";
   selected: boolean;
   isHovered: boolean;
   handleMouseEnter: () => void;
@@ -13,7 +19,6 @@ interface NodeToolbarProps {
   width?: number;
   height?: number;
   textEditor?: any;
-  onGenerate?: () => void;
   initialModel?: string;
 }
 
@@ -25,7 +30,6 @@ export default function NodeToolbar({
   handleMouseEnter,
   handleMouseLeave,
   textEditor,
-  onGenerate,
   initialModel,
 }: NodeToolbarProps) {
   const editor = textEditor as Editor | undefined;
@@ -44,6 +48,32 @@ export default function NodeToolbar({
     );
   }
 
+  // Upscale Toolbar with controls
+  if (toolbarType === "upscale") {
+    return (
+      <UpscaleToolbar
+        selected={selected}
+        isHovered={isHovered}
+        handleMouseEnter={handleMouseEnter}
+        handleMouseLeave={handleMouseLeave}
+        id={id}
+      />
+    );
+  }
+
+  // Remove Background Toolbar
+  if (toolbarType === "removeBackground") {
+    return (
+      <RemoveBackgroundToolbar
+        selected={selected}
+        isHovered={isHovered}
+        handleMouseEnter={handleMouseEnter}
+        handleMouseLeave={handleMouseLeave}
+        id={id}
+      />
+    );
+  }
+
   // Generate Toolbar with model selection and generate button
   if (toolbarType === "generate") {
     return (
@@ -52,7 +82,6 @@ export default function NodeToolbar({
         isHovered={isHovered}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeave={handleMouseLeave}
-        onGenerate={onGenerate}
         id={id}
         initialModel={initialModel}
       />

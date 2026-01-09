@@ -1,6 +1,12 @@
 "use client";
 
-import { Handle, NodeResizeControl, Position, useViewport } from "@xyflow/react";
+import {
+  Handle,
+  NodeResizeControl,
+  Position,
+  useViewport,
+  useNodeConnections,
+} from "@xyflow/react";
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import NodeToolbar from "./NodeToolbar";
 import Magnet from "../ui/Magnet";
@@ -16,7 +22,7 @@ export type HandleConfig = {
 
 interface NodeLayoutProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image" | "generate";
+  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground";
   textEditor?: any; // Tiptap editor instance
   selected?: boolean;
   className?: string;

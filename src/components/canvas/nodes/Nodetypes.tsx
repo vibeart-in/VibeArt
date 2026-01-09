@@ -12,6 +12,7 @@ import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptCompon
 import AiAppNode from "./AiAppNode";
 import GroupNode from "./GroupNode";
 import UpscaleNode from "./UpscaleNode";
+import RemoveBackgroundNode from "./RemoveBackgroundNode";
 
 // Register all node types for React Flow
 export const nodeTypes: NodeTypes = {
@@ -30,4 +31,5 @@ export const nodeTypes: NodeTypes = {
   aiApp: AiAppNode,
   group: GroupNode,
   upscale: UpscaleNode,
+  removeBackground: RemoveBackgroundNode,
 };

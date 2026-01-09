@@ -104,6 +104,7 @@ export async function POST(req: Request) {
 
           const prediction = await replicate.predictions.create({
             model: modelIdentifier,
+            version: modelIdentifier.split(":")[1],
             input: parameters,
             webhook: webhookUrl,
             webhook_events_filter: ["completed"],
