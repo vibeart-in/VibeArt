@@ -294,7 +294,10 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   Image Generator (Advanced)
                 </ContextMenuItem>
 
-                <ContextMenuItem className="focus:bg-zinc-800 focus:text-zinc-100">
+                <ContextMenuItem
+                  className="focus:bg-zinc-800 focus:text-zinc-100"
+                  onClick={() => handleAddNode("generateVideo")}
+                >
                   <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
                     <Video size={12} />
                   </div>

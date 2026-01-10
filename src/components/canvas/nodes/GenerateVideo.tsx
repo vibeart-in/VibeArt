@@ -15,7 +15,7 @@ import { useAtom } from "jotai";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
 
-export type OutputImageNodeData = {
+export type GenerateVideoNodeData = {
   imageUrl?: string;
   prompt?: string;
   stylePrompt?: string; // Hidden style prompt
@@ -29,24 +29,24 @@ export type OutputImageNodeData = {
   [key: string]: unknown;
 };
 
-export type OutputImageNodeType = Node<OutputImageNodeData, "outputImage">;
+export type GenerateVideoNodeType = Node<GenerateVideoNodeData, "generateVideo">;
 
 const PLACEHOLDERS = [
   {
-    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/5daa4c31fc80f9fb0694d395998ee3b2.jpg",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/431008626864462037.mp4",
     prompt: "An astronaut in a field of flowers",
   },
   {
-    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/8a17b1c1dcebb918050eb417b343e3fd.jpg",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179975333151.mp4",
     prompt: "A moody cyberpunk street at night",
   },
   {
-    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/138864f441bad71a9d5b496f044e76f5.jpg",
-    prompt: "A portrait of a cyborg woman",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179976969272.mp4",
+    prompt: "A moody cyberpunk street at night",
   },
   {
-    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/canvas/57dd0213ddcc344454fb198e24be2e66.jpg",
-    prompt: "A portrait of a burning woman",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179977407426.mp4",
+    prompt: "A moody cyberpunk street at night",
   },
 ];
 
@@ -69,7 +69,7 @@ const EXPLICIT_IMAGE_PARAMS = new Set([
 const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
 const isImageParam = (key: string) => EXPLICIT_IMAGE_PARAMS.has(key);
 
-const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNodeType>) => {
+const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVideoNodeType>) => {
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
@@ -163,7 +163,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     }
 
     // Priority 3: Default Placeholder Aspect Ratio (Vertical for text area space)
-    return 1.2;
+    return 0.7;
   }, [data.outputImages, data.imageUrl]);
 
   const targetHeight = BASE_WIDTH * aspectRatio;
@@ -336,7 +336,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     <NodeLayout
       id={id}
       selected={selected}
-      title={data.category || "Image generation"}
+      title={data.category || "Video generation"}
       subtitle={data?.model}
       minWidth={BASE_WIDTH}
       minHeight={targetHeight}
@@ -358,17 +358,19 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         // style={{ minHeight: "300px" }}
       >
         {data.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <video
             src={data.imageUrl}
-            alt={data.prompt || "Generated Image"}
             className="h-full w-full rounded-3xl object-cover"
-            draggable={false}
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <AnimatePresence mode="popLayout">
-              <motion.img
+              <motion.video
                 key={currentPlaceholder}
                 src={PLACEHOLDERS[currentPlaceholder].url}
                 initial={{ opacity: 0, filter: "blur(8px)" }}
@@ -376,7 +378,10 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
                 className="absolute inset-0 h-full w-full object-cover"
-                alt="Placeholder"
+                autoPlay
+                loop
+                muted
+                playsInline
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10" />
@@ -518,6 +523,6 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   );
 });
 
-OutputImage.displayName = "OutputImage";
+GenerateVideo.displayName = "GenerateVideo";
 
-export default OutputImage;
+export default GenerateVideo;

@@ -14,12 +14,14 @@ import AiAppNode from "./AiAppNode";
 import GroupNode from "./GroupNode";
 import UpscaleNode from "./UpscaleNode";
 import RemoveBackgroundNode from "./RemoveBackgroundNode";
+import GenerateVideo from "./GenerateVideo";
 
 // Register all node types for React Flow
 export const nodeTypes: NodeTypes = {
   inputImage: InputImage,
   outputImage: OutputImage,
   outputImageAdvanced: OutputImageOpenSource,
+  generateVideo: GenerateVideo,
   prompt: TextNode,
   text: TextNode,
   sketch: SketchNode,
