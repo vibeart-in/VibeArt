@@ -4,7 +4,8 @@ import { User } from "@supabase/supabase-js";
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import { Button } from "@/src/components/ui/button";
 import { RadioGroup } from "@/src/components/ui/radio-group";
@@ -23,6 +24,7 @@ export interface UpdatePlanDialogProps {
   title?: string;
   products: ProductListResponse[];
   user: User | null;
+  hideTrigger?: boolean; // Added this prop
   /**
    * If true (default) the component will render as a dialog with trigger button.
    * If false the component is rendered inline with the same styling (no backdrop or animation).
@@ -32,7 +34,10 @@ export interface UpdatePlanDialogProps {
    * - In dialog mode it's called after the modal is closed.
    * - In inline mode it's used to show the X close button; if not provided the X is hidden.
    */
+
   onClose?: () => void;
+  openControlled?: boolean;
+  onOpenChangeControlled?: (open: boolean) => void;
 }
 
 // Custom Glassmorphic Dialog Component (used only for dialog mode)
@@ -45,7 +50,16 @@ function GlassmorphicDialog({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  return (
+  // Ensure we only portal after mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -56,11 +70,11 @@ function GlassmorphicDialog({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/10 backdrop-blur-md"
+            className="fixed inset-0 z-[10000] bg-black/10 backdrop-blur-md"
           />
 
           {/* Dialog Container */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:p-6 md:p-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -73,7 +87,7 @@ function GlassmorphicDialog({
               }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full max-w-[80vw] overflow-hidden rounded-3xl shadow-2xl",
+                "relative w-full max-w-5xl overflow-hidden rounded-3xl shadow-2xl",
                 "bg-gradient-to-br from-black/80 to-black/50",
                 "border border-white/20",
               )}
@@ -84,7 +98,8 @@ function GlassmorphicDialog({
           </div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
 
@@ -97,7 +112,11 @@ export function UpdatePlanDialog({
   products,
   user,
   isDialog = true,
+
   onClose,
+  openControlled,
+  onOpenChangeControlled,
+  hideTrigger,
 }: UpdatePlanDialogProps) {
   const [isYearly, setIsYearly] = useState(
     currentPlan ? currentPlan.payment_period_interval === "Year" : false,
@@ -105,7 +124,13 @@ export function UpdatePlanDialog({
   const [selectedPlan, setSelectedPlan] = useState<string | undefined>(
     currentPlan ? currentPlan.product_id : undefined,
   );
+
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Use controlled state if provided, otherwise local state
+  const effectiveIsOpen = openControlled !== undefined ? openControlled : isOpen;
+  const setEffectiveIsOpen = onOpenChangeControlled !== undefined ? onOpenChangeControlled : setIsOpen;
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePlanChange = (planId: string) => {
@@ -113,7 +138,7 @@ export function UpdatePlanDialog({
   };
 
   const handleDialogClose = () => {
-    setIsOpen(false);
+    setEffectiveIsOpen(false);
     onClose?.();
   };
 
@@ -319,16 +344,18 @@ export function UpdatePlanDialog({
   if (isDialog) {
     return (
       <>
-        <Button
-          size="sm"
-          className="rounded-xl"
-          disabled={!!currentPlan?.cancel_at_next_billing_date}
-          onClick={() => setIsOpen(true)}
-        >
-          {triggerText}
-        </Button>
+        {!hideTrigger && (
+          <Button
+            size="sm"
+            className="rounded-xl"
+            disabled={!!currentPlan?.cancel_at_next_billing_date}
+            onClick={() => setEffectiveIsOpen(true)}
+          >
+            {triggerText}
+          </Button>
+        )}
 
-        <GlassmorphicDialog isOpen={isOpen} onClose={handleDialogClose}>
+        <GlassmorphicDialog isOpen={effectiveIsOpen} onClose={handleDialogClose}>
           <RenderInner showClose={true} />
         </GlassmorphicDialog>
       </>
