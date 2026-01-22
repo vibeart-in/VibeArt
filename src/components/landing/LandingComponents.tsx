@@ -1,140 +1,223 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate, useMotionValue } from "framer-motion";
-import { ArrowRight, Check, Star, Play, ShoppingBag, Layout, Camera, Share2, Monitor } from "lucide-react";
+import { ArrowRight, Check, Star, Play, ShoppingBag, Layout, Camera, Share2, Monitor, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "../../lib/utils";
 import { AI_APPS } from "../../constants/aiApps";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // --- Hero Section ---
+
+
 export const Hero = () => {
+  /** ------------------------------
+   *  Cursor spotlight
+   *  ------------------------------ */
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
+  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 });
+  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 });
+
+  function handleMouseMove(e: React.MouseEvent) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
   }
 
+  const spotlightStyle = useTransform(
+    [smoothX, smoothY],
+    ([x, y]) =>
+      `radial-gradient(600px circle at ${x}px ${y}px, rgba(217,233,43,0.15), transparent 80%)`
+  );
+
+  /** ------------------------------
+   *  Measure V ↔ A distance
+   *  ------------------------------ */
+  const vRef = useRef<HTMLDivElement>(null);
+  const aRef = useRef<HTMLDivElement>(null);
+  const [swapX, setSwapX] = useState(0);
+
+  useLayoutEffect(() => {
+    if (vRef.current && aRef.current) {
+      const vBox = vRef.current.getBoundingClientRect();
+      const aBox = aRef.current.getBoundingClientRect();
+      setSwapX(aBox.left - vBox.left);
+    }
+  }, []);
+
   return (
-    <section 
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black text-center selection:bg-[#d9e92b]/30"
-        onMouseMove={handleMouseMove}
+    <section
+      onMouseMove={handleMouseMove}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden
+                 bg-[#050505] text-center selection:bg-[#d9e92b]/30"
     >
-      {/* Background Image with Parallax/Overlay */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70"
-        style={{ 
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      />
-      
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-[#d9e92b]/20" />
-      <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-      
-      {/* Animated Glow Blobs */}
-      <motion.div 
-        animate={{ 
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.2, 1],
-        }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 h-[500px] w-[500px] rounded-full bg-[#d9e92b]/30 blur-[150px] mix-blend-screen" 
-      />
-      <motion.div 
-        animate={{ 
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.5, 1],
-        }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-1/4 right-1/4 h-[500px] w-[500px] rounded-full bg-[#d9e92b]/20 blur-[150px] mix-blend-screen" 
+      {/* ---------------- Video Layer ---------------- */}
+      <div className="absolute inset-0 z-0 opacity-30 mix-blend-screen grayscale">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source src="/your-abstract-ai-video.mp4" type="video/mp4" />
+        </video>
+      </div>
+
+      {/* ---------------- Spotlight ---------------- */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{ background: spotlightStyle }}
       />
 
-      {/* Content */}
-      <div className="container relative z-10 mx-auto px-4">
+      {/* ---------------- Mesh Blobs ---------------- */}
+      <div className="absolute inset-0 overflow-hidden">
         <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 100, delay: 0.1 }}
-            className="mb-12 flex justify-center"
+          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[10%] -left-[10%] h-[70%] w-[70%]
+                     rounded-full bg-[#d9e92b]/10 blur-[120px]"
+        />
+        <motion.div
+          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[10%] -right-[10%] h-[70%] w-[70%]
+                     rounded-full bg-[#d9e92b]/5 blur-[120px]"
+        />
+      </div>
+
+      {/* ---------------- Content ---------------- */}
+      <div className="relative z-20 mx-auto px-4">
+
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex justify-center"
         >
-          <div className="group relative rounded-full bg-black/40 p-1 backdrop-blur-xl transition-all hover:bg-black/60 border border-white/10 shadow-[0_0_20px_rgba(250,204,21,0.4)]">
-             <span className="relative flex items-center gap-2 rounded-full border border-white/10 px-6 py-2 text-sm font-bold tracking-widest text-white uppercase">
-                <SparklesIcon className="h-4 w-4 text-[#d9e92b] animate-pulse" />
-                Next Gen Creation
-             </span>
+          <div className="relative flex items-center gap-2 rounded-full
+                          border border-white/10 bg-white/5 px-5 py-2 backdrop-blur-md">
+            <Sparkles className="h-4 w-4 text-[#d9e92b]" />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">
+              Next Gen Creation
+            </span>
           </div>
         </motion.div>
 
-        <div className="relative mx-auto max-w-7xl">
-            {/* Massive Glowing Title */}
-            <motion.h1
-                initial={{ opacity: 0, scale: 0.9, y: 50 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 font-satoshi text-[12vw] font-black leading-none tracking-tighter text-transparent sm:text-[150px]"
-                style={{ 
-                    backgroundImage: "linear-gradient(to bottom, #ffffff 0%, #d9e92b 50%, #0d0f0fff 100%)",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    filter: "drop-shadow(0 0 40px rgba(250,204,21,0.6))"
-                }}
-            >
-                VibeArt
-            </motion.h1>
-            
-            {/* Reflection Effect */}
-            <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="absolute left-0 right-0 top-full -mt-4 scale-y-[-0.5] font-satoshi text-[12vw] font-black leading-none tracking-tighter text-transparent opacity-30 sm:text-[150px] pointer-events-none blur-sm"
-                style={{ 
-                    backgroundImage: "linear-gradient(to bottom, #ffffff 0%, #d9e92b 50%, #0d0f0fff 100%)",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    maskImage: "linear-gradient(transparent, black)",
-                    WebkitMaskImage: "linear-gradient(to bottom, transparent 20%, black 100%)"
-                }}
-            >
-                VibeArt
-            </motion.h1>
+        {/* ---------------- Title ---------------- */}
+        <div className="relative flex items-baseline justify-center gap-2 md:gap-4">
 
-            <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="mx-auto mt-12 max-w-2xl font-satoshi text-xl font-medium text-white/80 sm:text-2xl drop-shadow-md"
+          {/* V */}
+          <div ref={vRef} className="relative">
+            <motion.h1
+              animate={{
+                x: [0, swapX, swapX, 0],
+                y: [0, -45, -45, 0],
+                rotate: [0, 180, 180, 360],
+                zIndex: [1, 10, 10, 1],
+              }}
+              transition={{
+                duration: 3,
+                times: [0, 0.4, 0.6, 1],
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+              className="font-satoshi text-[20vw] sm:text-[220px]
+                         font-black leading-none tracking-tighter
+                         text-transparent bg-clip-text
+                         bg-gradient-to-b from-white to-[#d9e92b]"
             >
-                Unleash the <span className="text-[#d9e92b] font-bold drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]">Power</span> of AI. 
-                Generate ultra-detailed assets in seconds.
-            </motion.p>
+              V
+            </motion.h1>
+          </div>
+
+          {/* ibe */}
+          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
+                         font-black leading-none tracking-tighter text-white">
+            ibe
+          </h1>
+
+          {/* A */}
+          <div ref={aRef} className="relative">
+            <motion.h1
+              animate={{
+                x: [0, -swapX, -swapX, 0],
+                y: [0, 40, 40, 0],
+                rotate: [0, -180, -180, -360],
+                zIndex: [1, 10, 10, 1],
+              }}
+              transition={{
+                duration: 3,
+                times: [0, 0.4, 0.6, 1],
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+              className="font-satoshi text-[20vw] sm:text-[220px]
+                         font-black leading-none tracking-tighter
+                         text-transparent bg-clip-text
+                         bg-gradient-to-b from-[#d9e92b] via-white to-[#d9e92b]"
+            >
+              A
+            </motion.h1>
+          </div>
+
+          {/* rt */}
+          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
+                         font-black leading-none tracking-tighter text-white">
+            rt
+          </h1>
         </div>
 
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-16 flex flex-col items-center justify-center gap-6 sm:flex-row"
+        {/* ---------------- Subtitle ---------------- */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mx-auto mt-10 max-w-xl text-lg sm:text-xl text-white/60"
         >
-           <button className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[#d9e92b] px-10 py-5 text-xl font-black text-black transition-all hover:scale-110 hover:shadow-[0_0_40px_rgba(250,204,21,0.6)] ring-4 ring-[#d9e92b]/30">
-             <span className="relative z-10">START CREATING</span>
-             <ArrowRight className="relative z-10 h-6 w-6 transition-transform group-hover:translate-x-1" />
-           </button>
-           
-           <button className="group inline-flex items-center gap-3 rounded-full bg-black/60 px-8 py-5 text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-black/80 hover:shadow-[0_0_20px_rgba(250,204,21,0.4)] border border-[#d9e92b]/30">
-             <Play className="h-6 w-6 fill-current text-[#d9e92b]" />
-             <span>WATCH DEMO</span>
-           </button>
+          Unleash the <span className="font-bold text-white">Power</span> of AI.
+          <br />
+          Generate ultra-detailed assets in seconds.
+        </motion.p>
+
+        {/* ---------------- Actions ---------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-12 flex justify-center gap-5 flex-wrap"
+        >
+          <button className="group flex items-center gap-3 rounded-full
+                             bg-[#d9e92b] px-8 py-4 text-lg font-black text-black
+                             shadow-[0_0_30px_rgba(217,233,43,0.4)]
+                             transition hover:scale-105 active:scale-95">
+            START CREATING
+            <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+          </button>
+
+          <button className="flex items-center gap-3 rounded-full
+                             border border-white/10 bg-white/5
+                             px-8 py-4 text-lg font-bold text-white
+                             backdrop-blur-sm hover:bg-white/10">
+            <Play className="h-5 w-5 text-[#d9e92b]" />
+            WATCH DEMO
+          </button>
         </motion.div>
       </div>
+
+      {/* ---------------- Noise ---------------- */}
+      <div className="pointer-events-none absolute inset-0 z-50
+                      bg-[url('https://grainy-gradients.vercel.app/noise.svg')]
+                      opacity-20 contrast-150" />
     </section>
   );
 };
+
 
 const SparklesIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
