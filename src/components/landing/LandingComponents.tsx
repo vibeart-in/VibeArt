@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate, useMotionValue } from "framer-motion";
-import { ArrowRight, Check, Star, Play, ShoppingBag, Layout, Camera, Share2, Monitor, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Star, Play, ShoppingBag, Layout, Camera, Share2, Monitor, Sparkles, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "../../lib/utils";
 import { AI_APPS } from "../../constants/aiApps";
@@ -13,13 +13,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Hero = () => {
   /** ------------------------------
-   *  Cursor spotlight
+   *  Cursor spotlight (Enhanced)
    *  ------------------------------ */
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 });
-  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 });
+  const smoothX = useSpring(mouseX, { damping: 15, stiffness: 150 });
+  const smoothY = useSpring(mouseY, { damping: 15, stiffness: 150 });
 
   function handleMouseMove(e: React.MouseEvent) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -27,10 +27,21 @@ export const Hero = () => {
     mouseY.set(e.clientY - rect.top);
   }
 
+  // Enhanced spotlight with dual gradients
   const spotlightStyle = useTransform(
     [smoothX, smoothY],
-    ([x, y]) =>
-      `radial-gradient(600px circle at ${x}px ${y}px, rgba(217,233,43,0.15), transparent 80%)`
+    ([x, y]) => {
+      const intensity = 0.3; // Increased intensity
+      return `
+        radial-gradient(800px circle at ${x}px ${y}px, 
+          rgba(217,233,43,${intensity}) 0%, 
+          rgba(217,233,43,${intensity * 0.5}) 30%,
+          transparent 70%),
+        radial-gradient(600px circle at ${x}px ${y}px, 
+          rgba(255,255,255,0.1) 0%,
+          transparent 60%)
+      `;
+    }
   );
 
   /** ------------------------------
@@ -39,85 +50,220 @@ export const Hero = () => {
   const vRef = useRef<HTMLDivElement>(null);
   const aRef = useRef<HTMLDivElement>(null);
   const [swapX, setSwapX] = useState(0);
+  const [swapY, setSwapY] = useState(0);
 
   useLayoutEffect(() => {
     if (vRef.current && aRef.current) {
       const vBox = vRef.current.getBoundingClientRect();
       const aBox = aRef.current.getBoundingClientRect();
       setSwapX(aBox.left - vBox.left);
+      setSwapY(aBox.top - vBox.top);
     }
   }, []);
+
+  // New: Particle effect for the swap
+  const [particles, setParticles] = useState<Array<{ x: number; y: number; id: number }>>([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Add particles along swap path
+      const newParticles = Array.from({ length: 5 }).map((_, i) => ({
+        id: Date.now() + i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+      }));
+      setParticles(prev => [...prev.slice(-20), ...newParticles]);
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // New: Glitch effect state
+  const [glitch, setGlitch] = useState(false);
 
   return (
     <section
       onMouseMove={handleMouseMove}
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden
-                 bg-[#050505] text-center selection:bg-[#d9e92b]/30"
+                 bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#111111] text-center selection:bg-[#d9e92b]/30"
     >
-      {/* ---------------- Video Layer ---------------- */}
-      <div className="absolute inset-0 z-0 opacity-30 mix-blend-screen grayscale">
+      {/* ---------------- Enhanced Video Layer ---------------- */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-transparent to-black/60" />
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover opacity-40 mix-blend-overlay"
         >
           <source src="/your-abstract-ai-video.mp4" type="video/mp4" />
         </video>
       </div>
 
-      {/* ---------------- Spotlight ---------------- */}
+      {/* ---------------- Enhanced Spotlight ---------------- */}
       <motion.div
         className="pointer-events-none absolute inset-0 z-10"
         style={{ background: spotlightStyle }}
       />
 
-      {/* ---------------- Mesh Blobs ---------------- */}
+      {/* ---------------- Animated Circuit Lines ---------------- */}
+      <div className="absolute inset-0 z-5 overflow-hidden">
+        <svg className="w-full h-full opacity-20">
+          <defs>
+            <linearGradient id="circuit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#d9e92b" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#d9e92b" stopOpacity="0.1" />
+            </linearGradient>
+          </defs>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <motion.path
+              key={i}
+              d={`M${i * 10} 0 L${i * 10} 100`}
+              stroke="url(#circuit-grad)"
+              strokeWidth="1"
+              strokeDasharray="10 5"
+              animate={{
+                strokeDashoffset: [0, 15],
+              }}
+              transition={{
+                duration: 2,
+                delay: i * 0.2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          ))}
+        </svg>
+      </div>
+
+      {/* ---------------- Enhanced Mesh Blobs ---------------- */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[10%] -left-[10%] h-[70%] w-[70%]
-                     rounded-full bg-[#d9e92b]/10 blur-[120px]"
+          animate={{ 
+            x: [0, 100, -50, 0],
+            y: [0, -50, 30, 0],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{ 
+            duration: 25, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+          className="absolute -top-[15%] -left-[15%] h-[80%] w-[80%]
+                     rounded-full bg-gradient-to-br from-[#d9e92b]/15 via-transparent to-[#d9e92b]/5 blur-[150px]"
         />
         <motion.div
-          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[10%] -right-[10%] h-[70%] w-[70%]
-                     rounded-full bg-[#d9e92b]/5 blur-[120px]"
+          animate={{ 
+            x: [0, -100, 50, 0],
+            y: [0, 50, -30, 0],
+            scale: [1, 1.1, 0.8, 1],
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+          className="absolute -bottom-[15%] -right-[15%] h-[80%] w-[80%]
+                     rounded-full bg-gradient-to-tl from-[#d9e92b]/10 via-transparent to-[#d9e92b]/5 blur-[150px]"
         />
       </div>
+
+      {/* ---------------- Swap Animation Particles ---------------- */}
+      {particles.map(particle => (
+        <motion.div
+          key={particle.id}
+          className="absolute w-[2px] h-[2px] bg-[#d9e92b] rounded-full z-30"
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+          }}
+          animate={{
+            x: [0, swapX, 0],
+            y: [0, swapY, 0],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            ease: "easeOut",
+          }}
+          onAnimationComplete={() => {
+            setParticles(prev => prev.filter(p => p.id !== particle.id));
+          }}
+        />
+      ))}
 
       {/* ---------------- Content ---------------- */}
       <div className="relative z-20 mx-auto px-4">
 
-        {/* Badge */}
+        {/* Enhanced Badge */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex justify-center"
+          className="mb-12 flex justify-center"
+          onHoverStart={() => setGlitch(true)}
+          onHoverEnd={() => setGlitch(false)}
         >
-          <div className="relative flex items-center gap-2 rounded-full
-                          border border-white/10 bg-white/5 px-5 py-2 backdrop-blur-md">
-            <Sparkles className="h-4 w-4 text-[#d9e92b]" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">
-              Next Gen Creation
+          <motion.div
+            animate={glitch ? {
+              x: [0, -2, 2, -1, 1, 0],
+              y: [0, 1, -1, 0.5, -0.5, 0],
+            } : {}}
+            transition={{ duration: 0.3 }}
+            className="relative flex items-center gap-3 rounded-full
+                       border border-white/20 bg-gradient-to-r from-black/30 to-black/10 
+                       px-6 py-3 backdrop-blur-xl shadow-2xl shadow-black/50
+                       hover:shadow-[#d9e92b]/20 hover:border-[#d9e92b]/30 transition-all duration-300"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="relative"
+            >
+              <Sparkles className="h-5 w-5 text-[#d9e92b]" />
+            </motion.div>
+            <span className="text-sm font-bold uppercase tracking-[0.3em] text-white/90 bg-gradient-to-r from-white to-[#d9e92b]/80 bg-clip-text text-transparent">
+              Quantum Creation Engine
             </span>
-          </div>
+            <motion.div
+              className="absolute -inset-1 rounded-full bg-[#d9e92b]/10 blur-md -z-10"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </motion.div>
         </motion.div>
 
-        {/* ---------------- Title ---------------- */}
+        {/* ---------------- Enhanced Title with Trail Effect ---------------- */}
         <div className="relative flex items-baseline justify-center gap-2 md:gap-4">
-
-          {/* V */}
+          
+          {/* V with trail effect */}
           <div ref={vRef} className="relative">
+            <motion.div
+              className="absolute inset-0 blur-xl opacity-50"
+              animate={{
+                x: [0, swapX, swapX, 0],
+                y: [0, -45, -45, 0],
+                scale: [1, 1.1, 1.1, 1],
+              }}
+              transition={{
+                duration: 3,
+                times: [0, 0.4, 0.6, 1],
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+            >
+              <div className="font-satoshi text-[20vw] sm:text-[220px] font-black text-[#d9e92b]/30">
+                V
+              </div>
+            </motion.div>
+            
             <motion.h1
               animate={{
                 x: [0, swapX, swapX, 0],
-                y: [0, -40, -40, 0],
+                y: [0, -45, -45, 0],
                 rotate: [0, 180, 180, 360],
-                zIndex: [1, 10, 10, 1],
+                scale: [1, 1.1, 1.1, 1],
               }}
               transition={{
                 duration: 3,
@@ -127,28 +273,61 @@ export const Hero = () => {
                 repeatDelay: 3,
               }}
               className="font-satoshi text-[20vw] sm:text-[220px]
-                         font-black leading-none tracking-tighter
+                         font-black leading-none tracking-tighter relative
                          text-transparent bg-clip-text
-                         bg-gradient-to-b from-white to-[#d9e92b]"
+                         bg-gradient-to-b from-white via-[#d9e92b] to-[#ffed4e]
+                         drop-shadow-[0_0_30px_rgba(217,233,43,0.3)]"
             >
               V
             </motion.h1>
           </div>
 
-          {/* ibe */}
-          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
-                         font-black leading-none tracking-tighter text-white">
-            ibe
-          </h1>
+          {/* ibe with glow */}
+          <motion.h1 
+            className="font-satoshi text-[14vw] sm:text-[160px]
+                       font-black leading-none tracking-tighter relative"
+            animate={{
+              textShadow: [
+                "0 0 20px rgba(255,255,255,0.3)",
+                "0 0 40px rgba(217,233,43,0.5)",
+                "0 0 20px rgba(255,255,255,0.3)",
+              ],
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-white drop-shadow-[0_0_20px_rgba(217,233,43,0.3)]">
+              ibe
+            </span>
+          </motion.h1>
 
-          {/* A */}
+          {/* A with trail effect */}
           <div ref={aRef} className="relative">
+            <motion.div
+              className="absolute inset-0 blur-xl opacity-50"
+              animate={{
+                x: [0, -swapX, -swapX, 0],
+                y: [0, 40, 40, 0],
+                scale: [1, 1.1, 1.1, 1],
+              }}
+              transition={{
+                duration: 3,
+                times: [0, 0.4, 0.6, 1],
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+            >
+              <div className="font-satoshi text-[20vw] sm:text-[220px] font-black text-[#d9e92b]/30">
+                A
+              </div>
+            </motion.div>
+            
             <motion.h1
               animate={{
                 x: [0, -swapX, -swapX, 0],
                 y: [0, 40, 40, 0],
                 rotate: [0, -180, -180, -360],
-                zIndex: [1, 10, 10, 1],
+                scale: [1, 1.1, 1.1, 1],
               }}
               transition={{
                 duration: 3,
@@ -158,62 +337,202 @@ export const Hero = () => {
                 repeatDelay: 3,
               }}
               className="font-satoshi text-[20vw] sm:text-[220px]
-                         font-black leading-none tracking-tighter
+                         font-black leading-none tracking-tighter relative
                          text-transparent bg-clip-text
-                         bg-gradient-to-b from-[#d9e92b] via-white to-[#d9e92b]"
+                         bg-gradient-to-b from-[#ffed4e] via-white to-[#d9e92b]
+                         drop-shadow-[0_0_30px_rgba(217,233,43,0.3)]"
             >
               A
             </motion.h1>
           </div>
 
-          {/* rt */}
-          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
-                         font-black leading-none tracking-tighter text-white">
-            rt
-          </h1>
+          {/* rt with glow */}
+          <motion.h1 
+            className="font-satoshi text-[14vw] sm:text-[160px]
+                       font-black leading-none tracking-tighter relative"
+            animate={{
+              textShadow: [
+                "0 0 20px rgba(255,255,255,0.3)",
+                "0 0 40px rgba(217,233,43,0.5)",
+                "0 0 20px rgba(255,255,255,0.3)",
+              ],
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-white drop-shadow-[0_0_20px_rgba(217,233,43,0.3)]">
+              rt
+            </span>
+          </motion.h1>
         </div>
 
-        {/* ---------------- Subtitle ---------------- */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mx-auto mt-10 max-w-xl text-lg sm:text-xl text-white/60"
-        >
-          Unleash the <span className="font-bold text-white">Power</span> of AI.
-          <br />
-          Generate ultra-detailed assets in seconds.
-        </motion.p>
+        {/* ---------------- Connection Line Animation ---------------- */}
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-[2px] bg-gradient-to-r from-transparent via-[#d9e92b] to-transparent z-0"
+          animate={{
+            width: ["0%", "100%", "0%"],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 3,
+            times: [0, 0.5, 1],
+            repeat: Infinity,
+            repeatDelay: 3,
+            ease: "easeInOut",
+          }}
+        />
 
-        {/* ---------------- Actions ---------------- */}
+        {/* ---------------- Enhanced Subtitle ---------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mx-auto mt-12 max-w-2xl"
+        >
+          <motion.p
+            className="text-2xl sm:text-3xl text-white/70 font-light leading-relaxed"
+            animate={{
+              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            style={{
+              background: "linear-gradient(90deg, #d9e92b, #ffffff, #d9e92b)",
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Where <span className="font-bold text-white">AI Imagination</span> meets
+            <br />
+            <span className="font-bold text-white">Infinite Creation</span>
+          </motion.p>
+          
+          {/* Stats Counter */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-8 flex justify-center gap-8 text-sm text-white/40"
+          >
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#d9e92b]">10K+</div>
+              <div>Assets Generated</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#d9e92b]">2.4s</div>
+              <div>Average Generation</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#d9e92b]">99%</div>
+              <div>Accuracy Rate</div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* ---------------- Enhanced Actions ---------------- */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-12 flex justify-center gap-5 flex-wrap"
+          className="mt-16 flex justify-center gap-6 flex-wrap"
         >
-          <button className="group flex items-center gap-3 rounded-full
-                             bg-[#d9e92b] px-8 py-4 text-lg font-black text-black
-                             shadow-[0_0_30px_rgba(217,233,43,0.4)]
-                             transition hover:scale-105 active:scale-95">
-            START CREATING
-            <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-          </button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative rounded-full overflow-hidden"
+          >
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-[#d9e92b] to-[#ffed4e]"
+              animate={{
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <div className="relative flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-[#d9e92b] to-[#ffed4e] rounded-full">
+              <span className="text-lg font-black text-black">
+                START CREATING
+              </span>
+              <motion.div
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <ArrowRight className="h-6 w-6 text-black transition group-hover:translate-x-1" />
+              </motion.div>
+            </div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#d9e92b] to-[#ffed4e] blur-xl opacity-50 -z-10 group-hover:opacity-70 transition-opacity" />
+          </motion.button>
 
-          <button className="flex items-center gap-3 rounded-full
-                             border border-white/10 bg-white/5
-                             px-8 py-4 text-lg font-bold text-white
-                             backdrop-blur-sm hover:bg-white/10">
-            <Play className="h-5 w-5 text-[#d9e92b]" />
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group flex items-center gap-3 rounded-full
+                       border border-white/20 bg-gradient-to-r from-white/5 to-white/10
+                       px-10 py-5 text-lg font-bold text-white backdrop-blur-xl
+                       hover:border-[#d9e92b]/30 hover:bg-white/15 transition-all"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Play className="h-6 w-6 text-[#d9e92b]" />
+            </motion.div>
             WATCH DEMO
-          </button>
+          </motion.button>
+        </motion.div>
+
+        {/* ---------------- Scroll Indicator ---------------- */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-white/30"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </motion.div>
         </motion.div>
       </div>
 
-      {/* ---------------- Noise ---------------- */}
+      {/* ---------------- Enhanced Noise Layer ---------------- */}
       <div className="pointer-events-none absolute inset-0 z-50
                       bg-[url('https://grainy-gradients.vercel.app/noise.svg')]
-                      opacity-20 contrast-150" />
+                      opacity-[0.03] contrast-150 mix-blend-overlay" />
+
+      {/* ---------------- Floating Elements ---------------- */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-[#d9e92b] rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.3, 1, 0.3],
+            }}
+            transition={{
+              duration: 2 + Math.random() * 2,
+              delay: i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
     </section>
   );
 };
