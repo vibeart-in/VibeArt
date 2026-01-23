@@ -115,7 +115,7 @@ export const Hero = () => {
             <motion.h1
               animate={{
                 x: [0, swapX, swapX, 0],
-                y: [0, -45, -45, 0],
+                y: [0, -40, -40, 0],
                 rotate: [0, 180, 180, 360],
                 zIndex: [1, 10, 10, 1],
               }}

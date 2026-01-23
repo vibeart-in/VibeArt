@@ -10,6 +10,8 @@ import {
   AiAppsCarousel,
   StickyPromptInput
 } from "../../components/landing/LandingComponents";
+import ContactUs from "@/src/components/landing/ContactUs";
+import PrivacySection from "@/src/components/landing/PrivacySection";
 
 export default function LandingPage() {
   return (
@@ -63,6 +65,12 @@ export default function LandingPage() {
       <TestimonialsSection />
 
       <FooterCTA />
+
+      <ContactUs />
+
+      <PrivacySection />
+
+      {/* <Footer /> */}
 
       <StickyPromptInput />
 
