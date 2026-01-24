@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate, useMotionValue } from "framer-motion";
 import { ArrowRight, Check, Star, Play, ShoppingBag, Layout, Camera, Share2, Monitor, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -8,217 +8,1278 @@ import { cn } from "../../lib/utils";
 import { AI_APPS } from "../../constants/aiApps";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+// --- Animated Text Component ---
+interface AnimatedTextProps {
+  text: string;
+  className?: string;
+}
+
+const AnimatedText: React.FC<AnimatedTextProps> = ({ text, className }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, 50); // Typing speed - adjust as needed
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  return (
+    <motion.p
+      className={className}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {displayedText}
+      <motion.span
+        className="inline-block w-0.5 h-5 bg-[#d9e92b] ml-1"
+        animate={{ opacity: [1, 0, 1] }}
+        transition={{ duration: 0.8, repeat: Infinity }}
+      />
+    </motion.p>
+  );
+};
+
 // --- Hero Section ---
 
 
 export const Hero = () => {
   /** ------------------------------
-   *  Cursor spotlight
+   *  Particle System
+   *  ------------------------------ */
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    speedX: number;
+    speedY: number;
+    opacity: number;
+  }>>([]);
+
+  useEffect(() => {
+    const newParticles = Array.from({ length: 40 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 1,
+      speedX: (Math.random() - 0.5) * 0.2,
+      speedY: (Math.random() - 0.5) * 0.2,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  /** ------------------------------
+   *  Morphing "V" ↔ "A" Animation
+   *  ------------------------------ */
+  const [isMorphing, setIsMorphing] = useState(false);
+  const morphCount = useRef(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsMorphing(true);
+      setTimeout(() => setIsMorphing(false), 1000);
+      morphCount.current++;
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /** ------------------------------
+   *  Floating Grid Background
    *  ------------------------------ */
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 });
-  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 });
-
   function handleMouseMove(e: React.MouseEvent) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
   }
 
-  const spotlightStyle = useTransform(
-    [smoothX, smoothY],
-    ([x, y]) =>
-      `radial-gradient(600px circle at ${x}px ${y}px, rgba(217,233,43,0.15), transparent 80%)`
+  const gridX = useSpring(mouseX, { damping: 30, stiffness: 100 });
+  const gridY = useSpring(mouseY, { damping: 30, stiffness: 100 });
+
+  const gridTransform = useTransform(
+    [gridX, gridY],
+    ([x, y]) => `translate(${x * 0.01}px, ${y * 0.01}px)`
   );
 
   /** ------------------------------
-   *  Measure V ↔ A distance
+   *  Neural Network Connections
    *  ------------------------------ */
-  const vRef = useRef<HTMLDivElement>(null);
-  const aRef = useRef<HTMLDivElement>(null);
-  const [swapX, setSwapX] = useState(0);
+  const [connections, setConnections] = useState<
+    Array<{ id: number; x1: number; y1: number; x2: number; y2: number }>
+  >([]);
 
-  useLayoutEffect(() => {
-    if (vRef.current && aRef.current) {
-      const vBox = vRef.current.getBoundingClientRect();
-      const aBox = aRef.current.getBoundingClientRect();
-      setSwapX(aBox.left - vBox.left);
-    }
+  useEffect(() => {
+    const newConnections = Array.from({ length: 12 }).map((_, i) => ({
+      id: i,
+      x1: Math.random() * 100,
+      y1: Math.random() * 100,
+      x2: Math.random() * 100,
+      y2: Math.random() * 100,
+    }));
+    setConnections(newConnections);
   }, []);
 
   return (
     <section
       onMouseMove={handleMouseMove}
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden
-                 bg-[#050505] text-center selection:bg-[#d9e92b]/30"
+                 bg-gradient-to-br from-[#0a0a0a] via-black to-[#1a1a2e]"
     >
-      {/* ---------------- Video Layer ---------------- */}
-      <div className="absolute inset-0 z-0 opacity-30 mix-blend-screen grayscale">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="h-full w-full object-cover"
-        >
-          <source src="/your-abstract-ai-video.mp4" type="video/mp4" />
-        </video>
-      </div>
-
-      {/* ---------------- Spotlight ---------------- */}
+      {/* ---------------- Floating Grid Background ---------------- */}
       <motion.div
-        className="pointer-events-none absolute inset-0 z-10"
-        style={{ background: spotlightStyle }}
-      />
+        className="absolute inset-0 z-0"
+        style={{ transform: gridTransform }}
+      >
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,#111_1px,transparent_1px),linear-gradient(#111_1px,transparent_1px)] bg-[size:80px_80px] opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#d9e92b]/5 to-transparent" />
+      </motion.div>
 
-      {/* ---------------- Mesh Blobs ---------------- */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[10%] -left-[10%] h-[70%] w-[70%]
-                     rounded-full bg-[#d9e92b]/10 blur-[120px]"
-        />
-        <motion.div
-          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[10%] -right-[10%] h-[70%] w-[70%]
-                     rounded-full bg-[#d9e92b]/5 blur-[120px]"
-        />
+      {/* ---------------- Animated Particles ---------------- */}
+      <div className="absolute inset-0 z-1 overflow-hidden">
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-[#d9e92b]"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: particle.size,
+              height: particle.size,
+              opacity: particle.opacity,
+            }}
+            animate={{
+              x: [0, particle.speedX * 100, 0],
+              y: [0, particle.speedY * 100, 0],
+            }}
+            transition={{
+              duration: 4 + Math.random() * 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
-      {/* ---------------- Content ---------------- */}
-      <div className="relative z-20 mx-auto px-4">
+      {/* ---------------- Neural Network Lines ---------------- */}
+      <svg className="absolute inset-0 z-2 h-full w-full opacity-10">
+        {connections.map((conn) => (
+          <motion.line
+            key={conn.id}
+            x1={`${conn.x1}%`}
+            y1={`${conn.y1}%`}
+            x2={`${conn.x2}%`}
+            y2={`${conn.y2}%`}
+            stroke="#d9e92b"
+            strokeWidth="0.5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{
+              duration: 2,
+              delay: conn.id * 0.1,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+        ))}
+      </svg>
 
-        {/* Badge */}
+      {/* ---------------- Main Content ---------------- */}
+      <div className="relative z-30 mx-auto px-4 text-center">
+
+        {/* Animated Badge */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-12 inline-block"
         >
-          <div className="relative flex items-center gap-2 rounded-full
-                          border border-white/10 bg-white/5 px-5 py-2 backdrop-blur-md">
-            <Sparkles className="h-4 w-4 text-[#d9e92b]" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">
-              Next Gen Creation
-            </span>
+          <div className="relative">
+            <div className="absolute -inset-1 animate-pulse rounded-full bg-gradient-to-r from-[#d9e92b] to-cyan-400 opacity-70 blur" />
+            <div className="relative flex items-center gap-2 rounded-full
+                            border border-white/20 bg-black/50 px-6 py-3 backdrop-blur-md">
+              <div className="flex h-2 w-2">
+                <div className="absolute h-2 w-2 animate-ping rounded-full bg-[#d9e92b]" />
+                <div className="h-2 w-2 rounded-full bg-[#d9e92b]" />
+              </div>
+              <span className="text-sm font-bold uppercase tracking-[0.3em] text-white">
+                AI-Powered Creation
+              </span>
+            </div>
           </div>
         </motion.div>
 
-        {/* ---------------- Title ---------------- */}
-        <div className="relative flex items-baseline justify-center gap-2 md:gap-4">
+        {/* ---------------- Title with Morphing Letters ---------------- */}
+        <div className="relative mb-8">
+          <div className="relative flex items-center justify-center gap-1 md:gap-3">
+            {/* "Vibe Art" Text */}
+            <h1 className="font-satoshi text-[18vw] sm:text-[200px]
+                           font-black leading-none tracking-tighter
+                           bg-gradient-to-r from-white via-white to-[#d9e92b]
+                           bg-clip-text text-transparent">
+              VibeArt
+            </h1>
 
-          {/* V */}
-          <div ref={vRef} className="relative">
-            <motion.h1
-              animate={{
-                x: [0, swapX, swapX, 0],
-                y: [0, -40, -40, 0],
-                rotate: [0, 180, 180, 360],
-                zIndex: [1, 10, 10, 1],
-              }}
-              transition={{
-                duration: 3,
-                times: [0, 0.4, 0.6, 1],
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatDelay: 3,
-              }}
-              className="font-satoshi text-[20vw] sm:text-[220px]
-                         font-black leading-none tracking-tighter
-                         text-transparent bg-clip-text
-                         bg-gradient-to-b from-white to-[#d9e92b]"
-            >
-              V
-            </motion.h1>
+            {/* Morphing "V" ↔ "A" Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                className="absolute"
+                animate={{
+                  scale: isMorphing ? [1, 1.5, 1] : 1,
+                  opacity: isMorphing ? [0.3, 0.8, 0.3] : 0,
+                }}
+                transition={{ duration: 1 }}
+              >
+                <div className="relative">
+                  {/* Morphing "V" to "A" */}
+                  <motion.svg
+                    width="180"
+                    height="180"
+                    viewBox="0 0 100 100"
+                    className="sm:w-[220px] sm:h-[220px]"
+                    animate={isMorphing ? "morph" : "initial"}
+                    variants={{
+                      initial: { opacity: 0 },
+                      morph: { opacity: 1 },
+                    }}
+                  >
+                    <motion.path
+                      d={isMorphing ? 
+                        "M20,80 L50,20 L80,80" : // V shape
+                        "M20,80 L50,20 L80,80 L65,50 L35,50 Z" // A shape with crossbar
+                      }
+                      fill="none"
+                      stroke="url(#gradient)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.5 }}
+                    />
+                    <defs>
+                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#d9e92b" />
+                        <stop offset="100%" stopColor="#00d4ff" />
+                      </linearGradient>
+                    </defs>
+                  </motion.svg>
+
+                  {/* Pulsing Rings */}
+                  {isMorphing && (
+                    <>
+                      <motion.div
+                        className="absolute inset-0 -z-10 mx-auto my-auto h-full w-full rounded-full border border-[#d9e92b]/30"
+                        initial={{ scale: 0.5, opacity: 1 }}
+                        animate={{ scale: 2, opacity: 0 }}
+                        transition={{ duration: 1 }}
+                      />
+                      <motion.div
+                        className="absolute inset-0 -z-10 mx-auto my-auto h-full w-full rounded-full border border-cyan-400/30"
+                        initial={{ scale: 0.5, opacity: 1 }}
+                        animate={{ scale: 1.8, opacity: 0 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                      />
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </div>
           </div>
 
-          {/* ibe */}
-          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
-                         font-black leading-none tracking-tighter text-white">
-            ibe
-          </h1>
-
-          {/* A */}
-          <div ref={aRef} className="relative">
-            <motion.h1
-              animate={{
-                x: [0, -swapX, -swapX, 0],
-                y: [0, 40, 40, 0],
-                rotate: [0, -180, -180, -360],
-                zIndex: [1, 10, 10, 1],
-              }}
-              transition={{
-                duration: 3,
-                times: [0, 0.4, 0.6, 1],
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatDelay: 3,
-              }}
-              className="font-satoshi text-[20vw] sm:text-[220px]
-                         font-black leading-none tracking-tighter
-                         text-transparent bg-clip-text
-                         bg-gradient-to-b from-[#d9e92b] via-white to-[#d9e92b]"
-            >
-              A
-            </motion.h1>
-          </div>
-
-          {/* rt */}
-          <h1 className="font-satoshi text-[14vw] sm:text-[160px]
-                         font-black leading-none tracking-tighter text-white">
-            rt
-          </h1>
+          {/* Animated Underline */}
+          <motion.div
+            className="mx-auto mt-4 h-1 w-32 bg-gradient-to-r from-transparent via-[#d9e92b] to-transparent"
+            animate={{
+              scaleX: [0, 1, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 1,
+            }}
+          />
         </div>
 
-        {/* ---------------- Subtitle ---------------- */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mx-auto mt-10 max-w-xl text-lg sm:text-xl text-white/60"
-        >
-          Unleash the <span className="font-bold text-white">Power</span> of AI.
-          <br />
-          Generate ultra-detailed assets in seconds.
-        </motion.p>
-
-        {/* ---------------- Actions ---------------- */}
+        {/* ---------------- Animated Subtitle ---------------- */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-12 flex justify-center gap-5 flex-wrap"
+          transition={{ delay: 0.4 }}
+          className="relative"
         >
-          <button className="group flex items-center gap-3 rounded-full
-                             bg-[#d9e92b] px-8 py-4 text-lg font-black text-black
-                             shadow-[0_0_30px_rgba(217,233,43,0.4)]
-                             transition hover:scale-105 active:scale-95">
-            START CREATING
-            <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-          </button>
+          <motion.p
+            animate={{
+              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+            }}
+            className="mx-auto mb-6 max-w-2xl bg-gradient-to-r from-white via-[#d9e92b] to-white 
+                       bg-[length:200%_auto] bg-clip-text text-2xl sm:text-3xl 
+                       font-medium text-transparent"
+          >
+            Where Creativity Meets Artificial Intelligence
+          </motion.p>
 
-          <button className="flex items-center gap-3 rounded-full
-                             border border-white/10 bg-white/5
-                             px-8 py-4 text-lg font-bold text-white
-                             backdrop-blur-sm hover:bg-white/10">
-            <Play className="h-5 w-5 text-[#d9e92b]" />
-            WATCH DEMO
-          </button>
+          <p className="mx-auto max-w-xl text-lg text-white/50">
+            Generate stunning visuals, animations, and assets with our 
+            <span className="font-bold text-[#d9e92b]"> next-generation AI engine</span>.
+            No skills required.
+          </p>
+        </motion.div>
+
+        {/* ---------------- Interactive Buttons ---------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, type: "spring" }}
+          className="mt-16 flex flex-col items-center gap-6 sm:flex-row sm:justify-center"
+        >
+          {/* Primary Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative overflow-hidden rounded-full px-10 py-4
+                       text-lg font-bold shadow-2xl"
+          >
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-[#d9e92b] to-cyan-400"
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+              }}
+              style={{
+                backgroundSize: "200% 200%",
+              }}
+            />
+            <div className="absolute inset-0.5 rounded-full bg-black" />
+            <span className="relative z-10 flex items-center gap-3
+                             bg-gradient-to-r from-[#d9e92b] to-cyan-400 
+                             bg-clip-text text-transparent">
+              <Sparkles className="h-5 w-5" />
+              Start Creating Free
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </span>
+          </motion.button>
+
+          {/* Secondary Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative overflow-hidden rounded-full
+                       border border-white/20 bg-white/5 px-10 py-4
+                       text-lg font-bold text-white backdrop-blur-md"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
+                            translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+            <span className="relative z-10 flex items-center gap-3">
+              <Play className="h-5 w-5 text-[#d9e92b]" />
+              Watch Demo (2 min)
+            </span>
+          </motion.button>
+        </motion.div>
+
+        {/* ---------------- Stats Bar ---------------- */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
+        >
+          {[
+            { value: "10M+", label: "Assets Generated" },
+            { value: "99.9%", label: "Uptime" },
+            { value: "2s", label: "Generation Time" },
+          ].map((stat, index) => (
+            <div key={index} className="text-center">
+              <motion.div
+                className="text-3xl font-black text-[#d9e92b]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 + index * 0.1 }}
+              >
+                {stat.value}
+              </motion.div>
+              <div className="mt-2 text-sm text-white/40 uppercase tracking-wider">
+                {stat.label}
+              </div>
+            </div>
+          ))}
         </motion.div>
       </div>
 
-      {/* ---------------- Noise ---------------- */}
-      <div className="pointer-events-none absolute inset-0 z-50
-                      bg-[url('https://grainy-gradients.vercel.app/noise.svg')]
-                      opacity-20 contrast-150" />
+      {/* ---------------- Floating Elements ---------------- */}
+      <motion.div
+        className="absolute left-1/4 top-1/4 h-20 w-20 rounded-full bg-gradient-to-br from-[#d9e92b]/20 to-cyan-400/20 blur-xl"
+        animate={{
+          y: [0, -30, 0],
+          rotate: [0, 180, 360],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute right-1/4 bottom-1/4 h-32 w-32 rounded-full bg-gradient-to-br from-cyan-400/10 to-[#d9e92b]/10 blur-xl"
+        animate={{
+          y: [0, 40, 0],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
+      />
+
+      {/* ---------------- Scan Line Effect ---------------- */}
+      <motion.div
+        className="absolute inset-x-0 top-0 z-40 h-px bg-gradient-to-r from-transparent via-[#d9e92b] to-transparent"
+        animate={{
+          top: ["0%", "100%", "0%"],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          repeatDelay: 2,
+        }}
+      />
     </section>
   );
 };
+export const Hero1 = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const [particles, setParticles] = useState<Array<{ x: number; y: number }>>([]);
 
+  // Neural connection particles
+  useEffect(() => {
+    const newParticles = Array.from({ length: 50 }).map(() => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+    }));
+    setParticles(newParticles);
+  }, []);
 
+  function handleMouseMove(e: React.MouseEvent) {
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+  }
+
+  return (
+    <section
+      onMouseMove={handleMouseMove}
+      className="relative min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#111111] overflow-hidden"
+    >
+      {/* Neural Network Background */}
+      <div className="absolute inset-0">
+        <svg className="w-full h-full opacity-30">
+          <defs>
+            <linearGradient id="neural-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#d9e92b" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#00d4ff" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#d9e92b" stopOpacity="0.2" />
+            </linearGradient>
+          </defs>
+          {particles.map((p, i) => (
+            <circle
+              key={i}
+              cx={`${p.x}%`}
+              cy={`${p.y}%`}
+              r="2"
+              fill="url(#neural-grad)"
+            >
+              <animate
+                attributeName="r"
+                values="2;4;2"
+                dur={`${Math.random() * 2 + 1}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+          ))}
+        </svg>
+      </div>
+
+      {/* Interactive 3D Grid */}
+      <motion.div
+        className="absolute inset-0 grid grid-cols-20 grid-rows-20 gap-1 opacity-10"
+        style={{
+          perspective: "1000px",
+        }}
+      >
+        {Array.from({ length: 400 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="bg-white/5 rounded-sm"
+            animate={{
+              rotateX: [0, 180, 0],
+              rotateY: [0, 180, 0],
+            }}
+            transition={{
+              duration: 10,
+              delay: i * 0.01,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Holographic Title */}
+      <div className="relative z-50 min-h-screen flex flex-col items-center justify-center">
+        <div className="relative">
+          {/* Glitch Effect Background */}
+          <motion.div
+            className="absolute -inset-4 bg-gradient-to-r from-[#d9e92b] via-[#00d4ff] to-[#d9e92b] opacity-20 blur-3xl"
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 90, 0],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          <h1 className="relative text-[180px] font-black tracking-tighter">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d9e92b] via-white to-[#00d4ff]">
+              VIBEART
+            </span>
+            
+            {/* Holographic Scan Line */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-b from-transparent via-[#d9e92b]/30 to-transparent"
+              animate={{ y: ["-100%", "100%"] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              style={{ height: "4px" }}
+            />
+          </h1>
+        </div>
+
+        {/* Animated Subtitle with Typing Effect */}
+        <AnimatedText
+          className="mt-8 text-xl text-white/70 font-light"
+          text="WHERE AI MEETS INFINITE CREATION"
+        />
+      </div>
+    </section>
+  );
+};
+export const Hero2 = () => {
+  const [activeShape, setActiveShape] = useState(0);
+  const pathVariants = [
+    "M0,0 Q50,50 100,0 T200,0 T300,0 T400,0",
+    "M0,0 Q50,20 100,40 T200,60 T300,40 T400,0",
+    "M0,0 Q50,-30 100,0 T200,30 T300,0 T400,0",
+  ];
+
+  return (
+    <section className="relative min-h-screen bg-[#050505] overflow-hidden">
+      {/* Liquid Background */}
+      <div className="absolute inset-0">
+        <svg className="w-full h-full" viewBox="0 0 400 200">
+          <defs>
+            <linearGradient id="liquid-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#d9e92b" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#00d4ff" stopOpacity="0.3" />
+            </linearGradient>
+          </defs>
+          <motion.path
+            d={pathVariants[activeShape]}
+            fill="url(#liquid-grad)"
+            animate={{
+              d: pathVariants,
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            onAnimationComplete={() => {
+              setActiveShape((prev) => (prev + 1) % pathVariants.length);
+            }}
+          />
+        </svg>
+      </div>
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-32 h-32 rounded-full"
+            style={{
+              background: `radial-gradient(circle at center, ${
+                i % 2 === 0 ? "#d9e92b" : "#00d4ff"
+              }20, transparent 70%)`,
+            }}
+            animate={{
+              x: [0, Math.random() * 100 - 50],
+              y: [0, Math.random() * 100 - 50],
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 8 + Math.random() * 4,
+              delay: i * 0.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-50 min-h-screen flex flex-col items-center justify-center">
+        {/* Animated Logo */}
+        <motion.div
+          className="relative mb-12"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="relative">
+            <motion.div
+              className="absolute -inset-6 rounded-full border-2"
+              animate={{
+                borderColor: ["#d9e92b", "#00d4ff", "#d9e92b"],
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+            <h1 className="text-[160px] font-black tracking-tighter bg-gradient-to-r from-[#d9e92b] via-white to-[#00d4ff] bg-clip-text text-transparent">
+              VIBEART
+            </h1>
+          </div>
+        </motion.div>
+
+        {/* Interactive CTA */}
+        <motion.div
+          className="relative group"
+          whileHover="hover"
+          initial="initial"
+          animate="animate"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#d9e92b] to-[#00d4ff] rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500" />
+          <button className="relative px-12 py-6 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 text-white text-xl font-bold group-hover:bg-white/10 transition-all duration-300">
+            <span className="flex items-center gap-3">
+              LAUNCH CREATOR
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                ⟳
+              </motion.span>
+            </span>
+          </button>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+export const Hero3 = () => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [gridTilt, setGridTilt] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      setGridTilt({
+        x: (e.clientY / window.innerHeight - 0.5) * 10,
+        y: -(e.clientX / window.innerWidth - 0.5) * 10,
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  return (
+    <section className="relative min-h-screen bg-[#050505] overflow-hidden">
+      {/* Interactive 3D Grid */}
+      <motion.div
+        className="absolute inset-0 grid grid-cols-40 grid-rows-20 gap-2"
+        style={{
+          transform: `rotateX(${gridTilt.x}deg) rotateY(${gridTilt.y}deg)`,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {Array.from({ length: 800 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="bg-gradient-to-b from-[#d9e92b]/10 to-transparent border border-white/5 rounded-sm"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 2 + Math.random(),
+              delay: Math.random() * 2,
+              repeat: Infinity,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Data Stream Lines */}
+      <div className="absolute inset-0 overflow-hidden">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute top-0 h-0.5 bg-gradient-to-r from-transparent via-[#d9e92b] to-transparent"
+            style={{ left: `${i * 10}%` }}
+            animate={{ top: ["0%", "100%", "0%"] }}
+            transition={{
+              duration: 3,
+              delay: i * 0.3,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-50 min-h-screen flex flex-col items-center justify-center p-4">
+        {/* Binary Rain */}
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute text-[#d9e92b] font-mono text-sm"
+              style={{ left: `${Math.random() * 100}%` }}
+              animate={{ top: ["-10%", "110%"] }}
+              transition={{
+                duration: 10 + Math.random() * 10,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            >
+              {Array.from({ length: 10 })
+                .map(() => Math.round(Math.random()))
+                .join("")}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Animated Title */}
+        <div className="relative">
+          <motion.h1
+            className="text-[180px] font-black tracking-tighter mb-4"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+          >
+            <span className="relative">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d9e92b] via-white to-[#d9e92b]">
+                VIBE
+              </span>
+              <motion.span
+                className="absolute -inset-0 blur-2xl opacity-30"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #d9e92b, #ffffff, #d9e92b)",
+                }}
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              />
+            </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#d9e92b] to-white ml-4">
+              ART
+            </span>
+          </motion.h1>
+
+          {/* Rotating Orbital */}
+          <motion.div
+            className="absolute -top-20 -right-20 w-40 h-40 rounded-full border-2 border-[#d9e92b]/30"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          >
+            {Array.from({ length: 8 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-4 h-4 bg-[#d9e92b] rounded-full"
+                style={{
+                  left: `${Math.cos((i * Math.PI) / 4) * 70 + 70}px`,
+                  top: `${Math.sin((i * Math.PI) / 4) * 70 + 70}px`,
+                }}
+                animate={{ scale: [1, 1.5, 1] }}
+                transition={{
+                  duration: 2,
+                  delay: i * 0.2,
+                  repeat: Infinity,
+                }}
+              />
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Futuristic Navigation */}
+        <div className="mt-16 flex gap-8">
+          {["CREATE", "EXPLORE", "SHARE", "EARN"].map((item, i) => (
+            <motion.button
+              key={item}
+              className="relative px-8 py-4 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold overflow-hidden group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-[#d9e92b]/20 to-[#00d4ff]/20"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "0%" }}
+                transition={{ duration: 0.3 }}
+              />
+              <span className="relative">{item}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+export const Hero4 = () => {
+  const [activePhase, setActivePhase] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Quantum state particles
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    color: string;
+    phase: number;
+  }>>([]);
+
+  // Initialize quantum particles
+  useEffect(() => {
+    const quantumParticles = Array.from({ length: 200 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 1,
+      color: i % 3 === 0 ? "#d9e92b" : i % 3 === 1 ? "#00d4ff" : "#ff00ff",
+      phase: Math.random() * Math.PI * 2,
+    }));
+    setParticles(quantumParticles);
+  }, []);
+
+  // Create quantum entanglement effect
+  const quantumEntanglement = (x: number, y: number) => {
+    return `radial-gradient(600px at ${x}px ${y}px, 
+      rgba(217, 233, 43, 0.15) 0%,
+      rgba(0, 212, 255, 0.1) 25%,
+      rgba(255, 0, 255, 0.05) 50%,
+      transparent 80%)`;
+  };
+
+  // Morphing letters animation
+  const letterMorphs = [
+    // Phase 0: Base
+    {
+      V: "M20,80 L50,20 L80,80",
+      I: "M110,20 L110,80",
+      B: "M130,20 Q160,20 160,40 Q160,60 130,60 Q160,60 160,80 Q160,100 130,100",
+      E: "M180,20 L220,20 L180,20 L180,50 L210,50 L180,50 L180,80 L220,80",
+      A: "M240,80 L270,20 L300,80 M255,50 L285,50",
+      R: "M320,20 L320,80 Q350,20 320,50 Q350,80 320,80",
+      T: "M360,20 L400,20 L380,20 L380,80"
+    },
+    // Phase 1: Quantum state
+    {
+      V: "M20,80 L40,40 L60,60 L80,20",
+      I: "M110,30 Q130,20 110,50 Q90,70 110,80",
+      B: "M130,20 C160,10 170,40 160,60 C170,80 140,90 130,80",
+      E: "M180,20 C200,15 210,35 200,50 C210,65 190,75 180,80",
+      A: "M240,80 C260,70 280,30 270,20 C260,40 270,60 255,50",
+      R: "M320,20 C340,30 350,50 330,70 C350,85 320,90 320,80",
+      T: "M360,20 C380,25 400,25 380,50 C370,70 390,80 380,80"
+    },
+    // Phase 2: Wave form
+    {
+      V: "M20,80 C30,60 40,40 50,20 C60,40 70,60 80,80",
+      I: "M110,20 C105,40 115,60 110,80",
+      B: "M130,20 C150,15 160,30 160,50 C160,70 150,85 130,80",
+      E: "M180,20 C190,20 210,25 200,40 C210,55 190,65 180,80",
+      A: "M240,80 C250,60 260,40 270,20 C280,40 290,60 300,80",
+      R: "M320,20 C330,30 340,45 320,60 C335,75 320,90 320,80",
+      T: "M360,20 C370,30 390,30 380,50 C370,70 390,80 380,80"
+    }
+  ];
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative min-h-screen bg-[#050505] overflow-hidden"
+    >
+      {/* Quantum Field Background */}
+      <div className="absolute inset-0">
+        {/* Dynamic Grid Distortion */}
+        <svg className="w-full h-full opacity-30">
+          <defs>
+            <filter id="quantum-distortion">
+              <feTurbulence 
+                type="fractalNoise" 
+                baseFrequency="0.01 0.02" 
+                numOctaves="3" 
+                result="noise"
+              />
+              <feDisplacementMap 
+                in="SourceGraphic" 
+                in2="noise" 
+                scale="20" 
+                xChannelSelector="R" 
+                yChannelSelector="G"
+              />
+            </filter>
+            <radialGradient id="quantum-glow">
+              <stop offset="0%" stopColor="#d9e92b" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#00d4ff" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#ff00ff" stopOpacity="0.1" />
+            </radialGradient>
+          </defs>
+          
+          {/* Distorted Grid */}
+          <g filter="url(#quantum-distortion)">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <line
+                key={`h-${i}`}
+                x1="0"
+                y1={`${i * 2}%`}
+                x2="100%"
+                y2={`${i * 2}%`}
+                stroke="url(#quantum-glow)"
+                strokeWidth="0.5"
+              />
+            ))}
+            {Array.from({ length: 50 }).map((_, i) => (
+              <line
+                key={`v-${i}`}
+                x1={`${i * 2}%`}
+                y1="0"
+                x2={`${i * 2}%`}
+                y2="100%"
+                stroke="url(#quantum-glow)"
+                strokeWidth="0.5"
+              />
+            ))}
+          </g>
+        </svg>
+      </div>
+
+      {/* Quantum Particles */}
+      <div className="absolute inset-0">
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: particle.size,
+              height: particle.size,
+              background: particle.color,
+              boxShadow: `0 0 10px ${particle.color}`,
+            }}
+            animate={{
+              x: [
+                `0%`,
+                `${Math.sin(particle.phase) * 100}%`,
+                `${Math.cos(particle.phase) * 50}%`,
+                `0%`
+              ],
+              y: [
+                `0%`,
+                `${Math.cos(particle.phase) * 100}%`,
+                `${Math.sin(particle.phase) * 50}%`,
+                `0%`
+              ],
+              scale: [1, 1.5, 0.5, 1],
+              opacity: [0.3, 1, 0.3, 0.3],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              delay: Math.random() * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Morphing Title */}
+      <div className="relative z-50 min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="relative mb-20">
+          {/* Animated SVG Letters */}
+          <div className="relative w-[800px] h-[200px]">
+            <svg
+              viewBox="0 0 420 120"
+              className="w-full h-full"
+            >
+              {["V", "I", "B", "E", "A", "R", "T"].map((letter, index) => (
+                <g key={letter} transform={`translate(${index * 60}, 0)`}>
+                  <motion.path
+                    d={letterMorphs[activePhase][letter as keyof typeof letterMorphs[0]]}
+                    stroke="url(#letter-gradient)"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        letterMorphs[0][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[1][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[2][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[0][letter as keyof typeof letterMorphs[0]],
+                      ],
+                    }}
+                    transition={{
+                      duration: 4,
+                      delay: index * 0.2,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    }}
+                  />
+                  {/* Glow effect */}
+                  <motion.path
+                    d={letterMorphs[activePhase][letter as keyof typeof letterMorphs[0]]}
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="blur-xl opacity-30"
+                    animate={{
+                      d: [
+                        letterMorphs[0][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[1][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[2][letter as keyof typeof letterMorphs[0]],
+                        letterMorphs[0][letter as keyof typeof letterMorphs[0]],
+                      ],
+                    }}
+                    transition={{
+                      duration: 4,
+                      delay: index * 0.2,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    }}
+                  />
+                </g>
+              ))}
+              
+              <defs>
+                <linearGradient id="letter-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#d9e92b" />
+                  <stop offset="50%" stopColor="#00d4ff" />
+                  <stop offset="100%" stopColor="#ff00ff" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Interactive Hologram */}
+            <motion.div
+              className="absolute -inset-20 rounded-full border-2 border-[#d9e92b]/20"
+              animate={{
+                rotate: 360,
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                rotate: {
+                  duration: 20,
+                  repeat: Infinity,
+                  ease: "linear",
+                },
+                scale: {
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
+            />
+          </div>
+
+          {/* Phase Changer */}
+          <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex gap-4">
+            {[0, 1, 2].map((phase) => (
+              <button
+                key={phase}
+                onClick={() => setActivePhase(phase)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  activePhase === phase 
+                    ? 'bg-[#d9e92b] scale-125' 
+                    : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Dynamic Subtitle with Wave Animation */}
+        <div className="relative mt-12">
+          <motion.div
+            className="relative overflow-hidden"
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            style={{
+              background: "linear-gradient(90deg, #d9e92b, #00d4ff, #ff00ff, #d9e92b)",
+              backgroundSize: "300% 300%",
+            }}
+          >
+            <h2 className="text-4xl font-bold text-transparent bg-clip-text">
+              QUANTUM CREATIVE ENGINE
+            </h2>
+          </motion.div>
+          
+          <motion.p
+            className="mt-4 text-lg text-white/60 max-w-xl"
+            animate={{
+              opacity: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            Where every pixel is a quantum possibility
+          </motion.p>
+        </div>
+
+        {/* Quantum Interface Controls */}
+        <div className="mt-16 flex gap-8">
+          <motion.button
+            className="relative px-12 py-6 rounded-xl overflow-hidden group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {/* Quantum Ripple Effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-[#d9e92b]/20 via-[#00d4ff]/20 to-[#ff00ff]/20"
+              animate={{
+                x: ["-100%", "200%"],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+            
+            {/* Button Content */}
+            <div className="relative flex items-center gap-4">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                className="w-8 h-8 rounded-full border-2 border-[#d9e92b]"
+              />
+              <span className="text-xl font-bold text-white">
+                INITIATE QUANTUM CREATION
+              </span>
+              <motion.div
+                animate={{ x: [0, 10, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="text-[#d9e92b]"
+              >
+                →
+              </motion.div>
+            </div>
+          </motion.button>
+
+          {/* Data Stream Button */}
+          <motion.button
+            className="relative px-8 py-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden group"
+            whileHover={{ scale: 1.05 }}
+          >
+            {/* Binary Stream */}
+            <div className="absolute inset-0 overflow-hidden opacity-20">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute text-xs font-mono text-[#00d4ff] whitespace-nowrap"
+                  style={{ top: `${i * 20}%` }}
+                  animate={{ x: ["100%", "-100%"] }}
+                  transition={{
+                    duration: 10 + i * 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                >
+                  0101010101010101010101010101010101010101
+                </motion.div>
+              ))}
+            </div>
+            <span className="relative text-white">EXPLORE DIMENSIONS</span>
+          </motion.button>
+        </div>
+
+        {/* Live Stats */}
+        <div className="mt-20 flex gap-12">
+          {[
+            { label: "QUANTUM STATES", value: "∞", unit: "" },
+            { label: "DIMENSIONS", value: "11", unit: "D" },
+            { label: "CREATIONS/SEC", value: "2.4K", unit: "" },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.2 }}
+            >
+              <div className="text-5xl font-bold bg-gradient-to-r from-[#d9e92b] to-[#00d4ff] bg-clip-text text-transparent">
+                {stat.value}
+                <span className="text-2xl">{stat.unit}</span>
+              </div>
+              <div className="text-sm text-white/40 mt-2">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quantum Noise Overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-5"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+    </section>
+  );
+};
 const SparklesIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
         <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813a3.75 3.75 0 002.576-2.576l.813-2.846A.75.75 0 019 4.5zM6.97 11.03a.75.75 0 01.653 1.055 2.25 2.25 0 01-1.127 1.127.75.75 0 01-1.055-.653 2.25 2.25 0 011.127-1.127.75.75 0 01.402.59zM16.03 6.97a.75.75 0 011.055.653 2.25 2.25 0 01-1.127 1.127.75.75 0 01-.653-1.055 2.25 2.25 0 011.127-1.127.75.75 0 01.59-.402z" clipRule="evenodd" />

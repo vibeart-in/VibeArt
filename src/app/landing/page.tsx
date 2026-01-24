@@ -8,7 +8,10 @@ import {
   TestimonialsSection, 
   FooterCTA,
   AiAppsCarousel,
-  StickyPromptInput
+  StickyPromptInput,
+  Hero1,
+  Hero2,
+  Hero3
 } from "../../components/landing/LandingComponents";
 import ContactUs from "@/src/components/landing/ContactUs";
 import PrivacySection from "@/src/components/landing/PrivacySection";
@@ -18,6 +21,9 @@ export default function LandingPage() {
     <main className="min-h-screen bg-black text-foreground selection:bg-green-500/30 pb-32">
       
       <Hero />
+      <Hero1 />
+      <Hero2 />
+      <Hero3 />
 
       <AiAppsCarousel />
 
