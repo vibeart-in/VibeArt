@@ -6,7 +6,7 @@ import {
   PhotoIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/solid";
-import { FireIcon, GraphIcon } from "@phosphor-icons/react";
+import { FireIcon, GraphIcon, Sparkle } from "@phosphor-icons/react";
 import { ChevronDown, Folder, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { usePathname } from "next/navigation";
@@ -65,14 +65,14 @@ export default function MainNavbar() {
       icon: <HomeIcon className="size-5" />,
     },
     {
-      name: "AI Apps",
-      link: "/ai-apps",
-      icon: <PuzzlePieceIcon className="size-5" />,
-    },
-    {
       name: "Canvas",
       link: "/canvas",
       icon: <GraphIcon size={24} weight="fill" />,
+    },
+    {
+      name: "AI Apps",
+      link: "/ai-apps",
+      icon: <PuzzlePieceIcon className="size-5" />,
     },
   ];
 
@@ -122,9 +122,9 @@ export default function MainNavbar() {
         }}
         className="absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-bold text-zinc-600 transition duration-200 hover:text-zinc-800 lg:flex lg:space-x-2"
       >
-        {navItems.map((item, idx) => {
+        {/* Home Item */}
+        {navItems.slice(0, 1).map((item, idx) => {
           const isHighlighted = highlightedItemIndex === idx;
-
           return (
             <a
               key={`link-${idx}`}
@@ -144,7 +144,6 @@ export default function MainNavbar() {
                 {item.icon}
                 {item.name}
               </span>
-
               {isHighlighted && (
                 <motion.div
                   layoutId="hovered"
@@ -154,6 +153,7 @@ export default function MainNavbar() {
             </a>
           );
         })}
+
         {/* Generate Dropdown Menu */}
         <div
           className="relative"
@@ -171,7 +171,7 @@ export default function MainNavbar() {
             )}
           >
             <span className="relative z-20 flex items-center gap-2">
-              <Sparkles className="size-5" />
+              <Sparkle size={20}  weight="fill" />
               Generate
               <ChevronDown className={cn(
                 "size-4 transition-transform duration-200",
@@ -245,8 +245,41 @@ export default function MainNavbar() {
           </AnimatePresence>
         </div>
 
-        {/* Regular Nav Items */}
-        
+        {/* Regular Nav Items (Canvas, AI Apps) */}
+        {navItems.slice(1).map((item, idx) => {
+          // Adjust index since we sliced
+          const actualIdx = idx + 1;
+          const isHighlighted = highlightedItemIndex === actualIdx;
+
+          return (
+            <a
+              key={`link-${actualIdx}`}
+              href={item.link}
+              onMouseEnter={() => {
+                setHovered(actualIdx);
+                setIsGenerateOpen(false);
+              }}
+              className={cn(
+                "relative flex items-center gap-2 px-4 py-2 transition-colors duration-200",
+                isHighlighted
+                  ? "text-black dark:text-black"
+                  : "text-neutral-600 dark:text-neutral-200"
+              )}
+            >
+              <span className="relative z-20 flex items-center gap-2">
+                {item.icon}
+                {item.name}
+              </span>
+
+              {isHighlighted && (
+                <motion.div
+                  layoutId="hovered"
+                  className="absolute inset-0 size-full rounded-full bg-accent"
+                />
+              )}
+            </a>
+          );
+        })}
       </motion.div>
     );
   };
