@@ -21,9 +21,10 @@ const displayLabel = (tag: string) =>
 type DialogBoxProps = {
   conversationType: ConversationType;
   onSelectModel: (model: ModelData) => void;
+  isFreeUser?: boolean;
 };
 
-const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
+const DialogBox = ({ conversationType, onSelectModel, isFreeUser }: DialogBoxProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<string>("All");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -198,7 +199,7 @@ const DialogBox = ({ conversationType, onSelectModel }: DialogBoxProps) => {
       <div className="mb-14 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
         {filteredModels.length > 0 ? (
           filteredModels.map((model) => (
-            <ModelCard key={model.id} model={model} onSelect={onSelectModel} />
+            <ModelCard key={model.id} model={model} onSelect={onSelectModel} isFreeUser={isFreeUser} />
           ))
         ) : (
           <p className="col-span-full text-center text-gray-400">
