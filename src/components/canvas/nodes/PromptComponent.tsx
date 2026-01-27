@@ -105,9 +105,10 @@ const ModelNode = React.memo(
         subtitle={selectedModel?.model_name || config.defaultSubtitle}
         className={config.className}
         handles={[
-          { type: "target", position: Position.Left },
+          // { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
         ]}
+        toolbarHidden={true}
       >
         <div className={config.containerClassName}>
           <ModelSelectModal
@@ -148,9 +149,10 @@ const PresetNode = React.memo(
         subtitle={selectedPreset?.name || config.defaultSubtitle}
         className={config.className}
         handles={[
-          { type: "target", position: Position.Left },
+          // { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
         ]}
+        toolbarHidden={true}
       >
         <div className={config.containerClassName}>
           <PresetModal
@@ -187,9 +189,10 @@ const StyleNodeComponent = React.memo(
         subtitle={selectedStyle?.name || config.defaultSubtitle}
         className={config.className}
         handles={[
-          { type: "target", position: Position.Left },
+          // { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
         ]}
+        toolbarHidden={true}
       >
         <div className={config.containerClassName}>
           <MidjourneyStylesModal

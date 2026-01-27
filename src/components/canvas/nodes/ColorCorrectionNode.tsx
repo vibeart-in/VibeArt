@@ -230,6 +230,7 @@ export default function ColorCorrectionNode({
         width: `${BASE_WIDTH}px`,
         height: `${nodeHeight}px`,
       }}
+      toolbarHidden={true}
     >
       <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
         {/* Image Section */}
