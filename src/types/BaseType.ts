@@ -147,6 +147,7 @@ export interface CanvasProject {
   created_at: string;
   updated_at: string;
   content: any;
+  is_public: boolean;
 }
 
 export type MidjourneyStyleData = {

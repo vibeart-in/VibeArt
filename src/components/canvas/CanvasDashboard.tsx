@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { Plus, Search, LayoutGrid, List, MoreHorizontal } from "lucide-react";
-import { useState, useTransition } from "react";
-import { motion } from "motion/react";
+import { useState, useTransition, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { createCanvas } from "@/src/actions/canvas";
 import { formatDistanceToNow } from "date-fns";
+import { TemplatesSection } from "./TemplatesSection";
 
 interface Project {
   id: string;
@@ -27,15 +28,50 @@ interface Project {
 
 interface CanvasDashboardProps {
   initialProjects: Project[];
+  templates?: any[];
 }
 
-export default function CanvasDashboard({ initialProjects }: CanvasDashboardProps) {
+const HERO_SLIDES = [
+  {
+    image: "https://i.pinimg.com/1200x/4d/e1/b6/4de1b607182a586587a29b9d5dbb0136.jpg",
+    alt: "Cyberpunk City",
+    title: "Canvas",
+    description:
+      "Nodes is the most powerful way to operate vibeArt. Connect every tool and model into complex automized pipelines. Create a new space and start collaborating.",
+  },
+  {
+    image:
+      "https://cdn.dribbble.com/userupload/13004077/file/original-b18365851213q140938478335036104.png?resize=1200x900",
+    alt: "Abstract Geometry",
+    title: "Unleash Logic",
+    description:
+      "Build intricate workflows with ease. Combine logic blocks, data processors, and AI models to create powerful automation systems without writing a single line of code.",
+  },
+  {
+    image: "https://cdn.dribbble.com/users/63407/screenshots/16086212/media/649195015e17300300609650085a610f.png",
+    alt: "Neon Grid",
+    title: "Infinite Scale",
+    description:
+      "From simple tasks to enterprise-grade solutions. Scale your creations instantly and share them with the world. The only limit is your imagination.",
+  },
+];
+
+export default function CanvasDashboard({ initialProjects, templates = [] }: CanvasDashboardProps) {
+ 
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isPending, startTransition] = useTransition();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newCanvasTitle, setNewCanvasTitle] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleNewCanvas = () => {
     setNewCanvasTitle("");
@@ -62,26 +98,41 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
       {/* Header Section */}
       <div className="mx-auto mb-12 max-w-7xl">
         <div className="relative mb-12 overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-r from-neutral-900 to-transparent p-8 md:p-12">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-80"
-            style={{
-              backgroundImage: `url('https://i.pinimg.com/1200x/4d/e1/b6/4de1b607182a586587a29b9d5dbb0136.jpg')`,
-            }}
-          ></div>
+          {HERO_SLIDES.map((slide, index) => (
+            <motion.div
+              key={slide.image}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: index === currentSlide ? 0.8 : 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url('${slide.image}')`,
+              }}
+            />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent"></div>
           <div className="relative z-10 max-w-2xl">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="rounded-lg bg-white/10 p-2 backdrop-blur-md">
-                <LayoutGrid className="h-6 w-6 text-blue-400" />
-              </div>
-              <h1 className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
-                Canvas
-              </h1>
-            </div>
-            <p className="mb-8 text-lg leading-relaxed text-neutral-400">
-              Nodes is the most powerful way to operate vibeArt. Connect every tool and model into
-              complex automized pipelines. Create a new space and start collaborating.
-            </p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="rounded-lg bg-white/10 p-2 backdrop-blur-md">
+                    <LayoutGrid className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <h1 className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
+                    {HERO_SLIDES[currentSlide].title}
+                  </h1>
+                </div>
+                <p className="mb-8 text-lg leading-relaxed text-neutral-400">
+                  {HERO_SLIDES[currentSlide].description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
             <button
               onClick={handleNewCanvas}
               disabled={isPending}
@@ -93,21 +144,25 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           </div>
         </div>
 
+        {/* Templates Section */}
+        {templates && templates.length > 0 && <TemplatesSection templates={templates} />}
+
+       
         {/* Toolbar */}
         <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex w-full items-center gap-4 rounded-xl border border-white/5 bg-neutral-900/50 p-1 pr-4 md:w-auto">
-            <div className="flex gap-1 rounded-lg bg-neutral-800 p-1">
-              <button className="rounded-md bg-neutral-700 px-4 py-1.5 text-sm font-medium text-white shadow-sm">
-                Projects
-              </button>
-              <button className="rounded-md px-4 py-1.5 text-sm font-medium text-neutral-400 transition-colors hover:text-white">
+          {/* <div className="flex w-full items-center gap-4 rounded-xl border border-white/5 bg-neutral-900/50 p-1 pr-4 md:w-auto"> */}
+            {/* <div className="flex gap-1 rounded-lg bg-neutral-800 p-1"> */}
+              {/* <button className="rounded-md bg-neutral-700 px-4 py-1.5 text-sm font-medium text-white shadow-sm"> */}
+                My Files
+              {/* </button> */}
+              {/* <button className="rounded-md px-4 py-1.5 text-sm font-medium text-neutral-400 transition-colors hover:text-white">
                 Apps
               </button>
               <button className="rounded-md px-4 py-1.5 text-sm font-medium text-neutral-400 transition-colors hover:text-white">
                 Templates
-              </button>
-            </div>
-          </div>
+              </button> */}
+            {/* </div> */}
+          {/* </div> */}
 
           <div className="flex w-full items-center gap-3 md:w-auto">
             <div className="relative flex-1 md:w-64">
