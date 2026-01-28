@@ -34,7 +34,7 @@ import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
 import { CanvasContextMenu } from "./CanvasContextMenu";
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
-  const { project, setIsDraggingEdge } = useCanvas();
+  const { project, setIsDraggingEdge, isReadOnly } = useCanvas();
   const {
     onConnect,
     onConnectStart,
@@ -69,7 +69,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   useCanvasJobOrchestrator(project?.id ?? "");
 
   const save = useDebouncedCallback(async () => {
-    if (saveState.isSaving || !project?.user_id || !project?.id) {
+    if (isReadOnly || saveState.isSaving || !project?.user_id || !project?.id) {
       return;
     }
 
@@ -94,7 +94,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   }, 5000);
 
   const saveThumbnail = useDebouncedCallback(async () => {
-    if (!project?.id || nodes.length === 0) return;
+    if (isReadOnly || !project?.id || nodes.length === 0) return;
 
     try {
       const nodesBounds = getNodesBounds(nodes);
@@ -323,22 +323,27 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
       <NodeDropzoneProvider>
-        <CanvasContextMenu addNode={addNode}>
+        <CanvasContextMenu addNode={addNode} isReadOnly={isReadOnly}>
           <ReactFlow
-            deleteKeyCode={["Backspace", "Delete"]}
+            deleteKeyCode={isReadOnly ? [] : ["Backspace", "Delete"]}
             edges={edges}
             edgeTypes={edgeTypes}
             fitView
             // isValidConnection={isValidConnection}
             nodes={nodes}
             nodeTypes={nodeTypes}
-            onConnect={handleConnect}
-            onConnectStart={handleConnectStart}
-            onConnectEnd={handleConnectEnd}
-            onEdgesChange={handleEdgesChange}
-            onNodesChange={handleNodesChange}
+            onConnect={isReadOnly ? undefined : handleConnect}
+            onConnectStart={isReadOnly ? undefined : handleConnectStart}
+            onConnectEnd={isReadOnly ? undefined : handleConnectEnd}
+            onEdgesChange={isReadOnly ? undefined : handleEdgesChange}
+            onNodesChange={isReadOnly ? undefined : handleNodesChange}
+            nodesDraggable={!isReadOnly}
+            nodesConnectable={!isReadOnly}
+            nodesFocusable={!isReadOnly}
+            edgesFocusable={!isReadOnly}
+            elementsSelectable={true}
             // panOnScroll
-            selectionOnDrag={true}
+            selectionOnDrag={!isReadOnly}
             colorMode="dark"
             proOptions={{ hideAttribution: true }}
             // snapToGrid={true}
