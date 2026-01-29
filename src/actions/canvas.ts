@@ -87,6 +87,83 @@ export async function publishCanvas(id: string) {
   revalidatePath(`/canvas/${id}`);
 }
 
+export async function updateCanvas(
+  id: string,
+  updates: { title?: string; is_public?: boolean; image_id?: string },
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const dbUpdates: any = { ...updates };
+  if (dbUpdates.image_id) {
+    dbUpdates.cover = dbUpdates.image_id;
+    delete dbUpdates.image_id;
+  }
+
+  const { error } = await supabase
+    .from("canvas")
+    .update(dbUpdates)
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error updating canvas:", error);
+    throw new Error("Failed to update canvas");
+  }
+
+  revalidatePath("/canvas");
+  revalidatePath(`/canvas/${id}`);
+}
+
+export async function getCanvasImages(canvasId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  // 1. Get image IDs from canvas output_images
+  const { data: canvas, error: canvasError } = await supabase
+    .from("canvas")
+    .select("output_images")
+    .eq("id", canvasId)
+    .single();
+
+  if (canvasError) {
+    console.error("Error fetching canvas for images:", canvasError);
+    return [];
+  }
+
+  const imageIds = canvas?.output_images;
+
+  if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+    return [];
+  }
+
+  // 2. Fetch images
+  const { data: images, error: imagesError } = await supabase
+    .from("images")
+    .select("*")
+    .in("id", imageIds)
+    .order("created_at", { ascending: false });
+
+  if (imagesError) {
+    console.error("Error fetching canvas images:", imagesError);
+    return [];
+  }
+
+  return images;
+}
+
 export async function getPublicTemplates(): Promise<CanvasProject[]> {
   const supabase = await createClient();
 
