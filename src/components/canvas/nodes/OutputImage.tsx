@@ -156,15 +156,20 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       return outputImg.height / outputImg.width;
     }
 
-    // Priority 2: Existing Image URL (if loading from persistence without outputImages array)
+    // Priority 2: Use explicit width/height from data if available
+    if (data.height && data.width) {
+      return data.height / data.width;
+    }
+
+    // Priority 3: Default behavior
     // We assume standard portrait if we have an image but no metadata, or 1:1
     if (data.imageUrl) {
       return 1.0;
     }
 
-    // Priority 3: Default Placeholder Aspect Ratio (Vertical for text area space)
+    // Priority 4: Default Placeholder Aspect Ratio (Vertical for text area space)
     return 1.2;
-  }, [data.outputImages, data.imageUrl]);
+  }, [data.outputImages, data.imageUrl, data.width, data.height]);
 
   const targetHeight = BASE_WIDTH * aspectRatio;
 
@@ -362,7 +367,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           <img
             src={data.imageUrl}
             alt={data.prompt || "Generated Image"}
-            className="h-full w-full rounded-3xl object-cover"
+            className="h-full w-full rounded-3xl object-fit"
             draggable={false}
           />
         ) : (

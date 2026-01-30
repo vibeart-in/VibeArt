@@ -3,7 +3,7 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect } from "react";
-import { Sparkles, Loader2, Play, TriangleAlert } from "lucide-react";
+import { Sparkles, Loader2, Play, TriangleAlert, RefreshCw } from "lucide-react";
 import { useSyncUpstreamData } from "@/src/utils/xyflow";
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { NodeParam } from "@/src/types/BaseType";
@@ -29,14 +29,17 @@ export type AiAppNodeData = {
   outputImages?: any[];
   processedImagesHash?: string;
   parameterValues?: Record<string, any>;
+  outputNodeIds?: string[]; // Track created output nodes for regeneration
+  mainNodeId?: string; // Track which node is the main one (connected to AI app)
+  hasGenerated?: boolean; // Track if generation has occurred
   [key: string]: unknown;
 };
 
 export type AiAppNodeType = Node<AiAppNodeData, "aiApp">;
 
 const BASE_WIDTH = 320;
-const GRID_GAP = 50;
-const OUTPUT_NODE_WIDTH = 300;
+const GRID_GAP = 100; // Increased gap between output nodes
+const OUTPUT_NODE_WIDTH = 350; // Estimated max width for output nodes
 
 // Helper to parse parameters safely
 const parseParameters = (appData: AiApp): AiAppParameter[] => {
@@ -83,59 +86,169 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       return;
     }
 
-    const imagesSignature = JSON.stringify(data.outputImages.map((img: any) => img.id));
+    // Extract actual image objects from the nested structure
+    // API returns: [{ images: {...} }, { images: {...} }]
+    // We need: [{...}, {...}]
+    const images = (data.outputImages as any[])
+      .map((item: any) => item.images || item)
+      .filter(Boolean);
+
+    if (images.length === 0) {
+      return;
+    }
+
+    const imagesSignature = JSON.stringify(images.map((img: any) => img.id));
 
     if (data.processedImagesHash === imagesSignature) {
       return;
     }
 
-    const images = data.outputImages as any[];
+    const currentNode = getNode(id);
+    const currentX = currentNode?.position.x ?? 0;
+    const currentY = currentNode?.position.y ?? 0;
+    const currentWidth = currentNode?.measured?.width ?? BASE_WIDTH;
 
-    let mainImage = images[0];
-    let maxArea = 0;
+    // Check if this is a regeneration (output nodes already exist)
+    const isRegeneration = data.outputNodeIds && data.outputNodeIds.length > 0;
 
-    images.forEach((img) => {
-      const area = (img.width || 0) * (img.height || 0);
-      if (area > maxArea) {
-        maxArea = area;
-        mainImage = img;
+    if (isRegeneration) {
+      // REGENERATION: Update existing output nodes with new images
+      // Re-identify the main image (it might have changed)
+      let mainImage = images[0];
+      let maxArea = 0;
+      let mainImageIndex = 0;
+
+      images.forEach((img, index) => {
+        const area = (img.width || 0) * (img.height || 0);
+        if (area > maxArea) {
+          maxArea = area;
+          mainImage = img;
+          mainImageIndex = index;
+        }
+      });
+
+      console.log('🔄 Regeneration - Main Image:', {
+        index: mainImageIndex,
+        dimensions: `${mainImage.width}×${mainImage.height}`,
+        area: maxArea,
+      });
+
+      const existingNodeIds = data.outputNodeIds || [];
+      const mainNodeId = data.mainNodeId;
+      
+      // Always update the main node (which is connected to AI app) with the largest image
+      if (mainNodeId) {
+        updateNodeData(mainNodeId, {
+          imageUrl: mainImage.image_url,
+          width: mainImage.width,
+          height: mainImage.height,
+        });
       }
-    });
+      
+      // Update other nodes with other images
+      const otherImages = images.filter((_, index) => index !== mainImageIndex);
+      let otherNodeIndex = 0;
+      
+      existingNodeIds.forEach((nodeId) => {
+        // Skip the main node, we already updated it
+        if (nodeId === mainNodeId) return;
+        
+        // Update this node with the next other image
+        if (otherImages[otherNodeIndex]) {
+          updateNodeData(nodeId, {
+            imageUrl: otherImages[otherNodeIndex].image_url,
+            width: otherImages[otherNodeIndex].width,
+            height: otherImages[otherNodeIndex].height,
+          });
+          otherNodeIndex++;
+        }
+      });
 
-    const updates: Partial<AiAppNodeData> = {
-      processedImagesHash: imagesSignature,
-    };
+      // Update processed hash
+      updateNodeData(id, {
+        processedImagesHash: imagesSignature,
+      });
+    } else {
+      // FIRST GENERATION: Create new output nodes for ALL images
+      // Find the main image (largest area)
+      let mainImage = images[0];
+      let maxArea = 0;
+      let mainImageIndex = 0;
 
-    if (
-      data.imageUrl !== mainImage.image_url ||
-      data.width !== mainImage.width ||
-      data.height !== mainImage.height
-    ) {
-      updates.imageUrl = mainImage.image_url;
-      updates.width = mainImage.width;
-      updates.height = mainImage.height;
-    }
+      images.forEach((img, index) => {
+        const area = (img.width || 0) * (img.height || 0);
+        if (area > maxArea) {
+          maxArea = area;
+          mainImage = img;
+          mainImageIndex = index;
+        }
+      });
 
-    const remainingImages = images.filter((img) => img.id !== mainImage.id);
+      console.log('🎯 Main Image Identified:', {
+        index: mainImageIndex,
+        dimensions: `${mainImage.width}×${mainImage.height}`,
+        area: maxArea,
+        url: mainImage.image_url,
+        totalImages: images.length
+      });
 
-    if (remainingImages.length > 0) {
-      const currentNode = getNode(id);
-      const currentX = currentNode?.position.x ?? 0;
-      const currentY = currentNode?.position.y ?? 0;
-      const currentWidth = currentNode?.measured?.width ?? BASE_WIDTH;
+      // Separate main image from others
+      const otherImages = images.filter((_, index) => index !== mainImageIndex);
 
       const newNodes: any[] = [];
       const newEdges: any[] = [];
+      const outputNodeIds: string[] = [];
       const startX = currentX + currentWidth + 100;
 
-      remainingImages.forEach((img, index) => {
-        const newNodeId = crypto.randomUUID();
-        const colIndex = index % 4;
-        const rowIndex = Math.floor(index / 4);
-        const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
-        const yOffset = rowIndex * (400 + GRID_GAP);
+      // 1. Create the MAIN output node first
+      const mainNodeId = crypto.randomUUID();
+      outputNodeIds[mainImageIndex] = mainNodeId;
 
-        const xPos = startX + xOffset;
+      newNodes.push({
+        id: mainNodeId,
+        type: "outputImage",
+        position: { x: startX, y: currentY },
+        data: {
+          imageUrl: mainImage.image_url,
+          width: mainImage.width,
+          height: mainImage.height,
+        },
+      });
+
+      // Connect AI app node to main image
+      newEdges.push({
+        id: `e-${id}-${mainNodeId}`,
+        source: id,
+        target: mainNodeId,
+        type: "active",
+        style: { stroke: "#4b5563", strokeWidth: 2 },
+      });
+
+      // 2. Create OTHER output nodes in a grid layout
+      // Position them to the right of the main image
+      const otherStartX = startX + OUTPUT_NODE_WIDTH + 200; // More space after main image
+
+      otherImages.forEach((img, relativeIndex) => {
+        const newNodeId = crypto.randomUUID();
+        
+        // Find the original index to maintain order
+        let originalIndex = 0;
+        for (let i = 0, count = 0; i < images.length; i++) {
+          if (i === mainImageIndex) continue;
+          if (count === relativeIndex) {
+            originalIndex = i;
+            break;
+          }
+          count++;
+        }
+        outputNodeIds[originalIndex] = newNodeId;
+
+        const colIndex = relativeIndex % 4;
+        const rowIndex = Math.floor(relativeIndex / 4);
+        const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
+        const yOffset = rowIndex * (450 + GRID_GAP); // Increased row height for better spacing
+
+        const xPos = otherStartX + xOffset;
         const yPos = currentY + yOffset;
 
         newNodes.push({
@@ -149,9 +262,10 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
           },
         });
 
+        // Connect OTHER images to MAIN image (not to AI app node)
         newEdges.push({
-          id: `e-${id}-${newNodeId}`,
-          source: id,
+          id: `e-${mainNodeId}-${newNodeId}`,
+          source: mainNodeId,
           target: newNodeId,
           type: "active",
           style: { stroke: "#4b5563", strokeWidth: 2 },
@@ -160,13 +274,19 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
 
       addNodes(newNodes);
       addEdges(newEdges);
-    }
 
-    updateNodeData(id, updates);
+      // Update AI app node with tracking data (but NOT with imageUrl)
+      updateNodeData(id, {
+        processedImagesHash: imagesSignature,
+        outputNodeIds: outputNodeIds,
+        mainNodeId: mainNodeId, // Store which node is the main one
+        hasGenerated: true,
+      });
+    }
   }, [
     data.outputImages,
     data.processedImagesHash,
-    data.imageUrl,
+    data.outputNodeIds,
     id,
     updateNodeData,
     addNodes,
@@ -343,9 +463,9 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       }
       minWidth={BASE_WIDTH}
       minHeight={nodeHeight}
-      keepAspectRatio={!data.imageUrl}
+      keepAspectRatio={true}
       className={`flex h-auto w-full cursor-default flex-col rounded-3xl transition-colors duration-200 ${
-        inputImageUrl || data.imageUrl ? "bg-[#1D1D1D]" : "border border-zinc-800 bg-[#141414]"
+        inputImageUrl ? "bg-[#1D1D1D]" : "border border-zinc-800 bg-[#141414]"
       }`}
       handles={[
         { type: "target", position: Position.Left },
@@ -353,267 +473,269 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       ]}
     >
       <div className="relative flex h-auto flex-1 flex-col overflow-hidden rounded-3xl">
-        {data.imageUrl ? (
-          <div className="relative h-full w-full">
-            <img
-              src={data.imageUrl}
-              alt="Result"
-              className="h-full w-full rounded-3xl bg-[#111] object-contain"
-              draggable={false}
-            />
-            <div className="absolute bottom-3 right-3 rounded-full border border-green-500/30 bg-green-500/20 px-3 py-1.5 text-xs font-medium text-green-300 backdrop-blur-sm">
-              ✓ Complete
-            </div>
-          </div>
-        ) : (
-          <div className="relative flex h-auto w-full flex-col overflow-hidden bg-[#141414]">
-            {/* Modern Header Section */}
-            <div className="relative h-[240px] w-full shrink-0 overflow-hidden">
-              {isVideoCover ? (
-                <video
-                  src={appData.cover_image}
-                  className="h-full w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-              ) : (
-                <img src={appData.cover_image} alt="Cover" className="h-full w-full object-cover" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent" />
+        <div className="relative flex h-auto w-full flex-col overflow-hidden bg-[#141414]">
+          {/* Modern Header Section */}
+          <div className="relative h-[240px] w-full shrink-0 overflow-hidden">
+            {isVideoCover ? (
+              <video
+                src={appData.cover_image}
+                className="h-full w-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img src={appData.cover_image} alt="Cover" className="h-full w-full object-cover" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent" />
 
-              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6">
-                <h3 className="text-3xl font-bold leading-tight tracking-tight text-white">
-                  {appData.app_name}
-                </h3>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#1A1A1A]/80 px-3.5 py-1 backdrop-blur-md">
-                    <span className="text-xs font-semibold text-zinc-300">
-                      {appData.cost} credit
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#1A1A1A]/80 px-3.5 py-1 backdrop-blur-md">
-                    <span className="text-xs font-semibold text-zinc-300">
-                      {durationVal >= 60
-                        ? `${Math.floor(durationVal / 60)} mins`
-                        : `${durationVal}s`}
-                    </span>
-                  </div>
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6">
+              <h3 className="text-3xl font-bold leading-tight tracking-tight text-white">
+                {appData.app_name}
+              </h3>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#1A1A1A]/80 px-3.5 py-1 backdrop-blur-md">
+                  <span className="text-xs font-semibold text-zinc-300">
+                    {appData.cost} credit
+                  </span>
                 </div>
+                <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#1A1A1A]/80 px-3.5 py-1 backdrop-blur-md">
+                  <span className="text-xs font-semibold text-zinc-300">
+                    {durationVal >= 60
+                      ? `${Math.floor(durationVal / 60)} mins`
+                      : `${durationVal}s`}
+                  </span>
+                </div>
+                {/* Generation Status Badge */}
+                {data.hasGenerated && (
+                  <div className="flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/20 px-3.5 py-1 backdrop-blur-md">
+                    <span className="text-xs font-semibold text-green-300">
+                      ✓ Generated
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
+          </div>
 
-            {/* Scrollable Content */}
-            <div className="flex min-h-0 flex-1 flex-col gap-4 p-5 pb-5">
-              {/* Image Input Section */}
-              {parseParameters(appData).some((p) => p.fieldName === "image") &&
-                (isPoseTransfer ? (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <Label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                        Model Image
-                      </Label>
-                      {inputImageUrl ? (
-                        <div className="group relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-xl">
-                          <img
-                            src={inputImageUrl}
-                            alt="Model"
-                            className="h-full w-full object-contain"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                              Model Connected
-                            </span>
-                          </div>
-                          <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
-                            Ready
-                          </div>
+          {/* Scrollable Content */}
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-5 pb-5">
+            {/* Image Input Section */}
+            {parseParameters(appData).some((p) => p.fieldName === "image") &&
+              (isPoseTransfer ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                      Model Image
+                    </Label>
+                    {inputImageUrl ? (
+                      <div className="group relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-xl">
+                        <img
+                          src={inputImageUrl}
+                          alt="Model"
+                          className="h-full w-full object-contain"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                            Model Connected
+                          </span>
                         </div>
-                      ) : (
-                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
-                            <Sparkles size={18} className="opacity-50" />
-                          </div>
-                          <div className="flex flex-col">
-                            <p className="text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-200">
-                              Connect Model
-                            </p>
-                            <p className="text-[10px] text-zinc-600">Connect model image node</p>
-                          </div>
+                        <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
+                          Ready
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                        Doodle / Pose
-                      </Label>
-                      {secondImageUrl ? (
-                        <div className="group relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-xl">
-                          <img
-                            src={secondImageUrl}
-                            alt="Doodle"
-                            className="h-full w-full object-contain"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                              Pose Connected
-                            </span>
-                          </div>
-                          <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
-                            Ready
-                          </div>
+                      </div>
+                    ) : (
+                      <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
+                          <Sparkles size={18} className="opacity-50" />
                         </div>
-                      ) : (
-                        <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
-                            <Play size={18} className="opacity-50" />
-                          </div>
-                          <div className="flex flex-col">
-                            <p className="text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-200">
-                              Connect Pose
-                            </p>
-                            <p className="text-[10px] text-zinc-600">Connect pose image node</p>
-                          </div>
+                        <div className="flex flex-col">
+                          <p className="text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-200">
+                            Connect Model
+                          </p>
+                          <p className="text-[10px] text-zinc-600">Connect model image node</p>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                ) : inputImageUrl ? (
-                  <div className="group relative h-44 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-2xl">
-                    <img src={inputImageUrl} alt="Input" className="h-full w-full object-contain" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                      <span className="rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
-                        Connected Input
-                      </span>
-                    </div>
-                    <div className="absolute bottom-3 right-3 rounded-full border border-[#CCFF00]/20 bg-[#CCFF00]/10 px-3 py-1 text-[10px] font-bold text-[#CCFF00] backdrop-blur-md">
-                      Active Input
-                    </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                      Doodle / Pose
+                    </Label>
+                    {secondImageUrl ? (
+                      <div className="group relative h-40 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-xl">
+                        <img
+                          src={secondImageUrl}
+                          alt="Doodle"
+                          className="h-full w-full object-contain"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                            Pose Connected
+                          </span>
+                        </div>
+                        <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
+                          Ready
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
+                          <Play size={18} className="opacity-50" />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-200">
+                            Connect Pose
+                          </p>
+                          <p className="text-[10px] text-zinc-600">Connect pose image node</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="group relative flex h-28 shrink-0 items-center gap-5 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-6 transition-all duration-300 hover:border-zinc-600 hover:bg-[#1A1A1A]/50 hover:shadow-lg">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl transition-all group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300">
-                      <Sparkles
-                        size={24}
-                        className="opacity-40 transition-opacity group-hover:opacity-100"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[15px] font-bold text-zinc-300 transition-colors group-hover:text-white">
-                        Connect input image
-                      </p>
-                      <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-                        Connect an image node to
-                        <br />
-                        enable generation
-                      </p>
-                    </div>
+                </div>
+              ) : inputImageUrl ? (
+                <div className="group relative h-44 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-2xl">
+                  <img src={inputImageUrl} alt="Input" className="h-full w-full object-contain" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
+                      Connected Input
+                    </span>
                   </div>
-                ))}
+                  <div className="absolute bottom-3 right-3 rounded-full border border-[#CCFF00]/20 bg-[#CCFF00]/10 px-3 py-1 text-[10px] font-bold text-[#CCFF00] backdrop-blur-md">
+                    Active Input
+                  </div>
+                </div>
+              ) : (
+                <div className="group relative flex h-28 shrink-0 items-center gap-5 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-6 transition-all duration-300 hover:border-zinc-600 hover:bg-[#1A1A1A]/50 hover:shadow-lg">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl transition-all group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300">
+                    <Sparkles
+                      size={24}
+                      className="opacity-40 transition-opacity group-hover:opacity-100"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-[15px] font-bold text-zinc-300 transition-colors group-hover:text-white">
+                      Connect input image
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                      Connect an image node to
+                      <br />
+                      enable generation
+                    </p>
+                  </div>
+                </div>
+              ))}
 
-              {/* Dynamic Parameters */}
-              <div className="flex flex-col gap-4">
-                {parseParameters(appData).map((param) => {
+            {/* Dynamic Parameters */}
+            <div className="flex flex-col gap-4">
+              {parseParameters(appData).map((param) => {
+                const key = param.description;
+                const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
+                if (
+                  param.fieldName === "image" ||
+                  param.fieldName === "video" ||
+                  (isPoseTransfer && param.fieldName === "doodle")
+                )
+                  return null;
+                if (
+                  ["aspect_ratio", "size", "select", "model_selected"].includes(
+                    param.fieldName,
+                  ) ||
+                  param.description === "Portrait or landscape mode"
+                )
+                  return null;
+
+                return (
+                  <div key={key} className="flex flex-col gap-2.5">
+                    <AppSectionLabel text={param.description} />
+                    <AppParamTextarea
+                      value={currentValue}
+                      onChange={(val) => handleParamChange(key, val)}
+                      placeholder={`Type your ${param.description.toLowerCase()}...`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {validationError && (
+            <div className="px-6 pb-2">
+              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">
+                <TriangleAlert size={14} className="shrink-0" />
+                <span className="leading-tight">{validationError}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Action Bar */}
+          <div className="flex items-center gap-3 p-6 pt-0">
+            <div className="custom-scrollbar no-scrollbar flex flex-1 items-center gap-2 overflow-x-auto">
+              {parseParameters(appData)
+                .filter(
+                  (p) =>
+                    ["aspect_ratio", "size", "select", "model_selected"].includes(p.fieldName) ||
+                    p.description === "Portrait or landscape mode",
+                )
+                .map((param) => {
                   const key = param.description;
                   const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
-                  if (
-                    param.fieldName === "image" ||
-                    param.fieldName === "video" ||
-                    (isPoseTransfer && param.fieldName === "doodle")
-                  )
-                    return null;
-                  if (
-                    ["aspect_ratio", "size", "select", "model_selected"].includes(
-                      param.fieldName,
-                    ) ||
-                    param.description === "Portrait or landscape mode"
-                  )
-                    return null;
+                  let options: string[] = [];
+                  try {
+                    if (param.fieldData) {
+                      const parsed = JSON.parse(param.fieldData);
+                      options = parsed[0] || [];
+                    } else if (param.description === "Portrait or landscape mode") {
+                      options = ["1", "2"];
+                    }
+                  } catch (e) {
+                    /* ignore */
+                  }
 
                   return (
-                    <div key={key} className="flex flex-col gap-2.5">
-                      <AppSectionLabel text={param.description} />
-                      <AppParamTextarea
-                        value={currentValue}
-                        onChange={(val) => handleParamChange(key, val)}
-                        placeholder={`Type your ${param.description.toLowerCase()}...`}
-                      />
-                    </div>
+                    <AppParamSelect
+                      key={key}
+                      value={currentValue}
+                      onValueChange={(val) => handleParamChange(key, val)}
+                      placeholder={param.description}
+                      options={
+                        param.description === "Portrait or landscape mode" && options.length === 2
+                          ? [
+                              { label: "Vertical", value: "1" },
+                              { label: "Landscape", value: "2" },
+                            ]
+                          : options.map((opt) => ({ label: opt, value: opt }))
+                      }
+                    />
                   );
                 })}
-              </div>
             </div>
 
-            {validationError && (
-              <div className="px-6 pb-2">
-                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">
-                  <TriangleAlert size={14} className="shrink-0" />
-                  <span className="leading-tight">{validationError}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Bottom Action Bar */}
-            <div className="flex items-center gap-3 p-6 pt-0">
-              <div className="custom-scrollbar no-scrollbar flex flex-1 items-center gap-2 overflow-x-auto">
-                {parseParameters(appData)
-                  .filter(
-                    (p) =>
-                      ["aspect_ratio", "size", "select", "model_selected"].includes(p.fieldName) ||
-                      p.description === "Portrait or landscape mode",
-                  )
-                  .map((param) => {
-                    const key = param.description;
-                    const currentValue = data.parameterValues?.[key] ?? param.fieldValue ?? "";
-                    let options: string[] = [];
-                    try {
-                      if (param.fieldData) {
-                        const parsed = JSON.parse(param.fieldData);
-                        options = parsed[0] || [];
-                      } else if (param.description === "Portrait or landscape mode") {
-                        options = ["1", "2"];
-                      }
-                    } catch (e) {
-                      /* ignore */
-                    }
-
-                    return (
-                      <AppParamSelect
-                        key={key}
-                        value={currentValue}
-                        onValueChange={(val) => handleParamChange(key, val)}
-                        placeholder={param.description}
-                        options={
-                          param.description === "Portrait or landscape mode" && options.length === 2
-                            ? [
-                                { label: "Vertical", value: "1" },
-                                { label: "Landscape", value: "2" },
-                              ]
-                            : options.map((opt) => ({ label: opt, value: opt }))
-                        }
-                      />
-                    );
-                  })}
-              </div>
-
-              <button
-                className={`flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#CCFF00] px-8 text-sm font-bold text-black shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all hover:scale-[1.05] hover:bg-[#DDFF33] active:scale-95 disabled:opacity-50 disabled:grayscale`}
-                onClick={handleGenerate}
-                disabled={
-                  isGenerating ||
-                  (parseParameters(appData).some((p) => p.fieldName === "image") && !inputImageUrl)
-                }
-              >
-                {isGenerating ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
+            <button
+              className={`flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#CCFF00] px-8 text-sm font-bold text-black shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all hover:scale-[1.05] hover:bg-[#DDFF33] active:scale-95 disabled:opacity-50 disabled:grayscale`}
+              onClick={handleGenerate}
+              disabled={
+                isGenerating ||
+                (parseParameters(appData).some((p) => p.fieldName === "image") && !inputImageUrl)
+              }
+            >
+              {isGenerating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : data.hasGenerated ? (
+                <>
+                  <RefreshCw size={16} />
+                  <span>Regenerate</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
                   <span>Generate</span>
-                )}
-              </button>
-            </div>
+                </>
+              )}
+            </button>
           </div>
-        )}
+        </div>
         {isGenerating && <ModernCardLoader text="Generating..." />}
       </div>
     </NodeLayout>
