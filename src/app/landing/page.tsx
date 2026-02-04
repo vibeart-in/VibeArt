@@ -7,8 +7,7 @@ import {
   FeaturesGrid, 
   TestimonialsSection, 
   FooterCTA,
-  AiAppsCarousel,
-  StickyPromptInput
+  AiAppsCarousel
 } from "../../components/landing/LandingComponents";
 import ContactUs from "@/src/components/landing/ContactUs";
 import PrivacySection from "@/src/components/landing/PrivacySection";
@@ -72,7 +71,7 @@ export default function LandingPage() {
 
       {/* <Footer /> */}
 
-      <StickyPromptInput />
+      {/* <StickyPromptInput /> */}
 
     </main>
   );
