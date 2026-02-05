@@ -1,162 +1,81 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { motion, Variants } from "motion/react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { createClient } from "@/src/lib/supabase/client";
-
-// --- STATICALLY IMPORT "ABOVE THE FOLD" COMPONENTS ---
-// The Hero is the first thing users see, so it should load instantly for the best LCP.
-import Hero from "../../components/landing/Hero";
-import { RaycastComponent } from "../../components/ui/RaycastBackground";
-
-// --- CREATE A LOADING PLACEHOLDER ---
-// This component will be shown while a lazy-loaded section is being fetched.
-// Giving it a min-height prevents the layout from jumping around (improves CLS).
-const SectionLoader = () => <div className="min-h-screen w-full" />;
-
-// --- DYNAMICALLY IMPORT "BELOW THE FOLD" COMPONENTS ---
-// `next/dynamic` creates a separate JavaScript chunk for each of these components.
-// The `loading` option specifies our placeholder to show while the chunk is downloaded.
-const PrivacySection = dynamic(() => import("../../components/landing/PrivacySection"), {
-  loading: () => <SectionLoader />,
-});
-const EditSection = dynamic(() => import("../../components/landing/EditSection"), {
-  loading: () => <SectionLoader />,
-});
-const EditBranding = dynamic(() => import("../../components/landing/EditBranding"), {
-  loading: () => <SectionLoader />,
-});
-const EditShowcase = dynamic(() => import("../../components/landing/EditShowcase"), {
-  loading: () => <SectionLoader />,
-});
-const Takecontrol = dynamic(() => import("../../components/landing/Takecontrol"), {
-  loading: () => <SectionLoader />,
-});
-const UpscaleSection = dynamic(() => import("../../components/landing/UpscaleSection"), {
-  loading: () => <SectionLoader />,
-});
-const ContactUs = dynamic(() => import("../../components/landing/ContactUs"), {
-  loading: () => <SectionLoader />,
-});
-const EndSection = dynamic(() => import("../../components/landing/EndSection"), {
-  loading: () => <SectionLoader />,
-});
+import { 
+  Hero, 
+  FeatureCard, 
+  FeaturesGrid, 
+  TestimonialsSection, 
+  FooterCTA,
+  AiAppsCarousel
+} from "@/src/components/landing/LandingComponents";
+import ContactUs from "@/src/components/landing/ContactUs";
+import PrivacySection from "@/src/components/landing/PrivacySection";
 
 const LandingPage = () => {
-  // --- DEFINE ANIMATION VARIANTS ---
-  // We can define the animation once and reuse it for every section.
-  const sectionVariants: Variants = {
-    // The state before the element is in view
-    hidden: { opacity: 0, y: 50 },
-    // The state when the element is in view
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
   return (
-    <main>
-      <div className="smooth-scroll relative overflow-hidden">
-        {/* === PART 1: STATIC CONTENT (LOADS IMMEDIATELY) === */}
-        <Hero />
-        <div className="relative">
-          <div className="z-10 h-56 w-screen bg-gradient-to-t from-black to-transparent"></div>
-          <RaycastComponent />
-          <div className="z-10 h-56 w-screen bg-gradient-to-t from-transparent to-black"></div>
-        </div>
+    <div className="min-h-screen bg-black text-foreground selection:bg-green-500/30 pb-32">
+      
+      <Hero />
 
-        {/* === PART 2: LAZY-LOADED & ANIMATED CONTENT === */}
-        {/*
-          Each section is wrapped in a `motion.div`.
-          - `variants`: Connects to our animation definition.
-          - `initial="hidden"`: Starts in the 'hidden' state (opacity: 0, y: 50).
-          - `whileInView="visible"`: Transitions to the 'visible' state when it enters the viewport.
-          - `viewport`: Configures the trigger.
-            - `once: true`: The animation only plays once. Crucial for performance.
-            - `amount: 0.2`: Triggers the animation when 20% of the section is visible.
-        */}
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <PrivacySection />
-        </motion.div>
+      <AiAppsCarousel />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <EditSection />
-        </motion.div>
+      <FeatureCard
+        title="Create Brand Identity - Pro & Fast"
+        description="Generate logos, color palettes, and typography guidelines that perfectly match your vision. Ensure consistency across all your assets with our AI-powered brand guardrails."
+        features={[
+            "Logo Generation",
+            "Brand Guidelines",
+            "Asset Consistency"
+        ]}
+        imageSide="right"
+        gradient="bg-green-400"
+        badge="Brand Identity"
+      />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <EditBranding />
-        </motion.div>
+      <FeatureCard
+        title="Brand Memory & Assets"
+        description="Store your brand assets in one place. Our AI remembers your style, so every new creation feels like it belongs to your brand automatically."
+        features={[
+            "Asset Library",
+            "Style Consistency",
+            "Instant Retrieval"
+        ]}
+        imageSide="left"
+        gradient="bg-purple-400"
+        badge="Smart Storage"
+      />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <EditShowcase />
-        </motion.div>
+      <FeatureCard
+        title="AI Product Photography"
+        description="Turn simple product photos into professional studio shots. Change backgrounds, lighting, and context with a single click."
+        features={[
+            "Background Removal",
+            "Scene Generation",
+            "Lighting Adjustment"
+        ]}
+        imageSide="right"
+        gradient="bg-pink-400"
+        badge="Photography"
+      />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <Takecontrol />
-        </motion.div>
+      <FeaturesGrid />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <UpscaleSection />
-        </motion.div>
+      <TestimonialsSection />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <ContactUs />
-        </motion.div>
+      <FooterCTA />
 
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <EndSection />
-        </motion.div>
-      </div>
-    </main>
+      <ContactUs />
+
+      <PrivacySection />
+
+      {/* <StickyPromptInput /> */}
+
+    </div>
   );
 };
 
@@ -168,7 +87,7 @@ export default function AuthRedirectWrapper() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Get initial session - same logic as navbar
+    // Get initial session
     const getUser = async () => {
       const {
         data: { user },
@@ -179,7 +98,7 @@ export default function AuthRedirectWrapper() {
 
     getUser();
 
-    // Listen for auth changes - same logic as navbar
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -192,10 +111,9 @@ export default function AuthRedirectWrapper() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Redirect authenticated users to /image/home
+      // Redirect authenticated users to /home
       router.push("/home");
     }
-    // If not authenticated, do nothing - they'll see the landing page
   }, [user, loading, router]);
 
   // Show loading state
