@@ -1,10 +1,15 @@
 "use client";
 
+import { CurrencyCircleDollar } from "@phosphor-icons/react";
 import { Position, NodeToolbar as FlowNodeToolbar, useNodesData } from "@xyflow/react";
+import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
-import { Sparkles, ChevronDown, Settings, Palette, Download } from "lucide-react";
-import { useEffect } from "react";
+import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
 
+import { useEffect, useState } from "react";
+
+import { getProducts } from "@/src/actions/subscription/getProducts";
+import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
 import {
   Select,
   SelectContent,
@@ -12,19 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { ConversationType } from "@/src/types/BaseType";
-
-import { selectedModelAtom } from "@/src/store/nodeAtoms";
-import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { CurrencyCircleDollar } from "@phosphor-icons/react";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
-import { getProducts } from "@/src/actions/subscription/getProducts";
-import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
-import { ProductListResponse } from "dodopayments/resources/index.mjs";
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { ConversationType } from "@/src/types/BaseType";
 import { Database } from "@/supabase/database.types";
+
 import UpdatePlanDialog from "../../user/dashboard/updatePlanDialog";
 
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];

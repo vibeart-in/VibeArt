@@ -101,7 +101,7 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
       title={data.label || "Text"}
 
       minWidth={300}
-      className="flex h-full w-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
+      className="flex size-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
 
       style={{
         backgroundColor: style.backgroundColor,
