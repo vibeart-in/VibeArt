@@ -11,6 +11,16 @@ import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
+import { getProducts } from "@/src/actions/subscription/getProducts";
+import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
+import { useNavInfo } from "@/src/hooks/useNavInfo";
+import UpdatePlanDialog from "../user/dashboard/updatePlanDialog";
+import { ProductListResponse } from "dodopayments/resources/index.mjs";
+import { User } from "@supabase/supabase-js";
+import { Database } from "@/supabase/database.types";
+
+// Helper types
+type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 
 import DialogBox from "./DialogBox";
 import ModelSelectorCard from "./ModalSelectorCard";
@@ -103,6 +113,38 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  
+  // Paid model restriction state
+  const [isUpdatePlanOpen, setIsUpdatePlanOpen] = useState(false);
+  const [products, setProducts] = useState<ProductListResponse[]>([]);
+  const [userSubscription, setUserSubscription] = useState<{
+    subscription: Subscription | null;
+    user: any; 
+  } | null>(null);
+  
+  const { data: navData } = useNavInfo();
+  const isFreeUser = navData?.navInfo?.subscription_tier === "free";
+
+  // Fetch products and subscription details
+  useEffect(() => {
+    if (isFreeUser) {
+        const fetchData = async () => {
+            const [productsRes, subRes] = await Promise.all([
+                getProducts(),
+                getUserSubscription()
+            ]);
+            
+            if (productsRes.success && productsRes.data) {
+                setProducts(productsRes.data);
+            }
+            if (subRes.success && subRes.data) {
+                setUserSubscription(subRes.data);
+            }
+        };
+        fetchData();
+    }
+  }, [isFreeUser]);
+
   const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -188,6 +230,14 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
   // --- Memoized Callbacks ---
   const handleModelSelect = useCallback((model: ModelData) => {
+    // Check if user is free and model is paid
+    if (isFreeUser && model.is_paid) {
+        setIsUpdatePlanOpen(true);
+        setIsDialogOpen(false);
+        setIsMobileDialogOpen(false);
+        return;
+    }
+
     // Try to save the current image state before switching
     try {
       if (paramsRef.current) {
@@ -208,7 +258,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
 
     setSelectedModel(model);
     setIsDialogOpen(false);
-  }, []);
+  }, [isFreeUser]);
 
   const handleCardClick = useCallback(() => {
     setIsDialogOpen((prev) => !prev);
@@ -418,7 +468,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
             }}
           >
             <div className="size-full overflow-y-auto p-2">
-              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
+              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} isFreeUser={isFreeUser} />
             </div>
             <GradualBlurMemo
               target="parent"
@@ -435,6 +485,27 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+
+
+      {/* Access Restriction Dialog */}
+      <UpdatePlanDialog
+        isDialog={true}
+         className="mx-0 shadow-lg transition-all duration-200 hover:shadow-xl"
+       
+        currentPlan={userSubscription?.subscription ?? null}
+        onPlanChange={async (planId) => {
+             // Implementation for plan change (can reuse logic or just redirect)
+             // For now just console log or simple redirect if needed
+             window.location.href = `/pricing`; 
+        }}
+        triggerText="" // Hidden trigger
+        products={products}
+        user={navData?.user ?? null}
+        openControlled={isUpdatePlanOpen}
+        onOpenChangeControlled={setIsUpdatePlanOpen}
+        hideTrigger={true}
+      />
 
       <AnimatePresence>
         {isDialogOpen && isMobile && (
@@ -455,7 +526,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
               </button>
             </div>
             <div className="size-full overflow-y-auto p-2">
-              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} />
+              <DialogBox conversationType={conversationType} onSelectModel={handleModelSelect} isFreeUser={isFreeUser} />
             </div>
           </motion.div>
         )}

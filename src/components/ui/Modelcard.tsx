@@ -1,5 +1,5 @@
 "use client";
-import { ClockIcon, FireIcon } from "@phosphor-icons/react";
+import { ClockIcon, FireIcon, CurrencyCircleDollar } from "@phosphor-icons/react";
 import { IconDiamondFilled, IconStarFilled } from "@tabler/icons-react";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
@@ -22,7 +22,9 @@ type ModelCardProps = {
   model: ModelData;
   onSelect: (model: ModelData) => void;
   onMoreInfo?: (model: ModelData) => void;
+  isFreeUser?: boolean;
 };
+
 
 function getTimeColor(estimated_time?: number) {
   const t = estimated_time ?? 0;
@@ -42,11 +44,12 @@ function getCostColor(cost?: number) {
   return { text: "text-red-300", border: "border-red-300" };
 }
 
-const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
+const ModelCard = ({ model, onSelect, onMoreInfo, isFreeUser }: ModelCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const timeColor = getTimeColor(model.estimated_time);
   const costColor = getCostColor(model.cost);
+  const showCoinIcon = onMoreInfo === undefined && isFreeUser && model.is_paid;
 
   return (
     <motion.div
@@ -133,6 +136,13 @@ const ModelCard = ({ model, onSelect, onMoreInfo }: ModelCardProps) => {
             </motion.div>
           </div>
         </div>
+
+        {/* Paid Model Indicator for Free Users */}
+        {showCoinIcon && (
+          <div className="absolute left-3 top-3 z-10 flex items-center justify-center rounded-full bg-yellow-400 p-1 shadow-lg shadow-yellow-400/20 backdrop-blur-sm">
+            <CurrencyCircleDollar size={16} weight="fill" className="text-black" /> 
+          </div>
+        )}
 
         {/* Bottom tags */}
         <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1.5">

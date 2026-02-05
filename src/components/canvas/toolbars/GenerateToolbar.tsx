@@ -12,9 +12,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
+
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { ConversationType } from "@/src/types/BaseType";
+
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { CurrencyCircleDollar } from "@phosphor-icons/react";
+import { useNavInfo } from "@/src/hooks/useNavInfo";
+import { getProducts } from "@/src/actions/subscription/getProducts";
+import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
+import { ProductListResponse } from "dodopayments/resources/index.mjs";
+import { Database } from "@/supabase/database.types";
+import UpdatePlanDialog from "../../user/dashboard/updatePlanDialog";
+
+type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
+
 
 interface GenerateToolbarProps {
   id?: string;
@@ -44,6 +58,27 @@ export default function GenerateToolbar({
   const { data: models = [] } = useModelsByUsecase(usecase);
 
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
+
+  // Subscription & Access Control Logic
+  const { data: navData } = useNavInfo();
+  const isFreeUser = navData?.navInfo?.subscription_tier === "free";
+  const [isUpdatePlanOpen, setIsUpdatePlanOpen] = useState(false);
+  const [products, setProducts] = useState<ProductListResponse[]>([]);
+  const [userSubscription, setUserSubscription] = useState<{
+    subscription: Subscription | null;
+    user: any;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isFreeUser) {
+      const fetchData = async () => {
+        const [productsRes, subRes] = await Promise.all([getProducts(), getUserSubscription()]);
+        if (productsRes.success && productsRes.data) setProducts(productsRes.data);
+        if (subRes.success && subRes.data) setUserSubscription(subRes.data);
+      };
+      fetchData();
+    }
+  }, [isFreeUser]);
 
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
@@ -101,7 +136,13 @@ export default function GenerateToolbar({
           value={selectedModel?.model_name || ""}
           onValueChange={(val) => {
             const found = models?.find((m) => m.model_name === val);
-            if (found) setSelectedModel(found);
+            if (found) {
+              if (isFreeUser && found.is_paid) {
+                setIsUpdatePlanOpen(true);
+                return;
+              }
+              setSelectedModel(found);
+            }
           }}
         >
           <SelectTrigger className="flex h-9 items-center gap-2 rounded-full border-0 bg-[#1A1A1A] pl-1 pr-3 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
@@ -119,6 +160,13 @@ export default function GenerateToolbar({
                     }}
                   ></div>
                   <span className="text-base">{model.model_name}</span>
+                  {isFreeUser && model.is_paid && (
+                    <CurrencyCircleDollar
+                      size={16}
+                      weight="fill"
+                      className="ml-auto text-yellow-400"
+                    />
+                  )}
                 </div>
               </SelectItem>
             ))}
@@ -141,6 +189,22 @@ export default function GenerateToolbar({
           </button>
         )}
       </div>
+
+      {/* Access Restriction Dialog */}
+      <UpdatePlanDialog
+        isDialog={true}
+        className="mx-0 transition-all duration-200"
+        currentPlan={userSubscription?.subscription ?? null}
+        onPlanChange={async () => {
+          window.location.href = `/pricing`;
+        }}
+        triggerText=""
+        products={products}
+        user={navData?.user ?? null}
+        openControlled={isUpdatePlanOpen}
+        onOpenChangeControlled={setIsUpdatePlanOpen}
+        hideTrigger={true}
+      />
     </FlowNodeToolbar>
   );
 }

@@ -55,16 +55,16 @@ export default function TextToolbar({
       offset={20}
     >
       <div
-        className="flex items-center gap-1 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
+        className="flex items-center gap-1 rounded-2xl border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Color Picker Section (Node Background) */}
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="flex h-8 items-center gap-1 rounded-full px-2 text-gray-300 outline-none transition-colors hover:bg-white/10 hover:text-white">
+            <button className="flex h-8 items-center gap-1 rounded-xl px-2 text-gray-300 outline-none transition-colors hover:bg-white/10 hover:text-white">
               <div
-                className="size-4 rounded-full border border-white/20"
+                className="size-4 rounded-xl border border-white/20"
                 style={{ backgroundColor: style.backgroundColor }}
               />
               <ChevronDown className="size-3 opacity-50" />
@@ -79,10 +79,10 @@ export default function TextToolbar({
                 {COLORS.map((color) => (
                   <DropdownMenu.Item
                     key={color}
-                    className="relative flex size-6 cursor-pointer items-center justify-center rounded-full border border-transparent hover:border-white/50 focus:outline-none"
+                    className="relative flex size-6 cursor-pointer items-center justify-center rounded-xl border border-transparent hover:border-white/50 focus:outline-none"
                     onClick={() => setStyle((s) => ({ ...s, backgroundColor: color }))}
                   >
-                    <div className="size-full rounded-full" style={{ backgroundColor: color }} />
+                    <div className="size-full rounded-xl" style={{ backgroundColor: color }} />
                     {style.backgroundColor === color && (
                       <Check className="absolute inset-0 m-auto size-3 text-white drop-shadow-md" />
                     )}
@@ -96,7 +96,7 @@ export default function TextToolbar({
         {/* Heading / Type Selector */}
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="flex h-8 items-center gap-2 rounded-full px-2 text-sm font-medium text-gray-300 outline-none transition-colors hover:bg-white/10 hover:text-white">
+            <button className="flex h-8 items-center gap-2 rounded-xl px-2 text-sm font-medium text-gray-300 outline-none transition-colors hover:bg-white/10 hover:text-white">
               <span className="text-xs">
                 {editor.isActive("heading", { level: 1 })
                   ? "Heading 1"
@@ -154,7 +154,7 @@ export default function TextToolbar({
         {/* Formatting Section */}
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${
+          className={`flex size-8 items-center justify-center rounded-xl transition-colors hover:bg-white/10 ${
             editor.isActive("bold") ? "bg-white/20 text-white" : "text-gray-400"
           }`}
         >
@@ -163,7 +163,7 @@ export default function TextToolbar({
 
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${
+          className={`flex size-8 items-center justify-center rounded-xl transition-colors hover:bg-white/10 ${
             editor.isActive("italic") ? "bg-white/20 text-white" : "text-gray-400"
           }`}
         >
@@ -172,7 +172,7 @@ export default function TextToolbar({
 
         <button
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${
+          className={`flex size-8 items-center justify-center rounded-xl transition-colors hover:bg-white/10 ${
             editor.isActive("underline") ? "bg-white/20 text-white" : "text-gray-400"
           }`}
         >
@@ -181,18 +181,11 @@ export default function TextToolbar({
 
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${
+          className={`flex size-8 items-center justify-center rounded-xl transition-colors hover:bg-white/10 ${
             editor.isActive("bulletList") ? "bg-white/20 text-white" : "text-gray-400"
           }`}
         >
           <List className="size-4" />
-        </button>
-
-        <div className="mx-1 h-4 w-px bg-[#333]" />
-
-        {/* Delete/More Action can go here */}
-        <button className="flex size-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-500/20 hover:text-red-400">
-          <Minus className="size-4" />
         </button>
       </div>
     </FlowNodeToolbar>

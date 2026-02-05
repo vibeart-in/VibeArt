@@ -48,6 +48,7 @@ export interface ModelData {
   tags?: string[];
   is_variable_price?: boolean;
   pricing_parameters?: Json;
+  is_paid?: boolean;
 }
 
 export type DBModelData = Database["public"]["Functions"]["get_initial_model"]["Returns"][number];
