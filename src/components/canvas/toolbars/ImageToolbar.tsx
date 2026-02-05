@@ -1,7 +1,7 @@
 "use client";
 
-import { Palette, Sparkles, ChevronDown } from "lucide-react";
 import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
+import { Palette, Sparkles, ChevronDown } from "lucide-react";
 
 interface ImageToolbarProps {
   selected: boolean;

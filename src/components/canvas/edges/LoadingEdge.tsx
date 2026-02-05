@@ -1,4 +1,3 @@
-import React, { memo } from "react";
 import {
   BaseEdge,
   type EdgeProps,
@@ -8,6 +7,7 @@ import {
   Position,
   useInternalNode,
 } from "@xyflow/react";
+import React, { memo } from "react";
 
 const getHandleCoordsByPosition = (node: InternalNode<Node>, handlePosition: Position) => {
   // Choose the handle type based on position - Left is for target, Right is for source

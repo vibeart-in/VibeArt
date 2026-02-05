@@ -1,5 +1,7 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
 import {
   RotateCcw,
   Sun,
@@ -12,8 +14,7 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react";
-import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import FilterSlider from "./nodes/FilterSlider";
@@ -51,7 +52,10 @@ const DEFAULT_FILTERS = {
 };
 
 const PRESETS = [
-  { name: "Vivid", filters: { ...DEFAULT_FILTERS, brightness: 110, contrast: 120, saturation: 140 } },
+  {
+    name: "Vivid",
+    filters: { ...DEFAULT_FILTERS, brightness: 110, contrast: 120, saturation: 140 },
+  },
   { name: "Warm", filters: { ...DEFAULT_FILTERS, sepia: 30, saturation: 110 } },
   { name: "Cool", filters: { ...DEFAULT_FILTERS, hue: 180, saturation: 80 } },
   { name: "Vintage", filters: { ...DEFAULT_FILTERS, sepia: 50, contrast: 90, brightness: 90 } },
@@ -86,7 +90,15 @@ export default function ColorCorrectionToolbar({
   ];
 
   const effectFilters = [
-    { key: "blur" as const, label: "Blur", icon: CircleDot, min: 0, max: 20, unit: "px", default: 0 },
+    {
+      key: "blur" as const,
+      label: "Blur",
+      icon: CircleDot,
+      min: 0,
+      max: 20,
+      unit: "px",
+      default: 0,
+    },
     { key: "grayscale" as const, label: "Grayscale", icon: Contrast, min: 0, max: 100, default: 0 },
     { key: "sepia" as const, label: "Sepia", icon: Sparkles, min: 0, max: 100, default: 0 },
   ];
@@ -99,7 +111,7 @@ export default function ColorCorrectionToolbar({
       offset={20}
     >
       <div
-        className="flex items-center mt-[70px] gap-2 rounded-2xl border border-[#1D1D1D] bg-[#121212] p-2 shadow-2xl backdrop-blur-xl"
+        className="mt-[70px] flex items-center gap-2 rounded-2xl border border-[#1D1D1D] bg-[#121212] p-2 shadow-2xl backdrop-blur-xl"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -126,7 +138,7 @@ export default function ColorCorrectionToolbar({
                     onClick={onReset}
                     className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    <RotateCcw className="h-3 w-3" />
+                    <RotateCcw className="size-3" />
                     Reset
                   </button>
                 )}
@@ -157,7 +169,7 @@ export default function ColorCorrectionToolbar({
                   </TabsList>
                 </div>
 
-                <TabsContent value="light" className="mt-0 space-y-4 px-4 py-4">
+                <TabsContent value="light" className="mt-0 space-y-4 p-4">
                   {lightFilters.map((filter) => (
                     <FilterSlider
                       key={filter.key}
@@ -173,7 +185,7 @@ export default function ColorCorrectionToolbar({
                   ))}
                 </TabsContent>
 
-                <TabsContent value="color" className="mt-0 space-y-4 px-4 py-4">
+                <TabsContent value="color" className="mt-0 space-y-4 p-4">
                   {colorFilters.map((filter) => (
                     <FilterSlider
                       key={filter.key}
@@ -189,7 +201,7 @@ export default function ColorCorrectionToolbar({
                   ))}
                 </TabsContent>
 
-                <TabsContent value="effects" className="mt-0 space-y-4 px-4 py-4">
+                <TabsContent value="effects" className="mt-0 space-y-4 p-4">
                   {effectFilters.map((filter) => (
                     <FilterSlider
                       key={filter.key}

@@ -866,3 +866,17 @@
   pointer-events: none;
   height: 0;
 }
+
+@layer utilities {
+  @keyframes scroll-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-33.33%);
+    }
+  }
+  .animate-scroll-vertical {
+    animation: scroll-vertical 20s linear infinite;
+  }
+}

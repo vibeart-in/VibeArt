@@ -3,9 +3,9 @@
 "use client";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { IconEdit } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { motion } from "framer-motion";
 
 import { MessageGroupType } from "@/src/types/BaseType";
 

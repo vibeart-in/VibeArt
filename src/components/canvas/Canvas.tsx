@@ -16,22 +16,26 @@ import {
   OnNodesChange,
   MarkerType,
 } from "@xyflow/react";
+import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { toJpeg, toPng } from "html-to-image";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
 import "@xyflow/react/dist/style.css";
-import { edgeTypes } from "./edges/EdgeTypes";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { updateProjectAction } from "@/src/actions/canvas/update";
+import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
+
 import CustomControls from "./Controls";
+import { DevTools } from "../devtools";
+import { CanvasContextMenu } from "./CanvasContextMenu";
+import { edgeTypes } from "./edges/EdgeTypes";
 import { useCanvas } from "../providers/CanvasProvider";
 import { nodeTypes } from "./nodes/Nodetypes";
-import { NodeOperationsProvider } from "../providers/NodeProvider";
-import { updateProjectAction } from "@/src/actions/canvas/update";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
-import { DevTools } from "../devtools";
-import { toJpeg, toPng } from "html-to-image";
-import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
-import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
-import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
-import { CanvasContextMenu } from "./CanvasContextMenu";
+import { NodeOperationsProvider } from "../providers/NodeProvider";
+
+
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project, setIsDraggingEdge } = useCanvas();

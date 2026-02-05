@@ -1,6 +1,6 @@
-import React, { memo } from "react";
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
 import { Image as ImageIcon, Video, Sparkles, X } from "lucide-react";
+import React, { memo } from "react";
 
 const DropNode = memo(({ id, data }: NodeProps) => {
   const { setNodes, setEdges } = useReactFlow();
@@ -45,7 +45,7 @@ const DropNode = memo(({ id, data }: NodeProps) => {
       {/* Close Button */}
       <button
         onClick={handleClose}
-        className="absolute -right-7 -top-7 z-20 flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-800/80 text-zinc-300 ring-1 ring-zinc-700 transition-all hover:bg-red-500 hover:text-white hover:ring-red-400/60"
+        className="absolute -right-7 -top-7 z-20 flex size-8 items-center justify-center rounded-xl bg-zinc-800/80 text-zinc-300 ring-1 ring-zinc-700 transition-all hover:bg-red-500 hover:text-white hover:ring-red-400/60"
       >
         <X size={13} strokeWidth={2.2} />
       </button>
@@ -110,7 +110,7 @@ function Option({
       onClick={onClick}
       className="group relative flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-all hover:bg-zinc-800 hover:text-zinc-100"
     >
-      <div className={`flex h-6 w-6 items-center justify-center rounded ${colorMap[color]}`}>
+      <div className={`flex size-6 items-center justify-center rounded ${colorMap[color]}`}>
         {icon}
       </div>
 

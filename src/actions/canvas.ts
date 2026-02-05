@@ -1,7 +1,8 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+
+import { createClient } from "@/src/lib/supabase/server";
 
 export async function createCanvas(title: string = "Untitled Canvas") {
   const supabase = await createClient();

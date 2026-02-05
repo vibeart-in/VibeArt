@@ -46,11 +46,12 @@ export const getLorasFromNodes = (nodes: XYNodeSnapshot[]): any[] => {
 
 export const getImagesFromNodes = (nodes: XYNodeSnapshot[]): string[] => {
   return nodes
-    .map((node) => 
-      node.data?.croppedImageUrl || 
-      node.data?.processedImageUrl || 
-      node.data?.url || 
-      node.data?.imageUrl
+    .map(
+      (node) =>
+        node.data?.croppedImageUrl ||
+        node.data?.processedImageUrl ||
+        node.data?.url ||
+        node.data?.imageUrl,
     )
     .filter((url): url is string => typeof url === "string" && !!url);
 };
