@@ -48,7 +48,7 @@ const PhoneCard = ({
 
 export default function LensCaveCards() {
   return (
-    <div className="relative z-10 -mt-32 w-full px-6 pb-20 md:px-20 lg:px-32">
+    <div className="relative z-10 -mt-0 w-full px-6 pb-20 md:px-20 lg:px-32">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <PhoneCard title="Meetup" imageSrc="/images/app_interface.png" delay="delay-0" />
         <PhoneCard title="For You" imageSrc="/images/app_interface.png" delay="delay-100" />

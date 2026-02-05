@@ -99,7 +99,7 @@ const Page = async () => {
       <LensCaveHero />
       <HomeFeatureCard />
       {/* <HorizontalImageScroller images={sampleImages} galleryHeight={450} /> */}
-      {/* <LensCaveCards /> */}
+      <LensCaveCards />
       {/* <LensCaveLiveRooms /> */}
     </main>
   );
