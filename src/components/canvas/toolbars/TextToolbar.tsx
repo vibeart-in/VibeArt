@@ -1,5 +1,9 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Editor } from "@tiptap/react";
+import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
+import { useAtom } from "jotai";
 import {
   ChevronDown,
   Bold,
@@ -9,11 +13,9 @@ import {
   Minus,
   Check,
 } from "lucide-react";
-import { Position, NodeToolbar as FlowNodeToolbar } from "@xyflow/react";
-import { useAtom } from "jotai";
+
 import { nodeStyleAtom } from "../../../store/nodeAtoms";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Editor } from "@tiptap/react";
+
 
 interface TextToolbarProps {
   id: string;

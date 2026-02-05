@@ -1,6 +1,7 @@
 "use client";
-import React, { memo } from "react";
 import { NodeProps, Node } from "@xyflow/react";
+import React, { memo } from "react";
+
 import NodeLayout from "../NodeLayout";
 
 type GroupData = {
@@ -16,15 +17,15 @@ const GroupNode = memo(({ id, data, selected }: NodeProps<GroupNodeType>) => {
       id={id}
       selected={selected}
       title={data.label || "Group"}
-      className="h-full w-full rounded-2xl border border-zinc-700 bg-white/5 backdrop-blur-sm transition-colors duration-200"
+      className="size-full rounded-2xl border border-zinc-700 bg-white/5 backdrop-blur-sm transition-colors duration-200"
       minWidth={200}
       minHeight={200}
       toolbarType="default"
       handles={[]}
     >
-      <div className="h-full w-full p-4" />
+      <div className="size-full p-4" />
     </NodeLayout>
   );
 });
-
+GroupNode.displayName = "GroupNode";
 export default GroupNode;

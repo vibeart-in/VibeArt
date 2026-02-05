@@ -1,11 +1,13 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { ArrowUp, Loader2, RefreshCw } from "lucide-react";
-import { useSyncUpstreamData } from "@/src/utils/xyflow";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
+import { useSyncUpstreamData } from "@/src/utils/xyflow";
+
 import { useCanvas } from "../../providers/CanvasProvider";
+import NodeLayout from "../NodeLayout";
 
 export type UpscaleNodeData = {
   imageUrl?: string;
@@ -126,7 +128,7 @@ const UpscaleNode = React.memo(({ id, data, selected }: NodeProps<UpscaleNodeTyp
       subtitle="Real-ESRGAN"
       minWidth={BASE_WIDTH}
       minHeight={BASE_WIDTH * aspectRatio}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -134,7 +136,7 @@ const UpscaleNode = React.memo(({ id, data, selected }: NodeProps<UpscaleNodeTyp
       toolbarType="upscale"
       keepAspectRatio={true}
     >
-      <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
+      <div className="relative size-full flex-1 overflow-hidden rounded-3xl">
         {/* Dimensions Badge */}
         {data?.outputImages?.[0]?.width && data?.outputImages?.[0]?.height && (
           <div className="pointer-events-none absolute bottom-2 left-2 z-10 flex justify-center">
@@ -149,7 +151,7 @@ const UpscaleNode = React.memo(({ id, data, selected }: NodeProps<UpscaleNodeTyp
           <img
             src={displayImage}
             alt="Upscale Input/Output"
-            className="h-full w-full rounded-3xl object-cover"
+            className="size-full rounded-3xl object-cover"
             draggable={false}
           />
         ) : (

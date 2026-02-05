@@ -1,17 +1,18 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import { useAtom } from "jotai";
-import { nodeStyleAtom, NodeStyle } from "../../../store/nodeAtoms";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
+import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
+import { useAtom } from "jotai";
+import React, { useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
+import { nodeStyleAtom, NodeStyle } from "../../../store/nodeAtoms";
+import NodeLayout from "../NodeLayout";
 
 type TextData = {
   label?: string;
@@ -102,7 +103,7 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
       id={id}
       selected={selected}
       title={data.label || "Text"}
-      className="flex h-full w-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
+      className="flex size-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
       style={{
         backgroundColor: style.backgroundColor,
       }}
@@ -113,12 +114,12 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
       {/* Drag indicator */}
       <div className="flex cursor-grab items-center justify-center py-2 active:cursor-grabbing">
         <div className="flex gap-1">
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
         </div>
       </div>
 
@@ -130,7 +131,7 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
              the editor handles that content-wise. */}
         <EditorContent
           editor={editor}
-          className="nodrag h-full min-h-[120px] w-full cursor-text overflow-auto rounded-xl text-white/90 !outline-none hover:border-2 [&_.ProseMirror]:h-full [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none"
+          className="nodrag size-full min-h-[120px] cursor-text overflow-auto rounded-xl text-white/90 !outline-none hover:border-2 [&_.ProseMirror]:h-full [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none"
         />
       </div>
     </NodeLayout>

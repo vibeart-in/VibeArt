@@ -1,7 +1,7 @@
 "use client";
 
+import { BaseEdge, getSmoothStepPath, EdgeProps } from "@xyflow/react";
 import React from "react";
-import { BaseEdge, getSmoothStepPath, EdgeProps } from '@xyflow/react';
 
 export const CustomEdge = ({
   id,

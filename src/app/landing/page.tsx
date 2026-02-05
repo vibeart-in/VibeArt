@@ -1,21 +1,22 @@
 "use client";
 
 import React from "react";
-import { 
-  Hero, 
-  FeatureCard, 
-  FeaturesGrid, 
-  TestimonialsSection, 
-  FooterCTA,
-  AiAppsCarousel
-} from "../../components/landing/LandingComponents";
+
 import ContactUs from "@/src/components/landing/ContactUs";
 import PrivacySection from "@/src/components/landing/PrivacySection";
 
+import {
+  Hero,
+  FeatureCard,
+  FeaturesGrid,
+  TestimonialsSection,
+  FooterCTA,
+  AiAppsCarousel,
+} from "../../components/landing/LandingComponents";
+
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-black text-foreground selection:bg-green-500/30 pb-32">
-      
+    <main className="min-h-screen bg-black pb-32 text-foreground selection:bg-green-500/30">
       <Hero />
 
       <AiAppsCarousel />
@@ -23,11 +24,7 @@ export default function LandingPage() {
       <FeatureCard
         title="Create Brand Identity - Pro & Fast"
         description="Generate logos, color palettes, and typography guidelines that perfectly match your vision. Ensure consistency across all your assets with our AI-powered brand guardrails."
-        features={[
-            "Logo Generation",
-            "Brand Guidelines",
-            "Asset Consistency"
-        ]}
+        features={["Logo Generation", "Brand Guidelines", "Asset Consistency"]}
         imageSide="right"
         gradient="bg-green-400"
         badge="Brand Identity"
@@ -36,11 +33,7 @@ export default function LandingPage() {
       <FeatureCard
         title="Brand Memory & Assets"
         description="Store your brand assets in one place. Our AI remembers your style, so every new creation feels like it belongs to your brand automatically."
-        features={[
-            "Asset Library",
-            "Style Consistency",
-            "Instant Retrieval"
-        ]}
+        features={["Asset Library", "Style Consistency", "Instant Retrieval"]}
         imageSide="left"
         gradient="bg-purple-400"
         badge="Smart Storage"
@@ -49,11 +42,7 @@ export default function LandingPage() {
       <FeatureCard
         title="AI Product Photography"
         description="Turn simple product photos into professional studio shots. Change backgrounds, lighting, and context with a single click."
-        features={[
-            "Background Removal",
-            "Scene Generation",
-            "Lighting Adjustment"
-        ]}
+        features={["Background Removal", "Scene Generation", "Lighting Adjustment"]}
         imageSide="right"
         gradient="bg-pink-400"
         badge="Photography"
@@ -72,7 +61,6 @@ export default function LandingPage() {
       {/* <Footer /> */}
 
       {/* <StickyPromptInput /> */}
-
     </main>
   );
 }

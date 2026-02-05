@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { InputBoxParameter } from "../types/BaseType";
 
 type CanvasGenerationParams = {

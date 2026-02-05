@@ -8,8 +8,8 @@ import localFont from "next/font/local";
 import { RealtimeProvider } from "../components/providers/RealtimeProvider";
 import { SkipToContent } from "../components/SkipToContent";
 import { Toaster } from "../components/ui/sonner";
-import { TanStackProvider } from "../lib/TanstackProvider";
 import { JotaiProviders } from "../lib/JotaiProvider";
+import { TanStackProvider } from "../lib/TanstackProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`

@@ -1,6 +1,7 @@
-import { createClient } from "@/src/lib/supabase/client";
-import { AiApp } from "@/src/constants/aiApps";
 import { useEffect, useState } from "react";
+
+import { AiApp } from "@/src/constants/aiApps";
+import { createClient } from "@/src/lib/supabase/client";
 
 export function useAiAppDetails(appId?: string) {
   const [data, setData] = useState<AiApp | null>(null);

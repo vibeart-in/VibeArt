@@ -1,9 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
 import { Plus, Search, LayoutGrid, List, MoreHorizontal } from "lucide-react";
-import { useState, useTransition } from "react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+
+import { createCanvas } from "@/src/actions/canvas";
+
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +19,7 @@ import {
 } from "../ui/dotted-dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Button } from "../ui/button";
-import { createCanvas } from "@/src/actions/canvas";
-import { formatDistanceToNow } from "date-fns";
+
 
 interface Project {
   id: string;
@@ -72,7 +75,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           <div className="relative z-10 max-w-2xl">
             <div className="mb-4 flex items-center gap-3">
               <div className="rounded-lg bg-white/10 p-2 backdrop-blur-md">
-                <LayoutGrid className="h-6 w-6 text-blue-400" />
+                <LayoutGrid className="size-6 text-blue-400" />
               </div>
               <h1 className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
                 Canvas
@@ -87,7 +90,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
               disabled={isPending}
               className="group flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-black transition-all hover:bg-neutral-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="size-5" />
               <span>{isPending ? "Creating..." : "New Canvas"}</span>
             </button>
           </div>
@@ -111,7 +114,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
 
           <div className="flex w-full items-center gap-3 md:w-auto">
             <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
               <input
                 type="text"
                 placeholder="Search projects..."
@@ -123,13 +126,13 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
                 onClick={() => setViewMode("grid")}
                 className={`rounded-lg p-2 transition-colors ${viewMode === "grid" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"}`}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="size-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 className={`rounded-lg p-2 transition-colors ${viewMode === "list" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"}`}
               >
-                <List className="h-4 w-4" />
+                <List className="size-4" />
               </button>
             </div>
           </div>
@@ -147,7 +150,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-neutral-500 transition-colors group-hover:text-white/80">
               <div className="rounded-full bg-neutral-800 p-4 transition-colors group-hover:bg-neutral-700">
-                <Plus className="h-8 w-8" />
+                <Plus className="size-8" />
               </div>
               <span className="font-medium">New Workflow</span>
             </div>
@@ -170,14 +173,14 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
                     "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png"
                   }
                   alt={project.title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
 
                 {/* Overlay actions */}
                 <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                   <button className="rounded-lg bg-black/50 p-1.5 text-white backdrop-blur-md hover:bg-black/70">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="size-4" />
                   </button>
                 </div>
               </div>

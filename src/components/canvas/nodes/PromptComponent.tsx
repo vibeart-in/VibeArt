@@ -1,11 +1,15 @@
 import { Handle, Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
+import { PlusCircleIcon } from "lucide-react";
 import React, { useState } from "react";
+
+import { ConversationType, ModelData, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
+
+import MidjourneyStylesModal from "../../inputBox/MidjourneyStylesModal";
 import ModelSelectModal from "../../inputBox/ModelSelectModal";
 import PresetModal from "../../inputBox/PresetModal";
-import MidjourneyStylesModal from "../../inputBox/MidjourneyStylesModal";
-import { ConversationType, ModelData, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
-import { PlusCircleIcon } from "lucide-react";
+import NodeLayout from "../NodeLayout";
+
+
 
 // Base types
 export type BaseNodeData = {

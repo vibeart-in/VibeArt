@@ -174,7 +174,7 @@ export default function DragAndDropBox({
           <img
             src={uploadedImageUrl}
             alt="Uploaded"
-            className="h-auto max-h-[60vh] w-auto max-w-full rounded-3xl border-2 border-white/20"
+            className="size-auto max-h-[60vh] max-w-full rounded-3xl border-2 border-white/20"
           />
           <button onClick={handleRemoveImage} className="absolute -right-4 -top-4">
             <IconX size={32} className="custom-box hover:text-accent" />

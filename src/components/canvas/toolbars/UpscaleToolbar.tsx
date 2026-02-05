@@ -1,15 +1,17 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { IconWindowMaximize } from "@tabler/icons-react";
 import {
   Position,
   NodeToolbar as FlowNodeToolbar,
   useNodesData,
   useReactFlow,
 } from "@xyflow/react";
+import { Download } from "lucide-react";
+
 import { Slider } from "@/src/components/ui/slider";
 import { Switch } from "@/src/components/ui/switch";
-import { IconWindowMaximize } from "@tabler/icons-react";
+
 
 interface UpscaleToolbarProps {
   id?: string;

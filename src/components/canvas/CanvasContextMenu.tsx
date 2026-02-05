@@ -1,15 +1,5 @@
+import { IconWindowMaximize } from "@tabler/icons-react";
 import { useReactFlow } from "@xyflow/react";
-import { useCallback, useState, ReactNode, useMemo } from "react";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-} from "../ui/context-menu";
 import {
   Search,
   Upload,
@@ -25,8 +15,20 @@ import {
   Zap,
   Eraser,
 } from "lucide-react";
+import { useCallback, useState, ReactNode, useMemo } from "react";
+
 import { AI_APPS } from "@/src/constants/aiApps";
-import { IconWindowMaximize } from "@tabler/icons-react";
+
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+} from "../ui/context-menu";
 
 interface CanvasContextMenuProps {
   children: ReactNode;
@@ -68,7 +70,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Text",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
             <Type size={12} />
           </div>
         ),
@@ -77,7 +79,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Image Generator",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
             <ImageIcon size={12} />
           </div>
         ),
@@ -86,7 +88,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Image Generator (Advanced)",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
             <ImageIcon size={12} />
           </div>
         ),
@@ -95,7 +97,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Video Generator",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
             <Video size={12} />
           </div>
         ),
@@ -104,7 +106,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Checkpoint",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
             <Palette size={12} />
           </div>
         ),
@@ -113,7 +115,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "LoRA",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
             <Palette size={12} />
           </div>
         ),
@@ -122,7 +124,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Style",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
             <Palette size={12} />
           </div>
         ),
@@ -131,7 +133,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Presets",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
             <LayoutTemplate size={12} />
           </div>
         ),
@@ -140,7 +142,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Color Correction",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
             <Palette size={12} />
           </div>
         ),
@@ -149,7 +151,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Crop",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
             <Crop size={12} />
           </div>
         ),
@@ -158,7 +160,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Painter",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
             <Brush size={12} />
           </div>
         ),
@@ -167,7 +169,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Upscale",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
             <IconWindowMaximize size={12} />
           </div>
         ),
@@ -176,7 +178,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Remove Background",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
             <Eraser size={12} />
           </div>
         ),
@@ -185,7 +187,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       {
         label: "Group",
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
             <LayoutTemplate size={12} />
           </div>
         ),
@@ -195,7 +197,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
       ...AI_APPS.map((app) => ({
         label: app.app_name,
         icon: (
-          <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
+          <div className="mr-2 flex size-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
             <Sparkles size={12} />
           </div>
         ),
@@ -211,7 +213,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger onContextMenu={handleContextMenu} className="block h-full w-full">
+      <ContextMenuTrigger onContextMenu={handleContextMenu} className="block size-full">
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
@@ -268,7 +270,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("prompt")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-emerald-900/50 text-emerald-500">
                     <Type size={12} />
                   </div>
                   Text
@@ -278,7 +280,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("outputImage")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-indigo-900/50 text-indigo-500">
                     <ImageIcon size={12} />
                   </div>
                   Image Generator
@@ -288,7 +290,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("outputImageAdvanced")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
                     <ImageIcon size={12} />
                   </div>
                   Image Generator (Advanced)
@@ -298,7 +300,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("generateVideo")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-purple-900/50 text-purple-500">
                     <Video size={12} />
                   </div>
                   Video Generator
@@ -316,7 +318,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("checkpoint")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-blue-900/50 text-blue-500">
                     <Palette size={12} />
                   </div>
                   Checkpoint
@@ -326,7 +328,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("lora")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-violet-900/50 text-violet-500">
                     <Palette size={12} />
                   </div>
                   LoRA
@@ -336,7 +338,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("style")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-orange-900/50 text-orange-500">
                     <Palette size={12} />
                   </div>
                   Style
@@ -346,7 +348,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("presets")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-pink-900/50 text-pink-500">
                     <LayoutTemplate size={12} />
                   </div>
                   Presets
@@ -364,7 +366,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("colorCorrection")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-amber-900/50 text-amber-500">
                     <Palette size={12} />
                   </div>
                   Color Correction
@@ -374,7 +376,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("crop")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-neutral-800/50 text-neutral-400">
                     <Crop size={12} />
                   </div>
                   Crop
@@ -384,7 +386,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("sketch")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-pink-900/50 text-pink-400">
                     <Brush size={12} />
                   </div>
                   Painter
@@ -394,7 +396,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("upscale")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
                     <IconWindowMaximize size={12} />
                   </div>
                   Upscale
@@ -404,7 +406,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("removeBackground")}
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-rose-900/50 text-rose-400">
                     <Eraser size={12} />
                   </div>
                   Remove Background
@@ -421,7 +423,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
                     })
                   }
                 >
-                  <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
+                  <div className="mr-2 flex size-5 items-center justify-center rounded bg-zinc-800/50 text-zinc-400">
                     <LayoutTemplate size={12} />
                   </div>
                   Group
@@ -433,7 +435,7 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
 
             <ContextMenuSub>
               <ContextMenuSubTrigger className="focus:bg-zinc-800 focus:text-zinc-100">
-                <div className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
+                <div className="mr-2 flex size-5 items-center justify-center rounded bg-cyan-900/50 text-cyan-500">
                   <Sparkles size={12} />
                 </div>
                 AI Apps

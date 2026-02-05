@@ -1,10 +1,11 @@
-import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
-import { UserSectionClient } from "@/src/components/home/UserSectionClient";
-import Canvas from "@/src/components/canvas/Canvas";
 import { Background, BackgroundVariant, Panel } from "@xyflow/react";
-import { createClient } from "@/src/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+import Canvas from "@/src/components/canvas/Canvas";
+import { UserSectionClient } from "@/src/components/home/UserSectionClient";
 import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
+import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
+import { createClient } from "@/src/lib/supabase/server";
 import { CanvasProject } from "@/src/types/BaseType";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {

@@ -1,13 +1,15 @@
 "use client";
 
-import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { IconPhotoFilled } from "@tabler/icons-react";
 import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { Loader2, UploadCloud } from "lucide-react";
-import NodeLayout from "../NodeLayout";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
+
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+
 import { useCanvas } from "../../providers/CanvasProvider";
+import NodeLayout from "../NodeLayout";
 
 export type InputImageNodeData = {
   label?: string;
@@ -102,13 +104,13 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
           <img
             src={data.url}
             alt="Node Input"
-            className="h-full w-full object-cover"
+            className="size-full object-cover"
             draggable={false}
           />
         ) : (
           <label
             htmlFor={`upload-${id}`}
-            className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 text-gray-500 hover:text-gray-300"
+            className="flex size-full cursor-pointer flex-col items-center justify-center gap-2 text-gray-500 hover:text-gray-300"
           >
             <UploadCloud size={32} />
             <span className="text-xs font-medium">Click to Upload</span>

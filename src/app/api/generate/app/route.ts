@@ -25,7 +25,12 @@ export async function POST(req: NextRequest) {
       parameters: clientParameters,
       inputMediaStoreUrls,
       canvasId,
-    }: { appId: string; parameters: NodeParam[]; inputMediaStoreUrls: string[]; canvasId?: string } = await req.json();
+    }: {
+      appId: string;
+      parameters: NodeParam[];
+      inputMediaStoreUrls: string[];
+      canvasId?: string;
+    } = await req.json();
 
     if (!appId || !clientParameters) {
       return NextResponse.json({ message: "Missing appId or parameters" }, { status: 400 });

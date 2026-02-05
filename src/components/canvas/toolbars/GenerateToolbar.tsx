@@ -1,9 +1,10 @@
 "use client";
 
-import { Sparkles, ChevronDown, Settings, Palette, Download } from "lucide-react";
 import { Position, NodeToolbar as FlowNodeToolbar, useNodesData } from "@xyflow/react";
-import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { ConversationType } from "@/src/types/BaseType";
+import { useAtom } from "jotai";
+import { Sparkles, ChevronDown, Settings, Palette, Download } from "lucide-react";
+import { useEffect } from "react";
+
 import {
   Select,
   SelectContent,
@@ -11,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { useEffect } from "react";
-import { useAtom } from "jotai";
+import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { ConversationType } from "@/src/types/BaseType";
 
 interface GenerateToolbarProps {
   id?: string;

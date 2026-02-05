@@ -1,4 +1,5 @@
 import React from "react";
+
 import { useMediaQuery } from "@/src/hooks/use-media-query";
 
 interface ImageCardLoadingProps {

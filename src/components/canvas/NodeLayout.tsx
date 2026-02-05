@@ -1,5 +1,6 @@
 "use client";
 
+import { IconSquareRoundedPlus } from "@tabler/icons-react";
 import {
   Handle,
   NodeResizeControl,
@@ -8,10 +9,10 @@ import {
   useNodeConnections,
 } from "@xyflow/react";
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+
 import NodeToolbar from "./NodeToolbar";
-import Magnet from "../ui/Magnet";
-import { IconSquareRoundedPlus } from "@tabler/icons-react";
 import { useCanvas } from "../providers/CanvasProvider";
+import Magnet from "../ui/Magnet";
 
 export type HandleConfig = {
   type: "source" | "target";
@@ -172,7 +173,7 @@ export default function NodeLayout({
       <NodeLabels title={title} subtitle={subtitle} />
 
       {/* Main Content */}
-      <div className="h-full w-full">{children}</div>
+      <div className="size-full">{children}</div>
 
       {/* Resize Control */}
       {!resizeHidden && selected && (
@@ -261,7 +262,7 @@ const NodeLabels = React.memo(({ title, subtitle }: { title?: string; subtitle?:
 
   return (
     <div
-      className="absolute bottom-full left-0 right-0 flex items-center justify-between px-1 font-medium text-white/90"
+      className="absolute inset-x-0 bottom-full flex items-center justify-between px-1 font-medium text-white/90"
       style={{ marginBottom: `${8 / zoom}px` }}
     >
       {title && (

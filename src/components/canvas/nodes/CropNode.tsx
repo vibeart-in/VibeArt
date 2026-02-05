@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { Crop, RotateCcw, ChevronDown, Loader2 } from "lucide-react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 
-import NodeLayout from "../NodeLayout";
-import { useUpstreamData } from "@/src/utils/xyflow";
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
+import { useUpstreamData } from "@/src/utils/xyflow";
+
 import { useCanvas } from "../../providers/CanvasProvider";
+import NodeLayout from "../NodeLayout";
 
 // --- Types ---
 export type CropNodeData = {
@@ -121,7 +122,7 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
 
       setLocalCrop((prev) => {
         // Calculate based on start state to avoid drift
-        let n = { ...dragType.startCrop };
+        const n = { ...dragType.startCrop };
         const ratio = parseAspectRatio(data.aspectRatio);
 
         if (dragType.type === "move") {
@@ -299,7 +300,7 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
       selected={selected}
       title="Image Crop"
       id={id}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left, id: "target" },
         { type: "source", position: Position.Right, id: "source" },
@@ -308,11 +309,11 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
       toolbarHidden={true}
       resizeHidden={true}
     >
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-[#0d0d0d]">
+      <div className="flex size-full flex-col overflow-hidden rounded-3xl bg-[#0d0d0d]">
         {/* Workspace */}
         <div className="relative flex-1 bg-black/20 p-4" ref={containerRef}>
           {data.imageUrl ? (
-            <div className="relative h-full w-full">
+            <div className="relative size-full">
               {!data.croppedImageUrl ? (
                 <>
                   {/* Reference Image (Reference/Bg) - blurred */}
@@ -354,7 +355,7 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
                     {["nw", "ne", "sw", "se"].map((handle) => (
                       <div
                         key={handle}
-                        className={`absolute z-10 h-4 w-4 rounded-md border border-black bg-white ${
+                        className={`absolute z-10 size-4 rounded-md border border-black bg-white ${
                           handle === "nw"
                             ? "-left-2 -top-2 cursor-nw-resize"
                             : handle === "ne"
@@ -370,10 +371,10 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
                 </>
               ) : (
                 /* Final Cropped Preview */
-                <div className="relative h-full w-full overflow-hidden rounded-lg">
+                <div className="relative size-full overflow-hidden rounded-lg">
                   <img
                     src={data.croppedImageUrl}
-                    className="h-full w-full object-cover"
+                    className="size-full object-cover"
                     alt="result"
                   />
                 </div>

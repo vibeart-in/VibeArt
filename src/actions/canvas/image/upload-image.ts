@@ -1,14 +1,15 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
-import sharp from "sharp";
 import { nanoid } from "nanoid";
+import sharp from "sharp";
+
+import { createClient } from "@/src/lib/supabase/server";
 
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file" };
- 
+
     const supabase = await createClient();
 
     // 1. Auth Check

@@ -1,9 +1,9 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 import { getUser } from "@/src/actions/getUser";
+import { createClient } from "@/src/lib/supabase/server";
 import { ServerActionRes } from "@/src/types/serverAction";
 
 export async function updateProjectAction(

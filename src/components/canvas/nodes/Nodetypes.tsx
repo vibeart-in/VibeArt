@@ -1,20 +1,20 @@
 import { NodeTypes } from "@xyflow/react";
 
 // Import all node components
-import InputImage from "./InputImage";
-import OutputImage from "./OutputImage";
-import OutputImageOpenSource from "./OutputImageOpenSource";
-import TextNode from "./TextNode";
-import SketchNode from "./SketchNode";
+import AiAppNode from "./AiAppNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
 import CropNode from "./CropNode";
 import DropNode from "./DropNode";
-import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
-import AiAppNode from "./AiAppNode";
-import GroupNode from "./GroupNode";
-import UpscaleNode from "./UpscaleNode";
-import RemoveBackgroundNode from "./RemoveBackgroundNode";
 import GenerateVideo from "./GenerateVideo";
+import GroupNode from "./GroupNode";
+import InputImage from "./InputImage";
+import OutputImage from "./OutputImage";
+import OutputImageOpenSource from "./OutputImageOpenSource";
+import { CheckpointNode, LoraNode, PresetsNode, StyleNode } from "./PromptComponent";
+import RemoveBackgroundNode from "./RemoveBackgroundNode";
+import SketchNode from "./SketchNode";
+import TextNode from "./TextNode";
+import UpscaleNode from "./UpscaleNode";
 
 // Register all node types for React Flow
 export const nodeTypes: NodeTypes = {

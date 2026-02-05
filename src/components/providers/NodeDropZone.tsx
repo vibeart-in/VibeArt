@@ -5,10 +5,12 @@ import { FileIcon, ImageIcon, VideoIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { useNodeOperations } from "./NodeProvider";
-import { useCanvas } from "./CanvasProvider";
-import { cn } from "@/src/lib/utils";
+
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { cn } from "@/src/lib/utils";
+
+import { useCanvas } from "./CanvasProvider";
+import { useNodeOperations } from "./NodeProvider";
 
 type NodeDropzoneProviderProps = {
   children: ReactNode;

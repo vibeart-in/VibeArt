@@ -1,7 +1,7 @@
 // import { Handle, Position, NodeProps, Node } from "@xyflow/react";
 // import NodeLayout from "../NodeLayout";
 // import React from "react";
-// import { PlusCircleIcon } from "lucide-react"; 
+// import { PlusCircleIcon } from "lucide-react";
 
 // export type StyleNodeType = Node<{ label?: string }, "style">;
 
