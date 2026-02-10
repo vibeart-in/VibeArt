@@ -148,7 +148,7 @@ export default function NodeLayout({
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative transition-all duration-300 ${
+      className={`group relative ${
         selected ? "ring-2 ring-[#e2e2e2]/50" : ""
       } ${className}`}
       style={{

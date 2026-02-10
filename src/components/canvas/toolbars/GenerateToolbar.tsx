@@ -1,7 +1,7 @@
 "use client";
 
 import { CurrencyCircleDollar } from "@phosphor-icons/react";
-import { Position, NodeToolbar as FlowNodeToolbar, useNodesData } from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
 import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
@@ -111,12 +111,13 @@ export default function GenerateToolbar({
     }
   };
 
+  if (!selected && !isHovered) return null;
+
   return (
-    <FlowNodeToolbar
-      className={selected ? "opacity-100" : "opacity-50 hover:opacity-100"}
-      isVisible={selected || isHovered}
-      position={Position.Bottom}
-      offset={20}
+    <div
+      className={`absolute bottom-[-80px] left-1/2 z-[100] -translate-x-1/2 transform transition-opacity duration-300 ${
+        selected ? "opacity-100" : "opacity-50 hover:opacity-100"
+      }`}
     >
       <div
         className="flex items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
@@ -203,6 +204,6 @@ export default function GenerateToolbar({
         onOpenChangeControlled={setIsUpdatePlanOpen}
         hideTrigger={true}
       />
-    </FlowNodeToolbar>
+    </div>
   );
 }
