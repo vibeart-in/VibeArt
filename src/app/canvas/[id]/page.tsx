@@ -6,6 +6,7 @@ import { UserSectionClient } from "@/src/components/home/UserSectionClient";
 import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/server";
+import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
 import { CanvasProject } from "@/src/types/BaseType";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -43,7 +44,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           >
             <NavbarLogo className="!mr-0 !pr-0" />
             <span className="text-white/50">/</span>
-            <h1 className="text-lg font-semibold text-white">{project.title}</h1>
+            <CanvasTitle initialTitle={project.title ?? "Untitled Project"} projectId={project.id} />
           </Panel>
           <Panel position="top-right" className="rounded-3xl bg-black/50 p-3 backdrop-blur-md">
             <UserSectionClient />

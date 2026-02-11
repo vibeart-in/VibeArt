@@ -80,8 +80,21 @@ export default function GenerateToolbar({
 
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
+  // Load initial model from localStorage or use initialModel/first model
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
+      // Try to get the last selected model from localStorage
+      const storedModelName = localStorage.getItem("lastSelectedModel");
+      
+      if (storedModelName) {
+        const storedModel = models.find((m) => m.model_name === storedModelName);
+        if (storedModel) {
+          setSelectedModel(storedModel);
+          return;
+        }
+      }
+      
+      // Fallback to initialModel if provided
       if (initialModel) {
         const found = models.find((m) => m.model_name === initialModel);
         if (found) {
@@ -89,6 +102,8 @@ export default function GenerateToolbar({
           return;
         }
       }
+      
+      // Default to first model
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel, setSelectedModel, initialModel]);
@@ -141,6 +156,8 @@ export default function GenerateToolbar({
                 return;
               }
               setSelectedModel(found);
+              localStorage.setItem("lastSelectedModel", found.model_name);
+              console.log("Selected model saved to localStorage:", found.model_name);
             }
           }}
         >

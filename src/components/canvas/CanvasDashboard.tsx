@@ -1,13 +1,31 @@
 "use client";
 
-import { Plus, Search, LayoutGrid, List, MoreHorizontal, Sparkles, ArrowRight } from "lucide-react";
+import {
+  Plus,
+  Search,
+  LayoutGrid,
+  List,
+  MoreHorizontal,
+  Sparkles,
+  ArrowRight,
+  Edit2,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 
-import { createCanvas } from "@/src/actions/canvas";
+import { createCanvas, updateCanvas, deleteCanvas } from "@/src/actions/canvas";
 
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -33,11 +51,23 @@ interface CanvasDashboardProps {
 }
 
 export default function CanvasDashboard({ initialProjects }: CanvasDashboardProps) {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
+  // Sync with server data if it updates
+  useEffect(() => {
+    setProjects(initialProjects);
+  }, [initialProjects]);
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isPending, startTransition] = useTransition();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [newCanvasTitle, setNewCanvasTitle] = useState("");
 
   const handleNewCanvas = () => {
@@ -55,6 +85,63 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
         setIsDialogOpen(false);
       } catch (error) {
         console.error("Failed to create canvas", error);
+      }
+    });
+  };
+
+  // --- Edit Handlers ---
+  const handleEditClick = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setProjectToEdit(project);
+    setEditTitle(project.title);
+    setIsRenameDialogOpen(true);
+  };
+
+  const handleRenameProject = () => {
+    if (!projectToEdit || !editTitle.trim()) return;
+
+    startTransition(async () => {
+      try {
+        await updateCanvas(projectToEdit.id, { title: editTitle });
+
+        // Update local state
+        setProjects((prev) =>
+          prev.map((p) => (p.id === projectToEdit.id ? { ...p, title: editTitle } : p)),
+        );
+
+        setProjectToEdit(null);
+        setIsRenameDialogOpen(false);
+        toast.success("Project renamed successfully");
+      } catch (error) {
+        console.error("Failed to update canvas", error);
+        toast.error("Failed to rename project");
+      }
+    });
+  };
+
+  // --- Delete Handlers ---
+  const handleDeleteClick = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setProjectToDelete(project);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteProject = () => {
+    if (!projectToDelete) return;
+
+    startTransition(async () => {
+      try {
+        await deleteCanvas(projectToDelete.id);
+
+        // Update local state
+        setProjects((prev) => prev.filter((p) => p.id !== projectToDelete.id));
+
+        setProjectToDelete(null);
+        setIsDeleteDialogOpen(false);
+        toast.success("Project deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete canvas", error);
+        toast.error("Failed to delete project. Please try again.");
       }
     });
   };
@@ -205,7 +292,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           </motion.div>
 
           {/* Project Cards */}
-          {initialProjects.map((project, i) => (
+          {projects.map((project, i) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
@@ -227,9 +314,36 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
 
                 {/* Overlay actions */}
                 <div className="absolute right-3 top-3 translate-y-[-10px] opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                  <button className="flex size-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80">
-                    <MoreHorizontal className="size-4" />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="flex size-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="size-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-40 rounded-xl border border-white/10 bg-neutral-900/90 text-neutral-200 backdrop-blur-xl"
+                    >
+                      <DropdownMenuItem
+                        onClick={(e) => handleEditClick(project, e)}
+                        className="flex items-center gap-2 px-3 py-2 text-sm focus:bg-white/10"
+                      >
+                        <Edit2 className="size-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <DropdownMenuItem
+                        onClick={(e) => handleDeleteClick(project, e)}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                      >
+                        <Trash2 className="size-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -314,6 +428,76 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
               className="bg-white text-black hover:bg-neutral-200"
             >
               {isPending ? "Creating..." : "Create Canvas"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Dialog */}
+      <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
+        <DialogContent className="border-white/10 bg-neutral-900/95 backdrop-blur-xl sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-white">Rename Project</DialogTitle>
+            <DialogDescription className="text-neutral-400">
+              Change the name of your canvas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-6">
+            <div className="grid gap-2">
+              <Label htmlFor="rename" className="text-neutral-300">
+                Project Name
+              </Label>
+              <Input
+                id="rename"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Project Name"
+                className="border-white/10 bg-black/50 text-white placeholder:text-neutral-600 focus:border-purple-500/50 focus:bg-black/80 focus:ring-0"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsRenameDialogOpen(false)}
+              className="text-neutral-400 hover:bg-white/5 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRenameProject}
+              disabled={isPending || !editTitle.trim()}
+              className="bg-white text-black hover:bg-neutral-200"
+            >
+              {isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="border-white/10 bg-neutral-900/95 backdrop-blur-xl sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-white">Delete Canvas?</DialogTitle>
+            <DialogDescription className="text-neutral-400">
+              Are you sure you want to delete <span className="font-semibold text-white">{projectToDelete?.title}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="text-neutral-400 hover:bg-white/5 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteProject}
+              disabled={isPending}
+              className="  "
+            >
+              {isPending ? "Deleting..." : "Yes, Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
