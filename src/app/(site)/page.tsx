@@ -15,6 +15,7 @@ import {
 } from "@/src/components/landing/LandingComponents";
 import PrivacySection from "@/src/components/landing/PrivacySection";
 import { createClient } from "@/src/lib/supabase/client";
+import LightFrequencies from "@/src/components/landing/NEW/LightFrequencies";
 
 const LandingPage = () => {
   return (
@@ -59,6 +60,8 @@ const LandingPage = () => {
       <ContactUs />
 
       <PrivacySection />
+
+      {/* <LightFrequencies /> */}
 
       {/* <StickyPromptInput /> */}
     </div>

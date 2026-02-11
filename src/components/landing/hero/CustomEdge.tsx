@@ -1,6 +1,6 @@
 "use client";
 
-import { BaseEdge, getSmoothStepPath, EdgeProps } from "@xyflow/react";
+import { BaseEdge, getBezierPath, EdgeProps } from "@xyflow/react";
 import React from "react";
 
 export const CustomEdge = ({
@@ -14,22 +14,58 @@ export const CustomEdge = ({
   style = {},
   markerEnd,
 }: EdgeProps) => {
-  const [edgePath] = getSmoothStepPath({
+  const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 20,
   });
+
+  const filterId = `glow-filter-${id}`;
 
   return (
     <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
-      <circle r="4" fill="#d9e92b">
-        <animateMotion dur="2s" repeatCount="indefinite" path={edgePath} />
-      </circle>
+      <defs>
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+          <feColorMatrix
+            in="blur"
+            type="matrix"
+            values="0 0 0 0 0.85
+                    0 0 0 0 0.91
+                    0 0 0 0 0.17
+                    0 0 0 1.2 0"
+            result="coloredBlur"
+          />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Base curve line */}
+      <BaseEdge
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{
+          ...style,
+          // stroke: "rgba(217, 233, 43, 0.25)",
+          strokeWidth: 2,
+          strokeDasharray: "none",
+        }}
+      />
+
+      {/* Animated glow traveling along the curve */}
+      {/* <ellipse rx="8" ry="5" fill="#d9e92b" opacity="0.9" filter={`url(#${filterId})`}>
+        <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} rotate="auto" />
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.2s" repeatCount="indefinite" />
+        <animate attributeName="rx" values="6;10;6" dur="1.2s" repeatCount="indefinite" />
+        <animate attributeName="ry" values="4;6;4" dur="1.2s" repeatCount="indefinite" />
+      </ellipse> */}
     </>
   );
 };

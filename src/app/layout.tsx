@@ -93,6 +93,12 @@ const satoshi = localFont({
   display: "swap",
 });
 
+const sakire = localFont({
+  src: "./fonts/Sakire.ttf",
+  variable: "--font-sakire",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -100,7 +106,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} ${satoshi.variable} antialiased`}>
+      <body className={`${geistSans.className} ${satoshi.variable} ${sakire.variable} antialiased`}>
         <SkipToContent />
         <TanStackProvider>
           <JotaiProviders>

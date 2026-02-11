@@ -12,7 +12,11 @@ import {
   HeroVideoNode,
   HeroFeatureNode,
   HeroAppShowcaseNode,
+  OutputImageNode,
+  HeroImageNode,
 } from "./HeroNodes";
+import HeroInputImage from "./nodes/HeroInputImage";
+import HeroOutputImage from "./nodes/HeroOutputImage";
 
 export const nodeTypes = {
   heroTitle: HeroTitleNode,
@@ -24,211 +28,127 @@ export const nodeTypes = {
   heroVideo: HeroVideoNode,
   heroFeature: HeroFeatureNode,
   heroShowcase: HeroAppShowcaseNode,
+  inputImage: HeroInputImage,
+  outputImage: HeroOutputImage,
+  heroImage: HeroImageNode,
 };
 
 export const edgeTypes = {
   custom: CustomEdge,
+  active: CustomEdge,
 };
 
 export const initialNodes: Node[] = [
-  // --- Center ---
+  {
+    id: "heroImage",
+    type: "heroImage",
+    position: { x: 0, y: 0 },
+    data: {},
+    draggable: true,
+  },
   {
     id: "title",
     type: "heroTitle",
-    position: { x: 200.85494752885495, y: -115.66385215179193 },
+    position: { x: 0, y: 0 },
     data: {},
-  },
-
-  // --- Top Layer ---
-  {
-    id: "fire-node",
-    type: "heroFire",
-    position: { x: 359.0077043245389, y: -470.58285816865083 },
-    data: {},
+    draggable: true,
   },
   {
-    id: "stat-users",
-    type: "heroStats",
-    position: { x: -623.9322400355717, y: -479.44838545777924 },
-    data: { value: "120k+", label: "Creators" },
-  },
-  {
-    id: "stat-gen",
-    type: "heroStats",
-    position: { x: 1513.591562518975, y: -481.5493751138502 },
-    data: { value: "2M+", label: "Generated" },
-  },
-
-  // --- Mid Layer ---
-  {
-    id: "carousel",
-    type: "heroCarousel",
-    position: { x: -590.8922920588174, y: 220.14093763282523 },
-    data: { title: "AI Tools" },
-  },
-  {
-    id: "video-gen",
-    type: "heroVideo",
-    position: { x: 662.0377085483838, y: 378.53499969639944 },
-    data: {},
-  },
-  {
-    id: "slideshow",
-    type: "heroSlideshow",
-    position: { x: 1436.550138861337, y: 148.21012695893674 },
-    data: { title: "Gallery" },
-  },
-
-  // --- Connection Labels ---
-  {
-    id: "label-1",
-    type: "heroLabel",
-    position: { x: 24, y: 578 },
-    data: { label: "Input Modules", color: "bg-purple-600" },
-  },
-  {
-    id: "label-2",
-    type: "heroLabel",
-    position: { x: 1386, y: -34 },
-    data: { label: "Visual Output", color: "bg-[#d9e92b]/20" },
-  },
-
-  // --- Features ---
-  {
-    id: "feature-1",
-    type: "heroFeature",
-    position: { x: -291.64588591318005, y: -230.0610416793167 },
+    id: "552ead66-e1bf-4b21-afec-3075f3f15945",
     data: {
-      title: "Real-time Flow",
-      description: "Experience generative art at the speed of thought.",
-      icon: Sparkles,
-      gradient: "from-yellow-400 to-orange-500",
+      url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/oOEPJpDbUQm6-JzpQxm9P.webp",
+      label: "dress_view_back.webp",
+      width: 450,
+      height: 680,
+      imageId: "51cd5b1c-bde9-4daf-9afe-d6f4d698dd39",
+    },
+    type: "inputImage",
+    dragging: false,
+    position: {
+      x: 100,
+      y: 80,
     },
   },
   {
-    id: "feature-2",
-    type: "heroFeature",
-    position: { x: 1074, y: -234 },
+    id: "4066d91f-2470-444c-b3be-ed3d8a5685b2",
     data: {
-      title: "Social Connect",
-      description: "Instantly share your creations with the community.",
-      icon: Share2,
-      gradient: "from-blue-400 to-cyan-500",
+      url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/gwH9OiJdWV3YP3EzWN85o.webp",
+      label: "dress_view_front.webp",
+      width: 640,
+      height: 970,
+      imageId: "cff3266e-00c4-4ea9-a570-aedd801e66d1",
+    },
+    type: "inputImage",
+
+    dragging: false,
+    position: {
+      x: 100,
+      y: 420,
     },
   },
   {
-    id: "app-showcase",
-    type: "heroShowcase",
-    position: { x: -1330.1196572960876, y: -186.30985915492957 },
-    data: {},
+    id: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
+    data: {
+      model: "Nano banana pro",
+      title: "Image Generator",
+      width: 649,
+      height: 975,
+      prompt:
+        "Cinematic high-fashion editorial photograph of a model wearing a light-yellow asymmetric draped dress, shot from low angle (nadir to eye-level alternation), vibrant deep shadows and soft rim light, moody studio environment with textured backdrop (muted concrete or pastel gradient), wind gently moving fabric, dramatic composition, film-grain texture, medium format 85mm lens, shallow depth of field, high contrast color grade with warm highlights and cool shadows — magazine cover / center spread quality.\n",
+      status: null,
+      imageUrl:
+        "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/6b4f019c-91fc-40b9-bd45-344b18a1e21b/0.jpeg",
+      isSource: false,
+      activeJobId: null,
+      stylePrompt: "",
+      outputImages: [
+        {
+          id: "abbcec71-1dfa-4f8f-9f36-c6340134d633",
+          width: 1696,
+          height: 2528,
+          user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+          image_url:
+            "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/6b4f019c-91fc-40b9-bd45-344b18a1e21b/0.jpeg",
+          is_public: false,
+          created_at: "2026-02-10T02:55:00.065474+00:00",
+          thumbnail_url:
+            "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/6b4f019c-91fc-40b9-bd45-344b18a1e21b/thumbnail/0.webp",
+        },
+      ],
+      inputImageUrls: [
+        "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/gwH9OiJdWV3YP3EzWN85o.webp",
+      ],
+    },
+    type: "outputImage",
+    width: 450,
+    height: 670,
+    dragging: false,
+    measured: {
+      width: 450,
+      height: 671,
+    },
+    position: {
+      x: 0,
+      y: 0,
+    },
+    resizing: false,
+    selected: true,
   },
 ];
 
 export const initialEdges: Edge[] = [
-  // Fire -> Title
   {
-    id: "e-fire-title",
-    source: "fire-node",
-    target: "title",
-    targetHandle: "t-top",
+    id: "edge-1",
+    source: "552ead66-e1bf-4b21-afec-3075f3f15945",
+    target: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
     type: "custom",
     animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 2 },
-  },
-
-  // Carousel -> Label 1 -> Title
-  {
-    id: "e-carousel-label1",
-    source: "carousel",
-    sourceHandle: null,
-    target: "label-1",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 2, opacity: 0.6 },
   },
   {
-    id: "e-label1-title",
-    source: "label-1",
-    target: "title",
-    targetHandle: "t-left",
+    id: "edge-2",
+    source: "4066d91f-2470-444c-b3be-ed3d8a5685b2",
+    target: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
     type: "custom",
     animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 2, opacity: 0.6 },
-  },
-
-  // Title -> Label 2 -> Slideshow
-  {
-    id: "e-title-label2",
-    source: "title",
-    sourceHandle: "s-right",
-    target: "label-2",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 2, opacity: 0.6 },
-  },
-  {
-    id: "e-label2-slideshow",
-    source: "label-2",
-    target: "slideshow",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 2, opacity: 0.6 },
-  },
-
-  // Title -> Video
-  {
-    id: "e-title-video",
-    source: "title",
-    sourceHandle: "s-bottom",
-    target: "video-gen",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 3, opacity: 0.8 },
-  },
-
-  // Stats
-  {
-    id: "e-stat-c",
-    source: "stat-users",
-    target: "carousel",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#333", strokeWidth: 1 },
-  },
-  {
-    id: "e-stat-s",
-    source: "stat-gen",
-    target: "slideshow",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#333", strokeWidth: 1 },
-  },
-
-  // Features
-  {
-    id: "e-f1-c",
-    source: "feature-1",
-    target: "carousel",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#333", strokeWidth: 1, strokeDasharray: "5,5" },
-  },
-  {
-    id: "e-f2-s",
-    source: "feature-2",
-    target: "slideshow",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#333", strokeWidth: 1, strokeDasharray: "5,5" },
-  },
-
-  // Showcase
-  {
-    id: "e-showcase-carousel",
-    source: "app-showcase",
-    target: "carousel",
-    type: "custom",
-    animated: true,
-    style: { stroke: "#d9e92b", strokeWidth: 1, opacity: 0.4 },
   },
 ];

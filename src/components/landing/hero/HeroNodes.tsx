@@ -10,44 +10,28 @@ import { cn } from "../../../lib/utils";
 
 export const HeroTitleNode = ({ data }: any) => {
   return (
-    <div className="relative flex w-[500px] flex-col items-center justify-center p-6">
-      <Handle
-        type="target"
-        position={Position.Top}
-        id="t-top"
-        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
-      />
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="t-left"
-        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="s-right"
-        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="s-bottom"
-        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
-      />
-
+    <div className="relative z-10 flex w-[800px] flex-col items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center"
+        className="flex flex-col items-center text-center"
       >
-        <h1 className="font-satoshi text-[50px] font-black leading-none tracking-tighter text-white drop-shadow-2xl md:text-[150px]">
-          Vibe<span className="text-[#d9e92b]">Art</span>
-        </h1>
-        <p className="mt-4 border-t border-white/10 pt-4 text-[30px] font-light uppercase tracking-[0.2em] text-neutral-400">
-          Interactive Generative Canvas
+        <div className="relative flex flex-col items-center">
+          <h1 className="font-sakire text-[60px] font-thin leading-[0.8] text-white md:text-[100px]">
+            VIBEART
+          </h1>
+          <div className="h-3 w-full bg-accent" />
+        </div>
+
+        <p className="mt-8 max-w-[800px] text-center text-lg font-medium leading-relaxed text-neutral-200">
+          Turn ideas into high-quality visuals using AI-powered creative workflows. Generate images,
+          concepts, and styles faster — without breaking your flow.
         </p>
+
+        <button className="mt-8 rounded-full bg-accent px-6 py-4 text-base font-bold text-black transition-transform hover:scale-105 active:scale-95">
+          Start creating
+        </button>
       </motion.div>
     </div>
   );
@@ -430,6 +414,189 @@ export const HeroFeatureNode = ({ data }: any) => {
       </div>
       <h4 className="mb-2 text-[25px] font-bold leading-tight text-white">{data.title}</h4>
       <p className="text-[20px] font-medium leading-relaxed text-neutral-400">{data.description}</p>
+    </div>
+  );
+};
+
+export const InputImageNode = ({ data }: any) => {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl transition-all hover:border-[#d9e92b]/50">
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
+      />
+      <div className="relative h-full w-full max-w-[400px]">
+        <img
+          src={data.url}
+          alt={data.label}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <p className="truncate font-mono text-[10px] text-white/80">{data.label}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const OutputImageNode = ({ data }: any) => {
+  return (
+    <div className="w-[400px] overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a]/90 p-4 shadow-2xl backdrop-blur-md transition-colors hover:border-[#d9e92b]/50">
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!h-3 !w-3 !border-none !bg-[#d9e92b]"
+      />
+
+      <div className="mb-3 flex items-center justify-between border-b border-white/5 pb-2">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            <div className="size-1.5 rounded-full bg-red-500/50" />
+            <div className="size-1.5 rounded-full bg-yellow-500/50" />
+            <div className="size-1.5 rounded-full bg-green-500/50" />
+          </div>
+          <span className="ml-2 font-mono text-[10px] uppercase text-neutral-400">
+            {data.title}
+          </span>
+        </div>
+        <span className="rounded-full bg-[#d9e92b]/10 px-2 py-0.5 text-[10px] font-bold text-[#d9e92b]">
+          {data.model}
+        </span>
+      </div>
+
+      <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black/50">
+        <img
+          src={data.imageUrl}
+          alt="Generated Output"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[#d9e92b]">
+            Prompt
+          </p>
+          <p className="line-clamp-3 text-xs font-medium leading-relaxed text-white">
+            {data.prompt}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const HeroImageNode = ({ data }: any) => {
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [isRapid, setIsRapid] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const movementAccumulator = React.useRef(0);
+  const rapidTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const BASE_URL =
+    "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing";
+
+  const frames = [`${BASE_URL}/1.webp`, `${BASE_URL}/2.webp`, `${BASE_URL}/3.webp`];
+  const rapidImage = `${BASE_URL}/4.webp`;
+  const scrollImage = `${BASE_URL}/5.webp`;
+
+  // Preload images
+  useEffect(() => {
+    const imageUrls = [...frames, rapidImage, scrollImage];
+    imageUrls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 50; // Threshold for "scroll down action"
+      setIsScrolled(scrolled);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // 1. Detect Rapid Movement
+      const speed = Math.abs(e.movementX);
+      if (speed > 100) {
+        // increased threshold
+        setIsRapid(true);
+        if (rapidTimeoutRef.current) clearTimeout(rapidTimeoutRef.current);
+        rapidTimeoutRef.current = setTimeout(() => {
+          setIsRapid(false);
+        }, 500); // 500ms duration for rapid state
+      }
+
+      // 2. Cycle Frames based on movement
+      // Sensitivity: Amount of pixels to move to switch frame
+      // Increased to 150 for slower, smoother feel
+      const sensitivity = 150;
+      movementAccumulator.current += e.movementX;
+
+      const steps = Math.trunc(movementAccumulator.current / sensitivity);
+
+      if (steps !== 0) {
+        setCurrentFrame((prev) => {
+          const count = frames.length;
+          let next = (prev + steps) % count;
+          if (next < 0) next += count;
+          return next;
+        });
+        movementAccumulator.current -= steps * sensitivity;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (rapidTimeoutRef.current) clearTimeout(rapidTimeoutRef.current);
+    };
+  }, []);
+
+  // Prepare a list of all unique images to manage transitions
+  const allImages = [
+    { src: frames[0], active: !isScrolled && !isRapid && currentFrame === 0 },
+    { src: frames[1], active: !isScrolled && !isRapid && currentFrame === 1 },
+    { src: frames[2], active: !isScrolled && !isRapid && currentFrame === 2 },
+    { src: rapidImage, active: !isScrolled && isRapid },
+    { src: scrollImage, active: isScrolled },
+  ];
+
+  return (
+    <div className="relative -z-10 flex flex-col items-center justify-center">
+      <div className="relative">
+        {/* Spacer image to maintain dimensions */}
+        <img
+          src={frames[0]}
+          className="pointer-events-none relative h-[70vh] w-auto opacity-0"
+          alt="Spacer"
+        />
+
+        {/* Stacked images with fade transitions */}
+        {allImages.map((img, idx) => (
+          <motion.img
+            key={img.src}
+            src={img.src}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: img.active ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }} // Smooth fade
+            className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+            alt="Hero"
+          />
+        ))}
+      </div>
     </div>
   );
 };
