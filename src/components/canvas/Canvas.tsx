@@ -18,7 +18,7 @@ import {
 } from "@xyflow/react";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { toJpeg, toPng } from "html-to-image";
-import { useCallback, useRef, useState, useMemo, useEffect } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import "@xyflow/react/dist/style.css";
@@ -317,11 +317,9 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   );
 
   // Keyboard listeners for Copy/Paste
-  useEffect(() => {
+  useMemo(() => {
+    if (typeof window === "undefined") return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         copySelection();
       }

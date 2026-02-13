@@ -88,12 +88,9 @@ export const useSmartGrouping = (
     const getDepth = (n: Node): number => {
       let depth = 0;
       let curr = n;
-      const visited = new Set<string>();
-      while (curr.parentId && !visited.has(curr.id)) {
-        visited.add(curr.id);
+      while (curr.parentId) {
         depth++;
-        const parentId: string = curr.parentId; // Guaranteed truthy by while
-        const parent = nds.find(pn => pn.id === parentId);
+        const parent = nds.find(pn => pn.id === curr.parentId);
         if (!parent) break;
         curr = parent;
       }
@@ -289,8 +286,8 @@ export const useSmartGrouping = (
     const finalNodes = Array.from(nodesToCopy);
     const nodeIds = new Set(finalNodes.map(n => n.id));
     
-    // Copy edges where at least one node is in the selection
-    const finalEdges = edges.filter(e => nodeIds.has(e.source) || nodeIds.has(e.target));
+    // Copy edges that connect nodes within the selection
+    const finalEdges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
 
     const clipboardData = {
       nodes: finalNodes,
@@ -334,16 +331,13 @@ export const useSmartGrouping = (
     const newEdges: Edge[] = clipboardData.edges.map(e => ({
       ...e,
       id: crypto.randomUUID(),
-      source: idMap.has(e.source) ? idMap.get(e.source)! : e.source,
-      target: idMap.has(e.target) ? idMap.get(e.target)! : e.target,
+      source: idMap.get(e.source)!,
+      target: idMap.get(e.target)!,
     }));
 
-    setNodes((nds) => {
-      const deselected = nds.map(n => ({ ...n, selected: false }));
-      return sortNodesHierarchically(deselected.concat(newNodes));
-    });
+    setNodes((nds) => nds.map(n => ({ ...n, selected: false })).concat(newNodes));
     setEdges((eds) => eds.concat(newEdges));
-  }, [setNodes, setEdges, sortNodesHierarchically]);
+  }, [setNodes, setEdges]);
 
   return {
     onNodeDragStart,
