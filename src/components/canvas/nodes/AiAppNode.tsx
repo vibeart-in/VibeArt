@@ -57,6 +57,14 @@ const parseParameters = (appData: AiApp): AiAppParameter[] => {
   }
 };
 
+// Helper to detect if output is a video
+const isVideoOutput = (imageUrl: string): boolean => {
+  if (!imageUrl) return false;
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v'];
+  const lowerUrl = imageUrl.toLowerCase();
+  return videoExtensions.some(ext => lowerUrl.includes(ext));
+};
+
 const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) => {
   const { updateNode, updateNodeData, addNodes, addEdges, getNode } = useReactFlow();
   const { project } = useCanvas();
@@ -204,12 +212,16 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       const mainNodeId = crypto.randomUUID();
       outputNodeIds[mainImageIndex] = mainNodeId;
 
+      // Determine node type based on output format
+      const isVideo = isVideoOutput(mainImage.image_url);
+      
       newNodes.push({
         id: mainNodeId,
-        type: "outputImage",
+        type: isVideo ? "generateVideo" : "outputImage",
         position: { x: startX, y: currentY },
         data: {
           imageUrl: mainImage.image_url,
+          videoUrl: isVideo ? mainImage.image_url : undefined,
           width: mainImage.width,
           height: mainImage.height,
         },
@@ -248,15 +260,16 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
         const yOffset = rowIndex * (450 + GRID_GAP); // Increased row height for better spacing
 
-        const xPos = otherStartX + xOffset;
-        const yPos = currentY + yOffset;
-
+        // Determine node type for other outputs
+        const isOtherVideo = isVideoOutput(img.image_url);
+        
         newNodes.push({
           id: newNodeId,
-          type: "outputImage",
-          position: { x: xPos, y: yPos },
+          type: isOtherVideo ? "generateVideo" : "outputImage",
+          position: { x: otherStartX + xOffset, y: currentY + yOffset },
           data: {
             imageUrl: img.image_url,
+            videoUrl: isOtherVideo ? img.image_url : undefined,
             width: img.width,
             height: img.height,
           },
@@ -471,6 +484,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
+      toolbarHidden={true}
     >
       <div className="relative flex h-auto flex-1 flex-col overflow-hidden rounded-3xl">
         <div className="relative flex h-auto w-full flex-col overflow-hidden bg-[#141414]">

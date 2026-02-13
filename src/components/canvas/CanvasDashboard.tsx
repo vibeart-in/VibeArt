@@ -34,10 +34,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dotted-dialog";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import AnimatedGradientBackground from "../ui/animated-gradient-background";
 import { BackgroundPlus } from "../ui/BackgroundPlus";
+import { Input } from "../ui/input";
 
 interface Project {
   id: string;
@@ -236,7 +236,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
           <div className="flex w-full items-center gap-4 md:w-auto">
             <div className="group relative flex-1 md:w-80">
               <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-purple-400" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search projects..."
                 className="w-full rounded-2xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-neutral-200 transition-all placeholder:text-neutral-600 focus:border-purple-500/50 focus:bg-black/60 focus:outline-none focus:ring-4 focus:ring-purple-500/10"
