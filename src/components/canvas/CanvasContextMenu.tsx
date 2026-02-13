@@ -33,9 +33,10 @@ import {
 interface CanvasContextMenuProps {
   children: ReactNode;
   addNode: (type: string, options?: Record<string, unknown>) => string;
+  onGroupSelection?: () => void;
 }
 
-export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps) {
+export function CanvasContextMenu({ children, addNode, onGroupSelection }: CanvasContextMenuProps) {
   const { screenToFlowPosition } = useReactFlow();
   const [location, setLocation] = useState({ x: 0, y: 0 });
   const [search, setSearch] = useState("");
@@ -256,6 +257,14 @@ export function CanvasContextMenu({ children, addNode }: CanvasContextMenuProps)
             >
               <Upload size={14} className="mr-2" />
               Upload
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="focus:bg-zinc-800 focus:text-zinc-100"
+              onClick={onGroupSelection}
+            >
+              <LayoutTemplate size={14} className="mr-2" />
+              Group Selection
             </ContextMenuItem>
 
             <ContextMenuSeparator className="bg-zinc-800" />
