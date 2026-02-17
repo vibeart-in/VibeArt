@@ -384,11 +384,34 @@ export const useSmartGrouping = (
 
       const finalParentId = isParentInSelection ? idMap.get(n.parentId!) : n.parentId;
 
+      // Remap internal references for AiAppNode (and potentially others)
+      const newData = { ...n.data };
+      
+      // Remap mainNodeId if it exists and is part of the selection
+      if (newData.mainNodeId && typeof newData.mainNodeId === 'string') {
+        const newMainId = idMap.get(newData.mainNodeId);
+        if (newMainId) {
+          newData.mainNodeId = newMainId;
+          // Also clear activeJobId and status for the new copy to prevent it from picking up old state
+          newData.activeJobId = undefined;
+          newData.status = undefined;
+          newData.hasGenerated = false;
+        }
+      }
+
+      // Remap outputNodeIds if they exist
+      if (Array.isArray(newData.outputNodeIds)) {
+        newData.outputNodeIds = newData.outputNodeIds
+          .map((oldId: string) => idMap.get(oldId))
+          .filter((newId): newId is string => !!newId);
+      }
+
       return {
         ...n,
         id: newId,
         parentId: finalParentId,
         position,
+        data: newData,
         selected: true,
       };
     });
