@@ -22,6 +22,7 @@ import { useNavInfo } from "@/src/hooks/useNavInfo";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { ConversationType } from "@/src/types/BaseType";
 import { Database } from "@/supabase/database.types";
+import { Position } from "@xyflow/react";
 
 import UpdatePlanDialog from "../../user/dashboard/updatePlanDialog";
 
@@ -131,7 +132,7 @@ export default function GenerateToolbar({
   return (
     <NodeToolbar
       isVisible={selected || isHovered}
-      position="bottom"
+      position={Position.Bottom}
       offset={12}
       className={`transition-opacity duration-300 ${
         selected ? "opacity-100" : "opacity-50 hover:opacity-100"
