@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Play, ArrowRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-import { AI_APPS } from "../../../constants/aiApps";
-import { cn } from "../../../lib/utils";
+import { AI_APPS } from "../../../../constants/aiApps";
+import { cn } from "../../../../lib/utils";
 
 export const HeroTitleNode = ({ data }: any) => {
   return (

@@ -16,21 +16,79 @@ import {
 import PrivacySection from "@/src/components/landing/PrivacySection";
 import { createClient } from "@/src/lib/supabase/client";
 import LightFrequencies from "@/src/components/landing/NEW/LightFrequencies";
+import ClarityScroll from "@/src/components/landing/hero/SpaceWrap";
+import { LogoCloud } from "@/src/components/ui/logo-cloud";
+import Testimonial from "@/src/components/landing/Testimonials";
+import CreativeProcess from "@/src/components/landing/hero/CreativeProcess";
+import MagicBento from "@/src/components/ui/MagicBento";
+import { motion } from "framer-motion";
+
+const logos = [
+  {
+    src: "https://svgl.app/library/nvidia-wordmark-light.svg",
+    alt: "Nvidia Logo",
+  },
+  {
+    src: "https://svgl.app/library/supabase_wordmark_light.svg",
+    alt: "Supabase Logo",
+  },
+  {
+    src: "https://svgl.app/library/openai_wordmark_light.svg",
+    alt: "OpenAI Logo",
+  },
+  {
+    src: "https://svgl.app/library/turso-wordmark-light.svg",
+    alt: "Turso Logo",
+  },
+  {
+    src: "https://svgl.app/library/vercel_wordmark.svg",
+    alt: "Vercel Logo",
+  },
+  {
+    src: "https://svgl.app/library/github_wordmark_light.svg",
+    alt: "GitHub Logo",
+  },
+  {
+    src: "https://svgl.app/library/claude-ai-wordmark-icon_light.svg",
+    alt: "Claude AI Logo",
+  },
+  {
+    src: "https://svgl.app/library/clerk-wordmark-light.svg",
+    alt: "Clerk Logo",
+  },
+];
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-black pb-32 text-foreground selection:bg-green-500/30">
       <Hero />
+      <ClarityScroll />
 
-      <AiAppsCarousel />
+      <section className="relative mx-auto my-12 max-w-5xl">
+        <h2 className="mb-5 text-center text-xl font-medium tracking-tight text-foreground md:text-3xl">
+          <span className="text-muted-foreground">State-of-the-art AI models</span>
+          <br />
+          <span className="font-semibold">for image, video, and text.</span>
+        </h2>
+        <div className="mx-auto my-5 h-px max-w-5xl bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
 
-      <FeatureCard
+        <LogoCloud logos={logos} />
+
+        <div className="mt-5 h-px bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
+      </section>
+
+      {/* <AiAppsCarousel /> */}
+
+      {/* <Slider /> */}
+
+      {/* <FeatureCard
         title="Create Brand Identity - Pro & Fast"
         description="Generate logos, color palettes, and typography guidelines that perfectly match your vision. Ensure consistency across all your assets with our AI-powered brand guardrails."
         features={["Logo Generation", "Brand Guidelines", "Asset Consistency"]}
         imageSide="right"
         gradient="bg-green-400"
         badge="Brand Identity"
+        imageUrl="https://i.pinimg.com/1200x/89/5a/ee/895aee589ed106b421d94938c44bde24.jpg"
       />
 
       <FeatureCard
@@ -49,18 +107,47 @@ const LandingPage = () => {
         imageSide="right"
         gradient="bg-pink-400"
         badge="Photography"
-      />
+      /> */}
+      <CreativeProcess />
 
       <FeaturesGrid />
 
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mb-20 text-center"
+      >
+        <span className="mb-4 inline-block text-sm font-bold uppercase tracking-widest text-green-500">
+          AI Models
+        </span>
+        <h2 className="mx-auto max-w-5xl font-satoshi text-4xl font-black text-white md:text-6xl">
+          100+ models from open source to <br />{" "}
+          <span className="text-neutral-600">proprietary models across all companies.</span>
+        </h2>
+      </motion.div>
+
+      <MagicBento
+        textAutoHide={true}
+        enableStars={false}
+        enableSpotlight
+        enableBorderGlow={true}
+        enableTilt={false}
+        enableMagnetism={false}
+        clickEffect={false}
+        spotlightRadius={400}
+        particleCount={12}
+        glowColor="255, 255, 255"
+        disableAnimations={false}
+      />
+      <PrivacySection />
+      <Testimonial />
+
+
 
       <FooterCTA />
-
-      <ContactUs />
-
-      <PrivacySection />
-
       {/* <LightFrequencies /> */}
 
       {/* <StickyPromptInput /> */}

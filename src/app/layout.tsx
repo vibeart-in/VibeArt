@@ -106,7 +106,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} ${satoshi.variable} ${sakire.variable} antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.className} ${satoshi.variable} ${sakire.variable} antialiased`}
+      >
         <SkipToContent />
         <TanStackProvider>
           <JotaiProviders>

@@ -53,7 +53,7 @@ export const CustomEdge = ({
         markerEnd={markerEnd}
         style={{
           ...style,
-          // stroke: "rgba(217, 233, 43, 0.25)",
+          stroke: "#4c4c4c",
           strokeWidth: 2,
           strokeDasharray: "none",
         }}

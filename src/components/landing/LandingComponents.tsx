@@ -2,7 +2,7 @@
 
 // Hero Module
 export * from "./hero/Hero";
-export * from "./hero/HeroNodes";
+export * from "./hero/nodes/HeroNodes";
 export * from "./hero/HeroData";
 export * from "./hero/CustomEdge";
 export * from "./hero/MobileHero";
