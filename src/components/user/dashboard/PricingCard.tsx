@@ -81,7 +81,7 @@ export default function PricingCard({
       layout
       onClick={() => onSelect(id)}
       className={cn(
-        "relative flex h-full min-h-[520px] w-full cursor-pointer flex-col rounded-2xl p-6 shadow-xl transition-all duration-300",
+        "relative flex h-full min-h-[520px] w-full cursor-pointer flex-col gap-4 rounded-2xl p-6 transition-all duration-300",
         isSelected ? "ring-1 ring-white/50" : "border",
         accent
           ? `${accent.from} ${accent.to}/20 bg-gradient-to-br`
@@ -177,36 +177,7 @@ export default function PricingCard({
         )}
       </Button>
 
-      {offer && features ? (
-        // Offer State - Emphasize "unlock all" message
-        <div className="relative mb-6 mt-4">
-          {/* "Unlock Everything" hero message */}
-          <div className="mb-4 flex w-full items-center justify-center rounded-2xl border-2 border-lime-400/40 bg-gradient-to-br from-lime-500/10 to-emerald-500/10 p-2">
-            <div className="flex place-items-center gap-3">
-              <div className="rounded-full bg-lime-400/20 p-1">
-                <Unlock className="size-5 text-lime-400" />
-              </div>
-              <h4 className="text-sm font-bold text-white">
-                Unlock all features as founding member
-              </h4>
-            </div>
-          </div>
-
-          {/* Struck-through features list */}
-          <ul className="flex flex-col gap-2.5 opacity-60">
-            {features.map((f, i) => (
-              <li key={i} className="relative flex items-center gap-3">
-                <span className="flex size-5 items-center justify-center rounded-full bg-white/5">
-                  <Check className="size-3 text-white/40" />
-                </span>
-                <span className="flex-1 text-sm text-white/50 line-through decoration-white/30">
-                  {f}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
+      {features && (
         // Normal State - Clean feature list
         <div>
           {features && (
@@ -234,7 +205,7 @@ export default function PricingCard({
       )}
 
       {/* Usage section (if exists) */}
-      {usage && (
+      {/* {usage && (
         <div className="mb-6 mt-4 border-t border-white/10 pt-4">
           <div className="mb-3 flex items-center gap-2">
             <Zap className="size-4 text-blue-400" />
@@ -251,11 +222,10 @@ export default function PricingCard({
             ))}
           </ul>
         </div>
-      )}
+      )} */}
 
       {/* action area */}
-      <div className="mt-4">
-        {/* small legal row or info */}
+      <div className="mt-auto">
         <div className="mt-4 flex items-center justify-between text-xs text-white/60">
           <div className="flex items-center gap-2">
             <Info className="size-3" />

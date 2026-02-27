@@ -11,8 +11,6 @@ import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { createClient } from "@/src/lib/supabase/client";
 import { MidjourneyStyleData } from "@/src/types/BaseType";
 
-import StyleCard from "../ui/StyleCard";
-
 import {
   Dialog,
   DialogContent,
@@ -21,6 +19,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dotted-dialog";
+import StyleCard from "../ui/StyleCard";
+
 
 type Props = {
   onSelectPrompt: (prompt: string) => void;

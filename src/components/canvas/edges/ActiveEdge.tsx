@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { IconSquareRoundedX, IconSquareRoundedXFilled } from "@tabler/icons-react";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -7,7 +7,7 @@ import {
   type EdgeProps,
 } from "@xyflow/react";
 import { X } from "lucide-react";
-import { IconSquareRoundedX, IconSquareRoundedXFilled } from "@tabler/icons-react";
+import React, { memo } from "react";
 
 const ActiveEdge = memo(
   ({

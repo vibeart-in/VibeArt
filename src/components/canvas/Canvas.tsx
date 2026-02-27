@@ -16,22 +16,36 @@ import {
   OnNodesChange,
   MarkerType,
 } from "@xyflow/react";
+import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { toJpeg, toPng } from "html-to-image";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
 import "@xyflow/react/dist/style.css";
-import { edgeTypes } from "./edges/EdgeTypes";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { updateProjectAction } from "@/src/actions/canvas/update";
+import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
+import { useSmartGrouping } from "@/src/hooks/useSmartGrouping";
+
 import CustomControls from "./Controls";
+import { DevTools } from "../devtools";
+import { CanvasContextMenu } from "./CanvasContextMenu";
+import { edgeTypes } from "./edges/EdgeTypes";
 import { useCanvas } from "../providers/CanvasProvider";
 import { nodeTypes } from "./nodes/Nodetypes";
-import { NodeOperationsProvider } from "../providers/NodeProvider";
-import { updateProjectAction } from "@/src/actions/canvas/update";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
+
 import { DevTools } from "../devtools";
 import { toJpeg } from "html-to-image";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
 import { CanvasContextMenu } from "./CanvasContextMenu";
+
+import { NodeOperationsProvider } from "../providers/NodeProvider";
+
+
+>>>>>>> canvasdeploy
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
   const { project, setIsDraggingEdge, isReadOnly } = useCanvas();
@@ -54,6 +68,9 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(
     initialEdges ?? content?.edges ?? [],
   );
+  
+  const { onNodeDragStart, onNodeDrag, onNodeDragStop, copySelection, pasteSelection, groupSelection } = useSmartGrouping(setNodes, setEdges);
+
   const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [saveState, setSaveState] = useState<{
     isSaving: boolean;
@@ -302,28 +319,35 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   const handleNodesChange = useCallback<OnNodesChange>(
     (changes) => {
       onNodesChangeInternal(changes);
-
-      // Filter for 'add' or 'remove' events
-      const structuralChanges = changes.filter(
-        (c) => c.type === "add" || c.type === "remove",
-      ).length;
-
-      if (structuralChanges > 0) {
-        trackChange(structuralChanges);
-      }
-
-      save(); // JSON data still saves normally (1s debounce)
+      save();
       onNodesChange?.(changes);
     },
-    [save, trackChange, onNodesChange, onNodesChangeInternal],
+    [save, onNodesChange, onNodesChangeInternal],
   );
+
+  // Keyboard listeners for Copy/Paste
+  useMemo(() => {
+    if (typeof window === "undefined") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        copySelection();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        pasteSelection();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copySelection, pasteSelection]);
 
   const nodeOpsValue = useMemo(() => ({ addNode, duplicateNode }), [addNode, duplicateNode]);
 
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
       <NodeDropzoneProvider>
+
         <CanvasContextMenu addNode={addNode} isReadOnly={isReadOnly}>
+
           <ReactFlow
             deleteKeyCode={isReadOnly ? [] : ["Backspace", "Delete"]}
             edges={edges}
@@ -332,6 +356,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             // isValidConnection={isValidConnection}
             nodes={nodes}
             nodeTypes={nodeTypes}
+
             onConnect={isReadOnly ? undefined : handleConnect}
             onConnectStart={isReadOnly ? undefined : handleConnectStart}
             onConnectEnd={isReadOnly ? undefined : handleConnectEnd}
@@ -342,6 +367,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             nodesFocusable={!isReadOnly}
             edgesFocusable={!isReadOnly}
             elementsSelectable={true}
+
             // panOnScroll
             selectionOnDrag={!isReadOnly}
             colorMode="dark"

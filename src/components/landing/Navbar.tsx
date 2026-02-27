@@ -16,27 +16,33 @@ import {
 } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/client";
 
+declare global {
+  interface Window {
+    __lenis?: import("lenis").default;
+  }
+}
+
 export function NavbarLander() {
   const navItems = [
     {
-      name: "Create",
-      link: "/generate",
+      name: "How It Works",
+      link: "#how-it-works",
     },
     {
-      name: "Pricing",
-      link: "/pricing",
+      name: "Features",
+      link: "#features",
     },
     {
-      name: "Enterprise",
-      link: "/auth/login",
+      name: "AI Models",
+      link: "#ai-models",
     },
     {
-      name: "Showcase",
-      link: "/showcase",
+      name: "Testimonials",
+      link: "#testimonials",
     },
     {
-      name: "About",
-      link: "/about",
+      name: "Get Started",
+      link: "#get-started",
     },
   ];
 
@@ -70,6 +76,20 @@ export function NavbarLander() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    if (!link.startsWith("#")) return;
+    e.preventDefault();
+    const id = link.slice(1);
+    const el = document.getElementById(id);
+    if (!el) return;
+    setIsMobileMenuOpen(false);
+    if (window.__lenis) {
+      window.__lenis.scrollTo(el, { offset: -80, immediate: true });
+    } else {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
@@ -119,7 +139,7 @@ export function NavbarLander() {
             <a
               key={`mobile-link-${idx}`}
               href={item.link}
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={(e) => handleScrollTo(e, item.link)}
               className="relative text-neutral-600 dark:text-neutral-300"
             >
               <span className="block">{item.name}</span>

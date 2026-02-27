@@ -12,14 +12,15 @@ import {
   IconWand,
   IconWindowMaximize,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
-import { deleteImage } from "@/src/actions/deleteImage";
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState, KeyboardEvent, MouseEvent } from "react";
 import { toast } from "sonner";
+
+import { deleteImage } from "@/src/actions/deleteImage";
 
 import { VideoOptions } from "./ImageCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../hover-card";
@@ -138,19 +139,19 @@ export const MediaModal = ({
 
   const handleDelete = useCallback(async () => {
     if (!imageId) return;
-    
+
     const loadingToast = toast.loading("Deleting image...");
-    
+
     try {
       const result = await deleteImage(imageId);
-      
+
       if (!result.success) {
         throw new Error(result.error || "Failed to delete");
       }
 
       toast.success("Image deleted successfully", { id: loadingToast });
       closeModal();
-      
+
       if (conversationId) {
         await queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
       } else {

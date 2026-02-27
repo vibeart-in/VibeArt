@@ -56,22 +56,14 @@ const StyleCard = ({ style, onSelect }: StyleCardProps) => {
           variants={coverVariants}
           style={{ willChange: "transform" }}
         >
-          <Image
-            src={style.cover}
-            alt={style.name}
-            fill
-            unoptimized
-            className="object-cover"
-          />
+          <Image src={style.cover} alt={style.name} fill unoptimized className="object-cover" />
         </motion.div>
       )}
 
       {/* Overlay */}
       <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-0 transition-all hover:backdrop-blur-0">
         <div className="relative flex size-full flex-col items-center justify-end gap-2 px-4 py-3">
-          <motion.p className="text-center font-bold leading-6 text-accent">
-            {style.name}
-          </motion.p>
+          <motion.p className="text-center font-bold leading-6 text-accent">{style.name}</motion.p>
 
           {/* Button container */}
           <div className="relative flex h-[48px] w-full items-center justify-center">

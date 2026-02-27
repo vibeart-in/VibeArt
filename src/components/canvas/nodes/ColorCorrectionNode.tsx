@@ -1,10 +1,8 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useUpstreamData } from "@/src/utils/xyflow";
 import {
   ImageIcon,
   Sun,
@@ -17,11 +15,15 @@ import {
   ChevronDown,
   Loader2,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
-import FilterSlider from "./FilterSlider";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import React, { useState, useEffect, useMemo } from "react";
+
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
+import { useUpstreamData } from "@/src/utils/xyflow";
+
+import FilterSlider from "./FilterSlider";
 import { useCanvas } from "../../providers/CanvasProvider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import NodeLayout from "../NodeLayout";
 
 export type ColorCorrectionNodeData = {
   imageUrl?: string;
@@ -225,13 +227,14 @@ export default function ColorCorrectionNode({
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       style={{
         width: `${BASE_WIDTH}px`,
         height: `${nodeHeight}px`,
       }}
+      toolbarHidden={true}
     >
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
+      <div className="flex size-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A0A0A] via-black to-[#0A0A0A] shadow-2xl">
         {/* Image Section */}
         <div
           className="relative flex-shrink-0"
@@ -250,7 +253,7 @@ export default function ColorCorrectionNode({
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 src={data.imageUrl}
                 alt="Color Correction"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
                 style={filterStyle}
                 draggable={false}
               />
@@ -258,7 +261,7 @@ export default function ColorCorrectionNode({
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
             </>
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-gray-500">
+            <div className="flex size-full flex-col items-center justify-center gap-4 text-gray-500">
               <div className="rounded-full bg-white/5 p-6">
                 <ImageIcon size={48} strokeWidth={1.5} />
               </div>
@@ -276,7 +279,7 @@ export default function ColorCorrectionNode({
           <div className="flex items-center justify-between px-4 py-1">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-[#D9E92B]">Adjustments</h3>
-              {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-gray-500" />}
+              {isProcessing && <Loader2 className="size-3 animate-spin text-gray-500" />}
             </div>
             <div className="flex items-center gap-2">
               {/* Presets Dropdown */}
@@ -332,7 +335,7 @@ export default function ColorCorrectionNode({
               </TabsList>
             </div>
 
-            <TabsContent value="light" className="mt-0 space-y-3 px-4 py-4">
+            <TabsContent value="light" className="mt-0 space-y-3 p-4">
               {lightFilters.map((filter) => (
                 <FilterSlider
                   key={filter.key}
@@ -348,7 +351,7 @@ export default function ColorCorrectionNode({
               ))}
             </TabsContent>
 
-            <TabsContent value="color" className="mt-0 space-y-3 px-4 py-4">
+            <TabsContent value="color" className="mt-0 space-y-3 p-4">
               {colorFilters.map((filter) => (
                 <FilterSlider
                   key={filter.key}
@@ -364,7 +367,7 @@ export default function ColorCorrectionNode({
               ))}
             </TabsContent>
 
-            <TabsContent value="effects" className="mt-0 space-y-3 px-4 py-4">
+            <TabsContent value="effects" className="mt-0 space-y-3 p-4">
               {effectFilters.map((filter) => (
                 <FilterSlider
                   key={filter.key}

@@ -1,21 +1,23 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import { useAtom } from "jotai";
-import { nodeStyleAtom, NodeStyle } from "../../../store/nodeAtoms";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
+import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
+import { useAtom } from "jotai";
+import React, { useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
+import { nodeStyleAtom, NodeStyle } from "../../../store/nodeAtoms";
+import NodeLayout from "../NodeLayout";
 
 type TextData = {
   label?: string;
   text?: string;
+  html?: string;
   style?: NodeStyle;
   onChange?: (value: string) => void;
   [key: string]: unknown;
@@ -63,7 +65,8 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
       Highlight.configure({ multicolor: true }),
       Underline,
     ],
-    content: data.prompt ?? "",
+    // Prefer data.html for editor state, fall back to data.prompt (legacy/unmigrated nodes may store HTML in prompt)
+    content: data.html ?? data.prompt ?? "",
     editorProps: {
       attributes: {
         class: "prose prose-invert max-w-none focus:outline-none min-h-full h-full",
@@ -71,38 +74,35 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
+      const text = editor.getText();
       // Debounce update
       if (changeDebounce.current) {
         window.clearTimeout(changeDebounce.current);
       }
       changeDebounce.current = window.setTimeout(() => {
-        updateNodeData(id, { prompt: html });
-        if (typeof data.onChange === "function") data.onChange(html);
+        // Store clean text in 'prompt' for downstream nodes, and HTML in 'html' for editor state restoration
+        updateNodeData(id, { prompt: text, html: html });
+        // onChange usually expects the "value", stick to html or text?
+        // User asked for "output text should be clean". If on change is used by some external UI purely for display it might want HTML.
+        // But usually onChange mirrors the semantic value. Let's send text if 'prompt' is the primary semantic value.
+        // However, existing usage might expect HTML.
+        // Given the request "output text have html tage... shouldnt be in html format", I'll send text.
+        if (typeof data.onChange === "function") data.onChange(text);
         changeDebounce.current = null;
       }, DEBOUNCE_MS);
     },
     immediatelyRender: false,
   });
 
-  // Sync content if data.prompt changes externally (and not just by our own edit if possible, but simplest is to just setContent)
-  // To avoid cursor jumping, we might want to check if content is different.
-  // useEffect(() => {
-  // if (editor && data.prompt && editor.getHTML() !== data.prompt) {
-  // Only set if significantly different to avoid loop if possible, or just trusting react-flow doesn't spam updates.
-  // Actually user typing updates state, which updates data, so this effect might fire.
-  // We should be careful. For now, trusting that if we are focused, we might not want to overwrite unless necessary.
-  // But 'data.prompt' is the source of truth if modified elsewhere.
-  // editor.commands.setContent(data.prompt);
-  // Commented out to avoid loop for now as we are the primary writer.
-  // }
-  // }, [data.prompt, editor]);
-
   return (
     <NodeLayout
       id={id}
       selected={selected}
       title={data.label || "Text"}
-      className="flex h-full w-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
+
+      minWidth={300}
+      className="flex size-full min-w-[300px] cursor-default flex-col rounded-3xl transition-colors duration-200"
+
       style={{
         backgroundColor: style.backgroundColor,
       }}
@@ -113,12 +113,12 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
       {/* Drag indicator */}
       <div className="flex cursor-grab items-center justify-center py-2 active:cursor-grabbing">
         <div className="flex gap-1">
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
-          <div className="h-1 w-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
+          <div className="size-1 rounded-full bg-white/20"></div>
         </div>
       </div>
 
@@ -130,7 +130,9 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
              the editor handles that content-wise. */}
         <EditorContent
           editor={editor}
-          className="nodrag h-full min-h-[120px] w-full cursor-text overflow-auto rounded-xl text-white/90 !outline-none hover:border-2 [&_.ProseMirror]:h-full [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none"
+
+          className="nodrag size-full min-h-[120px] cursor-text overflow-auto rounded-xl text-white/90 !outline-none hover:border-2 [&_.ProseMirror]:h-full [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none"
+
         />
       </div>
     </NodeLayout>

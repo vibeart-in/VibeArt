@@ -8,8 +8,8 @@ import localFont from "next/font/local";
 import { RealtimeProvider } from "../components/providers/RealtimeProvider";
 import { SkipToContent } from "../components/SkipToContent";
 import { Toaster } from "../components/ui/sonner";
-import { TanStackProvider } from "../lib/TanstackProvider";
 import { JotaiProviders } from "../lib/JotaiProvider";
+import { TanStackProvider } from "../lib/TanstackProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -93,6 +93,12 @@ const satoshi = localFont({
   display: "swap",
 });
 
+const sakire = localFont({
+  src: "./fonts/Sakire.ttf",
+  variable: "--font-sakire",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -100,7 +106,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} ${satoshi.variable} antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.className} ${satoshi.variable} ${sakire.variable} antialiased`}
+      >
         <SkipToContent />
         <TanStackProvider>
           <JotaiProviders>

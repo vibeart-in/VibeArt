@@ -87,8 +87,8 @@ function GlassmorphicDialog({
               }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full max-w-5xl overflow-hidden rounded-3xl shadow-2xl",
-                "bg-gradient-to-br from-black/80 to-black/50",
+                "relative w-full max-w-5xl overflow-hidden rounded-3xl",
+                "bg-gradient-to-br from-black to-black/80",
                 "border border-white/20",
               )}
               style={{ maxHeight: "90vh" }}
@@ -231,7 +231,7 @@ export function UpdatePlanDialog({
 
           <RadioGroup
             value={selectedPlan}
-            className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4"
+            className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
             onValueChange={handlePlanChange}
           >
             {/* Free plan */}

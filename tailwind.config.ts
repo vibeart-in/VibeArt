@@ -13,6 +13,7 @@ export default {
     extend: {
       fontFamily: {
         satoshi: ["var(--font-satoshi)", "sans-serif"],
+        sakire: ["var(--font-sakire)", "sans-serif"],
       },
       scrollBehavior: {
         smooth: "smooth",

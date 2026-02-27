@@ -1,6 +1,7 @@
 "use client";
 
 import { Editor } from "@tiptap/react";
+
 import {
   TextToolbar,
   ImageToolbar,

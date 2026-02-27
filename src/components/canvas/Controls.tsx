@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
 import { useReactFlow, useViewport, Node as XYNode } from "@xyflow/react";
 import { Plus, Minus, Maximize, Lock, Unlock } from "lucide-react";
+import React, { useState, useEffect } from "react";
 
 type Props = {
   nodes?: XYNode[];
@@ -65,12 +65,12 @@ const CustomControls = React.memo(
         <div className="flex items-center gap-2 rounded-full border border-white/5 bg-neutral-900/50 px-3 py-1.5 text-xs text-white/50 backdrop-blur-md">
           {isSaving ? (
             <>
-              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-500" />
+              <div className="size-1.5 animate-pulse rounded-full bg-yellow-500" />
               <span>Saving...</span>
             </>
           ) : lastSaved ? (
             <>
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <div className="size-1.5 rounded-full bg-emerald-500" />
               <span>
                 Saved {lastSaved.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </span>
@@ -92,7 +92,7 @@ const CustomControls = React.memo(
               disabled={atMaxZoom}
               className={buttonClass}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
             </button>
             <div className="flex items-center rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-sm">
               <span className="text-xs font-medium text-white/70">
@@ -106,7 +106,7 @@ const CustomControls = React.memo(
               disabled={atMinZoom}
               className={buttonClass}
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="size-4" />
             </button>
 
             <button
@@ -115,7 +115,7 @@ const CustomControls = React.memo(
               aria-label="Fit view"
               className={buttonClass}
             >
-              <Maximize className="h-4 w-4" />
+              <Maximize className="size-4" />
             </button>
           </div>
 
@@ -134,9 +134,9 @@ const CustomControls = React.memo(
               className={buttonClass}
             >
               {nodesLocked ? (
-                <Lock className="h-4 w-4 shadow-sm" />
+                <Lock className="size-4 shadow-sm" />
               ) : (
-                <Unlock className="h-4 w-4" />
+                <Unlock className="size-4" />
               )}
             </button>
           </div>
@@ -146,6 +146,6 @@ const CustomControls = React.memo(
   },
 );
 
-CustomControls.displayName = "CustomControls"
+CustomControls.displayName = "CustomControls";
 
 export default CustomControls;

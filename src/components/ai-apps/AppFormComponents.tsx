@@ -1,7 +1,8 @@
 "use client";
 
+import { Sparkles } from "lucide-react";
 import React from "react";
-import { Textarea } from "@/src/components/ui/textarea";
+
 import { Label } from "@/src/components/ui/label";
 import {
   Select,
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { Sparkles } from "lucide-react";
+import { Textarea } from "@/src/components/ui/textarea";
 
 // --- Types ---
 interface AppParamTextareaProps {
@@ -39,11 +40,9 @@ interface AppSectionLabelProps {
 
 export const AppSectionLabel = ({ text }: AppSectionLabelProps) => {
   return (
-    <div className="flex items-center gap-2 ml-1">
-      <div className="h-1 w-1 rounded-full bg-[#CCFF00]" />
-      <Label className="text-[13px] font-bold text-zinc-400 uppercase tracking-wider">
-        {text}
-      </Label>
+    <div className="ml-1 flex items-center gap-2">
+      <div className="size-1 rounded-full bg-[#CCFF00]" />
+      <Label className="text-[13px] font-bold uppercase tracking-wider text-zinc-400">{text}</Label>
     </div>
   );
 };
@@ -55,15 +54,15 @@ export const AppParamTextarea = ({
   className,
 }: AppParamTextareaProps) => {
   return (
-    <div className="relative group">
+    <div className="group relative">
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`min-h-[70px] w-full resize-none rounded-2xl border-2 border-zinc-800 bg-[#1A1A1A]/40 px-4 py-3 text-[14px] font-medium text-zinc-200 placeholder:text-zinc-700 focus:border-[#CCFF00]/30 focus:bg-[#1A1A1A]/60 focus:ring-4 focus:ring-[#CCFF00]/5 transition-all duration-300 ${className}`}
+        className={`min-h-[70px] w-full resize-none rounded-2xl border-2 border-zinc-800 bg-[#1A1A1A]/40 px-4 py-3 text-[14px] font-medium text-zinc-200 transition-all duration-300 placeholder:text-zinc-700 focus:border-[#CCFF00]/30 focus:bg-[#1A1A1A]/60 focus:ring-4 focus:ring-[#CCFF00]/5 ${className}`}
         placeholder={placeholder}
         style={{ height: "70px" }}
       />
-      <div className="absolute top-4 right-4 text-zinc-600 group-focus-within:text-[#CCFF00]/40 transition-colors">
+      <div className="absolute right-4 top-4 text-zinc-600 transition-colors group-focus-within:text-[#CCFF00]/40">
         <Sparkles size={16} />
       </div>
     </div>
@@ -80,8 +79,9 @@ export const AppParamSelect = ({
   renderOption,
   triggerClassName,
 }: AppParamSelectProps) => {
-  const defaultTriggerClass = "h-11 w-full rounded-2xl border-zinc-800 bg-[#1A1A1A] text-xs font-semibold text-zinc-300 hover:bg-zinc-800/50 transition-colors";
-  
+  const defaultTriggerClass =
+    "h-11 w-full rounded-2xl border-zinc-800 bg-[#1A1A1A] text-xs font-semibold text-zinc-300 hover:bg-zinc-800/50 transition-colors";
+
   return (
     <div className={`min-w-[140px] ${className}`}>
       <Select value={value} onValueChange={onValueChange}>
@@ -89,15 +89,15 @@ export const AppParamSelect = ({
           {triggerIcon && <span className="mr-2">{triggerIcon}</span>}
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className="bg-[#1A1A1A] border-zinc-800">
+        <SelectContent className="border-zinc-800 bg-[#1A1A1A]">
           {options.map((opt) => {
-             const label = typeof opt === 'string' ? opt : opt.label;
-             const val = typeof opt === 'string' ? opt : opt.value;
-             return (
-                 <SelectItem key={val} value={val}>
-                    {renderOption ? renderOption(opt) : <span className="text-xs">{label}</span>}
-                 </SelectItem>
-             );
+            const label = typeof opt === "string" ? opt : opt.label;
+            const val = typeof opt === "string" ? opt : opt.value;
+            return (
+              <SelectItem key={val} value={val}>
+                {renderOption ? renderOption(opt) : <span className="text-xs">{label}</span>}
+              </SelectItem>
+            );
           })}
         </SelectContent>
       </Select>

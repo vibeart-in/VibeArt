@@ -57,6 +57,14 @@ const parseParameters = (appData: AiApp): AiAppParameter[] => {
   }
 };
 
+// Helper to detect if output is a video
+const isVideoOutput = (imageUrl: string): boolean => {
+  if (!imageUrl) return false;
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v'];
+  const lowerUrl = imageUrl.toLowerCase();
+  return videoExtensions.some(ext => lowerUrl.includes(ext));
+};
+
 const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) => {
   const { updateNode, updateNodeData, addNodes, addEdges, getNode } = useReactFlow();
   const { project } = useCanvas();
@@ -204,12 +212,18 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       const mainNodeId = crypto.randomUUID();
       outputNodeIds[mainImageIndex] = mainNodeId;
 
+
+      // Determine node type based on output format
+      const isVideo = isVideoOutput(mainImage.image_url);
+      
       newNodes.push({
         id: mainNodeId,
-        type: "outputImage",
+        type: isVideo ? "generateVideo" : "outputImage",
         position: { x: startX, y: currentY },
         data: {
           imageUrl: mainImage.image_url,
+          videoUrl: isVideo ? mainImage.image_url : undefined,
+
           width: mainImage.width,
           height: mainImage.height,
         },
@@ -243,6 +257,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         }
         outputNodeIds[originalIndex] = newNodeId;
 
+
         const colIndex = relativeIndex % 4;
         const rowIndex = Math.floor(relativeIndex / 4);
         const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
@@ -251,12 +266,17 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         const xPos = otherStartX + xOffset;
         const yPos = currentY + yOffset;
 
+
+        // Determine node type for other outputs
+        const isOtherVideo = isVideoOutput(img.image_url);
+        
         newNodes.push({
           id: newNodeId,
-          type: "outputImage",
-          position: { x: xPos, y: yPos },
+          type: isOtherVideo ? "generateVideo" : "outputImage",
+          position: { x: otherStartX + xOffset, y: currentY + yOffset },
           data: {
             imageUrl: img.image_url,
+            videoUrl: isOtherVideo ? img.image_url : undefined,
             width: img.width,
             height: img.height,
           },
@@ -471,6 +491,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
       ]}
+      toolbarHidden={true}
     >
       <div className="relative flex h-auto flex-1 flex-col overflow-hidden rounded-3xl">
         <div className="relative flex h-auto w-full flex-col overflow-hidden bg-[#141414]">
@@ -540,6 +561,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                           <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                             Model Connected
                           </span>
+
                         </div>
                         <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
                           Ready
@@ -614,6 +636,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                       className="opacity-40 transition-opacity group-hover:opacity-100"
                     />
                   </div>
+
                   <div className="flex flex-col">
                     <p className="text-[15px] font-bold text-zinc-300 transition-colors group-hover:text-white">
                       Connect input image

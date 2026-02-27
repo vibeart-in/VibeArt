@@ -1,15 +1,18 @@
 "use client";
 
-import { Download } from "lucide-react";
 import {
   Position,
   NodeToolbar as FlowNodeToolbar,
   useNodesData,
   useReactFlow,
 } from "@xyflow/react";
+import { Download } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
 import { Slider } from "@/src/components/ui/slider";
 import { Switch } from "@/src/components/ui/switch";
-import { Sparkles } from "lucide-react";
+
+
 import { QualityLevel } from "../nodes/RemoveBackgroundNode";
 
 interface RemoveBackgroundToolbarProps {

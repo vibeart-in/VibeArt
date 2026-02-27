@@ -1,22 +1,24 @@
 // InputBox.tsx (replace relevant parts or drop in whole file)
 "use client";
+import { User } from "@supabase/supabase-js";
+import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { MoreVertical, XCircle, X, Sparkles } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
+import { getProducts } from "@/src/actions/subscription/getProducts";
+import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
 import { useMediaQuery } from "@/src/hooks/use-media-query";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
+import { useNavInfo } from "@/src/hooks/useNavInfo";
 import { ConversationType, ModelData } from "@/src/types/BaseType";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
-import { getProducts } from "@/src/actions/subscription/getProducts";
-import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
-import { useNavInfo } from "@/src/hooks/useNavInfo";
+
 import UpdatePlanDialog from "../user/dashboard/updatePlanDialog";
-import { ProductListResponse } from "dodopayments/resources/index.mjs";
-import { User } from "@supabase/supabase-js";
+
 import { Database } from "@/supabase/database.types";
 
 // Helper types

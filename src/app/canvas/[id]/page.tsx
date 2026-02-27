@@ -1,10 +1,18 @@
-import { createClient } from "@/src/lib/supabase/server";
+
+
 import { PublishButton } from "@/src/components/canvas/PublishButton";
-import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
+
+
+import { Background, BackgroundVariant, Panel } from "@xyflow/react";
+import { redirect } from "next/navigation";
+
 import Canvas from "@/src/components/canvas/Canvas";
-import { Background, Panel } from "@xyflow/react";
-import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { UserSectionClient } from "@/src/components/home/UserSectionClient";
+import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
+import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
+import { createClient } from "@/src/lib/supabase/server";
+import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
+
 import { CanvasProject } from "@/src/types/BaseType";
 import { UseTemplateButton } from "@/src/components/canvas/UseTemplateButton";
 
@@ -52,6 +60,7 @@ export default async function Page({
           >
             <NavbarLogo className="!mr-0 !pr-0" />
             <span className="text-white/50">/</span>
+
             <h1 className="text-lg font-semibold text-white">{project.title}</h1>
 
             {isReadOnly && (
@@ -75,6 +84,9 @@ export default async function Page({
                 }
               />
             )}
+
+            <CanvasTitle initialTitle={project.title ?? "Untitled Project"} projectId={project.id} />
+
           </Panel>
 
           <Panel position="top-right" className="rounded-3xl bg-black/50 p-3 backdrop-blur-md">

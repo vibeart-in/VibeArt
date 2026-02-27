@@ -1,22 +1,26 @@
-import { Position, NodeProps, Node, useReactFlow, NodeToolbar } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { ArrowUp, Loader2, Copy, Check, AlertCircle } from "lucide-react";
-import { TextShimmer } from "../../ui/text-shimmer";
-import { Textarea } from "../../ui/textarea";
+
+import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
-import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
+import { useAtom } from "jotai";
+import { ArrowUp, Loader2, Copy, Check, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
-import { useCanvas } from "../../providers/CanvasProvider";
-import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
-import { useAtom } from "jotai";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
+import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
+
+import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
+import { useCanvas } from "../../providers/CanvasProvider";
+import { TextShimmer } from "../../ui/text-shimmer";
+import { Textarea } from "../../ui/textarea";
+import NodeLayout from "../NodeLayout";
 
 export type GenerateVideoNodeData = {
   imageUrl?: string;
+  videoUrl?: string; // Primary video URL
   prompt?: string;
   stylePrompt?: string; // Hidden style prompt
   inputImageUrls?: string[];
@@ -138,64 +142,56 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
   }, [initialValues]);
 
   useEffect(() => {
-    if (data.imageUrl) return;
+    if (data.videoUrl || data.imageUrl) return;
     const interval = setInterval(() => {
       setCurrentPlaceholder((prev) => (prev + 1) % PLACEHOLDERS.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [data.imageUrl]);
+  }, [data.videoUrl, data.imageUrl]);
 
   // --- RESIZE & ASPECT RATIO LOGIC START ---
 
-  // 1. Determine dimensions strictly from Output if available, ignoring 'data.width' if it's an input param
-  const aspectRatio = useMemo(() => {
+  // 1. Determine dimensions from response data or calculate
+  const { targetWidth, targetHeight } = useMemo(() => {
+    // Priority 1: Use actual dimensions from response if available
+    if (data.width && data.height) {
+      return { targetWidth: data.width, targetHeight: data.height };
+    }
+
     const outputImg = data.outputImages?.[0];
 
-    // Priority 1: Generated Image Dimensions
+    // Priority 2: Use output image dimensions
     if (outputImg?.width && outputImg?.height) {
-      return outputImg.height / outputImg.width;
+      return { targetWidth: outputImg.width, targetHeight: outputImg.height };
     }
 
-    // Priority 2: Existing Image URL (if loading from persistence without outputImages array)
-    // We assume standard portrait if we have an image but no metadata, or 1:1
-    if (data.imageUrl) {
-      return 1.0;
+    // Priority 3: Calculate from aspect ratio
+    let aspectRatio = 0.7; // Default
+    if (data.videoUrl || data.imageUrl) {
+      aspectRatio = 1.0;
     }
 
-    // Priority 3: Default Placeholder Aspect Ratio (Vertical for text area space)
-    return 0.7;
-  }, [data.outputImages, data.imageUrl]);
-
-  const targetHeight = BASE_WIDTH * aspectRatio;
+    return { targetWidth: BASE_WIDTH, targetHeight: BASE_WIDTH * aspectRatio };
+  }, [data.width, data.height, data.outputImages, data.videoUrl, data.imageUrl]);
 
   // 2. Enforce Node Size
   useEffect(() => {
-    // We only trigger update if the current stored dimensions differ significantly from target
-    // We check `data.width` because React Flow usually syncs current node size back to data.width/height
-    // depending on your onNodesChange setup. If not, we trust the calculation.
-
     const currentWidth = data.width;
     const currentHeight = data.height;
 
     const isSizeMismatch =
       !currentWidth ||
       !currentHeight ||
-      Math.abs(currentWidth - BASE_WIDTH) > 1 ||
+      Math.abs(currentWidth - targetWidth) > 1 ||
       Math.abs(currentHeight - targetHeight) > 1;
 
-    // Only update if we have a generated image OR if it's the initialization phase
-    // We don't want to constantly fight the user if they manually resized,
-    // BUT we do want to snap to aspect ratio when an image is generated.
     if (isSizeMismatch) {
-      // Check if this mismatch is due to a new generation
-      if (data.imageUrl || !currentWidth) {
-        updateNode(id, {
-          width: BASE_WIDTH,
-          height: targetHeight,
-        });
-      }
+      updateNode(id, {
+        width: targetWidth,
+        height: targetHeight,
+      });
     }
-  }, [aspectRatio, targetHeight, data.width, data.height, data.imageUrl, id, updateNode]);
+  }, [targetWidth, targetHeight, data.width, data.height, id, updateNode]);
 
   // --- RESIZE LOGIC END ---
 
@@ -338,10 +334,10 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       selected={selected}
       title={data.category || "Video generation"}
       subtitle={data?.model}
-      minWidth={BASE_WIDTH}
+      minWidth={targetWidth}
       minHeight={targetHeight}
       keepAspectRatio={true}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -354,13 +350,13 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
          immediately, even if the NodeLayout hasn't fully expanded yet.
       */}
       <div
-        className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
+        className="relative size-full flex-1 overflow-hidden rounded-3xl"
         // style={{ minHeight: "300px" }}
       >
-        {data.imageUrl ? (
+        {(data.videoUrl || data.imageUrl) ? (
           <video
-            src={data.imageUrl}
-            className="h-full w-full rounded-3xl object-cover"
+            src={data.videoUrl || data.imageUrl}
+            className="size-full rounded-3xl object-cover"
             autoPlay
             loop
             muted
@@ -377,7 +373,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 size-full object-cover"
                 autoPlay
                 loop
                 muted
@@ -388,7 +384,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
           </div>
         )}
 
-        {data.imageUrl && (
+        {(data.videoUrl || data.imageUrl) && (
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent via-transparent to-black/30" />
         )}
 
@@ -416,7 +412,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       </div>
 
       <div
-        className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+        className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 ${
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
@@ -434,10 +430,10 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
           </div>
         )}
 
-        {!data.imageUrl ? (
+        {!(data.videoUrl || data.imageUrl) ? (
           <div className="relative w-full focus-within:outline-none focus-within:ring-0">
             {!data.prompt && (
-              <div className="pointer-events-none absolute bottom-10 left-0 right-0 p-2">
+              <div className="pointer-events-none absolute inset-x-0 bottom-10 p-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentPlaceholder}

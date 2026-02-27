@@ -1,5 +1,7 @@
+
 import { getCanvasProjects, getPublicTemplates } from "@/src/actions/canvas";
 import CanvasDashboard from "@/src/components/canvas/CanvasDashboard";
+
 import { formatDistanceToNow } from "date-fns";
 
 import { CanvasProject } from "@/src/types/BaseType";

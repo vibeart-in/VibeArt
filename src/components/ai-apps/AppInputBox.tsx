@@ -9,18 +9,17 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useMediaQuery } from "@/src/hooks/use-media-query";
-
 import { useGenerateAppImage } from "@/src/hooks/useGenerateAppImage";
 import { NodeParam } from "@/src/types/BaseType";
 import { getIconForParam } from "@/src/utils/server/utils";
 
+import { AppSectionLabel, AppParamTextarea, AppParamSelect } from "./AppFormComponents";
 import AppGridClient from "./AppGridClient";
 import { ImageObject } from "../inputBox/ReplicateParameters";
 import AnimatedCounter from "../ui/AnimatedCounter";
 import GenerateButton from "../ui/GenerateButton";
 import GradualBlurMemo from "../ui/GradualBlur";
 import ImageUploadBox from "../ui/ImageUploadBox";
-import { AppSectionLabel, AppParamTextarea, AppParamSelect } from "./AppFormComponents";
 import { Switch } from "../ui/switch";
 import VideoUploadBox from "../ui/VideoUploadBox";
 
@@ -332,46 +331,52 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">{param.description}</span>
                     <AppParamSelect
-                        key={param.nodeId}
-                        className="min-w-[130px]"
-                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={String(param.fieldValue)}
-                        onValueChange={(val) => handleChange(key, val)}
-                        placeholder={param.description}
-                        options={options}
-                        triggerIcon={param.fieldName !== "aspect_ratio" && param.description !== "aspect_ratio" ? getIconForParam(param.description ?? key) : null}
-                        renderOption={(opt) => {
-                            const optionLabel = typeof opt === 'string' ? opt : opt.label;
-                            // Aspect Ratio Logic
-                            const isAspect = param.fieldName === "aspect_ratio" || param.description === "aspect_ratio";
-                            const ratioRegex = /^\d+:\d+$/;
-                            const isRatio = ratioRegex.test(optionLabel);
-                            
-                            let preview = null;
-                            if (isAspect) {
-                                if (isRatio) {
-                                    const [w, h] = optionLabel.split(":").map(Number);
-                                    const aspectRatio = w / h;
-                                    const baseHeight = 15;
-                                    const previewWidth = baseHeight * aspectRatio;
-                                    preview = (
-                                        <div
-                                            className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
-                                            style={{ width: `${previewWidth}px`, height: `${baseHeight}px` }}
-                                        />
-                                    );
-                                } else {
-                                    preview = <IconAspectRatio size={15} />;
-                                }
-                            }
-                            
-                            return (
-                                <div className="flex items-center gap-2">
-                                    {preview}
-                                    <span className="text-sm">{optionLabel}</span>
-                                </div>
+                      key={param.nodeId}
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={options}
+                      triggerIcon={
+                        param.fieldName !== "aspect_ratio" && param.description !== "aspect_ratio"
+                          ? getIconForParam(param.description ?? key)
+                          : null
+                      }
+                      renderOption={(opt) => {
+                        const optionLabel = typeof opt === "string" ? opt : opt.label;
+                        // Aspect Ratio Logic
+                        const isAspect =
+                          param.fieldName === "aspect_ratio" ||
+                          param.description === "aspect_ratio";
+                        const ratioRegex = /^\d+:\d+$/;
+                        const isRatio = ratioRegex.test(optionLabel);
+
+                        let preview = null;
+                        if (isAspect) {
+                          if (isRatio) {
+                            const [w, h] = optionLabel.split(":").map(Number);
+                            const aspectRatio = w / h;
+                            const baseHeight = 15;
+                            const previewWidth = baseHeight * aspectRatio;
+                            preview = (
+                              <div
+                                className="flex-shrink-0 rounded-sm border border-gray-400 bg-muted"
+                                style={{ width: `${previewWidth}px`, height: `${baseHeight}px` }}
+                              />
                             );
-                        }}
+                          } else {
+                            preview = <IconAspectRatio size={15} />;
+                          }
+                        }
+
+                        return (
+                          <div className="flex items-center gap-2">
+                            {preview}
+                            <span className="text-sm">{optionLabel}</span>
+                          </div>
+                        );
+                      }}
                     />
                   </div>
                 );
@@ -382,40 +387,40 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">{param.description}</span>
                     <AppParamSelect
-                        className="min-w-[130px]"
-                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={String(param.fieldValue)}
-                        onValueChange={(val) => handleChange(key, val)}
-                        placeholder={param.description}
-                        options={[
-                            { label: "Vertical", value: "1" },
-                            { label: "Landscape", value: "2" }
-                        ]}
-                        triggerIcon={getIconForParam(param.description ?? key)}
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={[
+                        { label: "Vertical", value: "1" },
+                        { label: "Landscape", value: "2" },
+                      ]}
+                      triggerIcon={getIconForParam(param.description ?? key)}
                     />
                   </div>
                 );
               }
 
               if (param.description === "Camera movement") {
-                  return (
-                      <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
-                        <span className="text-center text-sm font-semibold">{param.description}</span>
-                        <AppParamSelect
-                            className="min-w-[130px]"
-                            triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={String(param.fieldValue)}
-                            onValueChange={(val) => handleChange(key, val)}
-                            placeholder={param.description}
-                            options={[
-                                { label: "None", value: "1" },
-                                { label: "Turn to front", value: "2" },
-                                { label: "Approach", value: "3" }
-                            ]}
-                            triggerIcon={getIconForParam(param.description ?? key)}
-                        />
-                      </div>
-                  );
+                return (
+                  <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
+                    <span className="text-center text-sm font-semibold">{param.description}</span>
+                    <AppParamSelect
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={[
+                        { label: "None", value: "1" },
+                        { label: "Turn to front", value: "2" },
+                        { label: "Approach", value: "3" },
+                      ]}
+                      triggerIcon={getIconForParam(param.description ?? key)}
+                    />
+                  </div>
+                );
               }
 
               if (param.description === "Object gender") {
@@ -423,16 +428,16 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">Gender</span>
                     <AppParamSelect
-                        className="min-w-[130px]"
-                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={String(param.fieldValue)}
-                        onValueChange={(val) => handleChange(key, val)}
-                        placeholder={param.description}
-                        options={[
-                            { label: "Women", value: "1" },
-                            { label: "Mam", value: "2" }
-                        ]}
-                        triggerIcon={getIconForParam(param.description ?? key)}
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={[
+                        { label: "Women", value: "1" },
+                        { label: "Mam", value: "2" },
+                      ]}
+                      triggerIcon={getIconForParam(param.description ?? key)}
                     />
                   </div>
                 );
@@ -443,17 +448,17 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                   <div key={key} className="flex h-full flex-col justify-between gap-2 py-2">
                     <span className="text-center text-sm font-semibold">{param.description}</span>
                     <AppParamSelect
-                        className="min-w-[130px]"
-                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={String(param.fieldValue)}
-                        onValueChange={(val) => handleChange(key, val)}
-                        placeholder={param.description}
-                        options={[
-                            { label: "Clean the figurine", value: "1" },
-                            { label: "Figurine sits on hands", value: "2" },
-                            { label: "Custom action", value: "3" }
-                        ]}
-                        triggerIcon={getIconForParam(param.description ?? key)}
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={[
+                        { label: "Clean the figurine", value: "1" },
+                        { label: "Figurine sits on hands", value: "2" },
+                        { label: "Custom action", value: "3" },
+                      ]}
+                      triggerIcon={getIconForParam(param.description ?? key)}
                     />
                   </div>
                 );
@@ -466,44 +471,44 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                       POV Interactive preset
                     </span>
                     <AppParamSelect
-                        className="min-w-[130px]"
-                        triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={String(param.fieldValue)}
-                        onValueChange={(val) => handleChange(key, val)}
-                        placeholder={param.description}
-                        options={[
-                            { label: "None", value: "1" },
-                            { label: "Click me", value: "2" },
-                            { label: "Help me warm my hands", value: "3" },
-                            { label: "I look at [your]", value: "4" },
-                            { label: "Palm painting heart", value: "5" },
-                            { label: "Apply band-aid", value: "6" },
-                            { label: "I send [item]", value: "7" },
-                            { label: "Kiss me", value: "8" },
-                            { label: "Look at me", value: "9" },
-                            { label: "Take off shoes", value: "10" },
-                            { label: "Take off stockings", value: "11" },
-                            { label: "Take off shoes and hit me", value: "12" },
-                            { label: "Make my hair", value: "13" },
-                            { label: "Feed [food]", value: "14" },
-                            { label: "Quiet", value: "15" },
-                            { label: "Comb hair", value: "16" },
-                            { label: "Stethoscope", value: "17" },
-                            { label: "Make a funny face", value: "19" },
-                            { label: "Snatch my glasses", value: "20" },
-                            { label: "Hold your hand", value: "21" },
-                            { label: "Send me [item]", value: "22" },
-                            { label: "Pinch cheeks", value: "23" },
-                            { label: "Combo punch me", value: "24" },
-                            { label: "Sit down and cross your legs", value: "26" },
-                            { label: "Continuous shooting", value: "29" },
-                            { label: "Stretching", value: "31" },
-                            { label: "Pick up things", value: "32" },
-                            { label: "Make your hair", value: "33" },
-                            { label: "Bow", value: "34" },
-                            { label: "Fall down", value: "35" }
-                        ]}
-                        triggerIcon={getIconForParam(param.description ?? key)}
+                      className="min-w-[130px]"
+                      triggerClassName="w-full h-10 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={String(param.fieldValue)}
+                      onValueChange={(val) => handleChange(key, val)}
+                      placeholder={param.description}
+                      options={[
+                        { label: "None", value: "1" },
+                        { label: "Click me", value: "2" },
+                        { label: "Help me warm my hands", value: "3" },
+                        { label: "I look at [your]", value: "4" },
+                        { label: "Palm painting heart", value: "5" },
+                        { label: "Apply band-aid", value: "6" },
+                        { label: "I send [item]", value: "7" },
+                        { label: "Kiss me", value: "8" },
+                        { label: "Look at me", value: "9" },
+                        { label: "Take off shoes", value: "10" },
+                        { label: "Take off stockings", value: "11" },
+                        { label: "Take off shoes and hit me", value: "12" },
+                        { label: "Make my hair", value: "13" },
+                        { label: "Feed [food]", value: "14" },
+                        { label: "Quiet", value: "15" },
+                        { label: "Comb hair", value: "16" },
+                        { label: "Stethoscope", value: "17" },
+                        { label: "Make a funny face", value: "19" },
+                        { label: "Snatch my glasses", value: "20" },
+                        { label: "Hold your hand", value: "21" },
+                        { label: "Send me [item]", value: "22" },
+                        { label: "Pinch cheeks", value: "23" },
+                        { label: "Combo punch me", value: "24" },
+                        { label: "Sit down and cross your legs", value: "26" },
+                        { label: "Continuous shooting", value: "29" },
+                        { label: "Stretching", value: "31" },
+                        { label: "Pick up things", value: "32" },
+                        { label: "Make your hair", value: "33" },
+                        { label: "Bow", value: "34" },
+                        { label: "Fall down", value: "35" },
+                      ]}
+                      triggerIcon={getIconForParam(param.description ?? key)}
                     />
                   </div>
                 );
@@ -573,7 +578,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                 );
               }
 
-               if (
+              if (
                 param.fieldName === "prompt" ||
                 param.fieldName === "text" ||
                 param.description === "Prompt"
@@ -584,7 +589,7 @@ const AppInputBox = ({ appId, appParameters, appCost, appCover }: AppInputBoxPro
                     <AppParamTextarea
                       value={param.fieldValue as string}
                       onChange={(val) => handleChange(key, val)}
-                      className="hide-scrollbar max-h-[60px] min-w-[200px] border pl-4 bg-background"
+                      className="hide-scrollbar max-h-[60px] min-w-[200px] border bg-background pl-4"
                       placeholder={param.description}
                     />
                   </div>

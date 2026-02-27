@@ -1,9 +1,15 @@
 "use client";
 
-import { Sparkles, ChevronDown, Settings, Palette, Download } from "lucide-react";
-import { Position, NodeToolbar as FlowNodeToolbar, useNodesData } from "@xyflow/react";
-import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
-import { ConversationType } from "@/src/types/BaseType";
+import { CurrencyCircleDollar } from "@phosphor-icons/react";
+import { useNodesData, NodeToolbar } from "@xyflow/react";
+import { ProductListResponse } from "dodopayments/resources/index.mjs";
+import { useAtom } from "jotai";
+import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
+
+import { useEffect, useState } from "react";
+
+import { getProducts } from "@/src/actions/subscription/getProducts";
+import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
 import {
   Select,
   SelectContent,
@@ -11,19 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { selectedModelAtom } from "@/src/store/nodeAtoms";
-import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import {  CurrencyCircleDollar } from "@phosphor-icons/react";
+import { useModelsByUsecase } from "@/src/hooks/useModelsByUsecase";
 import { useNavInfo } from "@/src/hooks/useNavInfo";
-import { getProducts } from "@/src/actions/subscription/getProducts";
-import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
-import { ProductListResponse } from "dodopayments/resources/index.mjs";
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { ConversationType } from "@/src/types/BaseType";
 import { Database } from "@/supabase/database.types";
+import { Position } from "@xyflow/react";
+
 import UpdatePlanDialog from "../../user/dashboard/updatePlanDialog";
 
-
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
+
 
 interface GenerateToolbarProps {
   id?: string;
@@ -60,28 +64,38 @@ export default function GenerateToolbar({
   const [isUpdatePlanOpen, setIsUpdatePlanOpen] = useState(false);
   const [products, setProducts] = useState<ProductListResponse[]>([]);
   const [userSubscription, setUserSubscription] = useState<{
-      subscription: Subscription | null;
-      user: any; 
+    subscription: Subscription | null;
+    user: any;
   } | null>(null);
 
   useEffect(() => {
-      if (isFreeUser) {
-          const fetchData = async () => {
-              const [productsRes, subRes] = await Promise.all([
-                  getProducts(),
-                  getUserSubscription()
-              ]);
-              if (productsRes.success && productsRes.data) setProducts(productsRes.data);
-              if (subRes.success && subRes.data) setUserSubscription(subRes.data);
-          };
-          fetchData();
-      }
+    if (isFreeUser) {
+      const fetchData = async () => {
+        const [productsRes, subRes] = await Promise.all([getProducts(), getUserSubscription()]);
+        if (productsRes.success && productsRes.data) setProducts(productsRes.data);
+        if (subRes.success && subRes.data) setUserSubscription(subRes.data);
+      };
+      fetchData();
+    }
   }, [isFreeUser]);
 
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
+  // Load initial model from localStorage or use initialModel/first model
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
+      // Try to get the last selected model from localStorage
+      const storedModelName = localStorage.getItem("lastSelectedModel");
+      
+      if (storedModelName) {
+        const storedModel = models.find((m) => m.model_name === storedModelName);
+        if (storedModel) {
+          setSelectedModel(storedModel);
+          return;
+        }
+      }
+      
+      // Fallback to initialModel if provided
       if (initialModel) {
         const found = models.find((m) => m.model_name === initialModel);
         if (found) {
@@ -89,6 +103,8 @@ export default function GenerateToolbar({
           return;
         }
       }
+      
+      // Default to first model
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel, setSelectedModel, initialModel]);
@@ -111,12 +127,16 @@ export default function GenerateToolbar({
     }
   };
 
+  if (!selected && !isHovered) return null;
+
   return (
-    <FlowNodeToolbar
-      className={selected ? "opacity-100" : "opacity-50 hover:opacity-100"}
+    <NodeToolbar
       isVisible={selected || isHovered}
       position={Position.Bottom}
-      offset={20}
+      offset={12}
+      className={`transition-opacity duration-300 ${
+        selected ? "opacity-100" : "opacity-50 hover:opacity-100"
+      }`}
     >
       <div
         className="flex items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
@@ -135,11 +155,13 @@ export default function GenerateToolbar({
           onValueChange={(val) => {
             const found = models?.find((m) => m.model_name === val);
             if (found) {
-                if (isFreeUser && found.is_paid) {
-                    setIsUpdatePlanOpen(true);
-                    return;
-                }
-                setSelectedModel(found);
+              if (isFreeUser && found.is_paid) {
+                setIsUpdatePlanOpen(true);
+                return;
+              }
+              setSelectedModel(found);
+              localStorage.setItem("lastSelectedModel", found.model_name);
+              console.log("Selected model saved to localStorage:", found.model_name);
             }
           }}
         >
@@ -159,7 +181,11 @@ export default function GenerateToolbar({
                   ></div>
                   <span className="text-base">{model.model_name}</span>
                   {isFreeUser && model.is_paid && (
-                      <CurrencyCircleDollar size={16} weight="fill" className="ml-auto text-yellow-400" />
+                    <CurrencyCircleDollar
+                      size={16}
+                      weight="fill"
+                      className="ml-auto text-yellow-400"
+                    />
                   )}
                 </div>
               </SelectItem>
@@ -184,21 +210,21 @@ export default function GenerateToolbar({
         )}
       </div>
 
-       {/* Access Restriction Dialog */}
-       <UpdatePlanDialog
+      {/* Access Restriction Dialog */}
+      <UpdatePlanDialog
         isDialog={true}
-         className="mx-0 shadow-lg transition-all duration-200 hover:shadow-xl"
+        className="mx-0 transition-all duration-200"
         currentPlan={userSubscription?.subscription ?? null}
         onPlanChange={async () => {
-             window.location.href = `/pricing`; 
+          window.location.href = `/pricing`;
         }}
-        triggerText="" 
+        triggerText=""
         products={products}
         user={navData?.user ?? null}
         openControlled={isUpdatePlanOpen}
         onOpenChangeControlled={setIsUpdatePlanOpen}
         hideTrigger={true}
       />
-    </FlowNodeToolbar>
+    </NodeToolbar>
   );
 }

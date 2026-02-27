@@ -65,7 +65,6 @@
   }
 
   html {
-    scroll-behavior: smooth;
     scroll-padding-top: 2rem;
   }
 
@@ -74,11 +73,6 @@
     /* Enhanced smooth scrolling with momentum */
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: smooth;
-  }
-
-  /* Smooth scrolling for all scrollable elements */
-  * {
-    scroll-behavior: smooth;
   }
 }
 
@@ -865,4 +859,18 @@
   color: rgba(255, 255, 255, 0.4);
   pointer-events: none;
   height: 0;
+}
+
+@layer utilities {
+  @keyframes scroll-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-33.33%);
+    }
+  }
+  .animate-scroll-vertical {
+    animation: scroll-vertical 20s linear infinite;
+  }
 }

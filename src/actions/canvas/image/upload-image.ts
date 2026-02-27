@@ -1,14 +1,22 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
-import sharp from "sharp";
 import { nanoid } from "nanoid";
+import sharp from "sharp";
+
+import { createClient } from "@/src/lib/supabase/server";
 
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file" };
- 
+
+    // Limit: Images 5MB, Videos 10MB
+    const isVideoUpload = file.type.startsWith("video");
+    const limit = isVideoUpload ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+
+    if (file.size > limit)
+      return { success: false, error: `File size exceeds ${isVideoUpload ? "10MB" : "5MB"}` };
+
     const supabase = await createClient();
 
     // 1. Auth Check
@@ -18,8 +26,20 @@ export async function uploadImageAction(formData: FormData) {
     if (!user) return { success: false, error: "Unauthorized" };
 
     // 2. Process Image (Dimensions)
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const metadata = await sharp(buffer).metadata();
+    let width: number | undefined;
+    let height: number | undefined;
+
+    const isVideo = file.type.startsWith("video");
+
+    if (isVideo) {
+      width = Number(formData.get("width")) || 0;
+      height = Number(formData.get("height")) || 0;
+    } else {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const metadata = await sharp(buffer).metadata();
+      width = metadata.width;
+      height = metadata.height;
+    }
 
     const canvasId = formData.get("canvasId") as string;
     if (!canvasId) return { success: false, error: "No canvas ID" };
@@ -72,8 +92,8 @@ export async function uploadImageAction(formData: FormData) {
           .insert({
             user_id: user.id,
             image_url: publicUrl,
-            width: metadata.width,
-            height: metadata.height,
+            width: width,
+            height: height,
             is_public: true,
           })
           .select("id")
@@ -87,8 +107,8 @@ export async function uploadImageAction(formData: FormData) {
         .insert({
           user_id: user.id,
           image_url: publicUrl,
-          width: metadata.width,
-          height: metadata.height,
+          width: width,
+          height: height,
           is_public: true,
         })
         .select("id")
@@ -113,8 +133,8 @@ export async function uploadImageAction(formData: FormData) {
       data: {
         imageId: dbRecord.id,
         url: publicUrl,
-        width: metadata.width,
-        height: metadata.height,
+        width: width,
+        height: height,
       },
     };
   } catch (error) {

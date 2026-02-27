@@ -1,11 +1,13 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Eraser, Loader2, RefreshCw } from "lucide-react";
-import { useSyncUpstreamData } from "@/src/utils/xyflow";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
+import { useSyncUpstreamData } from "@/src/utils/xyflow";
+
 import { useCanvas } from "../../providers/CanvasProvider";
+import NodeLayout from "../NodeLayout";
 
 export type QualityLevel = "cheap" | "medium" | "best";
 
@@ -176,7 +178,7 @@ const RemoveBackgroundNode = React.memo(
         subtitle={qualityLabel}
         minWidth={BASE_WIDTH}
         minHeight={BASE_WIDTH * aspectRatio}
-        className="bg flex h-full w-full cursor-default flex-col rounded-3xl"
+        className="bg flex size-full cursor-default flex-col rounded-3xl"
         handles={[
           { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
@@ -184,7 +186,7 @@ const RemoveBackgroundNode = React.memo(
         toolbarType="removeBackground"
         keepAspectRatio={true}
       >
-        <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
+        <div className="relative size-full flex-1 overflow-hidden rounded-3xl">
           {/* Dimensions Badge */}
           {data?.outputImages?.[0]?.width && data?.outputImages?.[0]?.height && (
             <div className="pointer-events-none absolute bottom-2 left-2 z-10 flex justify-center">
@@ -199,7 +201,7 @@ const RemoveBackgroundNode = React.memo(
             <img
               src={displayImage}
               alt="Remove Background Input/Output"
-              className="h-full w-full rounded-3xl object-cover"
+              className="size-full rounded-3xl object-cover"
               draggable={false}
             />
           ) : (

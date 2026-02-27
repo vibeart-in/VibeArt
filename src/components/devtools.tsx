@@ -1,14 +1,6 @@
 "use client";
 
 import {
-  useEffect,
-  useState,
-  useCallback,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-
-import {
   useNodes,
   Panel,
   useStore,
@@ -20,6 +12,8 @@ import {
   type NodeChange,
   type XYPosition,
 } from "@xyflow/react";
+import { useEffect, useState, useCallback, type Dispatch, type SetStateAction } from "react";
+
 
 import { ToggleGroup, ToggleGroupItem } from "@/src/components/ui/toggle-group";
 
@@ -70,9 +64,7 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
   // Memoize the callback for handling node changes
   const handleNodeChanges: OnNodesChange = useCallback(
     (newChanges: NodeChange[]) => {
-      setChanges((prevChanges) =>
-        [...newChanges, ...prevChanges].slice(0, limit),
-      );
+      setChanges((prevChanges) => [...newChanges, ...prevChanges].slice(0, limit));
     },
     [limit],
   );
@@ -90,9 +82,7 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
       {changes.length === 0 ? (
         <NoChanges />
       ) : (
-        changes.map((change, index) => (
-          <ChangeInfo key={index} change={change} />
-        ))
+        changes.map((change, index) => <ChangeInfo key={index} change={change} />)
       )}
     </>
   );
@@ -193,7 +183,7 @@ type DevToolsToggleProps = {
 
 const DevToolsToggle = ({ tools, position }: DevToolsToggleProps) => {
   return (
-    <Panel position={position} className="bg-card rounded border p-1 shadow-xs">
+    <Panel position={position} className="shadow-xs rounded border bg-card p-1">
       <ToggleGroup type="multiple">
         {tools.map(({ active, setActive, label, value }) => (
           <ToggleGroupItem
@@ -201,7 +191,7 @@ const DevToolsToggle = ({ tools, position }: DevToolsToggleProps) => {
             value={value}
             onClick={() => setActive((prev) => !prev)}
             aria-pressed={active}
-            className="bg-card text-card-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors duration-300"
+            className="bg-card text-card-foreground transition-colors duration-300 hover:bg-secondary hover:text-secondary-foreground"
           >
             {label}
           </ToggleGroupItem>

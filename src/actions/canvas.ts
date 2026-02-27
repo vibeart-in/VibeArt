@@ -1,7 +1,8 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+
+import { createClient } from "@/src/lib/supabase/server";
 
 export async function createCanvas(title: string = "Untitled Canvas") {
   const supabase = await createClient();
@@ -62,7 +63,9 @@ export async function getCanvasProjects(): Promise<CanvasProject[]> {
   return data as unknown as CanvasProject[];
 }
 
-export async function publishCanvas(id: string) {
+
+export async function updateCanvas(id: string, updates: { title?: string }) {
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -74,6 +77,7 @@ export async function publishCanvas(id: string) {
 
   const { error } = await supabase
     .from("canvas")
+
     .update({ is_public: true })
     .eq("id", id)
     .eq("user_id", user.id);
@@ -109,6 +113,8 @@ export async function updateCanvas(
   const { error } = await supabase
     .from("canvas")
     .update(dbUpdates)
+
+
     .eq("id", id)
     .eq("user_id", user.id);
 
@@ -118,16 +124,23 @@ export async function updateCanvas(
   }
 
   revalidatePath("/canvas");
+
   revalidatePath(`/canvas/${id}`);
 }
 
 export async function getCanvasImages(canvasId: string) {
+
+}
+
+export async function deleteCanvas(id: string) {
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
+
     return [];
   }
 
@@ -235,4 +248,39 @@ export async function duplicateCanvas(templateId: string) {
 
   revalidatePath("/canvas");
   return newCanvas.id;
+
+    throw new Error("User not authenticated");
+  }
+
+  // 1. Delete related Jobs and Job Output Images
+  // First, get all job IDs for this canvas
+  const { data: jobs } = await supabase
+    .from("jobs")
+    .select("id")
+    .eq("canvas_id", id);
+
+  if (jobs && jobs.length > 0) {
+    const jobIds = jobs.map((j) => j.id);
+
+    // Delete job output images
+    await supabase.from("job_output_images").delete().in("job_id", jobIds);
+
+    // Delete jobs
+    await supabase.from("jobs").delete().in("id", jobIds);
+  }
+
+  // 2. Delete the Canvas
+  const { error } = await supabase
+    .from("canvas")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error deleting canvas:", error);
+    throw new Error("Failed to delete canvas");
+  }
+
+  revalidatePath("/canvas");
+
 }
