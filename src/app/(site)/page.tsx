@@ -3,58 +3,49 @@
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-import ContactUs from "@/src/components/landing/ContactUs";
-import {
-  Hero,
-  FeatureCard,
-  FeaturesGrid,
-  TestimonialsSection,
-  FooterCTA,
-  AiAppsCarousel,
-} from "@/src/components/landing/LandingComponents";
+import { Hero, FeaturesGrid, AiAppsCarousel } from "@/src/components/landing/LandingComponents";
 import PrivacySection from "@/src/components/landing/PrivacySection";
 import { createClient } from "@/src/lib/supabase/client";
-import LightFrequencies from "@/src/components/landing/NEW/LightFrequencies";
 import ClarityScroll from "@/src/components/landing/hero/SpaceWrap";
 import { LogoCloud } from "@/src/components/ui/logo-cloud";
 import Testimonial from "@/src/components/landing/Testimonials";
 import CreativeProcess from "@/src/components/landing/hero/CreativeProcess";
 import MagicBento from "@/src/components/ui/MagicBento";
 import { motion } from "framer-motion";
+import { GetStarted } from "@/src/components/ui/GetStated";
 
 const logos = [
   {
-    src: "https://svgl.app/library/nvidia-wordmark-light.svg",
-    alt: "Nvidia Logo",
+    src: "https://www.segmind.com/partners/minimax.png",
+    alt: "Minimax Logo",
   },
   {
-    src: "https://svgl.app/library/supabase_wordmark_light.svg",
-    alt: "Supabase Logo",
+    src: "https://svgl.app/library/google-wordmark.svg",
+    alt: "Google Logo",
   },
   {
     src: "https://svgl.app/library/openai_wordmark_light.svg",
     alt: "OpenAI Logo",
   },
   {
-    src: "https://svgl.app/library/turso-wordmark-light.svg",
-    alt: "Turso Logo",
+    src: "https://www.modelscope.ai/api/v1/models/Wan-AI/Wan2.1-I2V-14B-720P/repo?Revision=master&FilePath=assets%2Flogo.png&View=true",
+    alt: "Qwen Logo",
   },
   {
-    src: "https://svgl.app/library/vercel_wordmark.svg",
-    alt: "Vercel Logo",
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/ByteDance_logo_English.svg/3840px-ByteDance_logo_English.svg.png",
+    alt: "Bytedance Logo",
   },
   {
-    src: "https://svgl.app/library/github_wordmark_light.svg",
-    alt: "GitHub Logo",
+    src: "https://www.nomadai.ie/logos/Midjourney.png?dpl=dpl_5xqEonpmrh3cYgYBw3Azt8Tkqvoz",
+    alt: "Midjourny Logo",
   },
   {
-    src: "https://svgl.app/library/claude-ai-wordmark-icon_light.svg",
-    alt: "Claude AI Logo",
+    src: "https://bfl.ai/brand/logotype-white.png",
+    alt: "Flux Logo",
   },
   {
-    src: "https://svgl.app/library/clerk-wordmark-light.svg",
-    alt: "Clerk Logo",
+    src: "https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/recraft-text.png",
+    alt: "Recraft Logo",
   },
 ];
 
@@ -64,23 +55,8 @@ const LandingPage = () => {
       <Hero />
       <ClarityScroll />
 
-      <section className="relative mx-auto my-12 max-w-5xl">
-        <h2 className="mb-5 text-center text-xl font-medium tracking-tight text-foreground md:text-3xl">
-          <span className="text-muted-foreground">State-of-the-art AI models</span>
-          <br />
-          <span className="font-semibold">for image, video, and text.</span>
-        </h2>
-        <div className="mx-auto my-5 h-px max-w-5xl bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
-
-        <LogoCloud logos={logos} />
-
-        <div className="mt-5 h-px bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
-      </section>
-
       {/* <AiAppsCarousel /> */}
-
       {/* <Slider /> */}
-
       {/* <FeatureCard
         title="Create Brand Identity - Pro & Fast"
         description="Generate logos, color palettes, and typography guidelines that perfectly match your vision. Ensure consistency across all your assets with our AI-powered brand guardrails."
@@ -108,48 +84,64 @@ const LandingPage = () => {
         gradient="bg-pink-400"
         badge="Photography"
       /> */}
-      <CreativeProcess />
+      <section id="how-it-works">
+        <CreativeProcess />
+      </section>
 
-      <FeaturesGrid />
-
+      <section id="features">
+        <FeaturesGrid />
+      </section>
       {/* <TestimonialsSection /> */}
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-20 text-center"
-      >
-        <span className="mb-4 inline-block text-sm font-bold uppercase tracking-widest text-green-500">
-          AI Models
-        </span>
-        <h2 className="mx-auto max-w-5xl font-satoshi text-4xl font-black text-white md:text-6xl">
-          100+ models from open source to <br />{" "}
-          <span className="text-neutral-600">proprietary models across all companies.</span>
+      <section id="ai-models">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block text-sm font-bold uppercase tracking-widest text-green-500">
+            AI Models
+          </span>
+          <h2 className="mx-auto max-w-5xl font-satoshi text-4xl font-black text-white md:text-6xl">
+            100+ models from open source to <br />{" "}
+            <span className="text-neutral-600">proprietary models across all companies.</span>
+          </h2>
+        </motion.div>
+        <MagicBento
+          textAutoHide={true}
+          enableStars={false}
+          enableSpotlight
+          enableBorderGlow={true}
+          enableTilt={false}
+          enableMagnetism={false}
+          clickEffect={false}
+          spotlightRadius={400}
+          particleCount={12}
+          glowColor="255, 255, 255"
+          disableAnimations={false}
+        />
+      </section>
+      <section className="relative mx-auto my-12 max-w-5xl">
+        <h2 className="mb-5 text-center text-xl font-medium tracking-tight text-foreground md:text-3xl">
+          <span className="text-muted-foreground">State-of-the-art AI models</span>
+          <br />
+          <span className="font-semibold">for image, video, and text.</span>
         </h2>
-      </motion.div>
+        <div className="mx-auto my-5 h-px max-w-5xl bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
 
-      <MagicBento
-        textAutoHide={true}
-        enableStars={false}
-        enableSpotlight
-        enableBorderGlow={true}
-        enableTilt={false}
-        enableMagnetism={false}
-        clickEffect={false}
-        spotlightRadius={400}
-        particleCount={12}
-        glowColor="255, 255, 255"
-        disableAnimations={false}
-      />
+        <LogoCloud logos={logos} />
+
+        <div className="mt-5 h-px bg-border [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
+      </section>
       <PrivacySection />
-      <Testimonial />
-
-
-
-      <FooterCTA />
+      <section id="testimonials">
+        <Testimonial />
+      </section>
+      <section id="get-started">
+        <GetStarted />
+      </section>
+      {/* <FooterCTA /> */}
       {/* <LightFrequencies /> */}
-
       {/* <StickyPromptInput /> */}
     </div>
   );

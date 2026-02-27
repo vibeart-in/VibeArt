@@ -275,11 +275,11 @@ const ClarityScroll: React.FC = () => {
               willChange: "opacity, transform, filter",
             }}
           >
-            CLARITY
+            CREATIVITY
             <br />
             THROUGH
             <br />
-            SIMPLICITY
+            SPEED
           </div>
         </div>
 
@@ -301,19 +301,16 @@ const ClarityScroll: React.FC = () => {
             <h2
               style={{
                 fontFamily: '"PP Neue Montreal", sans-serif',
-                fontSize: "2rem",
+                fontSize: "3rem",
                 textTransform: "uppercase",
                 marginBottom: "2rem",
                 fontWeight: "normal",
               }}
             >
-              The Art of Reduction
+              Go beyond simple generation.
             </h2>
-            <p
-              style={{ marginBottom: "1.5rem", opacity: 0.8, lineHeight: 1.6, fontSize: "1.1rem" }}
-            >
-              In a world of constant noise and distraction, true creativity emerges from the space
-              between thoughts.
+            <p style={{ marginBottom: "2rem", opacity: 0.8, lineHeight: 1.6, fontSize: "1.1rem" }}>
+              Design repeatable systems that power campaigns, brands, and creative teams.
             </p>
           </div>
         </div>

@@ -6,6 +6,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CustomEase } from "gsap/CustomEase";
 import Lenis from "lenis";
 
+// Expose Lenis globally so the navbar can scroll past pinned sections
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, CustomEase);
@@ -19,31 +26,38 @@ if (typeof window !== "undefined") {
 // Data
 const artists = [
   "VFX Artist",
+  "Background Artist",
   "Fashion Designer",
-  "Social Manager",
-  "Creative Director",
-  "Photographer",
+  "AI Director",
+  "Ads Creators",
   "Brand Strategist",
 ];
 
 const featuredContent = [
-  "Cinematic Reality",
-  "Modern Style",
-  "Digital Presence",
-  "High Impact",
-  "Visual Stories",
-  "Unique Identity",
+  "Visual Effects",
+  "Background Art",
+  "Fashion",
+  "AI Influencers",
+  "Creative Ads",
+  "Branding",
 ];
 
-const categories = ["Visual Effects", "Fashion", "Social Media", "Ads", "Photography", "Branding"];
+const categories = [
+  "Visual Effects",
+  "Background",
+  "Fashion",
+  "AI Influencers",
+  "Creative Ads",
+  "Branding",
+];
 
 const backgroundImages = [
   "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/generated-image-1771401163633.mp4",
-  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/anime-bg.jpg",
+  "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/generated-image-1767466858708.png",
   "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/replicate-prediction-7w76cff0rhrmy0cwdyctjm1s10.mp4",
   "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/tmpyqx17hg9.mp4",
   "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/new/tmpq68prbc3.mp4",
-  "https://i.pinimg.com/736x/73/e6/f6/73e6f629ed793c25a17f5ed0039ac456.jpg",
+  "https://i.pinimg.com/1200x/93/c1/f8/93c1f844633903c99b48e129daae30d2.jpg",
 ];
 
 // Sound Manager Class
@@ -114,7 +128,7 @@ export default function CreativeProcess() {
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedSectionRef = useRef<HTMLDivElement>(null);
   const fixedContainerRef = useRef<HTMLDivElement>(null);
-  const bgRefs = useRef<(HTMLImageElement | null)[]>([]);
+  const bgRefs = useRef<(HTMLImageElement | HTMLVideoElement | null)[]>([]);
   const artistRefs = useRef<(HTMLDivElement | null)[]>([]);
   const categoryRefs = useRef<(HTMLDivElement | null)[]>([]);
   const featuredRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -138,6 +152,7 @@ export default function CreativeProcess() {
       touchMultiplier: 2,
     });
     lenisRef.current = lenis;
+    window.__lenis = lenis;
 
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -162,6 +177,7 @@ export default function CreativeProcess() {
     return () => {
       gsap.ticker.remove(ticker);
       lenis.destroy();
+      window.__lenis = undefined;
       clearInterval(interval);
     };
   }, []);

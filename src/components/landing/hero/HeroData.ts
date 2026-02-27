@@ -1,34 +1,12 @@
 import { Node, Edge } from "@xyflow/react";
-import { Sparkles, Share2 } from "lucide-react";
-
 import { CustomEdge } from "./CustomEdge";
-import {
-  HeroTitleNode,
-  HeroAppCarouselNode,
-  HeroImageSlideshowNode,
-  HeroLabelNode,
-  HeroStatsNode,
-  HeroFireNode,
-  HeroVideoNode,
-  HeroFeatureNode,
-  HeroAppShowcaseNode,
-  OutputImageNode,
-  HeroImageNode,
-} from "./nodes/HeroNodes";
+import { HeroTitleNode, HeroImageNode } from "./nodes/HeroNodes";
 import HeroInputImage from "./nodes/HeroInputImage";
 import HeroOutputImage from "./nodes/HeroOutputImage";
 import HeroAiAppNode from "./nodes/HeroAiAppNode";
 
 export const nodeTypes = {
   heroTitle: HeroTitleNode,
-  heroCarousel: HeroAppCarouselNode,
-  heroSlideshow: HeroImageSlideshowNode,
-  heroLabel: HeroLabelNode,
-  heroStats: HeroStatsNode,
-  heroFire: HeroFireNode,
-  heroVideo: HeroVideoNode,
-  heroFeature: HeroFeatureNode,
-  heroShowcase: HeroAppShowcaseNode,
   inputImage: HeroInputImage,
   outputImage: HeroOutputImage,
   heroImage: HeroImageNode,
@@ -37,7 +15,6 @@ export const nodeTypes = {
 
 export const edgeTypes = {
   custom: CustomEdge,
-  active: CustomEdge,
 };
 
 export const initialNodes: Node[] = [
@@ -59,7 +36,7 @@ export const initialNodes: Node[] = [
     id: "552ead66-e1bf-4b21-afec-3075f3f15945",
     data: {
       url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/oOEPJpDbUQm6-JzpQxm9P.webp",
-      label: "dress_view_back.webp",
+      label: "dress_back",
       width: 450,
       height: 680,
       imageId: "51cd5b1c-bde9-4daf-9afe-d6f4d698dd39",
@@ -75,7 +52,7 @@ export const initialNodes: Node[] = [
     id: "4066d91f-2470-444c-b3be-ed3d8a5685b2",
     data: {
       url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/gwH9OiJdWV3YP3EzWN85o.webp",
-      label: "dress_view_front.webp",
+      label: "dress_front",
       width: 640,
       height: 970,
       imageId: "cff3266e-00c4-4ea9-a570-aedd801e66d1",
@@ -92,7 +69,7 @@ export const initialNodes: Node[] = [
     id: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
     data: {
       model: "Nano banana pro",
-      title: "Image Generator",
+      title: "output",
       width: 649,
       height: 975,
       prompt:
@@ -138,7 +115,7 @@ export const initialNodes: Node[] = [
     id: "3f9b4030-612c-4ee7-8798-a0b2a829bf55",
     data: {
       model: "Nano banana pro",
-      title: "Image Generator",
+      title: "output",
       width: 649,
       height: 975,
       prompt:
@@ -286,28 +263,24 @@ export const initialEdges: Edge[] = [
     id: "edge-1",
     source: "552ead66-e1bf-4b21-afec-3075f3f15945",
     target: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
-    type: "custom",
     animated: true,
   },
   {
     id: "edge-5",
     source: "552ead66-e1bf-4b21-afec-3075f3f15945",
     target: "3f9b4030-612c-4ee7-8798-a0b2a829bf55",
-    type: "custom",
     animated: true,
   },
   {
     id: "edge-6",
     source: "4066d91f-2470-444c-b3be-ed3d8a5685b2",
     target: "3f9b4030-612c-4ee7-8798-a0b2a829bf55",
-    type: "custom",
     animated: true,
   },
   {
     id: "edge-2",
     source: "4066d91f-2470-444c-b3be-ed3d8a5685b2",
     target: "0c6ecb69-f831-4043-b7e4-ad7f6ad95664",
-    type: "custom",
     animated: true,
   },
   {

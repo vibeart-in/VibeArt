@@ -5,6 +5,7 @@ import React from "react";
 import { AiApp } from "@/src/constants/aiApps";
 
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+import HeroNodeLayout from "./HeroNodeLayout";
 
 export type AiAppNodeData = {
   imageUrl?: string;
@@ -29,13 +30,13 @@ const BASE_WIDTH = 40;
 
 const HeroAiAppNode = React.memo(({ id, data, selected }: NodeProps<HeroAiAppNodeType>) => {
   return (
-    <NodeLayout
+    <HeroNodeLayout
       selected={selected}
-      title={"Anime to real app"}
+      title={"360° camera orbit"}
       minWidth={BASE_WIDTH}
       minHeight={50}
       keepAspectRatio={true}
-      className="flex h-auto w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D] transition-colors duration-200"
+      className="flex h-auto w-full flex-col rounded-3xl bg-[#1D1D1D] transition-colors duration-200"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -93,7 +94,7 @@ const HeroAiAppNode = React.memo(({ id, data, selected }: NodeProps<HeroAiAppNod
           </div>
         </div>
       </div>
-    </NodeLayout>
+    </HeroNodeLayout>
   );
 });
 

@@ -1,10 +1,10 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { ArrowUp, Loader2, Copy, Check } from "lucide-react";
 import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
 import { useAtom } from "jotai";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+import HeroNodeLayout from "./HeroNodeLayout";
 
 const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v", ".avi"];
 
@@ -60,9 +60,7 @@ const HeroOutputImage = React.memo(
       }
     }, [stylePrompt, data.stylePrompt, id, updateNodeData]);
 
-    const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
     const [prompt, setPrompt] = useState(data.prompt || "");
-    const [isCopied, setIsCopied] = useState(false);
 
     const mediaIsVideo = useMemo(
       () => (data.imageUrl ? isVideoUrl(data.imageUrl) : false),
@@ -190,18 +188,16 @@ const HeroOutputImage = React.memo(
 
     const inputImages = data.inputImageUrls || [];
 
-    const isGenerating = !!data.activeJobId;
-
     return (
-      <NodeLayout
+      <HeroNodeLayout
         id={id}
         selected={selected}
-        title={data.category || "Image generation"}
+        title={data.category || "Image gen"}
         subtitle={data?.model}
         minWidth={BASE_WIDTH}
         minHeight={targetHeight}
         keepAspectRatio={true}
-        className="flex h-full w-full cursor-default flex-col rounded-2xl bg-[#1D1D1D]"
+        className="flex h-full w-full cursor-default flex-col rounded-2xl bg-[#1D1D1D] transition-all duration-300 ease-in-out hover:scale-110"
         handles={[
           { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
@@ -210,10 +206,6 @@ const HeroOutputImage = React.memo(
         initialModel={data.model}
         toolbarHidden={true}
       >
-        {/* 
-         We ensure this container has a minimum height so placeholders show up 
-         immediately, even if the NodeLayout hasn't fully expanded yet.
-      */}
         <div className="relative h-full w-full flex-1 overflow-hidden rounded-2xl">
           {data.imageUrl &&
             (mediaIsVideo ? (
@@ -248,59 +240,15 @@ const HeroOutputImage = React.memo(
             selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
         >
-          {inputImages.length > 0 && (
-            <div className="scrollbar-hide relative z-10 mb-3 flex items-center gap-2 overflow-x-auto pb-1">
-              {inputImages.map((url, index) => (
-                <div
-                  key={index}
-                  className="relative shrink-0 overflow-hidden rounded-sm border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
-                >
-                  {isVideoUrl(url) ? (
-                    <video
-                      src={url}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="size-8 object-cover"
-                    />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={url} alt={`Input ${index + 1}`} className="size-8 object-cover" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
           {data.imageUrl && (
             <div className="group/prompt relative">
-              <p className="line-clamp-3 text-xs font-light leading-relaxed text-white/90">
+              <p className="line-clamp-3 text-[10px] font-light leading-relaxed text-white/90">
                 {data.prompt}
               </p>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (data.prompt) {
-                    navigator.clipboard.writeText(data.prompt);
-                    setIsCopied(true);
-                    setTimeout(() => setIsCopied(false), 2000);
-                  }
-                }}
-                className="absolute -top-1 right-10 opacity-0 transition-opacity group-hover/prompt:opacity-100"
-              >
-                <div className="rounded-md bg-black/40 p-1.5 backdrop-blur-sm transition-colors hover:bg-black/60">
-                  {isCopied ? (
-                    <Check className="size-3 text-green-400" />
-                  ) : (
-                    <Copy className="size-3 text-white/70" />
-                  )}
-                </div>
-              </button>
             </div>
           )}
         </div>
-      </NodeLayout>
+      </HeroNodeLayout>
     );
   },
 );

@@ -81,7 +81,7 @@ const cardData: BentoCardProps[] = [
   {
     color: "#060010",
     title: "Runway",
-    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkRkkSEF-TqDe3xHRf57zbLO-l53g3BNyvGw&s",
+    logo: "https://salesforceventures.com/wp-content/uploads/2023/08/Runway_Logo.png?w=1024",
     videoModel: "Gen-4 & Gen-4.5",
     label: "AI Company",
     coverVideo:
@@ -91,7 +91,7 @@ const cardData: BentoCardProps[] = [
   {
     color: "#060010",
     title: "Kuaishou Tech",
-    logo: "https://logo.clearbit.com/kuaishou.com",
+    logo: "https://i.namu.wiki/i/vfeQT3Qi_Uxuk3xz-65eZABtXQwmDeXbt4MmH4PQUnMcMtuww9p2D2qCdNR_wEw35n6z9EFpyDGoVJFagHf-_g.webp",
     videoModel: "Kling 2.5 & 2.6",
     label: "Tech Company",
     coverVideo:
@@ -133,7 +133,7 @@ const cardData: BentoCardProps[] = [
   {
     color: "#060010",
     title: "Pika Labs",
-    logo: "https://logo.clearbit.com/pika.art",
+    logo: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/pika-text.webp",
     videoModel: "Pika 2.2 & 2.5",
     label: "AI Company",
     coverVideo:
@@ -164,7 +164,7 @@ const cardData: BentoCardProps[] = [
   {
     color: "#060010",
     title: "MiniMax & Lightricks",
-    logo: "https://logo.clearbit.com/lightricks.com",
+    logo: "https://www.segmind.com/partners/minimax.png",
     videoModel: "Hailuo AI & LTX-2",
     label: "AI Companies",
     coverVideo:
