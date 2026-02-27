@@ -25,6 +25,7 @@ import "@xyflow/react/dist/style.css";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { updateProjectAction } from "@/src/actions/canvas/update";
 import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
+import { useSmartGrouping } from "@/src/hooks/useSmartGrouping";
 
 import CustomControls from "./Controls";
 import { DevTools } from "../devtools";
@@ -58,6 +59,9 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(
     initialEdges ?? content?.edges ?? [],
   );
+  
+  const { onNodeDragStart, onNodeDrag, onNodeDragStop, copySelection, pasteSelection, groupSelection } = useSmartGrouping(setNodes, setEdges);
+
   const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [saveState, setSaveState] = useState<{
     isSaving: boolean;
@@ -306,28 +310,33 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   const handleNodesChange = useCallback<OnNodesChange>(
     (changes) => {
       onNodesChangeInternal(changes);
-
-      // Filter for 'add' or 'remove' events
-      const structuralChanges = changes.filter(
-        (c) => c.type === "add" || c.type === "remove",
-      ).length;
-
-      if (structuralChanges > 0) {
-        trackChange(structuralChanges);
-      }
-
-      save(); // JSON data still saves normally (1s debounce)
+      save();
       onNodesChange?.(changes);
     },
-    [save, trackChange, onNodesChange, onNodesChangeInternal],
+    [save, onNodesChange, onNodesChangeInternal],
   );
+
+  // Keyboard listeners for Copy/Paste
+  useMemo(() => {
+    if (typeof window === "undefined") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        copySelection();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        pasteSelection();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copySelection, pasteSelection]);
 
   const nodeOpsValue = useMemo(() => ({ addNode, duplicateNode }), [addNode, duplicateNode]);
 
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
       <NodeDropzoneProvider>
-        <CanvasContextMenu addNode={addNode}>
+        <CanvasContextMenu addNode={addNode} onGroupSelection={groupSelection}>
           <ReactFlow
             deleteKeyCode={["Backspace", "Delete"]}
             edges={edges}
@@ -341,6 +350,9 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             onConnectEnd={handleConnectEnd}
             onEdgesChange={handleEdgesChange}
             onNodesChange={handleNodesChange}
+            onNodeDragStart={onNodeDragStart}
+            onNodeDrag={onNodeDrag}
+            onNodeDragStop={onNodeDragStop}
             // panOnScroll
             selectionOnDrag={true}
             colorMode="dark"

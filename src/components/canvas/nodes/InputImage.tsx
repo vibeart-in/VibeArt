@@ -2,7 +2,7 @@
 
 import { IconPhotoFilled } from "@tabler/icons-react";
 import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
-import { Loader2, UploadCloud } from "lucide-react";
+import { FileVideo, Loader2, UploadCloud, Volume2, VolumeX } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -24,12 +24,15 @@ export type InputImageNodeType = Node<InputImageNodeData, "inputImage">;
 
 const BASE_WIDTH = 500;
 
+const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov)$/i.test(url);
+
 const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeType>) => {
   // console.log("INPUTIMAGE", data);
   const { updateNode } = useReactFlow();
   const { project } = useCanvas();
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   const aspectRatio = data.width && data.height ? data.height / data.width : 1;
   const nodeHeight = BASE_WIDTH * aspectRatio;
@@ -39,10 +42,28 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
       const file = event.target.files?.[0];
       if (!file) return;
 
+      let width = 0;
+      let height = 0;
+
+      if (file.type.startsWith("video/")) {
+        const video = document.createElement("video");
+        video.src = URL.createObjectURL(file);
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            width = video.videoWidth;
+            height = video.videoHeight;
+            resolve(null);
+          };
+          video.onerror = () => resolve(null);
+        });
+      }
+
       try {
         setIsUploading(true);
         const formData = new FormData();
         formData.append("file", file);
+        if (width) formData.append("width", width.toString());
+        if (height) formData.append("height", height.toString());
         if (project?.id) formData.append("canvasId", project.id);
 
         const result = await uploadImageAction(formData);
@@ -87,7 +108,7 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
         type="file"
         id={`upload-${id}`}
         className="hidden"
-        accept="image/*"
+        accept="image/*,video/*"
         onChange={handleFileUpload}
         disabled={isUploading}
       />
@@ -100,13 +121,25 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
         )}
 
         {data.url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={data.url}
-            alt="Node Input"
-            className="size-full object-cover"
-            draggable={false}
-          />
+          isVideoUrl(data.url) ? (
+            <video
+              src={data.url}
+              className="size-full object-cover"
+              autoPlay
+              muted={isMuted}
+              loop
+              playsInline
+              draggable={false}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={data.url}
+              alt="Node Input"
+              className="size-full object-cover"
+              draggable={false}
+            />
+          )
         ) : (
           <label
             htmlFor={`upload-${id}`}
@@ -115,6 +148,15 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
             <UploadCloud size={32} />
             <span className="text-xs font-medium">Click to Upload</span>
           </label>
+        )}
+
+        {data.url && isVideoUrl(data.url) && (
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="absolute left-2 top-2 z-20 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-all hover:bg-black/70"
+          >
+            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          </button>
         )}
       </div>
 
@@ -132,7 +174,11 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
           htmlFor={`upload-${id}`}
           className="absolute bottom-0 left-2 z-10 flex cursor-pointer items-center gap-2 rounded-full bg-black/50 px-2 py-1 opacity-0 backdrop-blur-md transition-all duration-300 hover:bg-black/50 group-hover:opacity-100"
         >
-          <IconPhotoFilled size={12} className="text-white" />
+          {isVideoUrl(data.url) ? (
+            <FileVideo size={12} className="text-white" />
+          ) : (
+            <IconPhotoFilled size={12} className="text-white" />
+          )}
           <span className="text-[10px] text-white">Replace</span>
         </label>
       )}

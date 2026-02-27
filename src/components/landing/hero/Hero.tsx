@@ -44,6 +44,24 @@ export const Hero = () => {
           y = height * 0.3; // Starts at 30%, ends at 100% (70vh height)
         }
 
+        // Pin output video node to the right edge of the screen
+        if (node.id === "b8be99c6-b189-41d2-a2b0-76621b999759") {
+          const nodeWidth = 300; // matches node's width property
+          const margin = 100; // gap from the right edge
+          x = width - nodeWidth - margin;
+          y = height * 0.15; // keep it near the top vertically
+        }
+
+        // Pin aiApp node just to the left of the output video node
+        if (node.id === "e9fe739a-3318-4985-a8aa-b163da339715") {
+          const outputNodeWidth = 300; // same as output node width above
+          const outputMargin = 100; // same right margin as output node
+          const aiAppNodeWidth = 200; // matches node's width property
+          const gap = 60; // space between aiApp and output node
+          x = width - outputMargin - outputNodeWidth - gap - aiAppNodeWidth;
+          y = height * 0.7; // vertically centered-ish on screen
+        }
+
         return {
           ...node,
           position: { x, y },
@@ -74,6 +92,13 @@ export const Hero = () => {
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
+              defaultEdgeOptions={{
+                style: {
+                  stroke: "#4c4c4c",
+                  strokeWidth: 2,
+                  strokeDasharray: "none",
+                },
+              }}
               panOnScroll={false}
               zoomOnScroll={false}
               zoomOnPinch={false}

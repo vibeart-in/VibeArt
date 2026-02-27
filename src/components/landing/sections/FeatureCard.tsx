@@ -13,6 +13,7 @@ interface FeatureCardProps {
   imageSide: "left" | "right";
   gradient: string;
   badge?: string;
+  imageUrl?: string;
 }
 
 export const FeatureCard = ({
@@ -22,6 +23,7 @@ export const FeatureCard = ({
   imageSide,
   gradient,
   badge,
+  imageUrl,
 }: FeatureCardProps) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -99,24 +101,21 @@ export const FeatureCard = ({
               />
 
               {/* Abstract UI Mockup */}
-              <div className="absolute inset-0 flex flex-col p-10">
-                <div className="flex-1 transform rounded-2xl border border-white/5 bg-black/40 p-6 shadow-2xl backdrop-blur-xl transition-transform duration-500 group-hover:scale-[1.02]">
-                  <div className="mb-8 flex items-center gap-4">
-                    <div className="size-14 animate-pulse rounded-2xl bg-white/10" />
-                    <div className="space-y-3">
-                      <div className="h-3 w-32 rounded-full bg-white/10" />
-                      <div className="h-3 w-20 rounded-full bg-white/10" />
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="h-32 rounded-xl border border-white/5 bg-gradient-to-br from-white/5 to-transparent" />
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="h-24 rounded-xl bg-white/5" />
-                      <div className="h-24 rounded-xl bg-white/5" />
-                    </div>
+              {imageUrl ? (
+                <div className="absolute inset-0 flex flex-col p-10">
+                  <img
+                    src={imageUrl}
+                    alt={title}
+                    className="h-full w-full transform rounded-2xl border border-white/5 bg-black/40 object-cover shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex flex-col p-10">
+                  <div className="flex-1 transform rounded-2xl border border-white/5 bg-black/40 p-6 shadow-2xl backdrop-blur-xl transition-transform duration-500 group-hover:scale-[1.02]">
+                    
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Floating Badges */}
               <motion.div

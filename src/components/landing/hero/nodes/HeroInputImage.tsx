@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+import HeroNodeLayout from "./HeroNodeLayout";
 
 export type InputImageNodeData = {
   label?: string;
@@ -20,15 +21,14 @@ export type InputImageNodeData = {
 
 export type HeroInputImageNodeType = Node<InputImageNodeData, "heroInputImage">;
 
-const BASE_WIDTH = 200;
+const BASE_WIDTH = 160;
 
 const HeroInputImage = React.memo(({ id, data, selected }: NodeProps<HeroInputImageNodeType>) => {
-
   const aspectRatio = data.width && data.height ? data.height / data.width : 1;
   const nodeHeight = BASE_WIDTH * aspectRatio;
 
   return (
-    <NodeLayout
+    <HeroNodeLayout
       selected={selected}
       title={data.label || "Input Image"}
       subtitle="Input Image"
@@ -36,7 +36,7 @@ const HeroInputImage = React.memo(({ id, data, selected }: NodeProps<HeroInputIm
       style={{
         width: `${BASE_WIDTH}px`,
         height: `${nodeHeight}px`,
-        borderRadius: "16px",   
+        borderRadius: "16px",
       }}
       toolbarHidden={true}
     >
@@ -78,7 +78,7 @@ const HeroInputImage = React.memo(({ id, data, selected }: NodeProps<HeroInputIm
           <span className="text-[10px] text-white">Replace</span>
         </label>
       )}
-    </NodeLayout>
+    </HeroNodeLayout>
   );
 });
 

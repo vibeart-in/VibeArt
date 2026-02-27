@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
   // Optimize bundle size
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
   images: {
     remotePatterns: [
