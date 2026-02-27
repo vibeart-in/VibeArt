@@ -21,8 +21,8 @@ export const useSmartGrouping = (
   const store = useStoreApi();
   const [lastTargetId, setLastTargetId] = useState<string | null>(null);
 
-  // Helper to calculate absolute position recursively
-  const getAbsolutePosition = useCallback((nodeId: string, currentNodes: Node[]): XYPosition => {
+  // Helper to calculate absolute anchor position recursively (the point [node.position.x, node.position.y])
+  const getAbsoluteAnchor = useCallback((nodeId: string, currentNodes: Node[]): XYPosition => {
     let node = currentNodes.find((n) => n.id === nodeId);
     let x = 0;
     let y = 0;
@@ -40,6 +40,39 @@ export const useSmartGrouping = (
     }
     return { x, y };
   }, []);
+
+  // Helper to calculate the absolute visual top-left of a node recursively
+  const getAbsoluteTopLeft = useCallback((nodeId: string, currentNodes: Node[]): XYPosition => {
+    let node = currentNodes.find((n) => n.id === nodeId);
+    let absAnchor = { x: 0, y: 0 };
+    let totalOffset = { x: 0, y: 0 };
+
+    // Traverse up to find the root and accumulate anchor positions
+    // But we also need to subtract origin offsets at each level
+    let curr = node;
+    while (curr) {
+      absAnchor.x += curr.position.x;
+      absAnchor.y += curr.position.y;
+      
+      const width = curr.measured?.width ?? curr.width ?? 0;
+      const height = curr.measured?.height ?? curr.height ?? 0;
+      const origin = curr.origin ?? [0, 0];
+      
+      // The anchor is at position. Top-left is anchor - (origin * size)
+      // This offset is specific to the node's own coordinate space
+      totalOffset.x += origin[0] * width;
+      totalOffset.y += origin[1] * height;
+
+      curr = curr.parentId ? currentNodes.find(n => n.id === curr!.parentId) : undefined;
+    }
+
+    return {
+      x: absAnchor.x - totalOffset.x,
+      y: absAnchor.y - totalOffset.y
+    };
+  }, []);
+
+  const getAbsolutePosition = getAbsoluteAnchor; // Alias for backward compatibility if needed
 
   const onNodeDragStart = useCallback((_: React.MouseEvent, node: Node) => {
     // Safety: Clear 'extent: parent' if it exists to allow dragging out
@@ -109,14 +142,32 @@ export const useSmartGrouping = (
 
   const onNodeDrag = useCallback((_: React.MouseEvent, node: Node) => {
     const nodes = getNodes();
-    const absPos = getAbsolutePosition(node.id, nodes);
-    const center = getCenterPoint(node, absPos);
+    // For the dragged node, use its current position instead of store position
+    const currentNodes = nodes.map(n => n.id === node.id ? node : n);
+    const absPos = getAbsolutePosition(node.id, currentNodes);
     
-    // Find groups that contain the dragged node center
-    const targetGroup = [...nodes].reverse().find(n => 
-      n.type === 'group' && n.id !== node.id && isPointInNode(center, n, nodes)
-    );
-    const targetId = targetGroup?.id || null;
+    let targetId: string | null = null;
+
+    if (node.type === 'group') {
+      // Absorption mode: check if this group contains any OTHER nodes
+      const nodesToAbsorb = currentNodes.filter(n => 
+        n.id !== node.id && 
+        n.parentId !== node.id && // Not already a child
+        n.type !== 'group' && // Don't absorb other groups automatically for now
+        isPointInNode(getCenterPoint(n, getAbsolutePosition(n.id, currentNodes)), node, currentNodes)
+      );
+      
+      if (nodesToAbsorb.length > 0) {
+        targetId = node.id;
+      }
+    } else {
+      // Classic mode: check if this node's center is in a group
+      const center = getCenterPoint(node, absPos);
+      const targetGroup = [...nodes].reverse().find(n => 
+        n.type === 'group' && n.id !== node.id && isPointInNode(center, n, nodes)
+      );
+      targetId = targetGroup?.id || null;
+    }
 
     if (targetId !== lastTargetId) {
       setLastTargetId(targetId);
@@ -133,77 +184,91 @@ export const useSmartGrouping = (
         return n;
       }));
     }
-  }, [getNodes, getAbsolutePosition, isPointInNode, setNodes, lastTargetId]);
+  }, [getNodes, getAbsolutePosition, isPointInNode, getCenterPoint, setNodes, lastTargetId]);
 
   const onNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
     const nodes = getNodes();
-    const absoluteNodePos = getAbsolutePosition(node.id, nodes);
-    const center = getCenterPoint(node, absoluteNodePos);
+    const currentNodes = nodes.map(n => n.id === node.id ? node : n);
+    const absPos = getAbsoluteAnchor(node.id, currentNodes);
 
-    // Find overlapping group (center point check)
-    const targetGroup = [...nodes].reverse().find(n => 
-      n.type === 'group' && n.id !== node.id && isPointInNode(center, n, nodes)
-    );
-
-    // Helper for hierarchical sorting
-    const getSortOrder = (nds: Node[]) => {
-      const getDepth = (n: Node): number => {
-        let depth = 0;
-        let curr = n;
-        while (curr.parentId) {
-          depth++;
-          const parent = nds.find(pn => pn.id === curr.parentId);
-          if (!parent) break;
-          curr = parent;
-        }
-        return depth;
-      };
-
-      return [...nds].sort((a, b) => {
-        const depthA = getDepth(a);
-        const depthB = getDepth(b);
-        if (depthA !== depthB) return depthA - depthB;
-        if (a.type === 'group' && b.type !== 'group') return -1;
-        if (a.type !== 'group' && b.type === 'group') return 1;
-        return 0;
-      });
-    };
-
-    // Clear highlights and update parenting atomicly
     setNodes((nds) => {
-      const updatedNodes = nds.map((n) => {
+      let updatedNodes = nds.map((n) => {
+        // Clear all highlights
         if (n.type === 'group') {
           return { ...n, data: { ...n.data, isHighlighted: false } };
-        }
-        if (n.id === node.id) {
-          if (targetGroup && n.parentId !== targetGroup.id) {
-            const groupAbsPos = getAbsolutePosition(targetGroup.id, nds);
-            return {
-              ...n,
-              parentId: targetGroup.id,
-              position: {
-                x: absoluteNodePos.x - groupAbsPos.x,
-                y: absoluteNodePos.y - groupAbsPos.y,
-              },
-              extent: undefined,
-            };
-          } else if (!targetGroup && n.parentId) {
-            return {
-              ...n,
-              parentId: undefined,
-              position: absoluteNodePos,
-              extent: undefined,
-            };
-          }
         }
         return n;
       });
 
+      if (node.type === 'group') {
+        // Absorption: reparent all nodes whose centers are within this group
+        const groupAbsPos = absPos;
+        const groupTopLeft = getAbsoluteTopLeft(node.id, currentNodes);
+
+        const nodesToAbsorb = currentNodes.filter(n => 
+          n.id !== node.id && 
+          n.parentId !== node.id &&
+          n.type !== 'group' &&
+          isPointInNode(getCenterPoint(n, getAbsoluteAnchor(n.id, currentNodes)), node, currentNodes)
+        );
+
+        updatedNodes = updatedNodes.map(n => {
+          const match = nodesToAbsorb.find(target => target.id === n.id);
+          if (match) {
+            const childAbsAnchor = getAbsoluteAnchor(n.id, currentNodes);
+            return {
+              ...n,
+              parentId: node.id,
+              position: {
+                x: childAbsAnchor.x - groupTopLeft.x,
+                y: childAbsAnchor.y - groupTopLeft.y
+              },
+              extent: undefined
+            };
+          }
+          return n;
+        });
+      } else {
+        // Classic: single node reparenting
+        const center = getCenterPoint(node, absPos);
+        const targetGroup = [...nodes].reverse().find(n => 
+          n.type === 'group' && n.id !== node.id && isPointInNode(center, n, nodes)
+        );
+
+        updatedNodes = updatedNodes.map((n) => {
+          if (n.id === node.id) {
+            if (targetGroup && n.parentId !== targetGroup.id) {
+              const groupTopLeft = getAbsoluteTopLeft(targetGroup.id, nds);
+              const childAbsAnchor = getAbsoluteAnchor(node.id, currentNodes);
+              
+              return {
+                ...n,
+                parentId: targetGroup.id,
+                position: {
+                  x: childAbsAnchor.x - groupTopLeft.x,
+                  y: childAbsAnchor.y - groupTopLeft.y,
+                },
+                extent: undefined,
+              };
+            } else if (!targetGroup && n.parentId) {
+              const childAbsAnchor = getAbsoluteAnchor(node.id, currentNodes);
+              return {
+                ...n,
+                parentId: undefined,
+                position: childAbsAnchor,
+                extent: undefined,
+              };
+            }
+          }
+          return n;
+        });
+      }
+
       return sortNodesHierarchically(updatedNodes);
     });
-    
+
     setLastTargetId(null);
-  }, [getNodes, getAbsolutePosition, isPointInNode, getCenterPoint, setNodes]);
+  }, [getNodes, getAbsoluteAnchor, getAbsoluteTopLeft, isPointInNode, getCenterPoint, setNodes, sortNodesHierarchically]);
 
   const groupSelection = useCallback(() => {
     const nodes = getNodes();
@@ -319,11 +384,34 @@ export const useSmartGrouping = (
 
       const finalParentId = isParentInSelection ? idMap.get(n.parentId!) : n.parentId;
 
+      // Remap internal references for AiAppNode (and potentially others)
+      const newData = { ...n.data };
+      
+      // Remap mainNodeId if it exists and is part of the selection
+      if (newData.mainNodeId && typeof newData.mainNodeId === 'string') {
+        const newMainId = idMap.get(newData.mainNodeId);
+        if (newMainId) {
+          newData.mainNodeId = newMainId;
+          // Also clear activeJobId and status for the new copy to prevent it from picking up old state
+          newData.activeJobId = undefined;
+          newData.status = undefined;
+          newData.hasGenerated = false;
+        }
+      }
+
+      // Remap outputNodeIds if they exist
+      if (Array.isArray(newData.outputNodeIds)) {
+        newData.outputNodeIds = newData.outputNodeIds
+          .map((oldId: string) => idMap.get(oldId))
+          .filter((newId): newId is string => !!newId);
+      }
+
       return {
         ...n,
         id: newId,
         parentId: finalParentId,
         position,
+        data: newData,
         selected: true,
       };
     });

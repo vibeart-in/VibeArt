@@ -8,11 +8,12 @@ import {
   GenerateToolbar,
   UpscaleToolbar,
   RemoveBackgroundToolbar,
+  GroupToolbar,
 } from "./toolbars";
 
 interface NodeToolbarProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground";
+  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground" | "group";
   selected: boolean;
   isHovered: boolean;
   handleMouseEnter: () => void;
@@ -85,6 +86,19 @@ export default function NodeToolbar({
         handleMouseLeave={handleMouseLeave}
         id={id}
         initialModel={initialModel}
+      />
+    );
+  }
+
+  // Group Toolbar — colour picker only
+  if (toolbarType === "group") {
+    return (
+      <GroupToolbar
+        id={id}
+        selected={selected}
+        isHovered={isHovered}
+        handleMouseEnter={handleMouseEnter}
+        handleMouseLeave={handleMouseLeave}
       />
     );
   }
