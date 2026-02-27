@@ -23,7 +23,7 @@ export type HandleConfig = {
 
 interface NodeLayoutProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground";
+  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground" | "group";
   textEditor?: any; // Tiptap editor instance
   selected?: boolean;
   className?: string;
