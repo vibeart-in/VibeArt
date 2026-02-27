@@ -1,5 +1,11 @@
 "use client";
 
+
+import { useRouter } from "next/navigation";
+import { Plus, Search, LayoutGrid, List, MoreHorizontal } from "lucide-react";
+import { useState, useTransition, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+
 import {
   Plus,
   Search,
@@ -26,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+
 import {
   Dialog,
   DialogContent,
@@ -35,9 +42,16 @@ import {
   DialogTitle,
 } from "../ui/dotted-dialog";
 import { Label } from "../ui/label";
+
+import { Button } from "../ui/button";
+import { createCanvas } from "@/src/actions/canvas";
+import { formatDistanceToNow } from "date-fns";
+import { TemplatesSection } from "./TemplatesSection";
+
 import AnimatedGradientBackground from "../ui/animated-gradient-background";
 import { BackgroundPlus } from "../ui/BackgroundPlus";
 import { Input } from "../ui/input";
+
 
 interface Project {
   id: string;
@@ -48,7 +62,9 @@ interface Project {
 
 interface CanvasDashboardProps {
   initialProjects: Project[];
+  templates?: any[];
 }
+
 
 export default function CanvasDashboard({ initialProjects }: CanvasDashboardProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
@@ -57,6 +73,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
   useEffect(() => {
     setProjects(initialProjects);
   }, [initialProjects]);
+
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isPending, startTransition] = useTransition();
@@ -69,6 +86,14 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [newCanvasTitle, setNewCanvasTitle] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleNewCanvas = () => {
     setNewCanvasTitle("");
@@ -147,6 +172,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
   };
 
   return (
+
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white selection:bg-purple-500/30">
       <AnimatedGradientBackground
         gradientColors={["#000000", "#1c1c1c", "#111111", "#050505", "#0a0a0a",  "#050505", "#0a0a0a"]}
@@ -213,10 +239,16 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
                 {/* Abstract shape or decoration could go here */}
               </div>
             </div>
+
           </div>
         </motion.div>
 
+        {/* Templates Section */}
+        {templates && templates.length > 0 && <TemplatesSection templates={templates} />}
+
+       
         {/* Toolbar */}
+
         <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex w-full items-center gap-1 rounded-2xl border border-white/10 bg-black/40 p-1.5 backdrop-blur-xl md:w-auto">
             {["Projects", "Apps", "Templates"].map((tab) => (
@@ -232,6 +264,7 @@ export default function CanvasDashboard({ initialProjects }: CanvasDashboardProp
               </button>
             ))}
           </div>
+
 
           <div className="flex w-full items-center gap-4 md:w-auto">
             <div className="group relative flex-1 md:w-80">

@@ -212,6 +212,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
       const mainNodeId = crypto.randomUUID();
       outputNodeIds[mainImageIndex] = mainNodeId;
 
+
       // Determine node type based on output format
       const isVideo = isVideoOutput(mainImage.image_url);
       
@@ -222,6 +223,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         data: {
           imageUrl: mainImage.image_url,
           videoUrl: isVideo ? mainImage.image_url : undefined,
+
           width: mainImage.width,
           height: mainImage.height,
         },
@@ -255,10 +257,15 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         }
         outputNodeIds[originalIndex] = newNodeId;
 
+
         const colIndex = relativeIndex % 4;
         const rowIndex = Math.floor(relativeIndex / 4);
         const xOffset = colIndex * (OUTPUT_NODE_WIDTH + GRID_GAP);
         const yOffset = rowIndex * (450 + GRID_GAP); // Increased row height for better spacing
+
+        const xPos = otherStartX + xOffset;
+        const yPos = currentY + yOffset;
+
 
         // Determine node type for other outputs
         const isOtherVideo = isVideoOutput(img.image_url);
@@ -554,6 +561,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                           <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                             Model Connected
                           </span>
+
                         </div>
                         <div className="absolute bottom-3 left-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[10px] font-bold text-green-400 backdrop-blur-md">
                           Ready
@@ -628,6 +636,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                       className="opacity-40 transition-opacity group-hover:opacity-100"
                     />
                   </div>
+
                   <div className="flex flex-col">
                     <p className="text-[15px] font-bold text-zinc-300 transition-colors group-hover:text-white">
                       Connect input image

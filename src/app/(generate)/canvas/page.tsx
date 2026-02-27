@@ -1,11 +1,16 @@
+
+import { getCanvasProjects, getPublicTemplates } from "@/src/actions/canvas";
+import CanvasDashboard from "@/src/components/canvas/CanvasDashboard";
+
 import { formatDistanceToNow } from "date-fns";
 
-import { getCanvasProjects } from "@/src/actions/canvas";
-import CanvasDashboard from "@/src/components/canvas/CanvasDashboard";
 import { CanvasProject } from "@/src/types/BaseType";
 
 export default async function Page() {
-  const projectsData = await getCanvasProjects();
+  const [projectsData, templatesData] = await Promise.all([
+    getCanvasProjects(),
+    getPublicTemplates(),
+  ]);
 
   const formattedProjects = projectsData.map((p: CanvasProject) => ({
     id: p.id,
@@ -17,5 +22,5 @@ export default async function Page() {
         : "",
   }));
 
-  return <CanvasDashboard initialProjects={formattedProjects} />;
+  return <CanvasDashboard initialProjects={formattedProjects} templates={templatesData} />;
 }

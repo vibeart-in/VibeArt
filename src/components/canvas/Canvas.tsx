@@ -34,12 +34,21 @@ import { edgeTypes } from "./edges/EdgeTypes";
 import { useCanvas } from "../providers/CanvasProvider";
 import { nodeTypes } from "./nodes/Nodetypes";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
+
+import { DevTools } from "../devtools";
+import { toJpeg } from "html-to-image";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
+import { CanvasContextMenu } from "./CanvasContextMenu";
+
 import { NodeOperationsProvider } from "../providers/NodeProvider";
 
 
+>>>>>>> canvasdeploy
 
 function CanvasInner({ children, ...props }: ReactFlowProps) {
-  const { project, setIsDraggingEdge } = useCanvas();
+  const { project, setIsDraggingEdge, isReadOnly } = useCanvas();
   const {
     onConnect,
     onConnectStart,
@@ -77,7 +86,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   useCanvasJobOrchestrator(project?.id ?? "");
 
   const save = useDebouncedCallback(async () => {
-    if (saveState.isSaving || !project?.user_id || !project?.id) {
+    if (isReadOnly || saveState.isSaving || !project?.user_id || !project?.id) {
       return;
     }
 
@@ -102,7 +111,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   }, 5000);
 
   const saveThumbnail = useDebouncedCallback(async () => {
-    if (!project?.id || nodes.length === 0) return;
+    if (isReadOnly || !project?.id || nodes.length === 0) return;
 
     try {
       const nodesBounds = getNodesBounds(nodes);
@@ -336,25 +345,31 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   return (
     <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
       <NodeDropzoneProvider>
-        <CanvasContextMenu addNode={addNode} onGroupSelection={groupSelection}>
+
+        <CanvasContextMenu addNode={addNode} isReadOnly={isReadOnly}>
+
           <ReactFlow
-            deleteKeyCode={["Backspace", "Delete"]}
+            deleteKeyCode={isReadOnly ? [] : ["Backspace", "Delete"]}
             edges={edges}
             edgeTypes={edgeTypes}
             fitView
             // isValidConnection={isValidConnection}
             nodes={nodes}
             nodeTypes={nodeTypes}
-            onConnect={handleConnect}
-            onConnectStart={handleConnectStart}
-            onConnectEnd={handleConnectEnd}
-            onEdgesChange={handleEdgesChange}
-            onNodesChange={handleNodesChange}
-            onNodeDragStart={onNodeDragStart}
-            onNodeDrag={onNodeDrag}
-            onNodeDragStop={onNodeDragStop}
+
+            onConnect={isReadOnly ? undefined : handleConnect}
+            onConnectStart={isReadOnly ? undefined : handleConnectStart}
+            onConnectEnd={isReadOnly ? undefined : handleConnectEnd}
+            onEdgesChange={isReadOnly ? undefined : handleEdgesChange}
+            onNodesChange={isReadOnly ? undefined : handleNodesChange}
+            nodesDraggable={!isReadOnly}
+            nodesConnectable={!isReadOnly}
+            nodesFocusable={!isReadOnly}
+            edgesFocusable={!isReadOnly}
+            elementsSelectable={true}
+
             // panOnScroll
-            selectionOnDrag={true}
+            selectionOnDrag={!isReadOnly}
             colorMode="dark"
             proOptions={{ hideAttribution: true }}
             // snapToGrid={true}
@@ -393,20 +408,6 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
       </NodeDropzoneProvider>
     </NodeOperationsProvider>
   );
-}
-
-function checkIntersection(n1: Node, n2: Node) {
-  const n1w = n1.measured?.width ?? n1.width ?? 0;
-  const n1h = n1.measured?.height ?? n1.height ?? 0;
-  const n2w = n2.measured?.width ?? n2.width ?? 0;
-  const n2h = n2.measured?.height ?? n2.height ?? 0;
-
-  const n1x = n1.position.x;
-  const n1y = n1.position.y;
-  const n2x = n2.position.x;
-  const n2y = n2.position.y;
-
-  return n1x + n1w > n2x && n1x < n2x + n2w && n1y + n1h > n2y && n1y < n2y + n2h;
 }
 
 export default function Canvas(props: ReactFlowProps) {

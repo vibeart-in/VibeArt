@@ -33,10 +33,12 @@ import {
 interface CanvasContextMenuProps {
   children: ReactNode;
   addNode: (type: string, options?: Record<string, unknown>) => string;
-  onGroupSelection?: () => void;
+
+  isReadOnly?: boolean;
 }
 
-export function CanvasContextMenu({ children, addNode, onGroupSelection }: CanvasContextMenuProps) {
+export function CanvasContextMenu({ children, addNode, isReadOnly = false }: CanvasContextMenuProps) {
+
   const { screenToFlowPosition } = useReactFlow();
   const [location, setLocation] = useState({ x: 0, y: 0 });
   const [search, setSearch] = useState("");
@@ -211,6 +213,11 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
     if (!search) return [];
     return allItems.filter((item) => item.label.toLowerCase().includes(search.toLowerCase()));
   }, [search, allItems]);
+
+  // If read-only mode, just return children without context menu
+  if (isReadOnly) {
+    return <>{children}</>;
+  }
 
   return (
     <ContextMenu>
