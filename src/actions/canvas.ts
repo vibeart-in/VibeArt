@@ -63,7 +63,46 @@ export async function getCanvasProjects(): Promise<CanvasProject[]> {
   return data as unknown as CanvasProject[];
 }
 
-export async function updateCanvas(id: string, updates: { title?: string }) {
+export async function publishCanvas(id: string, publish: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("User not authenticated");
+
+  const { error } = await supabase
+    .from("canvas")
+    .update({ is_public: publish } as any)
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error publishing canvas:", error);
+    throw new Error("Failed to publish canvas");
+  }
+
+  revalidatePath("/canvas");
+}
+
+export async function getPublishedCanvases() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("canvas")
+    .select(`id, title, updated_at, user_id, image:images(*)`)
+    .eq("is_public", true)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching published canvases:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+export async function updateCanvas(id: string, updates: { title?: string; is_public?: boolean }) {
   const supabase = await createClient();
   const {
     data: { user },

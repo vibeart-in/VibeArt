@@ -1,11 +1,18 @@
 import { formatDistanceToNow } from "date-fns";
 
-import { getCanvasProjects } from "@/src/actions/canvas";
+import { getCanvasProjects, getPublishedCanvases } from "@/src/actions/canvas";
 import CanvasDashboard from "@/src/components/canvas/CanvasDashboard";
 import { CanvasProject } from "@/src/types/BaseType";
+import { createClient } from "@/src/lib/supabase/server";
 
 export default async function Page() {
-  const projectsData = await getCanvasProjects();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [projectsData, publishedData] = await Promise.all([
+    getCanvasProjects(),
+    getPublishedCanvases(),
+  ]);
 
   const formattedProjects = projectsData.map((p: CanvasProject) => ({
     id: p.id,
@@ -17,5 +24,11 @@ export default async function Page() {
         : "",
   }));
 
-  return <CanvasDashboard initialProjects={formattedProjects} />;
+  return (
+    <CanvasDashboard
+      initialProjects={formattedProjects}
+      publishedProjects={publishedData as any}
+      currentUserId={user?.id}
+    />
+  );
 }

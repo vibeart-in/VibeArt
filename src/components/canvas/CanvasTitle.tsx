@@ -1,10 +1,10 @@
 "use client";
 
-import { Check, X, Edit2 } from "lucide-react";
+import { Check, X, Globe, Eye } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
-import { updateCanvas } from "@/src/actions/canvas";
+import { updateCanvas, publishCanvas } from "@/src/actions/canvas";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { PencilSimple } from "@phosphor-icons/react";
@@ -13,12 +13,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 interface CanvasTitleProps {
   initialTitle: string;
   projectId: string;
+  initialIsPublic?: boolean;
+  isReadOnly?: boolean;
 }
 
-export function CanvasTitle({ initialTitle, projectId }: CanvasTitleProps) {
+export function CanvasTitle({ initialTitle, projectId, initialIsPublic = false, isReadOnly = false }: CanvasTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(initialIsPublic);
+  const [isPublishing, setIsPublishing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,6 +65,21 @@ export function CanvasTitle({ initialTitle, projectId }: CanvasTitleProps) {
     }
   };
 
+  const handleTogglePublish = async () => {
+    setIsPublishing(true);
+    try {
+      const next = !isPublic;
+      await publishCanvas(projectId, next);
+      setIsPublic(next);
+      toast.success(next ? "Canvas published to Community!" : "Canvas unpublished.");
+    } catch (error) {
+      console.error("Failed to publish canvas", error);
+      toast.error("Failed to update publish status");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   if (isEditing) {
     return (
       <div className="flex items-center gap-1">
@@ -97,20 +116,51 @@ export function CanvasTitle({ initialTitle, projectId }: CanvasTitleProps) {
   return (
     <div className="group flex items-center gap-2">
       <h1 className="text-lg font-semibold text-white">{title || "Untitled Project"}</h1>
-      <button
-        onClick={() => setIsEditing(true)}
-        className=""
-      >
-        
-       <Tooltip>
-  <TooltipTrigger asChild>
-    <PencilSimple weight="fill" className="size-4 text-[#cafd00] cursor-pointer" />
-  </TooltipTrigger>
-  <TooltipContent>
-    <p>Edit</p>
-  </TooltipContent>
-</Tooltip>
-      </button>
+
+      {isReadOnly && (
+        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/40 px-2.5 py-0.5 text-xs font-medium text-neutral-400 backdrop-blur-md">
+          <Eye className="size-3" /> View Only
+        </span>
+      )}
+
+      {/* Edit button */}
+      {!isReadOnly && (
+        <button onClick={() => setIsEditing(true)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PencilSimple weight="fill" className="size-4 text-[#cafd00] cursor-pointer" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Rename</p>
+            </TooltipContent>
+          </Tooltip>
+        </button>
+      )}
+
+      {/* Publish button */}
+      {!isReadOnly && (
+        <button onClick={handleTogglePublish} disabled={isPublishing}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Globe
+                  className={`size-5 cursor-pointer transition-all ${
+                    isPublishing
+                      ? "opacity-50"
+                      : isPublic
+                        ? "text-red-400 hover:text-red-300"
+                        : "text-white/90 hover:text-white/70"
+                  }`}
+                  style={{ fill: isPublic ? "none" : "none", color: isPublic ? "red" : "green" }}
+                />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isPublic ? "Published — click to unpublish" : "Publish to Community"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </button>
+      )}
     </div>
   );
 }

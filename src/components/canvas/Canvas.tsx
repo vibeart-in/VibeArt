@@ -38,7 +38,7 @@ import { NodeOperationsProvider } from "../providers/NodeProvider";
 
 
 
-function CanvasInner({ children, ...props }: ReactFlowProps) {
+function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOnly?: boolean }) {
   const { project, setIsDraggingEdge } = useCanvas();
   const {
     onConnect,
@@ -77,7 +77,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   useCanvasJobOrchestrator(project?.id ?? "");
 
   const save = useDebouncedCallback(async () => {
-    if (saveState.isSaving || !project?.user_id || !project?.id) {
+    if (readOnly || saveState.isSaving || !project?.user_id || !project?.id) {
       return;
     }
 
@@ -102,7 +102,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
   }, 5000);
 
   const saveThumbnail = useDebouncedCallback(async () => {
-    if (!project?.id || nodes.length === 0) return;
+    if (readOnly || !project?.id || nodes.length === 0) return;
 
     try {
       const nodesBounds = getNodesBounds(nodes);
@@ -321,7 +321,7 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
     if (typeof window === "undefined") return;
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || readOnly) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault();
@@ -359,7 +359,10 @@ function CanvasInner({ children, ...props }: ReactFlowProps) {
             onNodeDrag={onNodeDrag}
             onNodeDragStop={onNodeDragStop}
             // panOnScroll
-            selectionOnDrag={true}
+            selectionOnDrag={!readOnly}
+            nodesDraggable={!readOnly}
+            nodesConnectable={!readOnly}
+            elementsSelectable={!readOnly}
             colorMode="dark"
             proOptions={{ hideAttribution: true }}
             // snapToGrid={true}
@@ -414,10 +417,10 @@ function checkIntersection(n1: Node, n2: Node) {
   return n1x + n1w > n2x && n1x < n2x + n2w && n1y + n1h > n2y && n1y < n2y + n2h;
 }
 
-export default function Canvas(props: ReactFlowProps) {
+export default function Canvas({ readOnly, ...props }: ReactFlowProps & { readOnly?: boolean }) {
   return (
     <ReactFlowProvider>
-      <CanvasInner {...props} />
+      <CanvasInner readOnly={readOnly} {...props} />
     </ReactFlowProvider>
   );
 }

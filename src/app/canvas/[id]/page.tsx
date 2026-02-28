@@ -32,11 +32,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   }
 
   const project = data as unknown as CanvasProject;
+  console.log(project);
+  const isReadOnly = project.user_id !== user.id;
 
   return (
     <div className="h-screen w-screen">
       <CanvasProvider project={project}>
-        <Canvas>
+        <Canvas readOnly={isReadOnly}>
           {/* <SideToolbar /> */}
           <Panel
             position="top-left"
@@ -44,7 +46,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           >
             <NavbarLogo className="!mr-0 !pr-0" />
             <span className="text-white/50">/</span>
-            <CanvasTitle initialTitle={project.title ?? "Untitled Project"} projectId={project.id} />
+            <CanvasTitle 
+              initialTitle={project.title ?? "Untitled Project"} 
+              projectId={project.id} 
+              initialIsPublic={!!(project as any).is_public} 
+              isReadOnly={isReadOnly}
+            />
           </Panel>
           <Panel position="top-right" className="rounded-3xl bg-black/50 p-3 backdrop-blur-md">
             <UserSectionClient />
