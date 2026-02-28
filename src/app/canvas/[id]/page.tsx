@@ -44,7 +44,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             position="top-left"
             className="flex items-center gap-2 rounded-3xl bg-black/50 px-4 py-2 backdrop-blur-md"
           >
-            <NavbarLogo className="!mr-0 !pr-0" />
+            <NavbarLogo href="/canvas" className="!mr-0 !pr-0" />
             <span className="text-white/50">/</span>
             <CanvasTitle 
               initialTitle={project.title ?? "Untitled Project"} 

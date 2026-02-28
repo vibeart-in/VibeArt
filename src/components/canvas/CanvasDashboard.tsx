@@ -206,8 +206,9 @@ export default function CanvasDashboard({
           className="relative mb-16 overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/30 p-8 backdrop-blur-2xl md:p-16"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5" />
+          <div className="absolute inset-0 ml-60 bg-[url('https://i.pinimg.com/1200x/c1/c4/dc/c1c4dc5e235f85579f4d51abc05a7259.jpg')] bg-cover bg-right opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 grayscale" />
-
           <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
@@ -216,9 +217,9 @@ export default function CanvasDashboard({
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
+                <h1 className="font-satoshi text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
                   Where Ideas <br />
-                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-accent to-white bg-clip-text text-transparent">
                     Come Alive
                   </span>
                 </h1>
@@ -249,10 +250,6 @@ export default function CanvasDashboard({
                 </button>
               </div>
             </div>
-
-            <div className="relative hidden w-full justify-end lg:flex">
-              <div className="relative aspect-square w-96 rounded-full bg-gradient-to-tr from-purple-500/20 to-blue-500/20 blur-3xl filter" />
-            </div>
           </div>
         </motion.div>
 
@@ -277,7 +274,7 @@ export default function CanvasDashboard({
 
           <div className="flex w-full items-center gap-4 md:w-auto">
             <div className="group relative flex-1 md:w-80">
-              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-purple-400" />
+              <Search className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-purple-400" />
               <Input
                 type="text"
                 value={searchQuery}
@@ -469,7 +466,7 @@ export default function CanvasDashboard({
               />
             </div>
 
-            <div className="grid gap-2">
+            {/* <div className="grid gap-2">
               <Label htmlFor="desc" className="text-neutral-300">
                 Description <span className="text-neutral-600">(Optional)</span>
               </Label>
@@ -478,7 +475,7 @@ export default function CanvasDashboard({
                 placeholder="What are you building today?"
                 className="border-white/10 bg-black/50 text-white placeholder:text-neutral-600 focus:border-purple-500/50 focus:bg-black/80 focus:ring-0"
               />
-            </div>
+            </div> */}
 
             <div className="grid gap-2">
               <Label htmlFor="visibility" className="text-neutral-300">

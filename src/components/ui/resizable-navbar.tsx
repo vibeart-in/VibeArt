@@ -254,10 +254,10 @@ export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick:
   );
 };
 
-export const NavbarLogo = ({ className }: { className?: string }) => {
+export const NavbarLogo = ({ className, href }: { className?: string; href?: string }) => {
   return (
     <Link
-      href="/"
+      href={href || "/"}
       className={cn(
         "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black",
         className,
@@ -271,7 +271,6 @@ export const NavbarLogo = ({ className }: { className?: string }) => {
     </Link>
   );
 };
-
 export const NavbarButton = ({
   href,
   children,

@@ -55,6 +55,7 @@ const EXPLICIT_IMAGE_PARAMS = new Set([
   "image_input",
   "image input",
   "input_image",
+  "input_images",
   "style reference images",
   "style_reference_images",
   "image",
@@ -367,7 +368,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           <img
             src={data.imageUrl}
             alt={data.prompt || "Generated Image"}
-            className="h-full w-full rounded-3xl object-fit"
+            className="object-fit h-full w-full rounded-3xl"
             draggable={false}
           />
         ) : (

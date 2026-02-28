@@ -17,9 +17,10 @@ import {
   MarkerType,
 } from "@xyflow/react";
 import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
-import { toJpeg, toPng } from "html-to-image";
+import { toJpeg } from "html-to-image";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { toast } from "sonner"; // Added for toast notifications
 
 import "@xyflow/react/dist/style.css";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
@@ -46,6 +47,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     onConnectEnd,
     onEdgesChange,
     onNodesChange,
+    onNodeDragStart, // Intercepting this below
     nodes: initialNodes,
     edges: initialEdges,
     ...rest
@@ -59,10 +61,13 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(
     initialEdges ?? content?.edges ?? [],
   );
-  
-  const { onNodeDragStart, onNodeDrag, onNodeDragStop, copySelection, pasteSelection, groupSelection } = useSmartGrouping(setNodes, setEdges);
 
-  const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
+  const { onNodeDrag, onNodeDragStop, groupSelection } = useSmartGrouping(setNodes, setEdges);
+
+  // Replaced unused 'copiedNodes' state with a clipboardRef to avoid stale closures
+  const clipboardRef = useRef<{ nodes: Node[]; edges: Edge[] }>({ nodes: [], edges: [] });
+  const mousePosRef = useRef({ x: 0, y: 0 });
+
   const [saveState, setSaveState] = useState<{
     isSaving: boolean;
     lastSaved: Date | null;
@@ -75,6 +80,15 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     useReactFlow();
 
   useCanvasJobOrchestrator(project?.id ?? "");
+
+  // Track global mouse position for pasting at cursor
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePosRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   const save = useDebouncedCallback(async () => {
     if (readOnly || saveState.isSaving || !project?.user_id || !project?.id) {
@@ -106,7 +120,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
     try {
       const nodesBounds = getNodesBounds(nodes);
-      // 1. Reduce resolution (1280x720 is plenty for a thumbnail)
       const imageWidth = 1920;
       const imageHeight = 1080;
 
@@ -128,19 +141,8 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
         },
       });
 
-      console.log("NEW THUMBNAIL");
-      console.log(
-        "%c ",
-        `
-        font-size: 1px;
-        padding: 300px 400px;
-        background: url(${dataUrl}) no-repeat;
-        background-size: contain;
-        `,
-      );
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      // 3. Change filename to .jpg
       const file = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
 
       const formData = new FormData();
@@ -157,13 +159,11 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
         });
       }
       significantChangesRef.current = 0;
-      console.log("Thumbnail updated after significant changes");
     } catch (e) {
       console.error("Failed to generate thumbnail", e);
     }
   }, 5000);
 
-  // 4. Create a helper to track changes
   const trackChange = useCallback(
     (count = 1) => {
       significantChangesRef.current += count;
@@ -190,7 +190,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
       setNodes((nds) => nds.concat(newNode));
 
-      trackChange(1); // Increment counter
+      trackChange(1);
       save();
       return newNode.id;
     },
@@ -219,27 +219,104 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
       setTimeout(() => {
         updateNode(id, { selected: false });
         updateNode(newId, { selected: true });
+        toast.success("Node duplicated");
       }, 0);
     },
     [addNode, getNode, updateNode],
   );
 
+  // --- NEW: Copy logic ---
+  const handleCopy = useCallback(() => {
+    const selectedNodes = getNodes().filter((n) => n.selected);
+    if (selectedNodes.length === 0) return;
+
+    const selectedIds = new Set(selectedNodes.map((n) => n.id));
+    const selectedEdges = getEdges().filter(
+      (e) => selectedIds.has(e.source) && selectedIds.has(e.target),
+    );
+
+    clipboardRef.current = { nodes: selectedNodes, edges: selectedEdges };
+    toast.success(`Copied ${selectedNodes.length} node(s)`);
+  }, [getNodes, getEdges]);
+
+  // --- NEW: Paste at cursor logic ---
+  const handlePaste = useCallback(() => {
+    const { nodes: clipNodes, edges: clipEdges } = clipboardRef.current;
+    if (clipNodes.length === 0) return;
+
+    const clipNodeIds = new Set(clipNodes.map((n) => n.id));
+    // Determine top-level copied nodes to calculate accurate bounding box constraints
+    const topLevelNodes = clipNodes.filter((n) => !n.parentId || !clipNodeIds.has(n.parentId));
+
+    const minX = Math.min(...topLevelNodes.map((n) => n.position.x));
+    const minY = Math.min(...topLevelNodes.map((n) => n.position.y));
+
+    // Convert exact mouse window coordinates to flow coordinates
+    const projectedPosition = screenToFlowPosition({
+      x: mousePosRef.current.x,
+      y: mousePosRef.current.y,
+    });
+
+    const newIds = new Map<string, string>();
+    const newNodes = clipNodes.map((node) => {
+      const newId = crypto.randomUUID();
+      newIds.set(node.id, newId);
+
+      const parentId =
+        node.parentId && clipNodeIds.has(node.parentId)
+          ? newIds.get(node.parentId) // Wait until we map parent IDs correctly
+          : undefined;
+
+      // Only move top-level nodes to cursor. Children maintain relative positions.
+      const newPosition = parentId
+        ? { ...node.position }
+        : {
+            x: projectedPosition.x + (node.position.x - minX),
+            y: projectedPosition.y + (node.position.y - minY),
+          };
+
+      return {
+        ...node,
+        id: newId,
+        position: newPosition,
+        parentId,
+        selected: true,
+      };
+    });
+
+    // Fix forward references in parentIds if children were processed before parents
+    newNodes.forEach((node, index) => {
+      const originalNode = clipNodes[index];
+      if (originalNode.parentId && clipNodeIds.has(originalNode.parentId)) {
+        node.parentId = newIds.get(originalNode.parentId);
+      }
+    });
+
+    const newEdges = clipEdges.map((edge) => ({
+      ...edge,
+      id: crypto.randomUUID(),
+      source: newIds.get(edge.source)!,
+      target: newIds.get(edge.target)!,
+      selected: true,
+    }));
+
+    setNodes((nds) => nds.map((n) => ({ ...n, selected: false })).concat(newNodes));
+    setEdges((eds) => eds.map((e) => ({ ...e, selected: false })).concat(newEdges));
+
+    toast.success(`Pasted ${newNodes.length} node(s)`);
+    trackChange(newNodes.length);
+    save();
+  }, [screenToFlowPosition, setNodes, setEdges, trackChange, save]);
+
   const handleConnect = useCallback<OnConnect>(
     (connection) => {
       const sourceNode = getNode(connection.source);
-      const targetNode = getNode(connection.target);
-
       let edgeColor = "#4b5563"; // Default color
 
-      if (sourceNode?.type === "presets") {
-        edgeColor = "#ef4444"; // Red
-      } else if (sourceNode?.type === "style") {
-        edgeColor = "#22c55e"; // Green
-      } else if (sourceNode?.type === "lora") {
-        edgeColor = "#8b5cf6"; // Violet
-      } else if (sourceNode?.type === "checkpoint") {
-        edgeColor = "#3b82f6"; // Blue
-      }
+      if (sourceNode?.type === "presets") edgeColor = "#ef4444";
+      else if (sourceNode?.type === "style") edgeColor = "#22c55e";
+      else if (sourceNode?.type === "lora") edgeColor = "#8b5cf6";
+      else if (sourceNode?.type === "checkpoint") edgeColor = "#3b82f6";
 
       const newEdge: Edge = {
         id: crypto.randomUUID(),
@@ -255,7 +332,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
   );
 
   const handleConnectStart = useCallback<OnConnectStart>(() => {
-    // Delete any drop nodes when starting to drag a node
     setNodes((nds: Node[]) => nds.filter((n: Node) => n.type !== "drop"));
     setEdges((eds: Edge[]) => eds.filter((e: Edge) => e.type !== "temporary"));
     setIsDraggingEdge(true);
@@ -264,25 +340,18 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
   const handleConnectEnd = useCallback<OnConnectEnd>(
     (event, connectionState) => {
-      // when a connection is dropped on the pane it's not valid
       setIsDraggingEdge(false);
 
       if (!connectionState.isValid) {
-        // we need to remove the wrapper bounds, in order to get the correct position
         const { clientX, clientY } = "changedTouches" in event ? event.changedTouches[0] : event;
-
         const sourceId = connectionState.fromNode?.id;
         const isSourceHandle = connectionState.fromHandle?.type === "source";
 
-        if (!sourceId) {
-          return;
-        }
+        if (!sourceId) return;
 
         const newNodeId = addNode("drop", {
           position: screenToFlowPosition({ x: clientX, y: clientY }),
-          data: {
-            isSource: !isSourceHandle,
-          },
+          data: { isSource: !isSourceHandle },
         });
 
         setEdges((eds: Edge[]) =>
@@ -316,6 +385,51 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     [save, onNodesChange, onNodesChangeInternal],
   );
 
+  // --- NEW: Alt + Drag Duplication Interceptor ---
+  const handleNodeDragStartCustom = useCallback(
+    (event: React.MouseEvent, node: Node, nodesToDrag: Node[]) => {
+      if (event.altKey) {
+        // Create exact copies left behind unselected (user drags current ones away)
+        const draggedIds = new Set(nodesToDrag.map((n) => n.id));
+        const duplicatedIds = new Map(nodesToDrag.map((n) => [n.id, crypto.randomUUID()]));
+
+        const duplicatedNodes = nodesToDrag.map((n) => {
+          const parentId =
+            n.parentId && draggedIds.has(n.parentId) ? duplicatedIds.get(n.parentId) : n.parentId; // Keeps as child if only child is duplicated
+
+          return {
+            ...n,
+            id: duplicatedIds.get(n.id)!,
+            parentId,
+            selected: false,
+          };
+        });
+
+        // Also duplicate internal edges within dragged components
+        const edgesToDuplicate = getEdges().filter(
+          (e) => draggedIds.has(e.source) && draggedIds.has(e.target),
+        );
+        const duplicatedEdges = edgesToDuplicate.map((e) => ({
+          ...e,
+          id: crypto.randomUUID(),
+          source: duplicatedIds.get(e.source)!,
+          target: duplicatedIds.get(e.target)!,
+          selected: false,
+        }));
+
+        setNodes((nds) => nds.concat(duplicatedNodes));
+        setEdges((eds) => eds.concat(duplicatedEdges));
+
+        toast.success(`Duplicated ${nodesToDrag.length} node(s)`);
+        trackChange(duplicatedNodes.length);
+        save();
+      }
+
+      onNodeDragStart?.(event, node, nodesToDrag);
+    },
+    [getEdges, setNodes, setEdges, trackChange, save, onNodeDragStart],
+  );
+
   // Keyboard listeners for Copy/Paste
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -325,16 +439,16 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault();
-        copySelection();
+        handleCopy();
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault();
-        pasteSelection();
+        handlePaste();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copySelection, pasteSelection]);
+  }, [handleCopy, handlePaste]);
 
   const nodeOpsValue = useMemo(() => ({ addNode, duplicateNode }), [addNode, duplicateNode]);
 
@@ -347,7 +461,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             edges={edges}
             edgeTypes={edgeTypes}
             fitView
-            // isValidConnection={isValidConnection}
             nodes={nodes}
             nodeTypes={nodeTypes}
             onConnect={handleConnect}
@@ -355,7 +468,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             onConnectEnd={handleConnectEnd}
             onEdgesChange={handleEdgesChange}
             onNodesChange={handleNodesChange}
-            onNodeDragStart={onNodeDragStart}
+            onNodeDragStart={handleNodeDragStartCustom}
             onNodeDrag={onNodeDrag}
             onNodeDragStop={onNodeDragStop}
             // panOnScroll
@@ -365,26 +478,14 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             elementsSelectable={!readOnly}
             colorMode="dark"
             proOptions={{ hideAttribution: true }}
-            // snapToGrid={true}
-            // snapGrid={[42, 42]}
             minZoom={0.1}
             maxZoom={10}
             defaultEdgeOptions={{
-              style: {
-                stroke: "#4b5563",
-                strokeWidth: 2,
-              },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-                color: "#4b5563",
-              },
+              style: { stroke: "#4b5563", strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "#4b5563" },
             }}
-            connectionLineStyle={{
-              stroke: "#DFFF00",
-              strokeWidth: 4,
-            }}
+            connectionLineStyle={{ stroke: "#DFFF00", strokeWidth: 4 }}
             connectionLineContainerStyle={{ zIndex: 0 }}
-            // {...rest}
           >
             <CustomControls
               nodes={nodes}
