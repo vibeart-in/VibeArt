@@ -2,7 +2,7 @@
 import { cn } from "@/src/lib/utils";
 import { useMotionValue, animate, motion } from "framer-motion";
 import { useState, useEffect } from "react";
-
+import useMeasure from "react-use-measure";
 
 type InfiniteSliderProps = {
   children: React.ReactNode;
@@ -75,7 +75,7 @@ export function InfiniteSlider({
     : {};
 
   return (
-    <div className={cn  ("overflow-hidden", className)}>
+    <div className={cn("overflow-hidden", className)}>
       <motion.div
         className="flex w-max"
         style={{

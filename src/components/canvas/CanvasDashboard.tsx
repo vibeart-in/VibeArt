@@ -12,7 +12,6 @@ import {
   Trash2,
   Globe,
   Eye,
-  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
@@ -65,13 +64,14 @@ const STATIC_TEMPLATES = [
   {
     id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
     title: "tvk",
-    image: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
     user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
     category: "Template",
   },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ──────────────────────────────────────
 
 interface CanvasDashboardProps {
   initialProjects: Project[];
@@ -191,12 +191,6 @@ export default function CanvasDashboard({
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white selection:bg-purple-500/30">
-      <AnimatedGradientBackground
-        gradientColors={["#000000", "#1c1c1c", "#111111", "#050505", "#0a0a0a", "#050505", "#0a0a0a"]}
-        animationSpeed={0.005}
-        containerClassName="opacity-40"
-      />
-
       <div className="relative z-10 mx-auto max-w-[1800px] p-6 pt-24 md:p-8 lg:p-12">
         {/* Hero Header */}
         <motion.div
@@ -208,12 +202,14 @@ export default function CanvasDashboard({
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5" />
           <div className="absolute inset-0 ml-60 bg-[url('https://i.pinimg.com/1200x/c1/c4/dc/c1c4dc5e235f85579f4d51abc05a7259.jpg')] bg-cover bg-right opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 grayscale" />
+          {/* <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 grayscale" /> */}
           <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
-                <Sparkles className="size-4 text-purple-400" />
-                <span className="text-sm font-medium text-purple-100">AI-Powered Infinity Canvas</span>
+                <Sparkles className="size-4 text-accent/80" />
+                <span className="text-sm font-medium text-accent/80">
+                  AI-Powered Infinity Canvas
+                </span>
               </div>
 
               <div className="space-y-4">
@@ -224,8 +220,8 @@ export default function CanvasDashboard({
                   </span>
                 </h1>
                 <p className="max-w-xl text-lg leading-relaxed text-neutral-400 md:text-xl">
-                  Nodes is the most powerful way to operate vibeArt. Connect every tool and model into
-                  complex automized pipelines. Create a new space and start collaborating.
+                  Nodes is the most powerful way to operate vibeArt. Connect every tool and model
+                  into complex automized pipelines. Create a new space and start collaborating.
                 </p>
               </div>
 
@@ -274,7 +270,7 @@ export default function CanvasDashboard({
 
           <div className="flex w-full items-center gap-4 md:w-auto">
             <div className="group relative flex-1 md:w-80">
-              <Search className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-purple-400" />
+              <Search className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-accent" />
               <Input
                 type="text"
                 value={searchQuery}
@@ -286,7 +282,7 @@ export default function CanvasDashboard({
                       ? "Search community..."
                       : "Search templates..."
                 }
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-neutral-200 transition-all placeholder:text-neutral-600 focus:border-purple-500/50 focus:bg-black/60 focus:outline-none focus:ring-4 focus:ring-purple-500/10"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-neutral-200 transition-all placeholder:text-neutral-600 focus:border-accent/50 focus:bg-black/60 focus:outline-none focus:ring-4 focus:ring-accent/10"
               />
             </div>
 
@@ -324,16 +320,16 @@ export default function CanvasDashboard({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
               onClick={handleNewCanvas}
-              className="group relative aspect-video cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-black/40 transition-all duration-300 hover:border-purple-500/50 hover:shadow-[0_0_30px_-10px_rgba(168,85,247,0.3)] hover:ring-2 hover:ring-purple-500/20"
+              className="group relative aspect-video cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-black/40 transition-all duration-300 hover:border-accent/50 hover:shadow-[0_0_30px_-10px_rgba(168,85,247,0.3)] hover:ring-2 hover:ring-accent/20"
             >
               <BackgroundPlus
                 className="opacity-20 transition-opacity duration-500 group-hover:opacity-40"
                 plusColor="#A855F7"
                 plusSize={40}
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-neutral-400 transition-colors group-hover:text-purple-300">
-                <div className="flex size-16 items-center justify-center rounded-full bg-white/5 shadow-inner backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-purple-500/20">
-                  <Plus className="size-8 transition-transform duration-300 group-hover:rotate-90 group-hover:text-purple-400" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-neutral-400 transition-colors group-hover:text-accent">
+                <div className="flex size-16 items-center justify-center rounded-full bg-white/5 shadow-inner backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/20">
+                  <Plus className="size-8 transition-transform duration-300 group-hover:rotate-90 group-hover:text-accent" />
                 </div>
                 <span className="font-medium tracking-wide">Create New Workflow</span>
               </div>
@@ -561,8 +557,8 @@ export default function CanvasDashboard({
             <DialogTitle className="text-xl text-white">Delete Canvas?</DialogTitle>
             <DialogDescription className="text-neutral-400">
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-white">{projectToDelete?.title}</span>? This action
-              cannot be undone.
+              <span className="font-semibold text-white">{projectToDelete?.title}</span>? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
@@ -573,7 +569,7 @@ export default function CanvasDashboard({
             >
               Cancel
             </Button>
-            <Button onClick={handleDeleteProject} disabled={isPending} className="  ">
+            <Button onClick={handleDeleteProject} disabled={isPending} className=" ">
               {isPending ? "Deleting..." : "Yes, Delete"}
             </Button>
           </DialogFooter>
