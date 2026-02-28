@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Edit2,
   Trash2,
   Globe,
@@ -16,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 
 import { createCanvas, updateCanvas, deleteCanvas } from "@/src/actions/canvas";
 
@@ -60,10 +61,76 @@ interface PublishedProject {
 
 // ─── Static Templates Data ─────────────────────────
 
+
+
 const STATIC_TEMPLATES = [
   {
     id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
     title: "tvk",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+    category: "Template",
+  },
+  {
+    id: "05925547-bf66-4072-a136-0456dcffbd1f",
+    title: "Branding demo",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+    category: "Template",
+  },
+  {
+    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
+    title: "summa",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+    category: "Template",
+  },
+  {
+    id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
+    title: "tvk",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+    category: "Template",
+  },
+  {
+    id: "05925547-bf66-4072-a136-0456dcffbd1f",
+    title: "Branding demo",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+    category: "Template",
+  },
+  {
+    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
+    title: "summa",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+    category: "Template",
+  },
+  {
+    id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
+    title: "tvk",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
+    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+    category: "Template",
+  },
+  {
+    id: "05925547-bf66-4072-a136-0456dcffbd1f",
+    title: "Branding demo",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+    category: "Template",
+  },
+  {
+    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
+    title: "summa",
     image:
       "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
     user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
@@ -105,6 +172,44 @@ export default function CanvasDashboard({
   const [newCanvasTitle, setNewCanvasTitle] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const scrollSlider = (direction: "left" | "right") => {
+    if (sliderRef.current) {
+      const scrollAmount = direction === "left" ? -400 : 400;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    let intervalId: NodeJS.Timeout;
+
+    const startScroll = () => {
+      intervalId = setInterval(() => {
+        if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+          slider.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          slider.scrollBy({ left: 400, behavior: "smooth" });
+        }
+      }, 3000);
+    };
+
+    const pauseScroll = () => clearInterval(intervalId);
+
+    startScroll();
+
+    slider.addEventListener("mouseenter", pauseScroll);
+    slider.addEventListener("mouseleave", startScroll);
+
+    return () => {
+      clearInterval(intervalId);
+      slider.removeEventListener("mouseenter", pauseScroll);
+      slider.removeEventListener("mouseleave", startScroll);
+    };
+  }, []);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
@@ -248,6 +353,58 @@ export default function CanvasDashboard({
             </div>
           </div>
         </motion.div>
+
+        {/* ── WORKFLOW LIBRARY SLIDER ── */}
+        <div className="mb-12" style={{backgroundColor:"#202020",padding:"25px 0px 25px 25px"}}>
+          <div className="mb-4 flex items-center gap-4">
+            <h2 className="text-xl font-bold text-white">Templates</h2>
+            <h2 className="text-xl font-medium text-neutral-500 hover:text-neutral-300 cursor-pointer transition-colors">
+              Tutorials
+            </h2>
+          </div>
+          <div className="relative group/slider -mx-6 md:-mx-8 lg:-mx-12 overflow-hidden px-6 md:px-8 lg:px-12">
+            
+            {/* Left Button */}
+            <button
+              onClick={() => scrollSlider("left")}
+              className="absolute left-10 lg:left-16 top-1/2 -translate-y-1/2 z-20 flex size-10 items-center justify-center rounded-xl bg-neutral-800 text-white opacity-0 transition-all hover:bg-neutral-700 shadow-xl border border-white/10 backdrop-blur-md group-hover/slider:opacity-100 disabled:opacity-0"
+            >
+              <ArrowLeft className="size-5" />
+            </button>
+
+            {/* Right Button */}
+            <button
+              onClick={() => scrollSlider("right")}
+              className="absolute right-10 lg:right-16 top-1/2 -translate-y-1/2 z-20 flex size-10 items-center justify-center rounded-xl bg-neutral-800 text-white transition-all hover:bg-neutral-700 shadow-xl border border-white/10 backdrop-blur-md disabled:opacity-0"
+            >
+              <ArrowRight className="size-5" />
+            </button>
+
+            <div 
+              ref={sliderRef}
+              className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {[...STATIC_TEMPLATES].map((item: any) => (
+                <div
+                  key={item.id}
+                  onClick={() => router.push(`/canvas/${item.id}`)}
+                  className="group relative h-48 w-72 cursor-pointer overflow-hidden rounded-2xl bg-neutral-800 transition-transform active:scale-95 flex-shrink-0 snap-center"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                    <span className="font-semibold text-white truncate max-w-[85%] text-sm">{item.title}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Toolbar */}
         <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
