@@ -4,31 +4,32 @@ import Script from "next/script";
 import LensCaveHero from "@/src/components/home/LensCaveHero";
 import HorizontalImageScroller from "@/src/components/landing/HorizontalImageScroller";
 import LensCaveCards from "@/src/components/home/LensCaveCards";
-import LensCaveLiveRooms from "@/src/components/home/LensCaveLiveRooms";
 import HomeFeatureCard from "@/src/components/home/HomeFeatureCard";
+import { ShowcaseClient } from "@/src/components/home/ShowcaseClient";
+import { createClient } from "@/src/lib/supabase/server";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "LensCave - Where your World meets your Network",
+  title: "VibeArt - AI Image & Video Generator",
   description:
-    "We enable the world's most engaged investors and family offices to access professionally managed investment strategies.",
-  keywords: ["LensCave", "Network", "Investment", "Social", "Connect"],
+    "VibeArt helps creators generate AI images and videos with the latest models like Wan2.2, Seedream-4, Veo3.1, and more.",
+  keywords: ["VibeArt", "AI Image Generator", "AI Video", "Stable Diffusion", "FLUX", "Nanobannan"],
   openGraph: {
-    title: "LensCave - Where your World meets your Network",
+    title: "VibeArt - AI Image & Video Generator",
     description:
-      "We enable the world's most engaged investors and family offices to access professionally managed investment strategies.",
+      "VibeArt helps creators generate AI images and videos with the latest models like Wan2.2, Seedream-4, Veo3.1, and more.",
     url: "https://vibeart.in/",
-    siteName: "LensCave",
+    siteName: "VibeArt",
     images: ["https://vibeart.in/opengraph-image.png"],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LensCave - Where your World meets your Network",
+    title: "VibeArt - AI Image & Video Generator",
     description:
-      "We enable the world's most engaged investors and family offices to access professionally managed investment strategies.",
+      "VibeArt helps creators generate AI images and videos with the latest models like Wan2.2, Seedream-4, Veo3.1, and more.",
     images: ["https://vibeart.in/opengraph-image.png"],
     creator: "@ametheshlgp",
   },
@@ -78,29 +79,66 @@ const sampleImages = [
 ];
 
 const Page = async () => {
+  const supabase = await createClient();
+
+  const { data: models, error } = await supabase
+    .from("showcaseimages")
+    .select("generated_by")
+    .order("generated_by", { ascending: true });
+
+  if (error || !models) {
+    return <p className="text-center text-white">Could not load model data.</p>;
+  }
+
+  const uniqueModelNames = [
+    ...new Set(models.map((m) => m.generated_by).filter((name): name is string => !!name)),
+  ];
+
   // ✅ Structured data (JSON-LD) for SEO + LLMs
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "LensCave",
-    description: "Where your World meets your Network.",
+    name: "AI Image & Video Generator",
+    description:
+      "VibeArt helps creators generate AI images and videos with the latest models like Wan2.2, Seedream-4, Veo3.1, and more.",
     url: "https://vibeart.in/",
+    mainEntity: {
+      "@type": "ItemList",
+      name: "Supported AI Models",
+      itemListElement: uniqueModelNames.map((model, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: model,
+      })),
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://vibeart.in/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
   };
 
   return (
     <main className="relative min-h-screen w-full overflow-x-hidden bg-black text-white">
-      {/* ✅ Structured data injection (invisible, SEO only) */}
+     
       <Script
         id="home-jsonld"
         type="application/ld+json"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <LensCaveHero />
       <HomeFeatureCard />
-      {/* <HorizontalImageScroller images={sampleImages} galleryHeight={450} /> */}
       <LensCaveCards />
-      {/* <LensCaveLiveRooms /> */}
+
+      <section className="relative mt-12">
+        <HorizontalImageScroller images={sampleImages} galleryHeight={450} />
+        <div className="flex flex-col gap-24">
+          {uniqueModelNames.length > 0 && <ShowcaseClient models={uniqueModelNames} />}
+        </div>
+      </section>
+      
     </main>
   );
 };
