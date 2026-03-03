@@ -469,7 +469,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
               isSaving={saveState.isSaving}
               lastSaved={saveState.lastSaved}
             />
-            <DevTools position="bottom-left" />
+            {/* <DevTools position="bottom-left" /> */}
             {children}
           </ReactFlow>
         </CanvasContextMenu>

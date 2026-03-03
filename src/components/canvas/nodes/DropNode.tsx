@@ -1,9 +1,22 @@
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
-import { Image as ImageIcon, Video, Sparkles, X } from "lucide-react";
-import React, { memo } from "react";
+import {
+  Image as ImageIcon,
+  Video,
+  X,
+  Type,
+  Upload,
+  Palette,
+  LayoutTemplate,
+  Crop,
+  Brush,
+  Eraser,
+} from "lucide-react";
+import { IconWindowMaximize } from "@tabler/icons-react";
+import React, { memo, useState } from "react";
 
 const DropNode = memo(({ id, data }: NodeProps) => {
   const { setNodes, setEdges } = useReactFlow();
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const handleSelect = (type: string) => {
     setNodes((nodes) =>
@@ -40,8 +53,43 @@ const DropNode = memo(({ id, data }: NodeProps) => {
 
   const isSource = !!data?.isSource;
 
+  const categories = {
+    generation: [
+      {
+        type: "outputImage",
+        label: "Image Generator",
+        icon: <ImageIcon size={12} />,
+        color: "indigo",
+      },
+      {
+        type: "generateVideo",
+        label: "Video Generator",
+        icon: <Video size={12} />,
+        color: "purple",
+      },
+    ],
+
+    tools: [
+      {
+        type: "colorCorrection",
+        label: "Color Correction",
+        icon: <Palette size={12} />,
+        color: "amber",
+      },
+      { type: "crop", label: "Crop", icon: <Crop size={12} />, color: "neutral" },
+      { type: "sketch", label: "Painter", icon: <Brush size={12} />, color: "pink" },
+      { type: "upscale", label: "Upscale", icon: <IconWindowMaximize size={12} />, color: "cyan" },
+      {
+        type: "removeBackground",
+        label: "Remove Background",
+        icon: <Eraser size={12} />,
+        color: "rose",
+      },
+    ],
+  };
+
   return (
-    <div className="relative min-w-[13rem] rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-1.5 text-zinc-300 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+    <div className="relative min-w-[14rem] rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-1.5 text-zinc-300 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
       {/* Close Button */}
       <button
         onClick={handleClose}
@@ -58,25 +106,12 @@ const DropNode = memo(({ id, data }: NodeProps) => {
       />
 
       {/* Options */}
-      <div className="space-y-0.5">
-        <Option
-          icon={<ImageIcon size={14} />}
-          label="Image Generator"
-          color="indigo"
-          onClick={() => handleSelect("outputImage")}
-        />
-        <Option
-          icon={<Video size={14} />}
-          label="Video Generator"
-          color="purple"
-          onClick={() => handleSelect("video")}
-        />
-        <Option
-          icon={<Sparkles size={14} />}
-          label="Assistant"
-          color="teal"
-          onClick={() => handleSelect("assistant")}
-        />
+      <div className="max-h-[400px] space-y-1 overflow-y-auto">
+        {/* Generation Category */}
+        <CategorySection title="Generation" items={categories.generation} onSelect={handleSelect} />
+
+        {/* Tools Category */}
+        <CategorySection title="Tools" items={categories.tools} onSelect={handleSelect} />
       </div>
     </div>
   );
@@ -85,6 +120,42 @@ const DropNode = memo(({ id, data }: NodeProps) => {
 DropNode.displayName = "DropNode";
 
 export default DropNode;
+
+/* ---------- Category Section ---------- */
+
+interface CategoryItem {
+  type: string;
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function CategorySection({
+  title,
+  items,
+  onSelect,
+}: {
+  title: string;
+  items: CategoryItem[];
+  onSelect: (type: string) => void;
+}) {
+  return (
+    <div className="space-y-0.5">
+      <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+        {title}
+      </div>
+      {items.map((item) => (
+        <Option
+          key={item.type}
+          icon={item.icon}
+          label={item.label}
+          color={item.color}
+          onClick={() => onSelect(item.type)}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* ---------- Option Row ---------- */
 
@@ -96,21 +167,32 @@ function Option({
 }: {
   icon: React.ReactNode;
   label: string;
-  color: "indigo" | "purple" | "teal";
+  color: string;
   onClick: () => void;
 }) {
-  const colorMap = {
-    indigo: "bg-indigo-900/50 text-indigo-400",
-    purple: "bg-purple-900/50 text-purple-400",
-    teal: "bg-teal-900/50 text-teal-400",
+  const colorMap: Record<string, string> = {
+    emerald: "bg-emerald-900/50 text-emerald-500",
+    indigo: "bg-indigo-900/50 text-indigo-500",
+    blue: "bg-blue-900/50 text-blue-500",
+    purple: "bg-purple-900/50 text-purple-500",
+    violet: "bg-violet-900/50 text-violet-500",
+    orange: "bg-orange-900/50 text-orange-500",
+    pink: "bg-pink-900/50 text-pink-500",
+    amber: "bg-amber-900/50 text-amber-500",
+    neutral: "bg-neutral-800/50 text-neutral-400",
+    cyan: "bg-cyan-900/50 text-cyan-500",
+    rose: "bg-rose-900/50 text-rose-400",
+    zinc: "bg-zinc-800/50 text-zinc-400",
   };
 
   return (
     <div
       onClick={onClick}
-      className="group relative flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-all hover:bg-zinc-800 hover:text-zinc-100"
+      className="group relative flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-all hover:bg-zinc-800 hover:text-zinc-100"
     >
-      <div className={`flex size-6 items-center justify-center rounded ${colorMap[color]}`}>
+      <div
+        className={`flex size-5 items-center justify-center rounded ${colorMap[color] || colorMap.zinc}`}
+      >
         {icon}
       </div>
 

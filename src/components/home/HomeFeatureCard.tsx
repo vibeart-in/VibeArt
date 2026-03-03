@@ -25,20 +25,21 @@ interface FeatureCardProps {
 }
 
 const featureCards: FeatureCardProps[] = [
- {
-  id:1,
-  title:"Canvas",
-  description:"Create stunning AI art in seconds.",
-  icon:Sparkles,
-  imageSrc:"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/2_5D_In_the_cold_winter_with_Snow_gleams_white_Sno.jpg",
-  link:"/canvas",
- },
+  {
+    id: 1,
+    title: "Canvas",
+    description: "Create complex AI workflows in seconds.",
+    icon: Sparkles,
+    imageSrc: "https://i.pinimg.com/736x/3b/b3/08/3bb308dfc5184a408ac6fb4059f5208d.jpg",
+    link: "/canvas",
+  },
   {
     id: 2,
     title: "Generate",
     description: "Create stunning AI art in seconds.",
     icon: Sparkles,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/2_5D_In_the_cold_winter_with_Snow_gleams_white_Sno.jpg",
+    imageSrc:
+      "https://i.pinimg.com/736x/c1/b9/ac/c1b9ac13aaaf146de837ca6f7a8cddea.jpg",
     link: "/generate",
   },
   {
@@ -46,7 +47,8 @@ const featureCards: FeatureCardProps[] = [
     title: "Edit",
     description: "Powerful tools to tweak and perfect your images.",
     icon: Edit,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/A_vast_utopian_cliffside_metropolis_with_sweeping_%20(1).jpg",
+    imageSrc:
+      "https://i.pinimg.com/736x/2a/7d/4a/2a7d4a526e8d356962edfb94eb70f530.jpg",
     link: "/edit",
   },
   {
@@ -54,7 +56,8 @@ const featureCards: FeatureCardProps[] = [
     title: "Video",
     description: "Transform your ideas into motion.",
     icon: Video,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/deep_space_--ar_9_16_--profile_gu2pumm_3mvw2x6%20(1).jpg",
+    imageSrc:
+      "https://i.pinimg.com/1200x/35/d3/19/35d319dcb4acd6d3472e593064af6b55.jpg",
     link: "/video",
   },
   {
@@ -62,7 +65,8 @@ const featureCards: FeatureCardProps[] = [
     title: "AI Apps",
     description: "Explore a suite of specialized AI tools.",
     icon: Grid,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/semi-realistic_anime_digital_art_style_she_s_looki%20(2).jpg",
+    imageSrc:
+      "https://i.pinimg.com/736x/b0/f2/af/b0f2af275fa01546ae556ec03bbdd18d.jpg",
     link: "/ai-apps",
   },
   {
@@ -70,28 +74,22 @@ const featureCards: FeatureCardProps[] = [
     title: "Advance",
     description: "Pro-level controls for ultimate precision.",
     icon: Cpu,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/semi-realistic_anime_digital_art_style_she_s_looki%20(2).jpg",
+    imageSrc: "https://i.pinimg.com/736x/f6/04/7b/f6047bbf9d396b24a91799a1df469c7c.jpg",
     link: "/advance_generate",
-  },
-  {
-    id: 7,
-    title: "Gallery",
-    description: "Showcase and discover amazing creations.",
-    icon: ImageIcon,
-    imageSrc: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/illustrious/00049-379993896.webp",
-    link: "/gallery",
   },
 ];
 
 const HomeFeatureCard = () => {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [prevBtnDisabled, setPrevBtnDisabled] = useState(true);
+  const [nextBtnDisabled, setNextBtnDisabled] = useState(true);
+
+  // Removed loop: true and added containScroll for a cleaner non-infinite boundary
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
     align: "start",
     dragFree: true,
+    containScroll: "trimSnaps",
   });
-
-  const [isPlaying, setIsPlaying] = useState(true);
 
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
@@ -101,68 +99,73 @@ const HomeFeatureCard = () => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
 
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setPrevBtnDisabled(!emblaApi.canScrollPrev());
+    setNextBtnDisabled(!emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  // Hook into embla to update the button's disabled state on scroll/init
   useEffect(() => {
-    if (!isPlaying || !emblaApi) return;
-
-    const intervalId = setInterval(() => {
-      scrollNext();
-    }, 3000);
-
-    return () => clearInterval(intervalId);
-  }, [isPlaying, emblaApi, scrollNext]);
-
-  const handleMouseEnter = () => setIsPlaying(false);
-  const handleMouseLeave = () => setIsPlaying(true);
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("reInit", onSelect);
+    emblaApi.on("select", onSelect);
+  }, [emblaApi, onSelect]);
 
   return (
-    <div className="w-full overflow-hidden py-12 lg:px-12 bg-black">
+    <div className="mt-8 w-full overflow-hidden bg-black py-16 lg:px-12">
+      {/* Added Explore Header */}
+      <div className="mb-10 px-8">
+        <h2 className="mb-3 text-3xl font-bold text-white md:text-4xl">Explore Features</h2>
+        <p className="text-lg text-gray-400">Discover our powerful suite of AI creation tools.</p>
+      </div>
+
       <div className="group/fc relative w-full">
         {/* Gradient Masks */}
-        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-black to-transparent" />
+        {/* <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-black to-transparent" /> */}
         <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-black to-transparent" />
 
-        {/* Prev Button */}
+        {/* Prev Button - Will hide if at the very beginning */}
         <button
           onClick={scrollPrev}
-          className="absolute left-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/fc:opacity-100"
+          disabled={prevBtnDisabled}
+          className={`absolute left-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 ${prevBtnDisabled ? "hidden" : "opacity-0 group-hover/fc:opacity-100"}`}
         >
           <ChevronLeft className="size-5" />
         </button>
 
-        {/* Next Button */}
+        {/* Next Button - Will hide if at the very end */}
         <button
           onClick={scrollNext}
-          className="absolute right-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/fc:opacity-100"
+          disabled={nextBtnDisabled}
+          className={`absolute right-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 ${nextBtnDisabled ? "hidden" : "opacity-0 group-hover/fc:opacity-100"}`}
         >
           <ChevronRight className="size-5" />
         </button>
 
-        <div
-          className="overflow-hidden"
-          ref={emblaRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
+        {/* Removed onMouseEnter/onMouseLeave handlers since auto-play is gone */}
+        <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex touch-pan-y">
             {featureCards.map((card) => (
               <div
                 key={card.id}
-                className="relative flex flex-col gap-4 group cursor-pointer flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[28vw] lg:w-[23%] pl-8"
+                className="group relative flex w-[85vw] flex-shrink-0 cursor-pointer flex-col gap-4 pl-8 sm:w-[45vw] md:w-[28vw] lg:w-[23%]"
                 onMouseEnter={() => setHoveredId(card.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
-                <Link href={card.link} className="block group">
+                <Link href={card.link} className="group block">
                   {/* Card Image */}
                   <div className="relative aspect-[1/1.3] w-full overflow-hidden rounded-2xl">
                     <img
-                    src={card.imageSrc}
-                    alt={card.title}
-                    className="object-cover w-full h-full rounded-xl"
+                      src={card.imageSrc}
+                      alt={card.title}
+                      className="h-full w-full rounded-xl object-cover"
                     />
                   </div>
 
                   {/* Content */}
-                  <div className="flex flex-col gap-2 mt-12">
+                  <div className="mt-12 flex flex-col gap-2">
                     {/* Line */}
                     <div
                       className={`h-[2px] w-full transition-colors duration-300 ${
@@ -170,7 +173,7 @@ const HomeFeatureCard = () => {
                       }`}
                     />
 
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <card.icon
                         className={`size-5 transition-colors duration-300 ${
                           hoveredId === card.id ? "text-white" : "text-white/60"
@@ -184,9 +187,7 @@ const HomeFeatureCard = () => {
                         {card.title}
                       </h3>
                     </div>
-                    <p className="text-sm text-gray-400 line-clamp-2">
-                      {card.description}
-                    </p>
+                    <p className="line-clamp-2 text-sm text-gray-400">{card.description}</p>
                   </div>
                 </Link>
               </div>

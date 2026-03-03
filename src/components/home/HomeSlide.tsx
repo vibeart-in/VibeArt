@@ -8,45 +8,24 @@ import { useState, useEffect } from "react";
 const HERO_SLIDES = [
   {
     id: 1,
-    tag: "✦ Featured Model",
-    heading: "Upscale image",
-    sub: "4K",
+    tag: "✦ Comming Soon",
+    heading: "Seedance",
+    sub: "2.0",
     description:
-      "Upscale your image to 4K resolution with AI",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/semi-realistic_anime_digital_art_style_she_s_looki.jpg",
-    cta: "/ai-apps/108fa3df-6a1a-460b-aecb-cd1f025d4534",
+      "Seedance 2.0 is a revolutionary multi-modal AI video generation model that supports image, video, audio, and text inputs",
+    image: "https://static.higgsfield.ai/seedance-2/feature-5.mp4",
+    cta: "/canvas",
   },
   {
     id: 2,
     tag: "✦ New Release",
     heading: "Nano Banana",
     sub: "2",
-    description:"unbeliveable realstic image generation",
-    image:"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/illustrious/00049-379993896.webp",
+    description:
+      "Google's fast image generation model with conversational editing, multi-image fusion, and character consistency",
+    image:
+      "https://v1.pinimg.com/videos/mc/expMp4/a3/54/de/a354de8d19493e6e4d31dc01fddcfab3_t3.mp4",
     cta: "/generate",
-  },
-  {
-    id: 3,
-    tag: "✦ Architecture",
-    heading: "FLUX",
-    sub: ".1",
-    description:
-      "Next-generation image generation by Black Forest Labs. Exceptional prompt adherence and compositional accuracy for complex creative prompts.",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/A_vast_utopian_cliffside_metropolis_with_sweeping_%20(1).jpg",
-    cta: "/advance_generate",
-  },
-  {
-    id: 4,
-    tag: "✦ AI Video",
-    heading: "Wan",
-    sub: "2.1",
-    description:
-      "A cutting-edge open-source video generation model from Alibaba. Create smooth, cinematic AI video clips from text prompts or images.",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/deep_space_--ar_9_16_--profile_gu2pumm_3mvw2x6%20(1).jpg",
-    cta: "/video",
   },
   {
     id: 5,
@@ -55,15 +34,14 @@ const HERO_SLIDES = [
     sub: "1.0",
     description:
       "A lightweight yet powerful generalist model fine-tuned for rapid generation. Ideal for concept art, mood boards, and iterative creative exploration.",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/2_5D_In_the_cold_winter_with_Snow_gleams_white_Sno.jpg",
+    image: "https://i.pinimg.com/736x/f5/71/ca/f571ca671fd3dcc1758a8ea7e480c6c1.jpg",
     cta: "/canvas",
   },
 ];
 
-const SLIDE_DURATION = 5000; // ms
+const SLIDE_DURATION = 10000; // ms
 
-export default function LensCaveHero() {
+export default function HomeSlide() {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -76,7 +54,7 @@ export default function LensCaveHero() {
   const slide = HERO_SLIDES[current];
 
   return (
-    <div className="relative h-[85vh] w-full overflow-hidden bg-black text-white">
+    <div className="relative h-[70vh] w-full overflow-hidden bg-black text-white">
       {/* ── Backgrounds — cross-fade ── */}
       <AnimatePresence mode="sync">
         <motion.div
@@ -87,14 +65,24 @@ export default function LensCaveHero() {
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: "easeInOut" }}
         >
-          <Image
-            src={slide.image}
-            alt={slide.heading}
-            fill
-            className="object-cover opacity-80"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/65 to-transparent" />
+          {slide.image.endsWith(".mp4") ? (
+            <video
+              src={slide.image}
+              autoPlay
+              muted
+              loop
+              className="h-full w-full object-cover opacity-80"
+            />
+          ) : (
+            <Image
+              src={slide.image}
+              alt={slide.heading}
+              fill
+              className="object-cover opacity-80"
+              priority
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/45 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>

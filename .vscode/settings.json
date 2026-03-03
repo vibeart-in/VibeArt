@@ -25,5 +25,6 @@
     "source.fixAll": "always",
     "source.fixAll.eslint": "always"
   },
-  "npm.packageManager": "pnpm"
+  "npm.packageManager": "pnpm",
+  "typescript.autoClosingTags": false
 }
