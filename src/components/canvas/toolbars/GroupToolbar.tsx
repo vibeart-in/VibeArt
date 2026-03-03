@@ -6,15 +6,15 @@ import { Palette } from "lucide-react";
 import { useRef, useState } from "react";
 
 const GROUP_COLORS = [
-  { label: "Indigo",  border: "#6366f1", bg: "rgba(99,102,241,0.10)"  },
-  { label: "Blue",    border: "#3b82f6", bg: "rgba(59,130,246,0.10)"  },
-  { label: "Cyan",    border: "#06b6d4", bg: "rgba(6,182,212,0.10)"   },
-  { label: "Emerald", border: "#10b981", bg: "rgba(16,185,129,0.10)"  },
-  { label: "Amber",   border: "#f59e0b", bg: "rgba(245,158,11,0.10)"  },
-  { label: "Rose",    border: "#f43f5e", bg: "rgba(244,63,94,0.10)"   },
-  { label: "Pink",    border: "#ec4899", bg: "rgba(236,72,153,0.10)"  },
-  { label: "Violet",  border: "#8b5cf6", bg: "rgba(139,92,246,0.10)"  },
-  { label: "Zinc",    border: "#71717a", bg: "rgba(113,113,122,0.15)" },
+  { label: "Indigo", border: "#6366f1", bg: "rgba(99,102,241,0.10)" },
+  { label: "Blue", border: "#3b82f6", bg: "rgba(59,130,246,0.10)" },
+  { label: "Cyan", border: "#06b6d4", bg: "rgba(6,182,212,0.10)" },
+  { label: "Emerald", border: "#10b981", bg: "rgba(16,185,129,0.10)" },
+  { label: "Amber", border: "#f59e0b", bg: "rgba(245,158,11,0.10)" },
+  { label: "Rose", border: "#f43f5e", bg: "rgba(244,63,94,0.10)" },
+  { label: "Pink", border: "#ec4899", bg: "rgba(236,72,153,0.10)" },
+  { label: "Violet", border: "#8b5cf6", bg: "rgba(139,92,246,0.10)" },
+  { label: "Zinc", border: "#71717a", bg: "rgba(113,113,122,0.15)" },
 ];
 
 interface GroupToolbarProps {
@@ -64,7 +64,7 @@ export default function GroupToolbar({
           >
             {/* Active colour dot */}
             <span
-              className="size-3.5 rounded-full border border-white/20 flex-shrink-0"
+              className="size-3.5 flex-shrink-0 rounded-full border border-white/20"
               style={{ backgroundColor: activeColor || "#6366f1" }}
             />
             <Palette className="size-4" />
@@ -74,11 +74,11 @@ export default function GroupToolbar({
           {/* Popover */}
           {open && (
             <div
-              className="absolute bottom-full left-1/2 mb-3 -translate-x-1/2 w-56 rounded-2xl border border-white/10 bg-[#161616] shadow-2xl"
+              className="absolute bottom-full left-1/2 mb-3 w-56 -translate-x-1/2 rounded-2xl border border-white/10 bg-[#161616] shadow-2xl"
               style={{ padding: "16px" }}
             >
               {/* Header */}
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-white/30 select-none">
+              <p className="mb-3 select-none text-[11px] font-semibold uppercase tracking-widest text-white/30">
                 Group Color
               </p>
 
@@ -93,9 +93,9 @@ export default function GroupToolbar({
                   >
                     <span
                       className="size-8 rounded-full ring-2 ring-offset-1 ring-offset-[#161616] transition-transform group-hover/swatch:scale-110"
-                      style={{ backgroundColor: c.border, ringColor: c.border }}
+                      style={{ backgroundColor: c.border, ["--tw-ring-color" as any]: c.border }}
                     />
-                    <span className="text-[10px] text-white/40 group-hover/swatch:text-white/70 transition-colors">
+                    <span className="text-[10px] text-white/40 transition-colors group-hover/swatch:text-white/70">
                       {c.label}
                     </span>
                   </button>
