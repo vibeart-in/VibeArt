@@ -10,8 +10,9 @@ import {
   Sparkles,
   Cpu,
   LucideIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface FeatureCardProps {
@@ -24,8 +25,16 @@ interface FeatureCardProps {
 }
 
 const featureCards: FeatureCardProps[] = [
+ {
+  id:1,
+  title:"Canvas",
+  description:"Create stunning AI art in seconds.",
+  icon:Sparkles,
+  imageSrc:"https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/2_5D_In_the_cold_winter_with_Snow_gleams_white_Sno.jpg",
+  link:"/canvas",
+ },
   {
-    id: 1,
+    id: 2,
     title: "Generate",
     description: "Create stunning AI art in seconds.",
     icon: Sparkles,
@@ -33,7 +42,7 @@ const featureCards: FeatureCardProps[] = [
     link: "/generate",
   },
   {
-    id: 2,
+    id: 3,
     title: "Edit",
     description: "Powerful tools to tweak and perfect your images.",
     icon: Edit,
@@ -41,7 +50,7 @@ const featureCards: FeatureCardProps[] = [
     link: "/edit",
   },
   {
-    id: 3,
+    id: 4,
     title: "Video",
     description: "Transform your ideas into motion.",
     icon: Video,
@@ -49,7 +58,7 @@ const featureCards: FeatureCardProps[] = [
     link: "/video",
   },
   {
-    id: 4,
+    id: 5,
     title: "AI Apps",
     description: "Explore a suite of specialized AI tools.",
     icon: Grid,
@@ -57,7 +66,7 @@ const featureCards: FeatureCardProps[] = [
     link: "/ai-apps",
   },
   {
-    id: 5,
+    id: 6,
     title: "Advance",
     description: "Pro-level controls for ultimate precision.",
     icon: Cpu,
@@ -65,7 +74,7 @@ const featureCards: FeatureCardProps[] = [
     link: "/advance_generate",
   },
   {
-    id: 6,
+    id: 7,
     title: "Gallery",
     description: "Showcase and discover amazing creations.",
     icon: ImageIcon,
@@ -88,6 +97,10 @@ const HomeFeatureCard = () => {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
   useEffect(() => {
     if (!isPlaying || !emblaApi) return;
 
@@ -103,10 +116,26 @@ const HomeFeatureCard = () => {
 
   return (
     <div className="w-full overflow-hidden py-12 lg:px-12 bg-black">
-      <div className="relative w-full">
+      <div className="group/fc relative w-full">
         {/* Gradient Masks */}
-        <div className="absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-black to-transparent pointer-events-none" />
-        <div className="absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-black to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-black to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-black to-transparent" />
+
+        {/* Prev Button */}
+        <button
+          onClick={scrollPrev}
+          className="absolute left-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/fc:opacity-100"
+        >
+          <ChevronLeft className="size-5" />
+        </button>
+
+        {/* Next Button */}
+        <button
+          onClick={scrollNext}
+          className="absolute right-3 top-1/3 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-900/80 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/fc:opacity-100"
+        >
+          <ChevronRight className="size-5" />
+        </button>
 
         <div
           className="overflow-hidden"
