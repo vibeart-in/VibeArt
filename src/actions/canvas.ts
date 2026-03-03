@@ -103,7 +103,7 @@ export async function getPublishedCanvases() {
 
   const { data, error } = await supabase
     .from("canvas")
-    .select(`id, title, updated_at, user_id, image:images(*)`)
+    .select(`id, title, updated_at, user_id, image:cover(*)`)
     .eq("is_public", true)
     .order("updated_at", { ascending: false });
 
