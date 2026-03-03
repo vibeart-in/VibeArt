@@ -18,13 +18,13 @@ export const edgeTypes = {
 };
 
 export const initialNodes: Node[] = [
-  {
-    id: "heroImage",
-    type: "heroImage",
-    position: { x: 0, y: 0 },
-    data: {},
-    draggable: true,
-  },
+  // {
+  //   id: "heroImage",
+  //   type: "heroImage",
+  //   position: { x: 0, y: 0 },
+  //   data: {},
+  //   draggable: true,
+  // },
   {
     id: "title",
     type: "heroTitle",
