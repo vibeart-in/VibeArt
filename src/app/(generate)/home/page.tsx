@@ -7,6 +7,7 @@ import LensCaveCards from "@/src/components/home/LensCaveCards";
 import HomeFeatureCard from "@/src/components/home/HomeFeatureCard";
 import { ShowcaseClient } from "@/src/components/home/ShowcaseClient";
 import { createClient } from "@/src/lib/supabase/server";
+import Footer from "@/src/components/landing/Footer";
 
 export const revalidate = 3600;
 
@@ -138,7 +139,9 @@ const Page = async () => {
           {uniqueModelNames.length > 0 && <ShowcaseClient models={uniqueModelNames} />}
         </div>
       </section>
-      
+      <div className="relative overflow-hidden">
+        <Footer />
+      </div>
     </main>
   );
 };
