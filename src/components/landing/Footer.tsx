@@ -8,7 +8,7 @@ import {
   TwitterLogoIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import * as motion from "motion/react-client";
-import { useInView } from "motion/react";
+import { useInView, Variants } from "motion/react";
 import Image from "next/image";
 import { useRef } from "react";
 
@@ -57,7 +57,7 @@ const gradientColors = {
 };
 
 // --- Shared animation variants ---
-const fadeUpVariant = {
+const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: (delay: number = 0) => ({
     opacity: 1,

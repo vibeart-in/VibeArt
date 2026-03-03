@@ -5,6 +5,81 @@ import { nanoid } from "nanoid";
 
 import { createClient } from "@/src/lib/supabase/server";
 
+// Helper function to get image dimensions from buffer
+async function getImageDimensions(buffer: Buffer): Promise<{ width: number; height: number }> {
+  // Read dimensions from image file headers
+  // PNG signature and dimensions
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+    return {
+      width: buffer.readUInt32BE(16),
+      height: buffer.readUInt32BE(20),
+    };
+  }
+
+  // JPEG/JPG
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+    let offset = 2;
+    while (offset < buffer.length) {
+      if (buffer[offset] !== 0xff) break;
+      const marker = buffer[offset + 1];
+      if (marker === 0xc0 || marker === 0xc2) {
+        return {
+          height: buffer.readUInt16BE(offset + 5),
+          width: buffer.readUInt16BE(offset + 7),
+        };
+      }
+      offset += 2 + buffer.readUInt16BE(offset + 2);
+    }
+  }
+
+  // GIF
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
+    return {
+      width: buffer.readUInt16LE(6),
+      height: buffer.readUInt16LE(8),
+    };
+  }
+
+  // WebP
+  if (
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  ) {
+    // VP8
+    if (buffer[12] === 0x56 && buffer[13] === 0x50 && buffer[14] === 0x38) {
+      if (buffer[15] === 0x20) {
+        // VP8
+        return {
+          width: buffer.readUInt16LE(26) & 0x3fff,
+          height: buffer.readUInt16LE(28) & 0x3fff,
+        };
+      } else if (buffer[15] === 0x4c) {
+        // VP8L
+        const bits = buffer.readUInt32LE(21);
+        return {
+          width: (bits & 0x3fff) + 1,
+          height: ((bits >> 14) & 0x3fff) + 1,
+        };
+      } else if (buffer[15] === 0x58) {
+        // VP8X
+        return {
+          width: (buffer.readUIntLE(24, 3) & 0xffffff) + 1,
+          height: (buffer.readUIntLE(27, 3) & 0xffffff) + 1,
+        };
+      }
+    }
+  }
+
+  // Fallback - return default dimensions
+  return { width: 0, height: 0 };
+}
+
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get("file") as File;
@@ -36,9 +111,9 @@ export async function uploadImageAction(formData: FormData) {
       height = Number(formData.get("height")) || 0;
     } else {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const metadata = await sharp(buffer).metadata();
-      width = metadata.width;
-      height = metadata.height;
+      const dimensions = await getImageDimensions(buffer);
+      width = dimensions.width;
+      height = dimensions.height;
     }
 
     const canvasId = formData.get("canvasId") as string;
