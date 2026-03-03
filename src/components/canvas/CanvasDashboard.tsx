@@ -61,79 +61,53 @@ interface PublishedProject {
 
 // ─── Static Templates Data ─────────────────────────
 
-
-
 const STATIC_TEMPLATES = [
   {
-    id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
-    title: "tvk",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
-    category: "Template",
-  },
-  {
     id: "05925547-bf66-4072-a136-0456dcffbd1f",
     title: "Branding demo",
     image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/05925547-bf66-4072-a136-0456dcffbd1f/e6c19a4e-d941-485b-bc21-0b19f84b9fa0/0.jpeg",
     user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
     category: "Template",
   },
   {
-    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
-    title: "summa",
+    id: "43edca02-2a9a-4ce3-bfc1-6c80deb2a8ac",
+    title: "Thumbnail demo",
     image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
-    category: "Template",
-  },
-  {
-    id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
-    title: "tvk",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
-    category: "Template",
-  },
-  {
-    id: "05925547-bf66-4072-a136-0456dcffbd1f",
-    title: "Branding demo",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/43edca02-2a9a-4ce3-bfc1-6c80deb2a8ac/5d5c7849-b0d1-4513-8e95-9a1fb9dfee38/0.webp",
     user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
     category: "Template",
   },
   {
-    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
-    title: "summa",
+    id: "1270379f-063d-4967-b841-0bab43be6579",
+    title: "Consistent Character",
     image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
-    category: "Template",
-  },
-  {
-    id: "cc758c9a-16d6-43e9-b0b7-bd2c64264515",
-    title: "tvk",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
-    category: "Template",
-  },
-  {
-    id: "05925547-bf66-4072-a136-0456dcffbd1f",
-    title: "Branding demo",
-    image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/05925547-bf66-4072-a136-0456dcffbd1f/thumbnail.jpg",
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/1270379f-063d-4967-b841-0bab43be6579/8a0e2341-26e9-4f13-ba2f-3e1f7d47a5b3/0.webp",
     user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
     category: "Template",
   },
   {
-    id: "6cdce348-11fb-47e8-b659-bbd3a929ddfe",
-    title: "summa",
+    id: "6c3ecee1-0a45-4fc0-870c-9ccaed0fac59",
+    title: "AI Apps demo",
     image:
-      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas_images/cc758c9a-16d6-43e9-b0b7-bd2c64264515/thumbnail.jpg",
-    user_id: "de3cd749-9c6e-4ab5-8827-a3f1fe47d9a3",
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/6c3ecee1-0a45-4fc0-870c-9ccaed0fac59/4cT_DI06Oz_DVKcTTlInr.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+    category: "Template",
+  },
+  {
+    id: "d6c2a8f4-1000-490f-80e1-6a4ae173b46b",
+    title: "Background Art demo",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/d6c2a8f4-1000-490f-80e1-6a4ae173b46b/6ad0934c-59f6-4c08-bc68-36126177232d/2.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
+    category: "Template",
+  },
+  {
+    id: "fb13dedc-687a-4f25-9ae1-dc77b4cd2190",
+    title: "Face replacement demo",
+    image:
+      "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/fb13dedc-687a-4f25-9ae1-dc77b4cd2190/crop_426875f3-9646-499a-8d15-9c1f524f3f77.jpg",
+    user_id: "3c40da91-b7c5-4d89-ae86-91180214e50e",
     category: "Template",
   },
 ];
@@ -355,19 +329,18 @@ export default function CanvasDashboard({
         </motion.div>
 
         {/* ── WORKFLOW LIBRARY SLIDER ── */}
-        <div className="mb-12" style={{backgroundColor:"#202020",padding:"25px 0px 25px 25px"}}>
+        <div
+          className="mb-12"
+          // style={{ backgroundColor: "#202020", padding: "25px 0px 25px 25px" }}
+        >
           <div className="mb-4 flex items-center gap-4">
             <h2 className="text-xl font-bold text-white">Templates</h2>
-            <h2 className="text-xl font-medium text-neutral-500 hover:text-neutral-300 cursor-pointer transition-colors">
-              Tutorials
-            </h2>
           </div>
-          <div className="relative group/slider -mx-6 md:-mx-8 lg:-mx-12 overflow-hidden px-6 md:px-8 lg:px-12">
-            
+          <div className="group/slider relative -mx-6 overflow-hidden px-6 md:-mx-8 md:px-8 lg:-mx-12 lg:px-12">
             {/* Left Button */}
             <button
               onClick={() => scrollSlider("left")}
-              className="absolute left-10 lg:left-16 top-1/2 -translate-y-1/2 z-20 flex size-10 items-center justify-center rounded-xl bg-neutral-800 text-white opacity-0 transition-all hover:bg-neutral-700 shadow-xl border border-white/10 backdrop-blur-md group-hover/slider:opacity-100 disabled:opacity-0"
+              className="absolute left-10 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 disabled:opacity-0 group-hover/slider:opacity-100 lg:left-16"
             >
               <ArrowLeft className="size-5" />
             </button>
@@ -375,21 +348,21 @@ export default function CanvasDashboard({
             {/* Right Button */}
             <button
               onClick={() => scrollSlider("right")}
-              className="absolute right-10 lg:right-16 top-1/2 -translate-y-1/2 z-20 flex size-10 items-center justify-center rounded-xl bg-neutral-800 text-white transition-all hover:bg-neutral-700 shadow-xl border border-white/10 backdrop-blur-md disabled:opacity-0"
+              className="absolute right-10 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 disabled:opacity-0 lg:right-16"
             >
               <ArrowRight className="size-5" />
             </button>
 
-            <div 
+            <div
               ref={sliderRef}
-              className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide"
+              className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {[...STATIC_TEMPLATES].map((item: any) => (
                 <div
                   key={item.id}
                   onClick={() => router.push(`/canvas/${item.id}`)}
-                  className="group relative h-48 w-72 cursor-pointer overflow-hidden rounded-2xl bg-neutral-800 transition-transform active:scale-95 flex-shrink-0 snap-center"
+                  className="group relative h-48 w-72 flex-shrink-0 cursor-pointer snap-center overflow-hidden rounded-2xl bg-neutral-800 transition-transform active:scale-95"
                 >
                   <img
                     src={item.image}
@@ -398,7 +371,9 @@ export default function CanvasDashboard({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
                   <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                    <span className="font-semibold text-white truncate max-w-[85%] text-sm">{item.title}</span>
+                    <span className="max-w-[85%] truncate text-sm font-semibold text-white">
+                      {item.title}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -770,10 +745,7 @@ function ProjectCard({
     >
       <div className="relative aspect-video w-full overflow-hidden bg-neutral-900">
         <img
-          src={
-            image ||
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png"
-          }
+          src={image || "https://i.pinimg.com/736x/40/90/56/409056080e874008c724806708087480.jpg"}
           alt={title}
           className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />

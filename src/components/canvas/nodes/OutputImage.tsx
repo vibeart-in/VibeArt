@@ -257,6 +257,14 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         prompt: finalPrompt,
         ...imageParams,
       } as unknown as InputBoxParameter;
+
+      if (inputImages.length === 0) {
+        Object.keys(parameters).forEach((key) => {
+          if (isImageParam(key) || isImageParam(normalizeKey(key))) {
+            delete (parameters as Record<string, any>)[key];
+          }
+        });
+      }
     }
 
     generateMutation.mutate(

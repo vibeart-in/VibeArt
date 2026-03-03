@@ -6,7 +6,6 @@ import {
   useReactFlow,
   type EdgeProps,
 } from "@xyflow/react";
-import { X } from "lucide-react";
 import React, { memo } from "react";
 
 const ActiveEdge = memo(

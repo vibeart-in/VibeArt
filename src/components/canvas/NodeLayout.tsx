@@ -23,8 +23,15 @@ export type HandleConfig = {
 
 interface NodeLayoutProps {
   id?: string;
-  toolbarType?: "default" | "text" | "image" | "generate" | "upscale" | "removeBackground" | "group";
-  textEditor?: any; // Tiptap editor instance
+  toolbarType?:
+    | "default"
+    | "text"
+    | "image"
+    | "generate"
+    | "upscale"
+    | "removeBackground"
+    | "group";
+  textEditor?: any;
   selected?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -37,7 +44,7 @@ interface NodeLayoutProps {
   keepAspectRatio?: boolean;
   toolbarHidden?: boolean;
   resizeHidden?: boolean;
-  initialModel?: string; // New prop for initializing model
+  initialModel?: string;
 }
 
 export default function NodeLayout({
@@ -64,7 +71,6 @@ export default function NodeLayout({
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Clear timeout on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
       if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
@@ -81,14 +87,25 @@ export default function NodeLayout({
 
   const handleMouseLeave = useCallback(() => {
     if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-    // Add a small delay so UI doesn't flicker if mouse moves fast
     hoverTimeout.current = setTimeout(() => {
       setIsHovered(false);
     }, 250);
   }, []);
 
-  // Use this to toggle visibility of handles/toolbar
   const isActive = selected || isHovered;
+
+  // --- Delayed Unmount Logic for Exit Animations ---
+  const [isToolbarMounted, setIsToolbarMounted] = useState(isActive);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsToolbarMounted(true);
+    } else {
+      // 300ms matches our CSS exit transition duration
+      const timeout = setTimeout(() => setIsToolbarMounted(false), 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [isActive]);
 
   // --- 2. Positioning Logic ---
   const getHandlePositionStyle = (
@@ -96,14 +113,7 @@ export default function NodeLayout({
   ): React.CSSProperties & { "--x-translate"?: string; "--y-translate"?: string } => {
     const isVertical = position === Position.Left || position === Position.Right;
     const size = isVertical ? { height: "6rem", width: "4rem" } : { width: "6rem", height: "4rem" };
-
-    // Position the logical handle center exactly on the node border.
-    // Half of 4rem (handle thickness) is 2rem. To touch the border, use -2rem.
     const offset = "-0rem";
-
-    // We want the visual "plus" icon to float outside the node.
-    // Since the handle is at the border (0px), this pushes the icon outwards.
-    // Try 30px - 40px for a good floating distance.
     const floatDistance = "54px";
 
     switch (position) {
@@ -148,23 +158,22 @@ export default function NodeLayout({
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative ${
-        selected ? "ring-2 ring-[#e2e2e2]/50" : ""
-      } ${className}`}
+      className={`group relative ${selected ? "ring-2 ring-[#e2e2e2]/50" : ""} ${className}`}
       style={{
         minWidth,
         minHeight,
         ...style,
       }}
     >
-      {isActive && !toolbarHidden && (
+      {/* Use isToolbarMounted instead of isActive so exit animations can finish */}
+      {isToolbarMounted && !toolbarHidden && (
         <NodeToolbar
           handleMouseEnter={handleMouseEnter}
           handleMouseLeave={handleMouseLeave}
-          isHovered={isActive}
+          isHovered={isActive} // Passes true/false dynamically to trigger animation inside
+          selected={!!selected}
           id={id}
           toolbarType={toolbarType}
-          selected={!!selected}
           textEditor={textEditor}
           initialModel={initialModel}
         />
@@ -220,9 +229,8 @@ export default function NodeLayout({
             type={handle.type}
             position={handle.position}
             id={handle.id}
-            // Use 'isActive' to control visibility
-            className={`group/handle absolute z-0 flex items-center justify-center bg-transparent transition-opacity duration-300 ${
-              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            className={`group/handle absolute z-0 flex items-center justify-center bg-transparent transition-all duration-300 ${
+              isActive ? "opacity-100" : "pointer-events-none opacity-0"
             } ${handle.className || ""}`}
             style={{
               ...handleStyle,
@@ -232,21 +240,32 @@ export default function NodeLayout({
             }}
           >
             {!isDraggingEdge && (
-              <Magnet
-                padding={0}
-                magnetStrength={2}
-                activeTransition="transform 0.1s ease-out"
-                inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                wrapperClassName="w-full h-full"
+              // Animation wrapper perfectly coordinates slide-out with active state
+              <div
+                className="duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex items-center justify-center transition-transform"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transform: `translate(${xTrans || 0}, ${yTrans || 0})`,
+                  width: "100%",
+                  height: "100%",
+                  transform: isActive
+                    ? `translate(${xTrans || "0px"}, ${yTrans || "0px"}) scale(1)`
+                    : `translate(0px, 0px) scale(0.5)`,
                 }}
               >
-                <IconSquareRoundedPlus />
-              </Magnet>
+                <Magnet
+                  padding={0}
+                  magnetStrength={2}
+                  activeTransition="transform 0.1s ease-out"
+                  inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                  wrapperClassName="w-full h-full"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconSquareRoundedPlus />
+                </Magnet>
+              </div>
             )}
           </Handle>
         );

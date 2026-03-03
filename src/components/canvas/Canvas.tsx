@@ -20,7 +20,7 @@ import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { toJpeg } from "html-to-image";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { toast } from "sonner"; // Added for toast notifications
+import { toast } from "sonner";
 
 import "@xyflow/react/dist/style.css";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
@@ -37,8 +37,6 @@ import { nodeTypes } from "./nodes/Nodetypes";
 import { NodeDropzoneProvider } from "../providers/NodeDropZone";
 import { NodeOperationsProvider } from "../providers/NodeProvider";
 
-
-
 function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOnly?: boolean }) {
   const { project, setIsDraggingEdge } = useCanvas();
   const {
@@ -47,7 +45,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     onConnectEnd,
     onEdgesChange,
     onNodesChange,
-    onNodeDragStart, // Intercepting this below
+    onNodeDragStart,
     nodes: initialNodes,
     edges: initialEdges,
     ...rest
@@ -197,34 +195,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     [save, trackChange],
   );
 
-  const duplicateNode = useCallback(
-    (id: string) => {
-      const node = getNode(id);
-
-      if (!(node && node.type)) {
-        return;
-      }
-
-      const { id: oldId, ...rest } = node;
-
-      const newId = addNode(node.type, {
-        ...rest,
-        position: {
-          x: node.position.x + 200,
-          y: node.position.y + 200,
-        },
-        selected: true,
-      });
-
-      setTimeout(() => {
-        updateNode(id, { selected: false });
-        updateNode(newId, { selected: true });
-        toast.success("Node duplicated");
-      }, 0);
-    },
-    [addNode, getNode, updateNode],
-  );
-
   // --- NEW: Copy logic ---
   const handleCopy = useCallback(() => {
     const selectedNodes = getNodes().filter((n) => n.selected);
@@ -311,7 +281,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
   const handleConnect = useCallback<OnConnect>(
     (connection) => {
       const sourceNode = getNode(connection.source);
-      let edgeColor = "#4b5563"; // Default color
+      let edgeColor = "#404040"; // Default color
 
       if (sourceNode?.type === "presets") edgeColor = "#ef4444";
       else if (sourceNode?.type === "style") edgeColor = "#22c55e";
@@ -405,17 +375,15 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
           };
         });
 
-        // Also duplicate internal edges within dragged components
-        const edgesToDuplicate = getEdges().filter(
-          (e) => draggedIds.has(e.source) && draggedIds.has(e.target),
-        );
-        const duplicatedEdges = edgesToDuplicate.map((e) => ({
-          ...e,
-          id: crypto.randomUUID(),
-          source: duplicatedIds.get(e.source)!,
-          target: duplicatedIds.get(e.target)!,
-          selected: false,
-        }));
+        const duplicatedEdges = getEdges()
+          .filter((e) => draggedIds.has(e.source) || draggedIds.has(e.target))
+          .map((e) => ({
+            ...e,
+            id: crypto.randomUUID(),
+            source: duplicatedIds.get(e.source) || e.source,
+            target: duplicatedIds.get(e.target) || e.target,
+            selected: false,
+          }));
 
         setNodes((nds) => nds.concat(duplicatedNodes));
         setEdges((eds) => eds.concat(duplicatedEdges));
@@ -435,7 +403,12 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     if (typeof window === "undefined") return;
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || readOnly) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        readOnly
+      )
+        return;
 
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault();
@@ -450,10 +423,8 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleCopy, handlePaste]);
 
-  const nodeOpsValue = useMemo(() => ({ addNode, duplicateNode }), [addNode, duplicateNode]);
-
   return (
-    <NodeOperationsProvider addNode={addNode} duplicateNode={duplicateNode}>
+    <NodeOperationsProvider addNode={addNode}>
       <NodeDropzoneProvider>
         <CanvasContextMenu addNode={addNode} onGroupSelection={groupSelection}>
           <ReactFlow
@@ -472,7 +443,9 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             onNodeDrag={onNodeDrag}
             onNodeDragStop={onNodeDragStop}
             // panOnScroll
-            selectionOnDrag={!readOnly}
+            selectionOnDrag={false}
+            selectionKeyCode={["Control", "Meta"]}
+            multiSelectionKeyCode={["Control", "Meta"]}
             nodesDraggable={!readOnly}
             nodesConnectable={!readOnly}
             elementsSelectable={!readOnly}
@@ -480,9 +453,10 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             proOptions={{ hideAttribution: true }}
             minZoom={0.1}
             maxZoom={10}
+            connectionRadius={100}
             defaultEdgeOptions={{
-              style: { stroke: "#4b5563", strokeWidth: 2 },
-              markerEnd: { type: MarkerType.ArrowClosed, color: "#4b5563" },
+              style: { stroke: "#404040", strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "#404040" },
             }}
             connectionLineStyle={{ stroke: "#DFFF00", strokeWidth: 4 }}
             connectionLineContainerStyle={{ zIndex: 0 }}
@@ -502,20 +476,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
       </NodeDropzoneProvider>
     </NodeOperationsProvider>
   );
-}
-
-function checkIntersection(n1: Node, n2: Node) {
-  const n1w = n1.measured?.width ?? n1.width ?? 0;
-  const n1h = n1.measured?.height ?? n1.height ?? 0;
-  const n2w = n2.measured?.width ?? n2.width ?? 0;
-  const n2h = n2.measured?.height ?? n2.height ?? 0;
-
-  const n1x = n1.position.x;
-  const n1y = n1.position.y;
-  const n2x = n2.position.x;
-  const n2y = n2.position.y;
-
-  return n1x + n1w > n2x && n1x < n2x + n2w && n1y + n1h > n2y && n1y < n2y + n2h;
 }
 
 export default function Canvas({ readOnly, ...props }: ReactFlowProps & { readOnly?: boolean }) {

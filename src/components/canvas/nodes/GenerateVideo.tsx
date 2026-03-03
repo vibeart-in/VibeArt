@@ -1,4 +1,3 @@
-
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAtom } from "jotai";
@@ -154,9 +153,9 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
   // 1. Determine dimensions from response data or calculate
   const { targetWidth, targetHeight } = useMemo(() => {
     // Priority 1: Use actual dimensions from response if available
-    if (data.width && data.height) {
-      return { targetWidth: data.width, targetHeight: data.height };
-    }
+    // if (data.width && data.height) {
+    //   return { targetWidth: data.width, targetHeight: data.height };
+    // }
 
     const outputImg = data.outputImages?.[0];
 
@@ -167,7 +166,11 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
 
     // Priority 3: Calculate from aspect ratio
     let aspectRatio = 0.7; // Default
-    if (data.videoUrl || data.imageUrl) {
+
+    // Calculate aspect ratio from output image dimensions if available
+    if (outputImg?.width && outputImg?.height) {
+      aspectRatio = outputImg.height / outputImg.width;
+    } else if (data.videoUrl || data.imageUrl) {
       aspectRatio = 1.0;
     }
 
@@ -353,7 +356,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
         className="relative size-full flex-1 overflow-hidden rounded-3xl"
         // style={{ minHeight: "300px" }}
       >
-        {(data.videoUrl || data.imageUrl) ? (
+        {data.videoUrl || data.imageUrl ? (
           <video
             src={data.videoUrl || data.imageUrl}
             className="size-full rounded-3xl object-cover"

@@ -63,7 +63,12 @@ export async function getCanvasProjects(): Promise<CanvasProject[]> {
   return data as unknown as CanvasProject[];
 }
 
-export async function publishCanvas(id: string, publish: boolean) {
+export async function publishCanvas(
+  id: string,
+  publish: boolean,
+  title?: string,
+  cover?: string | null,
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -71,9 +76,17 @@ export async function publishCanvas(id: string, publish: boolean) {
 
   if (!user) throw new Error("User not authenticated");
 
+  const updates: any = { is_public: publish };
+
+  // Only update title and cover when publishing
+  if (publish) {
+    if (title) updates.title = title;
+    if (cover !== undefined) updates.cover = cover;
+  }
+
   const { error } = await supabase
     .from("canvas")
-    .update({ is_public: publish } as any)
+    .update(updates)
     .eq("id", id)
     .eq("user_id", user.id);
 
@@ -138,10 +151,7 @@ export async function deleteCanvas(id: string) {
 
   // 1. Delete related Jobs and Job Output Images
   // First, get all job IDs for this canvas
-  const { data: jobs } = await supabase
-    .from("jobs")
-    .select("id")
-    .eq("canvas_id", id);
+  const { data: jobs } = await supabase.from("jobs").select("id").eq("canvas_id", id);
 
   if (jobs && jobs.length > 0) {
     const jobIds = jobs.map((j) => j.id);
@@ -154,11 +164,7 @@ export async function deleteCanvas(id: string) {
   }
 
   // 2. Delete the Canvas
-  const { error } = await supabase
-    .from("canvas")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
+  const { error } = await supabase.from("canvas").delete().eq("id", id).eq("user_id", user.id);
 
   if (error) {
     console.error("Error deleting canvas:", error);

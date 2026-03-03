@@ -1,7 +1,7 @@
 "use client";
 
 import { CurrencyCircleDollar } from "@phosphor-icons/react";
-import { useNodesData, NodeToolbar } from "@xyflow/react";
+import { useNodesData, NodeToolbar, Position } from "@xyflow/react"; // Remember to import Position
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
 import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
@@ -22,12 +22,10 @@ import { useNavInfo } from "@/src/hooks/useNavInfo";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { ConversationType } from "@/src/types/BaseType";
 import { Database } from "@/supabase/database.types";
-import { Position } from "@xyflow/react";
 
 import UpdatePlanDialog from "../../user/dashboard/updatePlanDialog";
 
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
-
 
 interface GenerateToolbarProps {
   id?: string;
@@ -58,7 +56,6 @@ export default function GenerateToolbar({
 
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom(id || ""));
 
-  // Subscription & Access Control Logic
   const { data: navData } = useNavInfo();
   const isFreeUser = navData?.navInfo?.subscription_tier === "free";
   const [isUpdatePlanOpen, setIsUpdatePlanOpen] = useState(false);
@@ -81,12 +78,9 @@ export default function GenerateToolbar({
 
   const imageUrl = (nodesData?.data as any)?.imageUrl;
 
-  // Load initial model from localStorage or use initialModel/first model
   useEffect(() => {
     if (models && models.length > 0 && !selectedModel) {
-      // Try to get the last selected model from localStorage
       const storedModelName = localStorage.getItem("lastSelectedModel");
-      
       if (storedModelName) {
         const storedModel = models.find((m) => m.model_name === storedModelName);
         if (storedModel) {
@@ -94,8 +88,6 @@ export default function GenerateToolbar({
           return;
         }
       }
-      
-      // Fallback to initialModel if provided
       if (initialModel) {
         const found = models.find((m) => m.model_name === initialModel);
         if (found) {
@@ -103,8 +95,6 @@ export default function GenerateToolbar({
           return;
         }
       }
-      
-      // Default to first model
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel, setSelectedModel, initialModel]);
@@ -127,19 +117,20 @@ export default function GenerateToolbar({
     }
   };
 
-  if (!selected && !isHovered) return null;
+  const isActive = selected || isHovered;
 
   return (
     <NodeToolbar
-      isVisible={selected || isHovered}
+      isVisible={true} // Hardcode to true, parent component manages unmounting logic now
       position={Position.Bottom}
       offset={12}
-      className={`transition-opacity duration-300 ${
-        selected ? "opacity-100" : "opacity-50 hover:opacity-100"
-      }`}
     >
       <div
-        className="flex items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl"
+        className={`ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex origin-top items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl transition-all duration-300 ${
+          isActive
+            ? `translate-y-0 scale-100 ${selected ? "opacity-100" : "opacity-80 hover:opacity-100"}`
+            : "pointer-events-none -translate-y-4 scale-90 opacity-0"
+        }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -161,7 +152,6 @@ export default function GenerateToolbar({
               }
               setSelectedModel(found);
               localStorage.setItem("lastSelectedModel", found.model_name);
-              console.log("Selected model saved to localStorage:", found.model_name);
             }
           }}
         >
