@@ -106,7 +106,7 @@ export default function LensCaveCards() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="w-full bg-black px-6 pb-20 md:px-20 lg:px-32"
+      className="w-full bg-black px-6 pb-20 md:px-10"
     >
       {/* Section Header */}
       <div className="mb-6 flex items-center gap-4">
@@ -131,7 +131,7 @@ export default function LensCaveCards() {
       </div>
 
       {/* Slider */}
-      <div className="group/slider relative -mx-6 overflow-hidden px-6 md:-mx-20 md:px-20 lg:-mx-32 lg:px-32">
+      <div className="group/slider relative -mx-6 overflow-hidden px-6 md:-mx-10 md:px-10">
         {/* Left fade */}
         <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-black to-transparent" />
         {/* Right fade */}
@@ -140,7 +140,7 @@ export default function LensCaveCards() {
         {/* Left Button */}
         <button
           onClick={() => scrollSlider("left")}
-          className="absolute left-6 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/slider:opacity-100"
+          className="absolute left-8 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white opacity-0 shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 group-hover/slider:opacity-100"
         >
           <ArrowLeft className="size-5" />
         </button>
@@ -148,7 +148,7 @@ export default function LensCaveCards() {
         {/* Right Button */}
         <button
           onClick={() => scrollSlider("right")}
-          className="absolute right-6 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700 disabled:opacity-0"
+          className="absolute right-8 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-neutral-800 text-white shadow-xl backdrop-blur-md transition-all hover:bg-neutral-700"
         >
           <ArrowRight className="size-5" />
         </button>
@@ -190,3 +190,4 @@ export default function LensCaveCards() {
     </motion.div>
   );
 }
+

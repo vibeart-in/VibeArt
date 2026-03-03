@@ -51,13 +51,13 @@ const HERO_SLIDES = [
   {
     id: 5,
     tag: "✦ Recommended",
-    heading: "Nanobannan",
-    sub: "2",
+    heading: "Canvas",
+    sub: "1.0",
     description:
       "A lightweight yet powerful generalist model fine-tuned for rapid generation. Ideal for concept art, mood boards, and iterative creative exploration.",
     image:
       "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/showcase/new/2_5D_In_the_cold_winter_with_Snow_gleams_white_Sno.jpg",
-    cta: "/generate",
+    cta: "/canvas",
   },
 ];
 
