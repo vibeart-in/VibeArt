@@ -72,7 +72,7 @@ const ContactUs = () => {
           <div className="mt-8 w-full lg:mt-0 lg:w-1/2">
             <div className="relative">
               <Image
-                src="/images/landing/contactus/contact.png"
+                src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/contact/contact.webp"
                 alt="An astronaut and an anime-style girl with wings sitting on a spaceship"
                 width={300}
                 height={300}
@@ -89,7 +89,7 @@ const ContactUs = () => {
                 }}
               />
               <Image
-                src="/images/landing/contactus/contact-trans2.png"
+                src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/contact/contact-trans2.webp"
                 alt="An astronaut and an anime-style girl with wings sitting on a spaceship"
                 width={300}
                 height={300}

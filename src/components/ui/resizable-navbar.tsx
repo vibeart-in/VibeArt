@@ -7,6 +7,13 @@ import React, { useRef, useState } from "react";
 
 import { cn } from "@/src/lib/utils";
 
+// Lenis is exposed globally by CreativeProcess to allow scrolling past pinned sections
+declare global {
+  interface Window {
+    __lenis?: import("lenis").default;
+  }
+}
+
 interface NavbarProps {
   children: React.ReactNode;
   className?: string;
@@ -122,6 +129,20 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
   // Determine which single item should have the highlight. Hover takes precedence.
   const highlightedItemIndex = hovered !== null ? hovered : activeItemIndex;
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    if (!link.startsWith("#")) return; // let normal navigation happen
+    e.preventDefault();
+    const id = link.slice(1);
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (window.__lenis) {
+      window.__lenis.scrollTo(el, { offset: -80, immediate: true });
+    } else {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    onItemClick?.();
+  };
+
   return (
     <motion.div
       onMouseLeave={() => setHovered(null)}
@@ -138,7 +159,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
           <a
             key={`link-${idx}`}
             href={item.link}
-            onClick={onItemClick}
+            onClick={(e) => handleScrollTo(e, item.link)}
             onMouseEnter={() => setHovered(idx)}
             className={cn(
               "relative flex items-center gap-2 px-4 py-2 transition-colors duration-200",
@@ -233,10 +254,10 @@ export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick:
   );
 };
 
-export const NavbarLogo = ({ className }: { className?: string }) => {
+export const NavbarLogo = ({ className, href }: { className?: string; href?: string }) => {
   return (
     <Link
-      href="/"
+      href={href || "/"}
       className={cn(
         "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black",
         className,
@@ -250,7 +271,6 @@ export const NavbarLogo = ({ className }: { className?: string }) => {
     </Link>
   );
 };
-
 export const NavbarButton = ({
   href,
   children,

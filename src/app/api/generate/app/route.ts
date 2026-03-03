@@ -24,7 +24,13 @@ export async function POST(req: NextRequest) {
       appId,
       parameters: clientParameters,
       inputMediaStoreUrls,
-    }: { appId: string; parameters: NodeParam[]; inputMediaStoreUrls: string[] } = await req.json();
+      canvasId,
+    }: {
+      appId: string;
+      parameters: NodeParam[];
+      inputMediaStoreUrls: string[];
+      canvasId?: string;
+    } = await req.json();
 
     if (!appId || !clientParameters) {
       return NextResponse.json({ message: "Missing appId or parameters" }, { status: 400 });
@@ -66,6 +72,11 @@ export async function POST(req: NextRequest) {
     if (rpcError || !newJobId) {
       console.error("Error in RPC function create_job_and_conversation:", rpcError);
       return NextResponse.json({ message: "Failed to create job via RPC" }, { status: 500 });
+    }
+
+    // Update canvas_id if provided (for canvas job orchestration)
+    if (canvasId) {
+      await supabase.from("jobs").update({ canvas_id: canvasId }).eq("id", newJobId);
     }
 
     // 4. Call the external AI service (RunningHub)

@@ -32,7 +32,11 @@ const generateImage = async (formData: GenerationParams) => {
   return result;
 };
 
-export function useGenerateImage(conversationType: ConversationType, conversationId?: string) {
+export function useGenerateImage(
+  conversationType: ConversationType,
+  conversationId?: string,
+  options?: { redirectOnSuccess?: boolean },
+) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const queryKey = ["messages", conversationId];
@@ -81,7 +85,9 @@ export function useGenerateImage(conversationType: ConversationType, conversatio
     },
     onSettled: (data) => {
       if (!conversationId && data?.conversationId) {
-        router.push(`/${conversationType}/${data.conversationId}`);
+        if (options?.redirectOnSuccess !== false) {
+          router.push(`/${conversationType}/${data.conversationId}`);
+        }
       } else {
         queryClient.invalidateQueries({ queryKey });
       }

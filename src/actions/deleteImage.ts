@@ -23,7 +23,10 @@ export async function deleteImage(imageId: string) {
       .eq("image", imageId);
 
     if (updateError) {
-      console.warn("Failed to unlink image from conversation (might be wrong column name or harmless):", updateError);
+      console.warn(
+        "Failed to unlink image from conversation (might be wrong column name or harmless):",
+        updateError,
+      );
       // We continue, as maybe the column is different or row doesn't exist.
       // If it fails here, the delete below will likely fail with FK violation anyway.
     }

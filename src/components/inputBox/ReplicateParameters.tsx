@@ -208,7 +208,7 @@ const areOtherParamsEqual = (prevProps: any, nextProps: any) => {
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-const MemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
+export const ReplicateMemoizedOtherParameters = React.memo(OtherParameters, areOtherParamsEqual);
 
 export const ReplicateParameters = forwardRef<ReplicateParametersHandle, ReplicateParametersProps>(
   ({ parameters, modelName, identifier }, ref) => {
@@ -269,7 +269,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
       Record<string, string[]>
     >(() => ({}));
     const [selectedPreset, setSelectedPreset] = useState<PresetData | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
+    const [selectedStyle, setSelectedStyle] = useState<MidjourneyStyleData | null>(null);
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [isSpinning, setIsSpinning] = useState(false);
@@ -301,7 +301,9 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
 
           if (selectedStyle?.prompt) {
             const existing = filteredValues["prompt"] || "";
-            filteredValues["prompt"] = existing ? `${existing} ${selectedStyle.prompt}` : selectedStyle.prompt;
+            filteredValues["prompt"] = existing
+              ? `${existing} ${selectedStyle.prompt}`
+              : selectedStyle.prompt;
           }
 
           // Flatten permanent paths into an array (backwards-compatible) and also return a map for clarity
@@ -310,11 +312,11 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             values: filteredValues,
             inputImages: inputImagesFlat, // legacy-friendly
             inputImageMap: inputImagePermanentPathsMap, // new, keyed by original param key
-            currentImage:
-              Object.values(multiImagesMap).flat()[0] ||
-              null,
+            currentImage: Object.values(multiImagesMap).flat()[0] || null,
             allImageObjects: [
-              ...Object.values(singleImageObjects).filter((img): img is ImageObject => img !== null),
+              ...Object.values(singleImageObjects).filter(
+                (img): img is ImageObject => img !== null,
+              ),
               ...Object.values(multiImagesMap).flat(),
             ],
             selectedPreset,
@@ -387,16 +389,16 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             const imageParam = parameters[targetKey];
 
             if (imageParam?.type === "array") {
-               setMultiImagesMap((prev) => ({ ...prev, [targetKey]: persistedImages }));
-               const normalizedKey = normalizeKey(targetKey);
-               setValues((prev) => ({ 
-                 ...prev, 
-                 [normalizedKey]: persistedImages.map(img => img.displayUrl) 
-               }));
-               setInputImagePermanentPathsMap((prev) => ({
-                 ...prev,
-                 [targetKey]: persistedImages.map(img => img.permanentPath),
-               }));
+              setMultiImagesMap((prev) => ({ ...prev, [targetKey]: persistedImages }));
+              const normalizedKey = normalizeKey(targetKey);
+              setValues((prev) => ({
+                ...prev,
+                [normalizedKey]: persistedImages.map((img) => img.displayUrl),
+              }));
+              setInputImagePermanentPathsMap((prev) => ({
+                ...prev,
+                [targetKey]: persistedImages.map((img) => img.permanentPath),
+              }));
             }
           }
         } catch (e) {
@@ -585,7 +587,6 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
                 );
               }
 
-
               return null;
             })}
           </div>
@@ -659,7 +660,7 @@ export const ReplicateParameters = forwardRef<ReplicateParametersHandle, Replica
             </div>
           </div>
 
-          <MemoizedOtherParameters
+          <ReplicateMemoizedOtherParameters
             otherEntries={otherEntries}
             values={values}
             handleChange={handleChange}

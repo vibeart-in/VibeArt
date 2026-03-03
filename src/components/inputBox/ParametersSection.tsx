@@ -32,13 +32,22 @@ const ParametersSection = forwardRef<ParametersSectionHandle, ParametersSectionP
       getValues: () => {
         if (selectedModel.provider === "replicate") {
           if (!replicateParamsRef.current) throw new Error("Replicate parameters not ready");
-          const { values, inputImages, currentImage, allImageObjects, selectedPreset } = replicateParamsRef.current.getValues();
-          return { values, inputImages, promptText: values.prompt || "", currentImage, allImageObjects, selectedPreset };
+          const { values, inputImages, currentImage, allImageObjects, selectedPreset } =
+            replicateParamsRef.current.getValues();
+          return {
+            values,
+            inputImages,
+            promptText: values.prompt || "",
+            currentImage,
+            allImageObjects,
+            selectedPreset,
+          };
         }
 
         if (selectedModel.provider === "running_hub") {
           if (!runninghubParamsRef.current) throw new Error("Runninghub parameters not ready");
-          const { values, inputImages, currentImage, allImageObjects, selectedPreset } = runninghubParamsRef.current.getValues();
+          const { values, inputImages, currentImage, allImageObjects, selectedPreset } =
+            runninghubParamsRef.current.getValues();
           const promptParam = values.find(
             (p: any) => p.description === "prompt" || p.fieldName === "prompt",
           );

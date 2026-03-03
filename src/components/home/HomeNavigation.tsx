@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { PhotoIcon, VideoCameraIcon, PuzzlePieceIcon } from "@heroicons/react/24/solid";
 import { FireIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 
 export function HomeNavigation() {
   const navItems = [

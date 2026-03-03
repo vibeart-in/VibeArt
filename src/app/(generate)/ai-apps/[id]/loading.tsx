@@ -1,4 +1,5 @@
 import React from "react";
+
 import { cn } from "@/src/lib/utils";
 
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -67,7 +68,7 @@ export default function Loading() {
 
           {/* Desktop: Cover image on right */}
           <div className="hidden lg:flex lg:flex-grow lg:items-center lg:justify-center">
-            <Skeleton className="h-[500px] w-[500px] rounded-[44px]" />
+            <Skeleton className="size-[500px] rounded-[44px]" />
           </div>
         </div>
 

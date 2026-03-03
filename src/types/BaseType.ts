@@ -48,6 +48,7 @@ export interface ModelData {
   tags?: string[];
   is_variable_price?: boolean;
   pricing_parameters?: Json;
+  is_paid?: boolean;
 }
 
 export type DBModelData = Database["public"]["Functions"]["get_initial_model"]["Returns"][number];
@@ -137,6 +138,16 @@ export type PresetData = {
   tags?: string[] | null;
   for_model: string[];
 };
+
+export interface CanvasProject {
+  id: string;
+  user_id: string;
+  title: string | null;
+  image: { url?: string; public_url?: string; image_url?: string } | null;
+  created_at: string;
+  updated_at: string;
+  content: any;
+}
 
 export type MidjourneyStyleData = {
   id: number;

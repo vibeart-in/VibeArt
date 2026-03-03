@@ -1,0 +1,304 @@
+"use client";
+
+import { IconSquareRoundedPlus } from "@tabler/icons-react";
+import {
+  Handle,
+  NodeResizeControl,
+  Position,
+  useViewport,
+  useNodeConnections,
+} from "@xyflow/react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+
+import NodeToolbar from "./NodeToolbar";
+import { useCanvas } from "../providers/CanvasProvider";
+import Magnet from "../ui/Magnet";
+
+export type HandleConfig = {
+  type: "source" | "target";
+  position: Position;
+  id?: string;
+  className?: string;
+};
+
+interface NodeLayoutProps {
+  id?: string;
+  toolbarType?:
+    | "default"
+    | "text"
+    | "image"
+    | "generate"
+    | "upscale"
+    | "removeBackground"
+    | "group";
+  textEditor?: any;
+  selected?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  title?: string;
+  subtitle?: string;
+  children?: ReactNode;
+  handles?: HandleConfig[];
+  minWidth?: number;
+  minHeight?: number;
+  keepAspectRatio?: boolean;
+  toolbarHidden?: boolean;
+  resizeHidden?: boolean;
+  initialModel?: string;
+}
+
+export default function NodeLayout({
+  id,
+  selected,
+  className = "",
+  style,
+  title,
+  subtitle,
+  children,
+  handles = [],
+  minWidth = 200,
+  minHeight = 200,
+  toolbarType = "default",
+  textEditor,
+  keepAspectRatio,
+  toolbarHidden,
+  resizeHidden,
+  initialModel,
+}: NodeLayoutProps) {
+  const { isDraggingEdge } = useCanvas();
+
+  // --- 1. Internal Hover Logic ---
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    };
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 250);
+  }, []);
+
+  const isActive = selected || isHovered;
+
+  // --- Delayed Unmount Logic for Exit Animations ---
+  const [isToolbarMounted, setIsToolbarMounted] = useState(isActive);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsToolbarMounted(true);
+    } else {
+      // 300ms matches our CSS exit transition duration
+      const timeout = setTimeout(() => setIsToolbarMounted(false), 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [isActive]);
+
+  // --- 2. Positioning Logic ---
+  const getHandlePositionStyle = (
+    position: Position,
+  ): React.CSSProperties & { "--x-translate"?: string; "--y-translate"?: string } => {
+    const isVertical = position === Position.Left || position === Position.Right;
+    const size = isVertical ? { height: "6rem", width: "4rem" } : { width: "6rem", height: "4rem" };
+    const offset = "-0rem";
+    const floatDistance = "54px";
+
+    switch (position) {
+      case Position.Left:
+        return {
+          ...size,
+          left: offset,
+          top: "50%",
+          transform: "translateY(-50%)",
+          "--x-translate": `-${floatDistance}`,
+        };
+      case Position.Right:
+        return {
+          ...size,
+          right: offset,
+          top: "50%",
+          transform: "translateY(-50%)",
+          "--x-translate": floatDistance,
+        };
+      case Position.Top:
+        return {
+          ...size,
+          top: offset,
+          left: "50%",
+          transform: "translateX(-50%)",
+          "--y-translate": `-${floatDistance}`,
+        };
+      case Position.Bottom:
+        return {
+          ...size,
+          bottom: offset,
+          left: "50%",
+          transform: "translateX(-50%)",
+          "--y-translate": floatDistance,
+        };
+      default:
+        return {};
+    }
+  };
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`group relative ${selected ? "ring-2 ring-[#e2e2e2]/50" : ""} ${className}`}
+      style={{
+        minWidth,
+        minHeight,
+        ...style,
+      }}
+    >
+      {/* Use isToolbarMounted instead of isActive so exit animations can finish */}
+      {isToolbarMounted && !toolbarHidden && (
+        <NodeToolbar
+          handleMouseEnter={handleMouseEnter}
+          handleMouseLeave={handleMouseLeave}
+          isHovered={isActive} // Passes true/false dynamically to trigger animation inside
+          selected={!!selected}
+          id={id}
+          toolbarType={toolbarType}
+          textEditor={textEditor}
+          initialModel={initialModel}
+        />
+      )}
+
+      <NodeLabels title={title} subtitle={subtitle} />
+
+      {/* Main Content */}
+      <div className="size-full">{children}</div>
+
+      {/* Resize Control */}
+      {!resizeHidden && selected && (
+        <NodeResizeControl
+          position="bottom-right"
+          minWidth={minWidth}
+          minHeight={minHeight}
+          keepAspectRatio={keepAspectRatio}
+          style={{ background: "transparent", border: "none", zIndex: 50 }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              position: "absolute",
+              bottom: -6,
+              right: -6,
+            }}
+          >
+            <path
+              d="M 3 17 A 14 14 0 0 0 17 3"
+              stroke="#c0c0bf80"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          </svg>
+        </NodeResizeControl>
+      )}
+
+      {/* Handles */}
+      {handles.map((handle, index) => {
+        const {
+          "--x-translate": xTrans,
+          "--y-translate": yTrans,
+          ...handleStyle
+        } = getHandlePositionStyle(handle.position);
+
+        return (
+          <Handle
+            key={`${handle.type}-${handle.position}-${index}`}
+            type={handle.type}
+            position={handle.position}
+            id={handle.id}
+            className={`group/handle absolute z-0 flex items-center justify-center bg-transparent transition-all duration-300 ${
+              isActive ? "opacity-100" : "pointer-events-none opacity-0"
+            } ${handle.className || ""}`}
+            style={{
+              ...handleStyle,
+              border: "none",
+              borderRadius: 0,
+              background: "transparent",
+            }}
+          >
+            {!isDraggingEdge && (
+              // Animation wrapper perfectly coordinates slide-out with active state
+              <div
+                className="duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex items-center justify-center transition-transform"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  transform: isActive
+                    ? `translate(${xTrans || "0px"}, ${yTrans || "0px"}) scale(1)`
+                    : `translate(0px, 0px) scale(0.5)`,
+                }}
+              >
+                <Magnet
+                  padding={0}
+                  magnetStrength={2}
+                  activeTransition="transform 0.1s ease-out"
+                  inactiveTransition="transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                  wrapperClassName="w-full h-full"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconSquareRoundedPlus />
+                </Magnet>
+              </div>
+            )}
+          </Handle>
+        );
+      })}
+    </div>
+  );
+}
+
+const NodeLabels = React.memo(({ title, subtitle }: { title?: string; subtitle?: string }) => {
+  const { zoom } = useViewport();
+
+  if (!title && !subtitle) return null;
+
+  return (
+    <div
+      className="absolute inset-x-0 bottom-full flex items-center justify-between px-1 font-medium text-white/90"
+      style={{ marginBottom: `${8 / zoom}px` }}
+    >
+      {title && (
+        <span className="max-w-[60%] truncate font-light" style={{ fontSize: `${12 / zoom}px` }}>
+          {title}
+        </span>
+      )}
+      {subtitle && (
+        <span
+          className="max-w-[35%] truncate font-extralight opacity-80"
+          style={{ fontSize: `${10 / zoom}px` }}
+        >
+          {subtitle}
+        </span>
+      )}
+    </div>
+  );
+});
+
+NodeLabels.displayName = "NodeLabels";

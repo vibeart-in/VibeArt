@@ -1,4 +1,5 @@
 import { DotsThreeVerticalIcon, MinusCircleIcon } from "@phosphor-icons/react";
+import { SparkleIcon } from "@phosphor-icons/react";
 import { IconAspectRatio, IconTerminal } from "@tabler/icons-react";
 import { DicesIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -12,9 +13,14 @@ import React, {
   useState,
 } from "react";
 
-import { ConversationType, ModelData, NodeParam, PresetData, MidjourneyStyleData } from "@/src/types/BaseType";
+import {
+  ConversationType,
+  ModelData,
+  NodeParam,
+  PresetData,
+  MidjourneyStyleData,
+} from "@/src/types/BaseType";
 import { getRandomPromptForModel } from "@/src/utils/client/prompts";
-
 import { getIconForParam } from "@/src/utils/server/utils";
 
 import MidjourneyStylesModal from "./MidjourneyStylesModal";
@@ -40,7 +46,6 @@ import {
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { SparkleIcon } from "@phosphor-icons/react";
 
 interface RunninghubParametersProps {
   parameters: NodeParam[];
@@ -288,11 +293,10 @@ const OtherParameters = ({
   );
 };
 
-
 // ============================================================================
 // 3. CREATE THE MEMOIZED COMPONENT
 // ============================================================================
-const MemoizedOtherParameters = React.memo(OtherParameters);
+export const RunninghubMemoizedOtherParameters = React.memo(OtherParameters);
 
 export const RunninghubParameters = forwardRef<
   RunninghubParametersHandle,
@@ -374,7 +378,7 @@ export const RunninghubParameters = forwardRef<
 
         const currentValues = values.map((p) => {
           if ((p.description === "prompt" || p.fieldName === "prompt") && selectedStyle?.prompt) {
-             return { ...p, fieldValue: `${p.fieldValue} ${selectedStyle.prompt}` };
+            return { ...p, fieldValue: `${p.fieldValue} ${selectedStyle.prompt}` };
           }
           return p;
         });
@@ -383,7 +387,9 @@ export const RunninghubParameters = forwardRef<
           values: currentValues, // This array contains the displayUrl for images
           inputImages: inputImages, // This array contains ONLY the permanentPath
           currentImage: Object.values(imageObjects).find((img) => img !== null) || null,
-          allImageObjects: Object.values(imageObjects).filter((img): img is ImageObject => img !== null),
+          allImageObjects: Object.values(imageObjects).filter(
+            (img): img is ImageObject => img !== null,
+          ),
           selectedPreset,
         };
       },
@@ -537,7 +543,7 @@ export const RunninghubParameters = forwardRef<
   }, [modelName]);
 
   return (
-      <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
+    <div className="relative flex w-full flex-col gap-8 md:flex-row md:gap-2">
       {/* If it's Midjourney, show MidjourneyStylesModal instead of PresetModal */}
       {!memoizedIsMidjourney && !(checkpointParam || loraParam) ? (
         <PresetModal
@@ -629,9 +635,7 @@ export const RunninghubParameters = forwardRef<
           </div>
         </AnimatePresence>
 
-       
-
-        <MemoizedOtherParameters
+        <RunninghubMemoizedOtherParameters
           otherParams={otherParams}
           handleChange={handleChange}
           showNegativePrompt={showNegativePrompt}
@@ -641,20 +645,17 @@ export const RunninghubParameters = forwardRef<
           setEnableLoraStrength={setEnableLoraStrength}
           hasLoraStrengthParam={hasLoraStrengthParam}
         />
-        
-        
-
       </div>
       {memoizedIsMidjourney && (
-          <div className="w-full">
-            <MidjourneyStylesModal
-              onSelectPrompt={handlePromptChange}
-              selectedStyle={selectedStyle}
-              onSelect={setSelectedStyle}
-              currentPrompt={promptParam?.fieldValue || ""}
-            />
-          </div>
-        )}
+        <div className="w-full">
+          <MidjourneyStylesModal
+            onSelectPrompt={handlePromptChange}
+            selectedStyle={selectedStyle}
+            onSelect={setSelectedStyle}
+            currentPrompt={promptParam?.fieldValue || ""}
+          />
+        </div>
+      )}
       {imageParams.map((param, index) => {
         return (
           <ImageUploadBox

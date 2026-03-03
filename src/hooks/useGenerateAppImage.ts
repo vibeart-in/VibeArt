@@ -11,6 +11,7 @@ interface GenerateAppImagePayload {
   parameters: NodeParam[];
   inputImagePreviewUrls?: string[] | null;
   inputMediaStoreUrls?: string[] | null;
+  canvasId?: string | null; // Optional canvas ID for job tracking
 }
 
 interface GenerateAppImageResponse {

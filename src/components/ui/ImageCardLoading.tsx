@@ -1,4 +1,5 @@
 import React from "react";
+
 import { useMediaQuery } from "@/src/hooks/use-media-query";
 
 interface ImageCardLoadingProps {
@@ -16,8 +17,6 @@ function parseRatio(ratio: string | number): number {
   const [w, h] = ratio.split(":").map(Number);
   return h === 0 ? 1 : w / h;
 }
-
-
 
 export const ImageCardLoading: React.FC<ImageCardLoadingProps> = ({
   ratio = "1:1",

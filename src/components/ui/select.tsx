@@ -25,7 +25,7 @@ const SelectTrigger = React.forwardRef<
       // Width is flexible, defaults to fitting content
       "w-fit",
       // Background & border
-      "border border-solid border-[#313131] bg-[#131312]",
+      "border border-solid border-[#313131]/80 bg-[#131313]/60",
       // --- KEY CHANGE: Selected value text color is now 'accent' ---
       "text-xs font-normal leading-[14px]",
       // Focus and placeholder states

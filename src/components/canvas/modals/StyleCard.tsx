@@ -1,9 +1,9 @@
 "use client";
 import { motion, Variants } from "motion/react";
 import Image from "next/image";
-import { StyleData } from "@/src/types/BaseType";
 import React, { useState, useEffect } from "react";
 
+import { StyleData } from "@/src/types/BaseType";
 
 const cardVariants: Variants = {
   initial: { scale: 1 },
@@ -57,20 +57,20 @@ const StyleCard = ({ style, onSelect }: StyleCardProps) => {
           variants={coverVariants}
           style={{ willChange: "transform" }}
         >
-             {/* Assuming images for now, can add video support if needed like PresetCard */}
-            <Image src={style.cover} alt={style.name} fill className="object-cover" />
+          {/* Assuming images for now, can add video support if needed like PresetCard */}
+          <Image src={style.cover} alt={style.name} fill className="object-cover" />
         </motion.div>
       )}
 
       {/* Overlay */}
       <div className="absolute inset-0 flex flex-col justify-between bg-black/20 backdrop-blur-0 transition-all hover:backdrop-blur-0">
         <div className="relative flex size-full flex-col items-center justify-end gap-2 px-3 py-2">
-            <motion.p className="text-center font-bold leading-8 text-accent drop-shadow-md">{style.name}</motion.p>
-            {/* Show sref on hover if available and desirable, or just name? 
+          <motion.p className="text-center font-bold leading-8 text-accent drop-shadow-md">
+            {style.name}
+          </motion.p>
+          {/* Show sref on hover if available and desirable, or just name? 
                 The user image showed "-sref 123456" inside the card.
             */}
-            
-
 
           {/* Use Button */}
           <div className="relative flex h-[48px] w-full items-center justify-center">
@@ -88,8 +88,8 @@ const StyleCard = ({ style, onSelect }: StyleCardProps) => {
             >
               <button
                 onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(style);
+                  e.stopPropagation();
+                  onSelect(style);
                 }}
                 className="rounded-xl border border-accent bg-[linear-gradient(90deg,rgba(217,232,37,0.5)_0%,rgba(227,210,186,0.5)_100%)] px-6 py-1 font-satoshi text-sm font-semibold text-accent shadow-sm transition-transform hover:scale-105 active:scale-95"
               >

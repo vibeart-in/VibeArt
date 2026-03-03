@@ -54,7 +54,7 @@ export default function ImageGalleryWrapper({ userId }: { userId: string }) {
   const allImages = data.pages.flat() as ImageCardProps[];
 
   return (
-    <div className="mx-auto mt-12 max-w-[90vw] md:max-w-[80vw] overflow-hidden px-0 md:px-4 py-10">
+    <div className="mx-auto mt-12 max-w-[90vw] overflow-hidden px-0 py-10 md:max-w-[80vw] md:px-4">
       {/* Page Header */}
       <div className="mb-8 text-center">
         <h1 className="font-satoshi text-4xl font-bold text-accent sm:text-7xl">
