@@ -1,7 +1,7 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAtom } from "jotai";
-import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw } from "lucide-react";
+import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw, Maximize2 } from "lucide-react";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
@@ -16,6 +16,7 @@ import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubPara
 import { useCanvas } from "../../providers/CanvasProvider";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
+import { Dialog, DialogContent, DialogTitle } from "../../ui/dotted-dialog";
 import NodeLayout from "../NodeLayout";
 
 export type GenerateVideoNodeData = {
@@ -105,6 +106,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [prompt, setPrompt] = useState(data.prompt || "");
   const [isCopied, setIsCopied] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   // Sync prop to state
   useEffect(() => {
@@ -505,6 +507,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
             muted
             playsInline
             controls={false}
+            crossOrigin="anonymous"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -521,6 +524,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                 loop
                 muted
                 playsInline
+                crossOrigin="anonymous"
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10" />
@@ -563,13 +567,22 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
 
         {/* Reset Button */}
         {showResetButton && (
-          <button
-            className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/40 text-white/70 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/60 hover:text-white hover:shadow-xl"
-            onClick={handleReset}
-            title="Reset to generate state"
-          >
-            <RotateCcw size={16} />
-          </button>
+          <>
+            <button
+              className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/40 text-white/70 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/60 hover:text-white hover:shadow-xl"
+              onClick={() => setIsVideoDialogOpen(true)}
+              title="Open video in fullscreen"
+            >
+              <Maximize2 size={16} />
+            </button>
+            <button
+              className="absolute left-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/40 text-white/70 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/60 hover:text-white hover:shadow-xl"
+              onClick={handleReset}
+              title="Reset to generate state"
+            >
+              <RotateCcw size={16} />
+            </button>
+          </>
         )}
       </div>
 
@@ -752,6 +765,26 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
           </>
         )}
       </button>
+
+      {/* Video Dialog Modal */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-5xl p-0">
+          <DialogTitle className="sr-only">Video Player</DialogTitle>
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+            {(data.videoUrl || data.imageUrl) && (
+              <video
+                src={data.videoUrl || data.imageUrl}
+                className="h-full w-full object-contain"
+                controls
+                autoPlay
+                loop
+                playsInline
+                crossOrigin="anonymous"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </NodeLayout>
   );
 });

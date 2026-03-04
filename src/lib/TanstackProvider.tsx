@@ -2,7 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import DialogRotator from "../components/home/DialogRotator";
+// import DialogRotator from "../components/home/DialogRotator";
 
 interface TanStackProviderProps {
   children: React.ReactNode;
@@ -23,12 +23,12 @@ export const TanStackProvider = ({ children }: TanStackProviderProps) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DialogRotator
+      {/* <DialogRotator
         minDelaySec={30}
         maxDelaySec={300}
         cacheTtlSec={60 * 60}
         delayAfterCycleSec={60 * 60}
-      />
+      /> */}
       {children}
       {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>

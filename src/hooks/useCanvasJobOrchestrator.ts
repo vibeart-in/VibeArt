@@ -17,6 +17,7 @@ export function useCanvasJobOrchestrator(canvasId: string) {
         { event: "UPDATE", schema: "public", table: "jobs", filter: `canvas_id=eq.${canvasId}` },
         async (payload) => {
           const updatedJob = payload.new;
+          console.log("updatedJob---------", updatedJob);
 
           // Find the node that owns this job
           const nodes = getNodes();
@@ -82,6 +83,7 @@ export function useCanvasJobOrchestrator(canvasId: string) {
                     data: {
                       ...targetNode.data,
                       imageUrl: img.image_url,
+                      generated_model: updatedJob.model_name,
                       outputImages: outputImages,
                       activeJobId: null,
                       status: null,
@@ -118,6 +120,8 @@ export function useCanvasJobOrchestrator(canvasId: string) {
                             ...node.data,
                             imageUrl: outputImages[0].image_url,
                             outputImages: outputImages,
+                            generated_model: updatedJob.model_name,
+
                             activeJobId: null,
                             status: null,
                           },

@@ -115,6 +115,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
   const saveThumbnail = useDebouncedCallback(async () => {
     if (readOnly || !project?.id || nodes.length === 0) return;
+    // console.log("THUMBNAIL TAKEN")
     try {
       const nodesBounds = getNodesBounds(nodes);
       const imageWidth = 1920;

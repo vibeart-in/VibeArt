@@ -52,9 +52,7 @@ const PLACEHOLDERS = [
 ];
 
 const BASE_WIDTH = 450;
-
-// First frame / input image parameters
-const FIRST_FRAME_PARAMS = new Set([
+const EXPLICIT_IMAGE_PARAMS = new Set([
   "image_input",
   "image input",
   "input_image",
@@ -62,30 +60,16 @@ const FIRST_FRAME_PARAMS = new Set([
   "style reference images",
   "style_reference_images",
   "image",
+  "last_frame",
   "image prompt",
   "Image",
+  "last_frame_image",
   "reference_images",
   "first_frame_image",
-  "first_frame",
 ]);
-
-// Last frame / end frame parameters
-const LAST_FRAME_PARAMS = new Set([
-  "last_frame",
-  "last_frame_image",
-  "end_frame",
-  "end_frame_image",
-  "end_image",
-  "final_frame",
-]);
-
-// Combined set for checking if a parameter is any image type
-const ALL_IMAGE_PARAMS = new Set([...FIRST_FRAME_PARAMS, ...LAST_FRAME_PARAMS]);
 
 const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
-const isImageParam = (key: string) => ALL_IMAGE_PARAMS.has(key);
-const isFirstFrameParam = (key: string) => FIRST_FRAME_PARAMS.has(key);
-const isLastFrameParam = (key: string) => LAST_FRAME_PARAMS.has(key);
+const isImageParam = (key: string) => EXPLICIT_IMAGE_PARAMS.has(key);
 
 const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNodeType>) => {
   const { updateNodeData, updateNode } = useReactFlow();
@@ -256,49 +240,16 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       const paramsDef = selectedModel?.parameters;
 
       if (inputImages.length > 0 && paramsDef && !Array.isArray(paramsDef)) {
-        // Handle multiple image parameters with proper ordering
-        // First, find first frame parameter
-        const firstFrameKey = Object.keys(paramsDef).find((k) => isFirstFrameParam(k));
-        // Then, find last frame parameter
-        const lastFrameKey = Object.keys(paramsDef).find((k) => isLastFrameParam(k));
-
+        // Handle multiple image parameters (first frame, last frame, etc.)
         let imageIndex = 0;
-
-        // Assign first image to first frame parameter
-        if (firstFrameKey && imageIndex < inputImages.length) {
-          const def = paramsDef[firstFrameKey];
-          if (def.type === "array") {
-            // If it's an array type, assign all images
-            imageParams[firstFrameKey] = inputImages;
-            imageIndex = inputImages.length;
-          } else {
-            // Single image
-            imageParams[firstFrameKey] = inputImages[imageIndex];
-            imageIndex++;
-          }
-        }
-
-        // Assign second image to last frame parameter (if exists)
-        if (lastFrameKey && imageIndex < inputImages.length) {
-          imageParams[lastFrameKey] = inputImages[imageIndex];
-          imageIndex++;
-        }
-
-        // Handle any remaining image parameters (fallback for other image types)
         Object.keys(paramsDef).forEach((k) => {
-          if (
-            isImageParam(k) &&
-            !imageParams[k] &&
-            imageIndex < inputImages.length &&
-            !isFirstFrameParam(k) &&
-            !isLastFrameParam(k)
-          ) {
+          if (isImageParam(k) && imageIndex < inputImages.length) {
             const def = paramsDef[k];
             if (def.type === "array") {
               imageParams[k] = inputImages.slice(imageIndex);
               imageIndex = inputImages.length;
             } else {
-              imageParams[k] = inputImages[imageIndex];
+              imageParams[k] = inputImages[imageIndex] || null;
               imageIndex++;
             }
           }
@@ -326,32 +277,25 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             else if (param.type === "number" && value !== null && value !== undefined) {
               (parameters as Record<string, any>)[key] = parseFloat(String(value));
             }
-            // Validate and clean up URI format parameters (image parameters)
-            else if (param.format === "uri") {
-              // If value is empty, null, undefined, or not a valid string, remove the parameter entirely
-              if (!value || typeof value !== "string" || value.trim() === "") {
-                delete (parameters as Record<string, any>)[key];
+            // Validate URI format for image parameters
+            else if (param.format === "uri" && value) {
+              // Ensure it's a valid URL string or null
+              if (typeof value !== "string" || value.trim() === "") {
+                (parameters as Record<string, any>)[key] = null;
               }
             }
           }
         });
       }
 
-      // Remove empty or null image parameters (additional cleanup)
-      Object.keys(parameters).forEach((key) => {
-        const value = (parameters as Record<string, any>)[key];
-        if (isImageParam(key) || isImageParam(normalizeKey(key))) {
-          // Remove if null, undefined, empty string, or empty array
-          if (
-            value === null ||
-            value === undefined ||
-            value === "" ||
-            (Array.isArray(value) && value.length === 0)
-          ) {
+      // Remove empty image parameters
+      if (inputImages.length === 0) {
+        Object.keys(parameters).forEach((key) => {
+          if (isImageParam(key) || isImageParam(normalizeKey(key))) {
             delete (parameters as Record<string, any>)[key];
           }
-        }
-      });
+        });
+      }
     }
 
     // Compute credits for variable pricing models
@@ -459,6 +403,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       activeJobId: undefined,
       status: undefined,
       conversationId: undefined,
+      generated_model: undefined,
       // Keep: prompt, stylePrompt, inputImageUrls, model, category, width, height
     });
   }, [id, updateNodeData]);
@@ -471,7 +416,10 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       id={id}
       selected={selected}
       title={data.category || "Image generation"}
-      subtitle={data?.model}
+      subtitle={
+        (typeof data?.generated_model === "string" ? data.generated_model : undefined) ||
+        data?.model
+      }
       minWidth={BASE_WIDTH}
       minHeight={targetHeight}
       keepAspectRatio={true}
@@ -489,7 +437,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       */}
       <div
         className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
-        // style={{ minHeight: "300px" }}
+        style={{ minHeight: `${targetHeight}px` }}
       >
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -498,6 +446,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             alt={data.prompt || "Generated Image"}
             className="object-fit h-full w-full rounded-3xl"
             draggable={false}
+            crossOrigin="anonymous"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -511,6 +460,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                 transition={{ duration: 1.2, ease: "easeInOut" }}
                 className="absolute inset-0 h-full w-full object-cover"
                 alt="Placeholder"
+                crossOrigin="anonymous"
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10" />
@@ -568,85 +518,22 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
-        {/* Info message for image connections */}
-        {selected &&
-          inputImages.length === 0 &&
-          selectedModel?.parameters &&
-          !Array.isArray(selectedModel.parameters) &&
-          (() => {
-            const hasFirstFrame = Object.keys(selectedModel.parameters).some((k) =>
-              isFirstFrameParam(k),
-            );
-            const hasLastFrame = Object.keys(selectedModel.parameters).some((k) =>
-              isLastFrameParam(k),
-            );
-
-            if (hasFirstFrame || hasLastFrame) {
-              return (
-                <div className="mb-3 flex items-start gap-2 rounded-lg bg-blue-500/10 p-2 text-xs text-blue-300 backdrop-blur-sm">
-                  <svg
-                    className="mt-0.5 size-4 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>
-                    Connect images from the left:
-                    {hasFirstFrame && " First image = input"}
-                    {hasFirstFrame && hasLastFrame && ","}
-                    {hasLastFrame && " Second image = last frame"}
-                  </span>
-                </div>
-              );
-            }
-            return null;
-          })()}
-
         {inputImages.length > 0 && (
           <div className="scrollbar-hide relative z-10 mb-3 flex items-center gap-2 overflow-x-auto pb-1">
-            {inputImages.map((url, index) => {
-              // Determine label based on parameter availability
-              const paramsDef = selectedModel?.parameters;
-              const hasFirstFrame =
-                paramsDef &&
-                !Array.isArray(paramsDef) &&
-                Object.keys(paramsDef).some((k) => isFirstFrameParam(k));
-              const hasLastFrame =
-                paramsDef &&
-                !Array.isArray(paramsDef) &&
-                Object.keys(paramsDef).some((k) => isLastFrameParam(k));
-
-              let label = "";
-              if (hasFirstFrame && hasLastFrame) {
-                label = index === 0 ? "Input" : "Last Frame";
-              } else if (hasFirstFrame) {
-                label = "Input";
-              } else if (hasLastFrame) {
-                label = "Last Frame";
-              }
-
-              return (
-                <div
-                  key={index}
-                  className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
-                  {label && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 text-center text-[8px] font-semibold text-white">
-                      {label}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {inputImages.map((url, index) => (
+              <div
+                key={index}
+                className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Input ${index + 1}`}
+                  className="size-12 object-cover"
+                  crossOrigin="anonymous"
+                />
+              </div>
+            ))}
           </div>
         )}
 
