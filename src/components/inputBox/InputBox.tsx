@@ -651,7 +651,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
                 Confirm Credits
               </DialogTitle>
               <DialogDescription className="mb-4 text-sm text-muted-foreground">
-                Based on your video parameters. You're about to spend{" "}
+                Based on your parameters. You're about to spend{" "}
                 <span className="font-bold text-white">
                   {isComputingCredits
                     ? "calculating..."

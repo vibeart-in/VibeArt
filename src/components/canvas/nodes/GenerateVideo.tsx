@@ -1,7 +1,7 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAtom } from "jotai";
-import { ArrowUp, Loader2, Copy, Check, AlertCircle } from "lucide-react";
+import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw } from "lucide-react";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 
 import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
@@ -9,6 +9,7 @@ import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
 import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
+import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
 
 import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
@@ -54,23 +55,40 @@ const PLACEHOLDERS = [
 ];
 
 const BASE_WIDTH = 450;
-const EXPLICIT_IMAGE_PARAMS = new Set([
+
+// First frame / input image parameters
+const FIRST_FRAME_PARAMS = new Set([
   "image_input",
   "image input",
   "input_image",
   "style reference images",
   "style_reference_images",
   "image",
-  "last_frame",
   "image prompt",
   "Image",
-  "last_frame_image",
   "reference_images",
   "first_frame_image",
+  "first_frame",
+  "start_image",
 ]);
 
+// Last frame / end frame parameters
+const LAST_FRAME_PARAMS = new Set([
+  "last_frame",
+  "last_frame_image",
+  "end_frame",
+  "end_image",
+  "end_frame_image",
+  "final_frame",
+]);
+
+// Combined set for checking if a parameter is any image type
+const ALL_IMAGE_PARAMS = new Set([...FIRST_FRAME_PARAMS, ...LAST_FRAME_PARAMS]);
+
 const normalizeKey = (k: string) => k.replace(/\s+/g, "_").toLowerCase();
-const isImageParam = (key: string) => EXPLICIT_IMAGE_PARAMS.has(key);
+const isImageParam = (key: string) => ALL_IMAGE_PARAMS.has(key);
+const isFirstFrameParam = (key: string) => FIRST_FRAME_PARAMS.has(key);
+const isLastFrameParam = (key: string) => LAST_FRAME_PARAMS.has(key);
 
 const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVideoNodeType>) => {
   const { updateNodeData, updateNode } = useReactFlow();
@@ -108,6 +126,10 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
   const { project } = useCanvas();
   const generateMutation = useGenerateCanvasImage(project?.id || "");
   const [selectedModel] = useAtom(selectedModelAtom(id));
+
+  // Variable pricing states
+  const [isComputingCredits, setIsComputingCredits] = useState(false);
+  const [computedCreditCost, setComputedCreditCost] = useState<number | null>(null);
 
   // Sync atom to data.model
   useEffect(() => {
@@ -150,55 +172,58 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
 
   // --- RESIZE & ASPECT RATIO LOGIC START ---
 
-  // 1. Determine dimensions from response data or calculate
-  const { targetWidth, targetHeight } = useMemo(() => {
-    // Priority 1: Use actual dimensions from response if available
-    // if (data.width && data.height) {
-    //   return { targetWidth: data.width, targetHeight: data.height };
-    // }
-
+  // Simple aspect ratio: use generated video dimensions if available, otherwise default
+  const aspectRatio = useMemo(() => {
     const outputImg = data.outputImages?.[0];
 
-    // Priority 2: Use output image dimensions
     if (outputImg?.width && outputImg?.height) {
-      return { targetWidth: outputImg.width, targetHeight: outputImg.height };
+      return outputImg.height / outputImg.width;
     }
 
-    // Priority 3: Calculate from aspect ratio
-    let aspectRatio = 0.7; // Default
+    // Default aspect ratio for placeholder
+    return 0.7;
+  }, [data.outputImages]);
 
-    // Calculate aspect ratio from output image dimensions if available
-    if (outputImg?.width && outputImg?.height) {
-      aspectRatio = outputImg.height / outputImg.width;
-    } else if (data.videoUrl || data.imageUrl) {
-      aspectRatio = 1.0;
-    }
+  const targetHeight = BASE_WIDTH * aspectRatio;
 
-    return { targetWidth: BASE_WIDTH, targetHeight: BASE_WIDTH * aspectRatio };
-  }, [data.width, data.height, data.outputImages, data.videoUrl, data.imageUrl]);
-
-  // 2. Enforce Node Size
+  // Update node size only when a new video is generated
   useEffect(() => {
-    const currentWidth = data.width;
-    const currentHeight = data.height;
-
-    const isSizeMismatch =
-      !currentWidth ||
-      !currentHeight ||
-      Math.abs(currentWidth - targetWidth) > 1 ||
-      Math.abs(currentHeight - targetHeight) > 1;
-
-    if (isSizeMismatch) {
+    if (data.outputImages?.[0]) {
       updateNode(id, {
-        width: targetWidth,
+        width: BASE_WIDTH,
         height: targetHeight,
       });
     }
-  }, [targetWidth, targetHeight, data.width, data.height, id, updateNode]);
+  }, [data.outputImages, targetHeight, id, updateNode]);
 
   // --- RESIZE LOGIC END ---
 
   const inputImages = data.inputImageUrls || [];
+
+  // Compute credits when parameters change (for variable pricing models)
+  useEffect(() => {
+    if (!selectedModel?.is_variable_price || !selectedModel.pricing_parameters) {
+      setComputedCreditCost(null);
+      return;
+    }
+
+    try {
+      const creditParams =
+        typeof selectedModel.pricing_parameters === "string"
+          ? JSON.parse(selectedModel.pricing_parameters)
+          : selectedModel.pricing_parameters;
+
+      const result = evaluateCreditsFromModelParams(creditParams, values);
+      setComputedCreditCost(result.credits ?? null);
+    } catch (err) {
+      console.error("Failed to compute credits:", err);
+      setComputedCreditCost(null);
+    }
+  }, [selectedModel, values]);
+
+  const displayCreditCost = selectedModel?.is_variable_price
+    ? computedCreditCost
+    : selectedModel?.cost;
 
   const handleGenerate = useCallback(() => {
     if ((!prompt && !data.stylePrompt) || !project?.id || !selectedModel) return;
@@ -234,15 +259,53 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       const paramsDef = selectedModel?.parameters;
 
       if (inputImages.length > 0 && paramsDef && !Array.isArray(paramsDef)) {
-        const imageKey = Object.keys(paramsDef).find((k) => isImageParam(k));
-        if (imageKey) {
-          const def = paramsDef[imageKey];
+        // Handle multiple image parameters with proper ordering
+        // First, find first frame parameter
+        const firstFrameKey = Object.keys(paramsDef).find((k) => isFirstFrameParam(k));
+        // Then, find last frame parameter
+        const lastFrameKey = Object.keys(paramsDef).find((k) => isLastFrameParam(k));
+
+        let imageIndex = 0;
+
+        // Assign first image to first frame parameter
+        if (firstFrameKey && imageIndex < inputImages.length) {
+          const def = paramsDef[firstFrameKey];
           if (def.type === "array") {
-            imageParams[imageKey] = inputImages;
+            // If it's an array type, assign all images
+            imageParams[firstFrameKey] = inputImages;
+            imageIndex = inputImages.length;
           } else {
-            imageParams[imageKey] = inputImages[0];
+            // Single image
+            imageParams[firstFrameKey] = inputImages[imageIndex];
+            imageIndex++;
           }
         }
+
+        // Assign second image to last frame parameter (if exists)
+        if (lastFrameKey && imageIndex < inputImages.length) {
+          imageParams[lastFrameKey] = inputImages[imageIndex];
+          imageIndex++;
+        }
+
+        // Handle any remaining image parameters (fallback for other image types)
+        Object.keys(paramsDef).forEach((k) => {
+          if (
+            isImageParam(k) &&
+            !imageParams[k] &&
+            imageIndex < inputImages.length &&
+            !isFirstFrameParam(k) &&
+            !isLastFrameParam(k)
+          ) {
+            const def = paramsDef[k];
+            if (def.type === "array") {
+              imageParams[k] = inputImages.slice(imageIndex);
+              imageIndex = inputImages.length;
+            } else {
+              imageParams[k] = inputImages[imageIndex];
+              imageIndex++;
+            }
+          }
+        });
       }
 
       parameters = {
@@ -250,6 +313,68 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
         prompt: finalPrompt,
         ...imageParams,
       } as unknown as InputBoxParameter;
+
+      // Type conversion and validation for Replicate parameters
+      if (paramsDef && !Array.isArray(paramsDef)) {
+        Object.keys(parameters).forEach((key) => {
+          const param = paramsDef[key];
+          const value = (parameters as Record<string, any>)[key];
+
+          if (param) {
+            // Convert integer types
+            if (param.type === "integer" && value !== null && value !== undefined) {
+              (parameters as Record<string, any>)[key] = parseInt(String(value), 10);
+            }
+            // Convert number types
+            else if (param.type === "number" && value !== null && value !== undefined) {
+              (parameters as Record<string, any>)[key] = parseFloat(String(value));
+            }
+            // Validate and clean up URI format parameters (image parameters)
+            else if (param.format === "uri") {
+              // If value is empty, null, undefined, or not a valid string, remove the parameter entirely
+              if (!value || typeof value !== "string" || value.trim() === "") {
+                delete (parameters as Record<string, any>)[key];
+              }
+            }
+          }
+        });
+      }
+
+      // Remove empty or null image parameters (additional cleanup)
+      Object.keys(parameters).forEach((key) => {
+        const value = (parameters as Record<string, any>)[key];
+        if (isImageParam(key) || isImageParam(normalizeKey(key))) {
+          // Remove if null, undefined, empty string, or empty array
+          if (
+            value === null ||
+            value === undefined ||
+            value === "" ||
+            (Array.isArray(value) && value.length === 0)
+          ) {
+            delete (parameters as Record<string, any>)[key];
+          }
+        }
+      });
+    }
+
+    // Compute credits for variable pricing models
+    let modelCredit = typeof selectedModel.cost === "number" ? selectedModel.cost : 0;
+
+    if (selectedModel.is_variable_price && selectedModel.pricing_parameters) {
+      setIsComputingCredits(true);
+      try {
+        const creditParams =
+          typeof selectedModel.pricing_parameters === "string"
+            ? JSON.parse(selectedModel.pricing_parameters)
+            : selectedModel.pricing_parameters;
+
+        const result = evaluateCreditsFromModelParams(creditParams, parameters);
+        modelCredit = result.credits ?? modelCredit;
+      } catch (err: any) {
+        console.error("Failed to compute credits:", err);
+      } finally {
+        setIsComputingCredits(false);
+      }
     }
 
     generateMutation.mutate(
@@ -258,7 +383,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
         parameters,
         modelName: selectedModel.model_name,
         modelIdentifier: selectedModel.identifier,
-        modelCredit: typeof selectedModel.cost === "number" ? selectedModel.cost : 0,
+        modelCredit,
         modelProvider: selectedModel.provider,
       },
       {
@@ -329,7 +454,22 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
     });
   }, []);
 
+  const handleReset = useCallback(() => {
+    // Reset to default state while preserving prompt and connections
+    updateNodeData(id, {
+      videoUrl: undefined,
+      imageUrl: undefined,
+      outputImages: undefined,
+      activeJobId: undefined,
+      status: undefined,
+      conversationId: undefined,
+      // Keep: prompt, stylePrompt, inputImageUrls, model, category, width, height
+    });
+  }, [id, updateNodeData]);
+
   const isGenerating = !!data.activeJobId;
+  const showResetButton =
+    (data.videoUrl || data.imageUrl || data.status === "failed") && (selected || isGenerating);
 
   return (
     <NodeLayout
@@ -337,10 +477,10 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       selected={selected}
       title={data.category || "Video generation"}
       subtitle={data?.model}
-      minWidth={targetWidth}
+      minWidth={BASE_WIDTH}
       minHeight={targetHeight}
       keepAspectRatio={true}
-      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -353,13 +493,13 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
          immediately, even if the NodeLayout hasn't fully expanded yet.
       */}
       <div
-        className="relative size-full flex-1 overflow-hidden rounded-3xl"
+        className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
         // style={{ minHeight: "300px" }}
       >
         {data.videoUrl || data.imageUrl ? (
           <video
             src={data.videoUrl || data.imageUrl}
-            className="size-full rounded-3xl object-cover"
+            className="h-full w-full rounded-3xl object-cover"
             autoPlay
             loop
             muted
@@ -376,7 +516,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 autoPlay
                 loop
                 muted
@@ -409,34 +549,121 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                   Something went wrong. Please try again.
                 </p>
               </div>
+              <button
+                className="mt-2 flex items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-all hover:scale-105 hover:bg-white/20 hover:shadow-xl"
+                onClick={handleReset}
+                title="Retry generation"
+              >
+                <RotateCcw size={16} />
+                Retry
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Reset Button */}
+        {showResetButton && (
+          <button
+            className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/40 text-white/70 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/60 hover:text-white hover:shadow-xl"
+            onClick={handleReset}
+            title="Reset to generate state"
+          >
+            <RotateCcw size={16} />
+          </button>
+        )}
       </div>
 
       <div
-        className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
+        {/* Info message for image connections */}
+        {selected &&
+          inputImages.length === 0 &&
+          selectedModel?.parameters &&
+          !Array.isArray(selectedModel.parameters) &&
+          (() => {
+            const hasFirstFrame = Object.keys(selectedModel.parameters).some((k) =>
+              isFirstFrameParam(k),
+            );
+            const hasLastFrame = Object.keys(selectedModel.parameters).some((k) =>
+              isLastFrameParam(k),
+            );
+
+            if (hasFirstFrame || hasLastFrame) {
+              return (
+                <div className="mb-3 flex items-start gap-2 rounded-lg bg-blue-500/10 p-2 text-xs text-blue-300 backdrop-blur-sm">
+                  <svg
+                    className="mt-0.5 size-4 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    Connect images from the left:
+                    {hasFirstFrame && " First image = first frame"}
+                    {hasFirstFrame && hasLastFrame && ","}
+                    {hasLastFrame && " Second image = last frame"}
+                  </span>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
         {inputImages.length > 0 && (
           <div className="scrollbar-hide relative z-10 mb-3 flex items-center gap-2 overflow-x-auto pb-1">
-            {inputImages.map((url, index) => (
-              <div
-                key={index}
-                className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
-              </div>
-            ))}
+            {inputImages.map((url, index) => {
+              // Determine label based on parameter availability
+              const paramsDef = selectedModel?.parameters;
+              const hasFirstFrame =
+                paramsDef &&
+                !Array.isArray(paramsDef) &&
+                Object.keys(paramsDef).some((k) => isFirstFrameParam(k));
+              const hasLastFrame =
+                paramsDef &&
+                !Array.isArray(paramsDef) &&
+                Object.keys(paramsDef).some((k) => isLastFrameParam(k));
+
+              let label = "";
+              if (hasFirstFrame && hasLastFrame) {
+                label = index === 0 ? "First Frame" : "Last Frame";
+              } else if (hasFirstFrame) {
+                label = "First Frame";
+              } else if (hasLastFrame) {
+                label = "Last Frame";
+              }
+
+              return (
+                <div
+                  key={index}
+                  className="relative shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/20 shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
+                  {label && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 text-center text-[8px] font-semibold text-white">
+                      {label}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
         {!(data.videoUrl || data.imageUrl) ? (
           <div className="relative w-full focus-within:outline-none focus-within:ring-0">
             {!data.prompt && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-10 p-2">
+              <div className="pointer-events-none absolute left-0 right-0 p-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentPlaceholder}
@@ -508,14 +735,21 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       </div>
 
       <button
-        className={`absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-accent text-black shadow-lg transition-all hover:scale-110 hover:shadow-xl ${selected || isGenerating ? "opacity-100" : "opacity-0"}`}
+        className={`absolute bottom-3 right-3 flex items-center justify-center gap-1.5 rounded-full bg-accent px-3 py-2 text-black shadow-lg transition-all hover:scale-105 hover:shadow-xl ${selected || isGenerating ? "opacity-100" : "opacity-0"}`}
         onClick={handleGenerate}
-        disabled={isGenerating}
+        disabled={isGenerating || isComputingCredits}
       >
         {isGenerating ? (
-          <Loader2 size={18} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" />
         ) : (
-          <ArrowUp size={18} strokeWidth={3} />
+          <>
+            <ArrowUp size={16} strokeWidth={2.5} />
+            {displayCreditCost !== null && displayCreditCost !== undefined && (
+              <span className="text-xs font-semibold">
+                {isComputingCredits ? "..." : displayCreditCost}
+              </span>
+            )}
+          </>
         )}
       </button>
     </NodeLayout>
