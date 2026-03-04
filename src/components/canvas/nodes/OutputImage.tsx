@@ -1,7 +1,7 @@
 import { Position, NodeProps, Node, useReactFlow, NodeToolbar } from "@xyflow/react";
 import NodeLayout from "../NodeLayout";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { ArrowUp, Loader2, Copy, Check, AlertCircle } from "lucide-react";
+import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw } from "lucide-react";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
@@ -344,7 +344,20 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
     });
   }, []);
 
+  const handleReset = useCallback(() => {
+    // Reset to default state while preserving prompt and connections
+    updateNodeData(id, {
+      imageUrl: undefined,
+      outputImages: undefined,
+      activeJobId: undefined,
+      status: undefined,
+      conversationId: undefined,
+      // Keep: prompt, stylePrompt, inputImageUrls, model, category, width, height
+    });
+  }, [id, updateNodeData]);
+
   const isGenerating = !!data.activeJobId;
+  const showResetButton = (data.imageUrl || data.status === "failed") && (selected || isGenerating);
 
   return (
     <NodeLayout
@@ -422,6 +435,17 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Reset Button */}
+        {showResetButton && (
+          <button
+            className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/40 text-white/70 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/60 hover:text-white hover:shadow-xl"
+            onClick={handleReset}
+            title="Reset to generate state"
+          >
+            <RotateCcw size={16} />
+          </button>
+        )}
       </div>
 
       <div

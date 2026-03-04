@@ -115,7 +115,6 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
   const saveThumbnail = useDebouncedCallback(async () => {
     if (readOnly || !project?.id || nodes.length === 0) return;
-
     try {
       const nodesBounds = getNodesBounds(nodes);
       const imageWidth = 1920;
@@ -402,10 +401,11 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
+      // Don't trigger if user is typing in an input, textarea, or contenteditable element
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable) ||
         readOnly
       )
         return;
@@ -421,7 +421,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleCopy, handlePaste]);
+  }, [handleCopy, handlePaste, readOnly]);
 
   return (
     <NodeOperationsProvider addNode={addNode}>
@@ -469,7 +469,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
               isSaving={saveState.isSaving}
               lastSaved={saveState.lastSaved}
             />
-            {/* <DevTools position="bottom-left" /> */}
+            <DevTools position="bottom-left" />
             {children}
           </ReactFlow>
         </CanvasContextMenu>

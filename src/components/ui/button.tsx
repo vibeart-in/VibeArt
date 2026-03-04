@@ -6,14 +6,14 @@ import { cn } from "@/src/lib/utils";
 
 // Base styles applied to all buttons
 const buttonVariants = cva(
-  "relative box-border inline-block transform cursor-pointer rounded-xl px-4 py-2 text-center text-sm font-bold transition-all duration-300 ease-out hover:scale-105 hover:shadow-lg active:translate-y-0 active:scale-95",
+  "relative box-border inline-block transform cursor-pointer rounded-xl px-4 py-2 text-center text-sm font-bold transition-all duration-300 ease-out hover:scale-105 hover:shadow-sm active:translate-y-0 active:scale-95",
   {
     variants: {
       variant: {
         primary:
           "bg-gradient-to-r from-[#D9E825] to-[#E3D2BA] border border-[#D9E825] text-black " +
           "hover:from-[#E3F235] hover:to-[#F0E0CC] hover:border-[#E3F235] " +
-          "hover:shadow-[0_8px_25px_rgba(217,232,37,0.3)] " +
+          "hover:shadow-[0_0px_12px_rgba(217,232,37,0.5)] " +
           "active:from-[#C5D020] active:to-[#D4C2A5]",
 
         secondary:

@@ -130,9 +130,7 @@ const TextNode = React.memo(function TextNode({ id, data, selected }: NodeProps<
              the editor handles that content-wise. */}
         <EditorContent
           editor={editor}
-
           className="nodrag size-full min-h-[120px] cursor-text overflow-auto rounded-xl text-white/90 !outline-none hover:border-2 [&_.ProseMirror]:h-full [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none"
-
         />
       </div>
     </NodeLayout>

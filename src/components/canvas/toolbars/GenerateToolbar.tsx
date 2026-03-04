@@ -45,12 +45,18 @@ export default function GenerateToolbar({
   initialModel,
 }: GenerateToolbarProps) {
   const nodesData = useNodesData(id || "");
+
+  // Check if input images are connected
+  const hasInputImages = (nodesData?.data as any)?.inputImageUrls?.length > 0;
+
   const usecase =
     nodesData?.type === "outputImageAdvanced"
       ? ConversationType.ADVANCE
       : nodesData?.type === "generateVideo"
         ? ConversationType.VIDEO
-        : ConversationType.GENERATE;
+        : hasInputImages
+          ? ConversationType.EDIT
+          : ConversationType.GENERATE;
 
   const { data: models = [] } = useModelsByUsecase(usecase);
 

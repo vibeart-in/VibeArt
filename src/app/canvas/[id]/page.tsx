@@ -9,6 +9,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
 import { CanvasProject } from "@/src/types/BaseType";
 import SideToolbar from "@/src/components/canvas/SideToolbar";
+import { CloneButton } from "@/src/components/canvas/CloneButton";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -70,7 +71,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 isReadOnly={isReadOnly}
               />
             </Panel>
-            <Panel position="top-right" className="rounded-3xl bg-black/50 p-3 backdrop-blur-md">
+            <Panel
+              position="top-right"
+              className="flex items-center gap-2 rounded-3xl bg-black/50 p-3 backdrop-blur-md"
+            >
+              {isReadOnly && user && <CloneButton canvasId={project.id} />}
               <UserSectionClient />
             </Panel>
             <Background
