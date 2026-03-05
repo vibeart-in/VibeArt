@@ -1,16 +1,18 @@
 "use client";
 
+import { PencilSimple } from "@phosphor-icons/react";
 import { Check, X, Globe, Eye } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
 import { updateCanvas, publishCanvas } from "@/src/actions/canvas";
-import { Input } from "@/src/components/ui/input";
-import { Button } from "@/src/components/ui/button";
-import { PencilSimple } from "@phosphor-icons/react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { PublishDialog } from "./PublishDialog";
 import { useCanvas } from "@/src/components/providers/CanvasProvider";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+
+import { PublishDialog } from "./PublishDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+
 
 interface CanvasTitleProps {
   initialTitle: string;
@@ -110,7 +112,7 @@ export function CanvasTitle({
           variant="ghost"
           onClick={handleSave}
           disabled={isLoading}
-          className="ml-1 h-7 w-7 px-1 py-1 text-white hover:bg-green-400"
+          className="ml-1 size-7 p-1 text-white hover:bg-green-400"
         >
           <Check className="size-4 text-green-400 hover:text-white" />
         </Button>
@@ -119,7 +121,7 @@ export function CanvasTitle({
           variant="ghost"
           onClick={handleCancel}
           disabled={isLoading}
-          className="h-7 w-7 px-1 py-1 text-red-400 hover:bg-red-400 hover:text-white"
+          className="size-7 p-1 text-red-400 hover:bg-red-400 hover:text-white"
         >
           <X className="size-4 text-red-400 hover:text-white" />
         </Button>

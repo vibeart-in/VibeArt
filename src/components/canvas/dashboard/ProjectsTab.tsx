@@ -1,7 +1,8 @@
-import { motion } from "motion/react";
 import { Plus } from "lucide-react";
-import { BackgroundPlus } from "../../ui/BackgroundPlus";
+import { motion } from "motion/react";
+
 import { ProjectCard } from "./ProjectCard";
+import { BackgroundPlus } from "../../ui/BackgroundPlus";
 
 interface Project {
   id: string;

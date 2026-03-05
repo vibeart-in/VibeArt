@@ -1,11 +1,10 @@
 "use client";
 
 import { CurrencyCircleDollar } from "@phosphor-icons/react";
-import { useNodesData, NodeToolbar, Position } from "@xyflow/react"; // Remember to import Position
+import { useNodesData, NodeToolbar, Position, useReactFlow } from "@xyflow/react"; // Remember to import Position
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
 import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
-
 import { useEffect, useState } from "react";
 
 import { getProducts } from "@/src/actions/subscription/getProducts";
@@ -36,6 +35,63 @@ interface GenerateToolbarProps {
   initialModel?: string;
 }
 
+const STYLE_PROMPTS = [
+  { label: "None", value: "none", image: "" },
+  {
+    label: "Cinematic",
+    value: "cinematic style, highly detailed, dramatic lighting, 8k",
+    image: "https://images.unsplash.com/photo-1572372421973-dcbd21d537be?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Anime",
+    value: "anime style, 2d, studio ghibli, vibrant colors, masterpiece",
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Cyberpunk",
+    value: "cyberpunk style, neon lights, futuristic, highly detailed",
+    image: "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Oil Painting",
+    value: "oil painting style, thick brush strokes, classic art",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Studio Ghibli",
+    value:
+      "A beautiful Studio Ghibli inspired illustration, soft watercolor textures, dreamy atmosphere, warm sunlight, lush natural environment, whimsical storytelling vibe, hand painted anime style, delicate linework, magical realism, peaceful and nostalgic mood",
+    image: "https://images.unsplash.com/photo-1631582053308-40f482e7ace5?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Disney",
+    value:
+      "A highly detailed Pixar-style 3D animated character, expressive eyes, soft cinematic lighting, vibrant colors, smooth skin shading, playful personality, shallow depth of field, rendered like a frame from a modern Disney/Pixar animated film, ultra detailed, global illumination, cinematic composition",
+    image: "https://images.unsplash.com/photo-1663250422296-ed759f42d5e1?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Ultra realistic",
+    value:
+      "Ultra realistic cinematic photograph, shot on ARRI Alexa cinema camera, natural skin texture, dramatic lighting, shallow depth of field, volumetric light, film grain, high dynamic range, 85mm lens, professional movie still",
+    image: "https://images.unsplash.com/photo-1772442198677-10c8e7b46a5f?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Watercolor",
+    value: "watercolor painting, soft edges, pastel colors",
+    image: "https://images.unsplash.com/photo-1580136608260-4eb11f4b24fe?w=300&h=300&fit=crop",
+  },
+  {
+    label: "3D Render",
+    value: "3D render, unreal engine 5, octane render, beautiful lighting",
+    image: "https://images.unsplash.com/photo-1637666505754-7416ebd70cbf?w=300&h=300&fit=crop",
+  },
+  {
+    label: "Vintage",
+    value: "vintage photo, polaroid, film grain, nostalgic",
+    image: "https://images.unsplash.com/photo-1511407401960-0ee203836665?w=300&h=300&fit=crop",
+  },
+];
+
 export default function GenerateToolbar({
   id,
   selected,
@@ -45,6 +101,7 @@ export default function GenerateToolbar({
   initialModel,
 }: GenerateToolbarProps) {
   const nodesData = useNodesData(id || "");
+  const { updateNodeData } = useReactFlow();
 
   // Check if input images are connected
   const hasInputImages = (nodesData?.data as any)?.inputImageUrls?.length > 0;
@@ -110,10 +167,11 @@ export default function GenerateToolbar({
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
+      const extension = blob.type.split("/")[1] || "png";
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `generated-image-${Date.now()}.png`;
+      link.download = `generated-image-${Date.now()}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -132,7 +190,7 @@ export default function GenerateToolbar({
       offset={12}
     >
       <div
-        className={`ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex origin-top items-center gap-2 rounded-full border border-[#1D1D1D] bg-[#121212] p-1.5 shadow-2xl transition-all duration-300 ${
+        className={`ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex origin-top items-center gap-1.5 rounded-3xl border border-white/10 bg-[#131313] p-1.5 shadow-2xl transition-all duration-200 ${
           isActive
             ? `translate-y-0 scale-100 ${selected ? "opacity-100" : "opacity-80 hover:opacity-100"}`
             : "pointer-events-none -translate-y-4 scale-90 opacity-0"
@@ -141,10 +199,34 @@ export default function GenerateToolbar({
         onMouseLeave={handleMouseLeave}
       >
         {/* Palette Section */}
-        <button className="flex h-9 items-center gap-2 rounded-full bg-[#1A1A1A] px-3 text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
-          <Palette className="size-4" />
-          <ChevronDown className="size-3 opacity-50" />
-        </button>
+        <Select
+          value={(nodesData?.data as any)?.stylePrompt || "none"}
+          onValueChange={(val) => {
+            if (id) {
+              updateNodeData(id, { stylePrompt: val === "none" ? "" : val });
+            }
+          }}
+        >
+          <SelectTrigger className="flex h-11 items-center gap-2.5 rounded-2xl border-0 bg-[#020202] pl-1.5 pr-4 text-base font-medium text-white transition-colors hover:bg-white/5 focus:ring-0">
+            <SelectValue placeholder="Style" />
+            <ChevronDown className="size-4 text-white opacity-50" />
+          </SelectTrigger>
+          <SelectContent>
+            {STYLE_PROMPTS.map((style) => (
+              <SelectItem key={style.label} value={style.value}>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-[#1A1A1A] bg-cover bg-center"
+                    style={style.image ? { backgroundImage: `url('${style.image}')` } : {}}
+                  >
+                    {!style.image && <Palette className="size-4 text-gray-400" />}
+                  </div>
+                  <span className="text-sm">{style.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {/* Model Section */}
         <Select
@@ -161,16 +243,16 @@ export default function GenerateToolbar({
             }
           }}
         >
-          <SelectTrigger className="flex h-9 items-center gap-2 rounded-full border-0 bg-[#1A1A1A] pl-1 pr-3 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
+          <SelectTrigger className="flex h-11 items-center gap-2.5 rounded-2xl border-0 bg-[#020202] pl-1.5 pr-4 text-base font-medium text-white transition-colors hover:bg-[#020202]/30 focus:ring-0">
             <SelectValue placeholder="Select model" />
-            <ChevronDown className="size-3 opacity-50" />
+            <ChevronDown className="size-4 text-white opacity-50" />
           </SelectTrigger>
           <SelectContent>
             {models?.map((model) => (
               <SelectItem key={model.id} value={model.model_name}>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <div
-                    className="size-7 overflow-hidden rounded-sm bg-cover bg-center"
+                    className="size-8 overflow-hidden rounded-lg bg-cover bg-center"
                     style={{
                       backgroundImage: `url('${model.cover_image}')`,
                     }}
@@ -190,18 +272,18 @@ export default function GenerateToolbar({
         </Select>
 
         {/* Action Section */}
-        <button className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
-          <Sparkles className="size-4" />
-        </button>
+        {/* <button className="flex size-11 items-center justify-center rounded-2xl bg-[#020202] text-gray-300 transition-colors hover:bg-[#020202]/30 hover:text-white">
+          <Sparkles className="size-5 text-white hover:text-accent" />
+        </button> */}
 
         {/* Download Button */}
         {imageUrl && (
           <button
             onClick={handleDownload}
-            className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            className="group flex size-11 items-center justify-center rounded-2xl bg-[#020202] text-gray-300 transition-colors hover:bg-[#020202]/30"
             title="Download Generated Image"
           >
-            <Download className="size-4" />
+            <Download className="size-5 text-white group-hover:text-accent" />
           </button>
         )}
       </div>

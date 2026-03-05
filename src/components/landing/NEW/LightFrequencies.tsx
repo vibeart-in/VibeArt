@@ -1,6 +1,6 @@
-import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useLayoutEffect, useRef } from 'react';
 import './LightFrequencies.css';
 
 gsap.registerPlugin(ScrollTrigger);

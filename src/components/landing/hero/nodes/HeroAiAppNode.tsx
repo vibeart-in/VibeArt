@@ -2,9 +2,10 @@
 
 import { Position, NodeProps, Node } from "@xyflow/react";
 import React from "react";
-import { AiApp } from "@/src/constants/aiApps";
 
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+import { AiApp } from "@/src/constants/aiApps";
+
 import HeroNodeLayout from "./HeroNodeLayout";
 
 export type AiAppNodeData = {
@@ -51,7 +52,7 @@ const HeroAiAppNode = React.memo(({ id, data, selected }: NodeProps<HeroAiAppNod
             src={
               "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/ai_apps/360_orbit/cover.mp4"
             }
-            className="h-full w-full object-cover"
+            className="size-full object-cover"
             autoPlay
             muted
             loop
@@ -84,7 +85,7 @@ const HeroAiAppNode = React.memo(({ id, data, selected }: NodeProps<HeroAiAppNod
               <img
                 src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/canvas/3c40da91-b7c5-4d89-ae86-91180214e50e/4165c358-8eaf-4729-b3c0-6c7597ad0edd/26fc53c5-bbb6-453e-8d2c-44687ab2e7cb/0.jpeg"
                 alt="Input"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
               />
             </div>
             {/* Text */}

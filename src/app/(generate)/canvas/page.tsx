@@ -2,8 +2,8 @@ import { formatDistanceToNow } from "date-fns";
 
 import { getCanvasProjects, getPublishedCanvases } from "@/src/actions/canvas";
 import CanvasDashboard from "@/src/components/canvas/CanvasDashboard";
-import { CanvasProject } from "@/src/types/BaseType";
 import { createClient } from "@/src/lib/supabase/server";
+import { CanvasProject } from "@/src/types/BaseType";
 
 export default async function Page() {
   const supabase = await createClient();

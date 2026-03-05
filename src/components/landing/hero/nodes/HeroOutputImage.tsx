@@ -1,9 +1,11 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
 import { useAtom } from "jotai";
-import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+import { selectedModelAtom } from "@/src/store/nodeAtoms";
+import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
+
 import HeroNodeLayout from "./HeroNodeLayout";
 
 const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v", ".avi"];
@@ -197,7 +199,7 @@ const HeroOutputImage = React.memo(
         minWidth={BASE_WIDTH}
         minHeight={targetHeight}
         keepAspectRatio={true}
-        className="flex h-full w-full cursor-default flex-col rounded-2xl bg-[#1D1D1D] transition-all duration-300 ease-in-out hover:scale-110"
+        className="flex size-full cursor-default flex-col rounded-2xl bg-[#1D1D1D] transition-all duration-300 ease-in-out hover:scale-110"
         handles={[
           { type: "target", position: Position.Left },
           { type: "source", position: Position.Right },
@@ -206,7 +208,7 @@ const HeroOutputImage = React.memo(
         initialModel={data.model}
         toolbarHidden={true}
       >
-        <div className="relative h-full w-full flex-1 overflow-hidden rounded-2xl">
+        <div className="relative size-full flex-1 overflow-hidden rounded-2xl">
           {data.imageUrl &&
             (mediaIsVideo ? (
               <video
@@ -217,7 +219,7 @@ const HeroOutputImage = React.memo(
                 muted
                 playsInline
                 onLoadedMetadata={handleVideoLoaded}
-                className="h-full w-full rounded-2xl object-cover"
+                className="size-full rounded-2xl object-cover"
                 draggable={false}
               />
             ) : (
@@ -225,7 +227,7 @@ const HeroOutputImage = React.memo(
               <img
                 src={data.imageUrl}
                 alt={data.prompt || "Generated Image"}
-                className="h-full w-full rounded-2xl object-cover"
+                className="size-full rounded-2xl object-cover"
                 draggable={false}
               />
             ))}
@@ -236,7 +238,7 @@ const HeroOutputImage = React.memo(
         </div>
 
         <div
-          className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+          className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 ${
             selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
         >

@@ -1,18 +1,19 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import CreativeProcess from "@/src/components/landing/hero/CreativeProcess";
+import ClarityScroll from "@/src/components/landing/hero/SpaceWrap";
 import { Hero, FeaturesGrid, AiAppsCarousel } from "@/src/components/landing/LandingComponents";
 import PrivacySection from "@/src/components/landing/PrivacySection";
-import { createClient } from "@/src/lib/supabase/client";
-import ClarityScroll from "@/src/components/landing/hero/SpaceWrap";
-import { LogoCloud } from "@/src/components/ui/logo-cloud";
 import Testimonial from "@/src/components/landing/Testimonials";
-import CreativeProcess from "@/src/components/landing/hero/CreativeProcess";
-import MagicBento from "@/src/components/ui/MagicBento";
-import { motion } from "framer-motion";
 import { GetStarted } from "@/src/components/ui/GetStated";
+import { LogoCloud } from "@/src/components/ui/logo-cloud";
+import MagicBento from "@/src/components/ui/MagicBento";
+import { createClient } from "@/src/lib/supabase/client";
 
 const logos = [
   {

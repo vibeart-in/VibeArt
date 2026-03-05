@@ -8,15 +8,15 @@ import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
 import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
 import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
-import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
+import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
 
 import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
 import { useCanvas } from "../../providers/CanvasProvider";
+import { Dialog, DialogContent, DialogTitle } from "../../ui/dotted-dialog";
 import { TextShimmer } from "../../ui/text-shimmer";
 import { Textarea } from "../../ui/textarea";
-import { Dialog, DialogContent, DialogTitle } from "../../ui/dotted-dialog";
 import NodeLayout from "../NodeLayout";
 
 export type GenerateVideoNodeData = {
@@ -95,13 +95,17 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
-  const { stylePrompt } = useUpstreamData("target");
+  const { stylePrompt, nodes: upstreamNodes } = useUpstreamData("target");
+  const hasStyleNode = useMemo(
+    () => upstreamNodes.some((n) => n.type === "style"),
+    [upstreamNodes],
+  );
 
   useEffect(() => {
-    if (stylePrompt !== data.stylePrompt) {
+    if (hasStyleNode && stylePrompt !== data.stylePrompt) {
       updateNodeData(id, { stylePrompt });
     }
-  }, [stylePrompt, data.stylePrompt, id, updateNodeData]);
+  }, [hasStyleNode, stylePrompt, data.stylePrompt, id, updateNodeData]);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [prompt, setPrompt] = useState(data.prompt || "");
@@ -482,7 +486,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       minWidth={BASE_WIDTH}
       minHeight={targetHeight}
       keepAspectRatio={true}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -495,13 +499,13 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
          immediately, even if the NodeLayout hasn't fully expanded yet.
       */}
       <div
-        className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
+        className="relative size-full flex-1 overflow-hidden rounded-3xl"
         // style={{ minHeight: "300px" }}
       >
         {data.videoUrl || data.imageUrl ? (
           <video
             src={data.videoUrl || data.imageUrl}
-            className="h-full w-full rounded-3xl object-cover"
+            className="size-full rounded-3xl object-cover"
             autoPlay
             loop
             muted
@@ -519,7 +523,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 size-full object-cover"
                 autoPlay
                 loop
                 muted
@@ -587,7 +591,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       </div>
 
       <div
-        className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+        className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 ${
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
@@ -663,7 +667,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Input ${index + 1}`} className="size-12 object-cover" />
                   {label && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 text-center text-[8px] font-semibold text-white">
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 text-center text-[8px] font-semibold text-white">
                       {label}
                     </div>
                   )}
@@ -676,7 +680,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
         {!(data.videoUrl || data.imageUrl) ? (
           <div className="relative w-full focus-within:outline-none focus-within:ring-0">
             {!data.prompt && (
-              <div className="pointer-events-none absolute left-0 right-0 p-2">
+              <div className="pointer-events-none absolute inset-x-0 p-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentPlaceholder}
@@ -774,7 +778,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
             {(data.videoUrl || data.imageUrl) && (
               <video
                 src={data.videoUrl || data.imageUrl}
-                className="h-full w-full object-contain"
+                className="size-full object-contain"
                 controls
                 autoPlay
                 loop

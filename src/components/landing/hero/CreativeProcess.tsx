@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CustomEase } from "gsap/CustomEase";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+import React, { useEffect, useRef, useState } from "react";
 
 // Expose Lenis globally so the navbar can scroll past pinned sections
 declare global {
@@ -513,7 +513,7 @@ export default function CreativeProcess() {
 
       {/* Loading Overlay */}
       <div
-        className="loading-overlay fixed left-0 top-0 z-[9999] flex h-full w-full items-center justify-center bg-black text-2xl uppercase tracking-tighter text-white"
+        className="loading-overlay fixed left-0 top-0 z-[9999] flex size-full items-center justify-center bg-black text-2xl uppercase tracking-tighter text-white"
         style={{ display: loadingProgress >= 100 && animationState.current ? "flex" : "flex" }} // Keep flex, GSAP hides it
       >
         <div className="loading-counter-el flex items-center">
@@ -526,18 +526,18 @@ export default function CreativeProcess() {
 
       {/* Sound Toggle */}
       <div
-        className={`sound-toggle fixed right-5 top-5 z-[1000] flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/15 ${!isAudioEnabled ? "disabled opacity-50" : ""}`}
+        className={`sound-toggle fixed right-5 top-5 z-[1000] flex size-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/15 ${!isAudioEnabled ? "disabled opacity-50" : ""}`}
         onClick={toggleSound}
       >
-        <div className="sound-dots relative h-1 w-1">
+        <div className="sound-dots relative size-1">
           <div
-            className={`sound-dot absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite]" : ""}`}
+            className={`sound-dot absolute left-1/2 top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite]" : ""}`}
           ></div>
           <div
-            className={`sound-dot absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite_0.5s]" : ""}`}
+            className={`sound-dot absolute left-1/2 top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite_0.5s]" : ""}`}
           ></div>
           <div
-            className={`sound-dot absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite_1s]" : ""}`}
+            className={`sound-dot absolute left-1/2 top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ${isAudioEnabled ? "animate-[expandDot_2s_ease-out_infinite_1s]" : ""}`}
           ></div>
         </div>
       </div>
@@ -565,7 +565,7 @@ export default function CreativeProcess() {
             className="fixed-container sticky left-0 top-0 h-screen w-full origin-top overflow-hidden bg-white will-change-transform"
           >
             {/* Backgrounds */}
-            <div className="background-container absolute left-0 top-0 z-[1] h-full w-full overflow-hidden bg-black">
+            <div className="background-container absolute left-0 top-0 z-[1] size-full overflow-hidden bg-black">
               {backgroundImages.map((src, i) => {
                 const isVideo =
                   src.endsWith(".mp4") || src.endsWith(".webm") || src.endsWith(".mov");
@@ -634,7 +634,7 @@ export default function CreativeProcess() {
                       ref={(el) => {
                         featuredRefs.current[i] = el;
                       }}
-                      className={`featured-content invisible absolute left-0 top-0 flex h-full w-full items-center justify-center opacity-0 ${i === 0 ? "active !visible opacity-100" : ""}`}
+                      className={`featured-content invisible absolute left-0 top-0 flex size-full items-center justify-center opacity-0 ${i === 0 ? "active !visible opacity-100" : ""}`}
                     >
                       <h3 className="absolute left-1/2 top-1/2 m-0 w-full -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-medium text-[#f5f5f5]/90">
                         {/* Split Text Implementation */}
@@ -685,7 +685,7 @@ export default function CreativeProcess() {
                 <div className="header-row block">Beyond Thinking</div>
                 {/* <div className="header-row block">Thinking</div> */}
                 <div className="progress-indicator relative mx-auto mt-[2vh] h-px w-[160px] bg-[#f5f5f5]/30 max-md:w-[120px]">
-                  <div className="progress-numbers absolute left-0 right-0 top-0 -mx-[25px] flex -translate-y-1/2 justify-between text-[0.7rem] text-[#f5f5f5]">
+                  <div className="progress-numbers absolute inset-x-0 top-0 -mx-[25px] flex -translate-y-1/2 justify-between text-[0.7rem] text-[#f5f5f5]">
                     <span>{(currentSection + 1).toString().padStart(2, "0")}</span>
                     <span>06</span>
                   </div>

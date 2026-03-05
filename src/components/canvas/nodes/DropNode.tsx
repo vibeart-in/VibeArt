@@ -1,3 +1,4 @@
+import { IconWindowMaximize } from "@tabler/icons-react";
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
 import {
   Image as ImageIcon,
@@ -11,7 +12,6 @@ import {
   Brush,
   Eraser,
 } from "lucide-react";
-import { IconWindowMaximize } from "@tabler/icons-react";
 import React, { memo, useState } from "react";
 
 const DropNode = memo(({ id, data }: NodeProps) => {

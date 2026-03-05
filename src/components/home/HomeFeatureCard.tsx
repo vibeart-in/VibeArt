@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   Video,
@@ -14,6 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
+import React, { useState, useEffect, useCallback } from "react";
 
 interface FeatureCardProps {
   id: number;
@@ -160,7 +160,7 @@ const HomeFeatureCard = () => {
                     <img
                       src={card.imageSrc}
                       alt={card.title}
-                      className="h-full w-full rounded-xl object-cover"
+                      className="size-full rounded-xl object-cover"
                     />
                   </div>
 

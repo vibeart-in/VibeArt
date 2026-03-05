@@ -1,4 +1,5 @@
 import { cn } from "@/src/lib/utils";
+
 import { InfiniteSlider } from "./infinite-slider";
 
 type Logo = {
@@ -25,7 +26,7 @@ export function LogoCloud({ className, logos, ...props }: LogoCloudProps) {
         {logos.map((logo) => (
           <img
             alt={logo.alt}
-            className="pointer-events-none h-4 select-none md:h-5 dark:brightness-0 dark:invert"
+            className="pointer-events-none h-4 select-none dark:brightness-0 dark:invert md:h-5"
             height={logo.height || "auto"}
             key={`logo-${logo.alt}`}
             loading="lazy"

@@ -7,8 +7,8 @@ import {
   LinkedinLogoIcon,
   TwitterLogoIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import * as motion from "motion/react-client";
 import { useInView, Variants } from "motion/react";
+import * as motion from "motion/react-client";
 import Image from "next/image";
 import { useRef } from "react";
 

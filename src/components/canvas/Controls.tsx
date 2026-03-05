@@ -1,6 +1,6 @@
 "use client";
 import { useReactFlow, useViewport, Node as XYNode } from "@xyflow/react";
-import { Plus, Minus, Maximize, Lock, Unlock } from "lucide-react";
+import { Plus, Minus, Maximize, Lock, Unlock, Undo2, Redo2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 type Props = {
@@ -8,6 +8,10 @@ type Props = {
   setNodes?: React.Dispatch<React.SetStateAction<XYNode[]>>;
   minZoom?: number;
   maxZoom?: number;
+  undo?: () => void;
+  redo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 };
 
 const CustomControls = React.memo(
@@ -18,6 +22,10 @@ const CustomControls = React.memo(
     maxZoom = 4,
     isSaving,
     lastSaved,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   }: Props & {
     isSaving?: boolean;
     lastSaved?: Date | null;
@@ -81,6 +89,27 @@ const CustomControls = React.memo(
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-[20px] border border-white/5 bg-neutral-900/50 px-2 py-2 shadow-xl backdrop-blur-md">
+            <button
+              onClick={undo}
+              title="Undo (Ctrl+Z)"
+              aria-label="Undo"
+              disabled={!canUndo}
+              className={buttonClass}
+            >
+              <Undo2 className="size-4" />
+            </button>
+            <button
+              onClick={redo}
+              title="Redo (Ctrl+Y)"
+              aria-label="Redo"
+              disabled={!canRedo}
+              className={buttonClass}
+            >
+              <Redo2 className="size-4" />
+            </button>
+          </div>
+
           <div
             className="flex items-center gap-1 rounded-[20px] border border-white/5 bg-neutral-900/50 px-3 py-2 shadow-xl backdrop-blur-md"
             style={{ minWidth: 140 }}
@@ -133,11 +162,7 @@ const CustomControls = React.memo(
               disabled={!nodes || !setNodes}
               className={buttonClass}
             >
-              {nodesLocked ? (
-                <Lock className="size-4 shadow-sm" />
-              ) : (
-                <Unlock className="size-4" />
-              )}
+              {nodesLocked ? <Lock className="size-4 shadow-sm" /> : <Unlock className="size-4" />}
             </button>
           </div>
         </div>

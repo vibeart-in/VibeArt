@@ -1,5 +1,6 @@
-import { motion } from "motion/react";
 import { MoreHorizontal, Edit2, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,

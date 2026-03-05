@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { Plus, Sparkles, Globe, ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 
 interface HeroHeaderProps {
   isPending: boolean;

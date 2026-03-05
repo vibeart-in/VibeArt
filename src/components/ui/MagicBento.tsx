@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
 import { gsap } from "gsap";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 
 export interface BentoCardProps {
   color?: string;
@@ -866,7 +866,7 @@ const MagicBento: React.FC<BentoProps> = ({
                       loop
                       muted
                       playsInline
-                      className="absolute inset-0 h-full w-full object-cover opacity-80"
+                      className="absolute inset-0 size-full object-cover opacity-80"
                       style={{ zIndex: 0 }}
                     >
                       <source src={card.coverVideo} type="video/mp4" />
@@ -895,7 +895,7 @@ const MagicBento: React.FC<BentoProps> = ({
                       <img
                         src={card.logo}
                         alt={`${card.title} logo`}
-                        className="h-10 w-10 rounded-sm object-contain"
+                        className="size-10 rounded-sm object-contain"
                       />
                     ) : (
                       <svg
@@ -1082,7 +1082,7 @@ const MagicBento: React.FC<BentoProps> = ({
                     loop
                     muted
                     playsInline
-                    className="absolute inset-0 h-full w-full object-cover opacity-80"
+                    className="absolute inset-0 size-full object-cover opacity-80"
                     style={{ zIndex: 0 }}
                   >
                     <source src={card.coverVideo} type="video/mp4" />
@@ -1099,7 +1099,7 @@ const MagicBento: React.FC<BentoProps> = ({
 
                 {/* Bottom Gradient Blur */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-40 backdrop-blur-lg"
+                  className="absolute inset-x-0 bottom-0 h-40 backdrop-blur-lg"
                   style={{
                     zIndex: 1,
                     WebkitMaskImage:

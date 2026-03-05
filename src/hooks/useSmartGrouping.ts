@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
 import { Node, Edge, useReactFlow, XYPosition, useStoreApi } from "@xyflow/react";
+import { useCallback, useState } from "react";
 
 export const useSmartGrouping = (
   setNodes: (nds: Node[] | ((nds: Node[]) => Node[])) => void,
   setEdges: (eds: Edge[] | ((eds: Edge[]) => Edge[])) => void,
+  takeSnapshot?: () => void,
 ) => {
   const { getNodes, getEdges, getIntersectingNodes, getNode, toObject } = useReactFlow();
   const store = useStoreApi();
@@ -31,9 +32,9 @@ export const useSmartGrouping = (
 
   // Helper to calculate the absolute visual top-left of a node recursively
   const getAbsoluteTopLeft = useCallback((nodeId: string, currentNodes: Node[]): XYPosition => {
-    let node = currentNodes.find((n) => n.id === nodeId);
-    let absAnchor = { x: 0, y: 0 };
-    let totalOffset = { x: 0, y: 0 };
+    const node = currentNodes.find((n) => n.id === nodeId);
+    const absAnchor = { x: 0, y: 0 };
+    const totalOffset = { x: 0, y: 0 };
 
     // Traverse up to find the root and accumulate anchor positions
     // But we also need to subtract origin offsets at each level
@@ -332,6 +333,7 @@ export const useSmartGrouping = (
     };
 
     // Update nodes: add new group and reparent selected nodes
+    takeSnapshot?.();
     setNodes((nds) => {
       const updatedNodes = nds.map((n) => {
         if (n.selected) {
@@ -401,7 +403,7 @@ export const useSmartGrouping = (
       const newId = idMap.get(n.id)!;
       const isParentInSelection = n.parentId && idMap.has(n.parentId);
 
-      let position = { ...n.position };
+      const position = { ...n.position };
       if (!isParentInSelection) {
         position.x += 50;
         position.y += 50;

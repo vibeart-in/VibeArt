@@ -1,9 +1,10 @@
 import { Node, Edge } from "@xyflow/react";
+
 import { CustomEdge } from "./CustomEdge";
-import { HeroTitleNode, HeroImageNode } from "./nodes/HeroNodes";
-import HeroInputImage from "./nodes/HeroInputImage";
-import HeroOutputImage from "./nodes/HeroOutputImage";
 import HeroAiAppNode from "./nodes/HeroAiAppNode";
+import HeroInputImage from "./nodes/HeroInputImage";
+import { HeroTitleNode, HeroImageNode } from "./nodes/HeroNodes";
+import HeroOutputImage from "./nodes/HeroOutputImage";
 
 export const nodeTypes = {
   heroTitle: HeroTitleNode,

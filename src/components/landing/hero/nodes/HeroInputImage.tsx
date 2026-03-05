@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import NodeLayout from "@/src/components/canvas/NodeLayout";
+
 import HeroNodeLayout from "./HeroNodeLayout";
 
 export type InputImageNodeData = {

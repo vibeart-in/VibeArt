@@ -28,3 +28,8 @@ import { ModelData } from "@/src/types/BaseType";
 
 // Atom family to store selected model for each node by ID
 export const selectedModelAtom = atomFamily((id: string) => atom<ModelData | null>(null));
+
+// Canvas Setting Atoms
+export const snapToGridAtom = atom<boolean>(false);
+export const showMinimapAtom = atom<boolean>(false);
+export const panOnScrollAtom = atom<boolean>(false);

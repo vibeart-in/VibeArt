@@ -1,9 +1,11 @@
 "use client";
 
+import { Image as ImageIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Image as ImageIcon } from "lucide-react";
 
+import { publishCanvas } from "@/src/actions/canvas";
+import { Button } from "@/src/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +15,7 @@ import {
   DialogTitle,
 } from "@/src/components/ui/dialog";
 import { Input } from "@/src/components/ui/input";
-import { Button } from "@/src/components/ui/button";
 import { Label } from "@/src/components/ui/label";
-import { publishCanvas } from "@/src/actions/canvas";
 import { createClient } from "@/src/lib/supabase/client";
 
 interface PublishDialogProps {

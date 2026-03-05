@@ -39,9 +39,9 @@ export function CloneButton({ canvasId }: CloneButtonProps) {
     <Button
       onClick={handleClone}
       disabled={isCloning}
-      className="flex items-center gap-3 rounded-2xl border-white/20 hover:border-white/10 bg-black/80 px-6 py-6 text-white disabled:opacity-50"
+      className="flex items-center gap-3 rounded-2xl border-white/20 bg-black/80 p-6 text-white hover:border-white/10 disabled:opacity-50"
     >
-      <Copy className="h-4 w-4" />
+      <Copy className="size-4" />
       <span className="text-sm"> {isCloning ? "Cloning..." : "Clone Workflow"}</span>
     </Button>
   );

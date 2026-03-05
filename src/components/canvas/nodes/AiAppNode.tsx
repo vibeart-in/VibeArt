@@ -1,22 +1,24 @@
 "use client";
 
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect } from "react";
 import { Sparkles, Loader2, Play, TriangleAlert, RefreshCw } from "lucide-react";
-import { useSyncUpstreamData } from "@/src/utils/xyflow";
-import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
-import { NodeParam } from "@/src/types/BaseType";
-import { useCanvas } from "../../providers/CanvasProvider";
-import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
-import { AiApp, AiAppParameter } from "@/src/constants/aiApps";
-import { Label } from "@/src/components/ui/label";
+import React, { useState, useEffect } from "react";
+
 import {
   AppSectionLabel,
   AppParamTextarea,
   AppParamSelect,
 } from "@/src/components/ai-apps/AppFormComponents";
+import { Label } from "@/src/components/ui/label";
+import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
+import { AiApp, AiAppParameter } from "@/src/constants/aiApps";
 import { useAiAppDetails } from "@/src/hooks/useAiAppDetails";
+import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
+import { NodeParam } from "@/src/types/BaseType";
+import { useSyncUpstreamData } from "@/src/utils/xyflow";
+
+import { useCanvas } from "../../providers/CanvasProvider";
+import NodeLayout from "../NodeLayout";
 
 export type AiAppNodeData = {
   imageUrl?: string;
@@ -434,7 +436,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         title="AI App"
         minWidth={BASE_WIDTH}
         minHeight={nodeHeight}
-        className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D] p-4"
+        className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D] p-4"
       >
         <div className="flex h-full items-center justify-center text-sm text-zinc-500">
           No app data
@@ -452,9 +454,9 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
         title={appData?.app_name || "Loading App..."}
         minWidth={BASE_WIDTH}
         minHeight={nodeHeight}
-        className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+        className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       >
-        <div className="relative h-full w-full flex-1 overflow-hidden rounded-3xl">
+        <div className="relative size-full flex-1 overflow-hidden rounded-3xl">
           <ModernCardLoader text="Loading App Details..." />
         </div>
       </NodeLayout>
@@ -493,14 +495,14 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
             {isVideoCover ? (
               <video
                 src={appData.cover_image}
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
                 autoPlay
                 muted
                 loop
                 playsInline
               />
             ) : (
-              <img src={appData.cover_image} alt="Cover" className="h-full w-full object-cover" />
+              <img src={appData.cover_image} alt="Cover" className="size-full object-cover" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent" />
 
@@ -534,7 +536,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex min-h-0 flex-1 flex-col gap-4 p-5 pb-5">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-5">
             {/* Image Input Section */}
             {parseParameters(appData).some((p) => p.fieldName === "image") &&
               (isPoseTransfer ? (
@@ -548,7 +550,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                         <img
                           src={inputImageUrl}
                           alt="Model"
-                          className="h-full w-full object-contain"
+                          className="size-full object-contain"
                         />
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                           <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
@@ -561,7 +563,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                       </div>
                     ) : (
                       <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
+                        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
                           <Sparkles size={18} className="opacity-50" />
                         </div>
                         <div className="flex flex-col">
@@ -582,7 +584,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                         <img
                           src={secondImageUrl}
                           alt="Doodle"
-                          className="h-full w-full object-contain"
+                          className="size-full object-contain"
                         />
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                           <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
@@ -595,7 +597,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                       </div>
                     ) : (
                       <div className="group relative flex h-20 shrink-0 items-center gap-4 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-5 transition-all hover:border-zinc-700 hover:bg-zinc-800/40">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
+                        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-500 shadow-xl transition-all group-hover:scale-105 group-hover:bg-zinc-700 group-hover:text-zinc-300">
                           <Play size={18} className="opacity-50" />
                         </div>
                         <div className="flex flex-col">
@@ -610,7 +612,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                 </div>
               ) : inputImageUrl ? (
                 <div className="group relative h-44 w-full shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111] shadow-2xl">
-                  <img src={inputImageUrl} alt="Input" className="h-full w-full object-contain" />
+                  <img src={inputImageUrl} alt="Input" className="size-full object-contain" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <span className="rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
                       Connected Input
@@ -622,7 +624,7 @@ const AiAppNode = React.memo(({ id, data, selected }: NodeProps<AiAppNodeType>) 
                 </div>
               ) : (
                 <div className="group relative flex h-28 shrink-0 items-center gap-5 rounded-2xl border-2 border-dashed border-zinc-800 bg-[#1A1A1A]/30 px-6 transition-all duration-300 hover:border-zinc-600 hover:bg-[#1A1A1A]/50 hover:shadow-lg">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl transition-all group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300">
+                  <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-800 bg-[#141414] text-zinc-500 shadow-2xl transition-all group-hover:scale-105 group-hover:border-zinc-700 group-hover:bg-[#1D1D1D] group-hover:text-zinc-300">
                     <Sparkles
                       size={24}
                       className="opacity-40 transition-opacity group-hover:opacity-100"

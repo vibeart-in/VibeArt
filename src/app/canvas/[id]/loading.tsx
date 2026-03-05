@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 
 export default function Loading() {
@@ -23,13 +24,13 @@ export default function Loading() {
       </div>
 
       <div className="absolute right-4 top-4 z-10 rounded-3xl bg-black/50 p-3 backdrop-blur-md">
-        <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
+        <div className="size-10 animate-pulse rounded-full bg-white/10" />
       </div>
 
       {/* Centered Loading Indicator */}
       <div className="absolute inset-0 z-0 flex flex-col items-center justify-center gap-6">
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
-          <Loader2 className="h-10 w-10 animate-spin text-accent" />
+        <div className="relative flex size-24 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
+          <Loader2 className="size-10 animate-spin text-accent" />
           <div className="absolute inset-0 animate-pulse rounded-2xl border border-accent/20" />
         </div>
         <div className="flex flex-col items-center gap-2">

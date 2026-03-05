@@ -1,20 +1,22 @@
 import { Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import NodeLayout from "../NodeLayout";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw } from "lucide-react";
-import { TextShimmer } from "../../ui/text-shimmer";
-import { Textarea } from "../../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
-import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
-import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
-import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
-import { useCanvas } from "../../providers/CanvasProvider";
+
 import { ReplicateMemoizedOtherParameters } from "../../inputBox/ReplicateParameters";
 import { useAtom } from "jotai";
+import { ArrowUp, Loader2, Copy, Check, AlertCircle, RotateCcw } from "lucide-react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { ModernCardLoader } from "@/src/components/ui/ModernCardLoader";
+import { useGenerateCanvasImage } from "@/src/hooks/useGenerateCanvasImage";
 import { selectedModelAtom } from "@/src/store/nodeAtoms";
-import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
+import { InputBoxParameter, NodeParam } from "@/src/types/BaseType";
 import { evaluateCreditsFromModelParams } from "@/src/utils/client/credits-evaluator";
+import { useSyncUpstreamData, useUpstreamData } from "@/src/utils/xyflow";
+
+import { RunninghubMemoizedOtherParameters } from "../../inputBox/RunninghubParameters";
+import { useCanvas } from "../../providers/CanvasProvider";
+import { TextShimmer } from "../../ui/text-shimmer";
+import { Textarea } from "../../ui/textarea";
+import NodeLayout from "../NodeLayout";
 
 export type OutputImageNodeData = {
   imageUrl?: string;
@@ -75,13 +77,17 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
   const { updateNodeData, updateNode } = useReactFlow();
 
   useSyncUpstreamData(id, data);
-  const { stylePrompt } = useUpstreamData("target");
+  const { stylePrompt, nodes: upstreamNodes } = useUpstreamData("target");
+  const hasStyleNode = useMemo(
+    () => upstreamNodes.some((n) => n.type === "style"),
+    [upstreamNodes],
+  );
 
   useEffect(() => {
-    if (stylePrompt !== data.stylePrompt) {
+    if (hasStyleNode && stylePrompt !== data.stylePrompt) {
       updateNodeData(id, { stylePrompt });
     }
-  }, [stylePrompt, data.stylePrompt, id, updateNodeData]);
+  }, [hasStyleNode, stylePrompt, data.stylePrompt, id, updateNodeData]);
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [prompt, setPrompt] = useState(data.prompt || "");
@@ -423,7 +429,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       minWidth={BASE_WIDTH}
       minHeight={targetHeight}
       keepAspectRatio={true}
-      className="flex h-full w-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
+      className="flex size-full cursor-default flex-col rounded-3xl bg-[#1D1D1D]"
       handles={[
         { type: "target", position: Position.Left },
         { type: "source", position: Position.Right },
@@ -436,7 +442,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
          immediately, even if the NodeLayout hasn't fully expanded yet.
       */}
       <div
-        className="relative h-full w-full flex-1 overflow-hidden rounded-3xl"
+        className="relative size-full flex-1 overflow-hidden rounded-3xl"
         style={{ minHeight: `${targetHeight}px` }}
       >
         {data.imageUrl ? (
@@ -444,7 +450,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
           <img
             src={data.imageUrl}
             alt={data.prompt || "Generated Image"}
-            className="object-fit h-full w-full rounded-3xl"
+            className="object-fit size-full rounded-3xl"
             draggable={false}
             crossOrigin="anonymous"
           />
@@ -458,7 +464,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 size-full object-cover"
                 alt="Placeholder"
                 crossOrigin="anonymous"
               />
@@ -514,7 +520,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
       </div>
 
       <div
-        className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+        className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 ${
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
@@ -540,7 +546,7 @@ const OutputImage = React.memo(({ id, data, selected }: NodeProps<OutputImageNod
         {!data.imageUrl ? (
           <div className="relative w-full focus-within:outline-none focus-within:ring-0">
             {!data.prompt && (
-              <div className="pointer-events-none absolute left-0 right-0 p-2">
+              <div className="pointer-events-none absolute inset-x-0 p-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentPlaceholder}

@@ -106,7 +106,7 @@ export const FeatureCard = ({
                   <img
                     src={imageUrl}
                     alt={title}
-                    className="h-full w-full transform rounded-2xl border border-white/5 bg-black/40 object-cover shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+                    className="size-full transform rounded-2xl border border-white/5 bg-black/40 object-cover shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
                   />
                 </div>
               ) : (

@@ -1,8 +1,9 @@
 import { Metadata } from "next";
+
 import HomeFeatureCard from "@/src/components/home/HomeFeatureCard";
-import Footer from "@/src/components/landing/Footer";
-import HomeSlide from "@/src/components/home/HomeSlide";
 import { HomeGetStarted } from "@/src/components/home/HomeGetStarted";
+import HomeSlide from "@/src/components/home/HomeSlide";
+import Footer from "@/src/components/landing/Footer";
 
 export const revalidate = 3600;
 

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const HERO_SLIDES = [
@@ -71,7 +71,7 @@ export default function HomeSlide() {
               autoPlay
               muted
               loop
-              className="h-full w-full object-cover opacity-80"
+              className="size-full object-cover opacity-80"
             />
           ) : (
             <Image

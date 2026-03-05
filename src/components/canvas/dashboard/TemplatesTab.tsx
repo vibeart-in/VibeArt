@@ -1,7 +1,8 @@
-import { motion } from "motion/react";
 import { Search } from "lucide-react";
-import { TemplateCard } from "./TemplateCard";
+import { motion } from "motion/react";
+
 import { EmptyState } from "./EmptyState";
+import { TemplateCard } from "./TemplateCard";
 
 interface Template {
   id: string;

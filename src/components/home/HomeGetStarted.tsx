@@ -29,7 +29,7 @@ export function HomeGetStarted() {
             <video
               ref={videoRef}
               src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/From-video.mp4"
-              className="h-full w-full object-cover"
+              className="size-full object-cover"
               muted
               loop
               playsInline
@@ -39,9 +39,9 @@ export function HomeGetStarted() {
           <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 text-center">
             {/* Badge */}
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex size-2 rounded-full bg-primary"></span>
               </span>
               Your Canvas Awaits
             </div>
@@ -65,7 +65,7 @@ export function HomeGetStarted() {
               className="group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-full bg-primary px-12 text-base font-medium text-primary-foreground transition-all duration-300 hover:scale-105 hover:bg-primary/90 hover:ring-4 hover:ring-primary/20 active:scale-95"
             >
               <span className="relative z-10">Start Creating Now</span>
-              <ArrowRight className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight className="relative z-10 size-5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
         </div>

@@ -66,8 +66,8 @@ export default function CanvasDashboardSkeleton() {
             </div>
 
             <div className="flex items-center gap-1 rounded-2xl border border-white/10 bg-black/40 p-1.5 backdrop-blur-xl">
-              <div className="h-10 w-10 animate-pulse rounded-xl bg-white/5" />
-              <div className="h-10 w-10 animate-pulse rounded-xl bg-white/5" />
+              <div className="size-10 animate-pulse rounded-xl bg-white/5" />
+              <div className="size-10 animate-pulse rounded-xl bg-white/5" />
             </div>
           </div>
         </div>

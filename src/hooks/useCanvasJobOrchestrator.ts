@@ -1,6 +1,7 @@
 // hooks/useCanvasJobOrchestrator.ts
-import { useEffect } from "react";
 import { useReactFlow, Edge } from "@xyflow/react";
+import { useEffect } from "react";
+
 import { createClient } from "../lib/supabase/client";
 
 export function useCanvasJobOrchestrator(canvasId: string) {

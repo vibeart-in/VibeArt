@@ -217,7 +217,7 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
       <ContextMenuTrigger onContextMenu={handleContextMenu} className="block size-full">
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
+      <ContextMenuContent className="w-64 border-[1px] border-zinc-900 bg-[#0c0c0c] text-zinc-400">
         <div className="border-b border-zinc-800 p-3">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -267,14 +267,14 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
               Group Selection
             </ContextMenuItem>
 
-            <ContextMenuSeparator className="bg-zinc-800" />
+            <ContextMenuSeparator className="bg-neutral-800" />
 
             <ContextMenuSub>
               <ContextMenuSubTrigger className="focus:bg-zinc-800 focus:text-zinc-100">
                 <Zap size={14} className="mr-2" />
                 Generation
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-56 border-zinc-800 bg-zinc-900 text-zinc-400">
+              <ContextMenuSubContent className="w-56 border-zinc-800 bg-[#0c0c0c] text-zinc-400">
                 <ContextMenuItem
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("prompt")}
@@ -322,7 +322,7 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
                 <Palette size={14} className="mr-2" />
                 Models & Styles
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-56 border-zinc-800 bg-zinc-900 text-zinc-400">
+              <ContextMenuSubContent className="w-56 border-zinc-800 bg-[#0c0c0c] text-zinc-400">
                 <ContextMenuItem
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("checkpoint")}
@@ -370,7 +370,7 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
                 <Wrench size={14} className="mr-2" />
                 Tools
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-56 border-zinc-800 bg-zinc-900 text-zinc-400">
+              <ContextMenuSubContent className="w-56 border-zinc-800 bg-[#0c0c0c] text-zinc-400">
                 <ContextMenuItem
                   className="focus:bg-zinc-800 focus:text-zinc-100"
                   onClick={() => handleAddNode("colorCorrection")}
@@ -440,7 +440,7 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
               </ContextMenuSubContent>
             </ContextMenuSub>
 
-            <ContextMenuSeparator className="bg-zinc-800" />
+            <ContextMenuSeparator className="bg-neutral-800" />
 
             <ContextMenuSub>
               <ContextMenuSubTrigger className="focus:bg-zinc-800 focus:text-zinc-100">
@@ -449,7 +449,7 @@ export function CanvasContextMenu({ children, addNode, onGroupSelection }: Canva
                 </div>
                 AI Apps
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-64 border-zinc-800 bg-zinc-900 text-zinc-400">
+              <ContextMenuSubContent className="w-64 border-zinc-800 bg-[#0c0c0c] text-zinc-400">
                 {AI_APPS.map((app) => (
                   <ContextMenuItem
                     key={app.id}

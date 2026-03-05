@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { Sparkles, Edit2, Eye } from "lucide-react";
+import { motion } from "motion/react";
 
 interface TemplateCardProps {
   index: number;

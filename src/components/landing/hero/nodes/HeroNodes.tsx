@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
+
 import { TextShimmer } from "@/src/components/ui/text-shimmer";
 
 export const HeroTitleNode = ({ data }: any) => {
@@ -185,7 +186,7 @@ export const HeroImageNode = ({ data }: any) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: img.active ? 1 : 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }} // Smooth fade
-            className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+            className="pointer-events-none absolute inset-0 size-full object-contain"
             alt="Hero"
           />
         ))}

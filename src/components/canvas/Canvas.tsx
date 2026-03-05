@@ -16,17 +16,20 @@ import {
   OnNodesChange,
   MarkerType,
 } from "@xyflow/react";
-import { getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { getNodesBounds, getViewportForBounds, MiniMap } from "@xyflow/react";
+import { useAtomValue } from "jotai";
+import { snapToGridAtom, showMinimapAtom, panOnScrollAtom } from "@/src/store/nodeAtoms";
 import { toJpeg } from "html-to-image";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
-import { useDebouncedCallback } from "use-debounce";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 
 import "@xyflow/react/dist/style.css";
 import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { updateProjectAction } from "@/src/actions/canvas/update";
 import { useCanvasJobOrchestrator } from "@/src/hooks/useCanvasJobOrchestrator";
 import { useSmartGrouping } from "@/src/hooks/useSmartGrouping";
+import { useUndoRedo } from "@/src/hooks/useUndoRedo";
 
 import CustomControls from "./Controls";
 import { DevTools } from "../devtools";
@@ -60,7 +63,15 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     initialEdges ?? content?.edges ?? [],
   );
 
-  const { onNodeDrag, onNodeDragStop, groupSelection } = useSmartGrouping(setNodes, setEdges);
+  const { getEdges, toObject, screenToFlowPosition, getNodes, getNode, updateNode } =
+    useReactFlow();
+  const { takeSnapshot, undo, redo, canUndo, canRedo } = useUndoRedo();
+
+  const { onNodeDrag, onNodeDragStop, groupSelection } = useSmartGrouping(
+    setNodes,
+    setEdges,
+    takeSnapshot,
+  );
 
   // Replaced unused 'copiedNodes' state with a clipboardRef to avoid stale closures
   const clipboardRef = useRef<{ nodes: Node[]; edges: Edge[] }>({ nodes: [], edges: [] });
@@ -71,11 +82,15 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     lastSaved: Date | null;
   }>({ isSaving: false, lastSaved: null });
 
+  const snapToGrid = useAtomValue(snapToGridAtom);
+  const showMinimap = useAtomValue(showMinimapAtom);
+  const panOnScroll = useAtomValue(panOnScrollAtom);
+
   const significantChangesRef = useRef(0);
   const CHANGE_THRESHOLD = 3;
 
-  const { getEdges, toObject, screenToFlowPosition, getNodes, getNode, updateNode } =
-    useReactFlow();
+  // const { getEdges, toObject, screenToFlowPosition, getNodes, getNode, updateNode } =
+  // useReactFlow();
 
   useCanvasJobOrchestrator(project?.id ?? "");
 
@@ -174,6 +189,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
   const addNode = useCallback(
     (type: string, options?: Record<string, unknown>) => {
+      takeSnapshot();
       const { data: nodeData, ...rest } = options ?? {};
       const newNode: Node = {
         id: crypto.randomUUID(),
@@ -214,6 +230,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
     const { nodes: clipNodes, edges: clipEdges } = clipboardRef.current;
     if (clipNodes.length === 0) return;
 
+    takeSnapshot();
     const clipNodeIds = new Set(clipNodes.map((n) => n.id));
     // Determine top-level copied nodes to calculate accurate bounding box constraints
     const topLevelNodes = clipNodes.filter((n) => !n.parentId || !clipNodeIds.has(n.parentId));
@@ -280,8 +297,9 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
 
   const handleConnect = useCallback<OnConnect>(
     (connection) => {
+      takeSnapshot();
       const sourceNode = getNode(connection.source);
-      let edgeColor = "#404040"; // Default color
+      let edgeColor = "#82828280"; // Default color
 
       if (sourceNode?.type === "presets") edgeColor = "#ef4444";
       else if (sourceNode?.type === "style") edgeColor = "#22c55e";
@@ -313,6 +331,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
       setIsDraggingEdge(false);
 
       if (!connectionState.isValid) {
+        takeSnapshot();
         const { clientX, clientY } = "changedTouches" in event ? event.changedTouches[0] : event;
         const sourceId = connectionState.fromNode?.id;
         const isSourceHandle = connectionState.fromHandle?.type === "source";
@@ -358,6 +377,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
   // --- NEW: Alt + Drag Duplication Interceptor ---
   const handleNodeDragStartCustom = useCallback(
     (event: React.MouseEvent, node: Node, nodesToDrag: Node[]) => {
+      takeSnapshot();
       if (event.altKey) {
         // Create exact copies left behind unselected (user drags current ones away)
         const draggedIds = new Set(nodesToDrag.map((n) => n.id));
@@ -388,7 +408,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
         setNodes((nds) => nds.concat(duplicatedNodes));
         setEdges((eds) => eds.concat(duplicatedEdges));
 
-        toast.success(`Duplicated ${nodesToDrag.length} node(s)`);
+        toast.info(`Duplicated ${nodesToDrag.length} node(s)`);
         trackChange(duplicatedNodes.length);
         save();
       }
@@ -419,10 +439,22 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
         e.preventDefault();
         handlePaste();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+        e.preventDefault();
+        redo();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleCopy, handlePaste, readOnly]);
+  }, [handleCopy, handlePaste, undo, redo, readOnly]);
 
   return (
     <NodeOperationsProvider addNode={addNode}>
@@ -440,10 +472,14 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             onConnectEnd={handleConnectEnd}
             onEdgesChange={handleEdgesChange}
             onNodesChange={handleNodesChange}
+            onNodesDelete={() => takeSnapshot()}
+            onEdgesDelete={() => takeSnapshot()}
             onNodeDragStart={handleNodeDragStartCustom}
             onNodeDrag={onNodeDrag}
             onNodeDragStop={onNodeDragStop}
-            // panOnScroll
+            panOnScroll={panOnScroll}
+            snapToGrid={snapToGrid}
+            snapGrid={[20, 20]}
             selectionOnDrag={false}
             selectionKeyCode={["Control", "Meta"]}
             multiSelectionKeyCode={["Control", "Meta"]}
@@ -456,8 +492,8 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
             maxZoom={10}
             connectionRadius={100}
             defaultEdgeOptions={{
-              style: { stroke: "#404040", strokeWidth: 2 },
-              markerEnd: { type: MarkerType.ArrowClosed, color: "#404040" },
+              style: { stroke: "#82828280", strokeWidth: 2 },
+              markerEnd: { type: MarkerType.Arrow, color: "#82828280" },
             }}
             connectionLineStyle={{ stroke: "#DFFF00", strokeWidth: 4 }}
             connectionLineContainerStyle={{ zIndex: 0 }}
@@ -469,8 +505,20 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
               maxZoom={3}
               isSaving={saveState.isSaving}
               lastSaved={saveState.lastSaved}
+              undo={undo}
+              redo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
             />
-            <DevTools position="bottom-left" />
+            {/* <DevTools position="bottom-left" /> */}
+            {showMinimap && (
+              <MiniMap
+                position="bottom-left"
+                nodeColor="#333"
+                maskColor="#111111aa"
+                style={{ backgroundColor: "#111", border: "1px solid #333", borderRadius: "8px" }}
+              />
+            )}
             {children}
           </ReactFlow>
         </CanvasContextMenu>

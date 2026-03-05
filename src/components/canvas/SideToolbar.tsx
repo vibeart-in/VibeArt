@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { IconPhotoPlus, IconWindowMaximize } from "@tabler/icons-react";
+import { useReactFlow } from "@xyflow/react";
 import {
   Plus,
   Upload,
@@ -18,11 +19,14 @@ import {
   Brush,
   Eraser,
 } from "lucide-react";
-import { useReactFlow } from "@xyflow/react";
-import { IconPhotoPlus, IconWindowMaximize } from "@tabler/icons-react";
+import React, { useState } from "react";
+
+import { useAtom } from "jotai";
+
+import { AI_APPS } from "@/src/constants/aiApps";
+import { panOnScrollAtom, showMinimapAtom, snapToGridAtom } from "@/src/store/nodeAtoms";
 
 import { useNodeOperations } from "../providers/NodeProvider";
-import { AI_APPS } from "@/src/constants/aiApps";
 
 type PanelType = "addNode" | "uploadImage" | "addImage" | "addVideo" | "settings" | "help" | null;
 
@@ -46,37 +50,37 @@ export default function SideToolbar() {
   const tools = [
     {
       title: "Add Node",
-      icon: <Plus className="h-5 w-5" />,
+      icon: <Plus className="size-5" />,
       onClick: () => setActivePanel(activePanel === "addNode" ? null : "addNode"),
       active: activePanel === "addNode",
     },
     {
       title: "Upload Image",
-      icon: <Upload className="h-5 w-5" />,
+      icon: <Upload className="size-5" />,
       onClick: handleUploadImage,
       active: false,
     },
     {
       title: "Add Image Node",
-      icon: <ImageIcon className="h-5 w-5" />,
+      icon: <ImageIcon className="size-5" />,
       onClick: () => setActivePanel(activePanel === "addImage" ? null : "addImage"),
       active: activePanel === "addImage",
     },
     {
       title: "Add Video Node",
-      icon: <Video className="h-5 w-5" />,
+      icon: <Video className="size-5" />,
       onClick: () => handleAddNode("generateVideo"),
       active: false,
     },
     {
       title: "Settings",
-      icon: <Settings className="h-5 w-5" />,
+      icon: <Settings className="size-5" />,
       onClick: () => setActivePanel(activePanel === "settings" ? null : "settings"),
       active: activePanel === "settings",
     },
     {
       title: "Help",
-      icon: <HelpCircle className="h-5 w-5" />,
+      icon: <HelpCircle className="size-5" />,
       onClick: () => setActivePanel(activePanel === "help" ? null : "help"),
       active: activePanel === "help",
     },
@@ -87,11 +91,11 @@ export default function SideToolbar() {
       <div className="pointer-events-auto absolute left-4 top-1/2 z-50 flex -translate-y-1/2 flex-col items-center gap-4 rounded-3xl border border-white/5 bg-neutral-900/50 p-2 shadow-lg backdrop-blur-md transition-all hover:shadow-xl">
         {/* Top action button - Add Node */}
         <button
-          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent shadow-sm transition-all hover:scale-105 hover:bg-neutral-100 active:scale-95"
+          className="flex size-11 items-center justify-center rounded-2xl bg-accent shadow-sm transition-all hover:scale-105 hover:bg-neutral-100 active:scale-95"
           title="Add Node"
           onClick={() => setActivePanel(activePanel === "addNode" ? null : "addNode")}
         >
-          <Plus className="h-6 w-6 text-neutral-900" />
+          <Plus className="size-6 text-neutral-900" />
         </button>
 
         {/* Middle tools */}
@@ -140,7 +144,7 @@ export default function SideToolbar() {
               onClick={() => setActivePanel(null)}
               className="text-neutral-400 transition-colors hover:text-white"
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
             </button>
           </div>
 
@@ -248,7 +252,7 @@ function AddNodePanel({
                 className="flex w-full items-center gap-2 rounded-lg border border-white/5 bg-neutral-800/50 p-2 text-left text-sm text-neutral-300 transition-all hover:border-white/10 hover:bg-neutral-800 hover:text-white"
               >
                 <div
-                  className={`flex size-6 items-center justify-center rounded bg-${node.color}-900/50 text-${node.color}-500`}
+                  className={`bg- flex size-6 items-center justify-center rounded${node.color}-900/50 text-${node.color}-500`}
                 >
                   {node.icon}
                 </div>
@@ -318,6 +322,10 @@ function AddImagePanel({ onAddNode }: { onAddNode: (type: string) => void }) {
 }
 
 function SettingsPanel() {
+  const [snapToGrid, setSnapToGrid] = useAtom(snapToGridAtom);
+  const [showMinimap, setShowMinimap] = useAtom(showMinimapAtom);
+  const [panOnScroll, setPanOnScroll] = useAtom(panOnScrollAtom);
+
   return (
     <div className="space-y-4 text-sm text-neutral-300">
       <div>
@@ -325,11 +333,30 @@ function SettingsPanel() {
         <div className="space-y-2">
           <div className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-800/50 p-3">
             <span>Snap to Grid</span>
-            <input type="checkbox" className="rounded" />
+            <input
+              type="checkbox"
+              className="cursor-pointer rounded"
+              checked={snapToGrid}
+              onChange={(e) => setSnapToGrid(e.target.checked)}
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-800/50 p-3">
             <span>Show Minimap</span>
-            <input type="checkbox" className="rounded" />
+            <input
+              type="checkbox"
+              className="cursor-pointer rounded"
+              checked={showMinimap}
+              onChange={(e) => setShowMinimap(e.target.checked)}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-white/5 bg-neutral-800/50 p-3">
+            <span>Pan on Scroll</span>
+            <input
+              type="checkbox"
+              className="cursor-pointer rounded"
+              checked={panOnScroll}
+              onChange={(e) => setPanOnScroll(e.target.checked)}
+            />
           </div>
         </div>
       </div>
@@ -349,6 +376,8 @@ function HelpPanel() {
     { key: "Right Click", action: "Context menu" },
     { key: "Mouse Wheel", action: "Zoom in/out" },
     { key: "Space + Drag", action: "Pan canvas" },
+    { key: "Ctrl/Cmd + Z", action: "Undo" },
+    { key: "Ctrl/Cmd + Y", action: "Redo" },
   ];
 
   return (

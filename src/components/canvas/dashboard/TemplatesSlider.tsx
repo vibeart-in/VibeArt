@@ -1,5 +1,5 @@
-import { useRef } from "react";
 import { ArrowLeft, ArrowRight, LayoutTemplateIcon } from "lucide-react";
+import { useRef } from "react";
 
 interface Template {
   id: string;
@@ -65,11 +65,11 @@ export function TemplatesSlider({ templates, onTemplateClick }: TemplatesSliderP
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="h-full w-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+                  className="size-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
                 />
                 {/* Gradient overlays */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-24 backdrop-blur-sm"
+                  className="absolute inset-x-0 bottom-0 h-24 backdrop-blur-sm"
                   style={{
                     WebkitMaskImage:
                       "linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",

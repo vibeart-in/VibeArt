@@ -2,14 +2,14 @@ import { Background, BackgroundVariant, Panel } from "@xyflow/react";
 import { redirect } from "next/navigation";
 
 import Canvas from "@/src/components/canvas/Canvas";
+import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
+import { CloneButton } from "@/src/components/canvas/CloneButton";
+import SideToolbar from "@/src/components/canvas/SideToolbar";
 import { UserSectionClient } from "@/src/components/home/UserSectionClient";
 import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/server";
-import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
 import { CanvasProject } from "@/src/types/BaseType";
-import SideToolbar from "@/src/components/canvas/SideToolbar";
-import { CloneButton } from "@/src/components/canvas/CloneButton";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   try {

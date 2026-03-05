@@ -1,7 +1,8 @@
-import { motion } from "motion/react";
 import { Globe } from "lucide-react";
-import { PublishedCard } from "./PublishedCard";
+import { motion } from "motion/react";
+
 import { EmptyState } from "./EmptyState";
+import { PublishedCard } from "./PublishedCard";
 
 interface PublishedProject {
   id: string;
