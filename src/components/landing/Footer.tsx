@@ -71,9 +71,12 @@ const Footer = () => {
   const isInView = useInView(footerRef, { once: true, margin: "0px 0px -80px 0px" });
 
   return (
-    <footer ref={footerRef} className="relative mt-32 text-white">
+    <footer
+      ref={footerRef}
+      className="relative mt-20 overflow-hidden text-white lg:mt-32 lg:overflow-visible"
+    >
       <GlassPaneBG paneWidth={55}>
-        <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-8">
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
             {/* ── Left Column: Logo + CTA ── */}
             <motion.div
@@ -142,7 +145,7 @@ const Footer = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="relative mt-4 flex items-center justify-center overflow-hidden rounded-[13px] border-2 border-[#d8e825bd] bg-[linear-gradient(260deg,rgba(217,232,37,0.25)_1%,rgba(217,232,37,0.25)_20%,rgba(26,26,29,0.025)_100%)] p-4 px-12 shadow-[inset_0px_2px_4px_rgba(255,255,255,0.16)] backdrop-blur-xl"
+                className="relative mt-4 flex w-full items-center justify-center overflow-hidden rounded-[13px] border-2 border-[#d8e825bd] bg-[linear-gradient(260deg,rgba(217,232,37,0.25)_1%,rgba(217,232,37,0.25)_20%,rgba(26,26,29,0.025)_100%)] p-4 px-12 shadow-[inset_0px_2px_4px_rgba(255,255,255,0.16)] backdrop-blur-xl sm:w-auto"
               >
                 {/* shimmer sweep on hover */}
                 <motion.span
@@ -157,7 +160,8 @@ const Footer = () => {
             </motion.div>
 
             {/* ── Right Column: Links ── */}
-            <div className="mr-32 grid grid-cols-2 lg:col-span-2">
+            {/* Added gap for mobile and restricted margins to large screens */}
+            <div className="grid grid-cols-2 gap-8 lg:col-span-2 lg:mr-32">
               {footerLinks.map((column, colIdx) => (
                 <motion.div
                   key={column.title}
@@ -196,14 +200,15 @@ const Footer = () => {
           </div>
 
           {/* ── Bottom Bar ── */}
+          {/* Made margin responsive and ensured it stays above the decorative image via z-20 */}
           <motion.div
-            className="mr-80 mt-20 flex flex-col items-center justify-between gap-6 border-t border-white/20 pt-8 sm:flex-row"
+            className="relative z-20 mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/20 pt-8 sm:flex-row lg:mr-80 lg:mt-20"
             variants={fadeUpVariant}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
             custom={0.5}
           >
-            <p className="text-sm text-white/50">
+            <p className="text-center text-sm text-white/50 sm:text-left">
               &copy; {new Date().getFullYear()} Vibeart.in. All Rights Reserved.
             </p>
             <div className="flex items-center space-x-6">
@@ -231,8 +236,9 @@ const Footer = () => {
         </div>
 
         {/* ── Decorative image ── */}
+        {/* Drops down layer size and opacity on mobile to prevent clipping links */}
         <motion.div
-          className="absolute bottom-0 right-0 z-10"
+          className="pointer-events-none absolute bottom-0 right-0 z-0 opacity-20 lg:pointer-events-auto lg:z-10 lg:opacity-100"
           initial={{ opacity: 0, y: 60 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
@@ -241,6 +247,7 @@ const Footer = () => {
             src="https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/footer/footerMain.webp"
             width={500}
             height={500}
+            className="h-auto w-[250px] sm:w-[350px] lg:w-[500px]"
             alt="Decorative abstract graphic"
           />
         </motion.div>
@@ -251,8 +258,6 @@ const Footer = () => {
       </GlassPaneBG>
 
       {/* ── Gradient Rising Up ── */}
-      {/* Outer div owns the absolute centering; inner motion.div owns only the animation
-          so Framer Motion never clobbers the -50% translateX centering. */}
       <div className="absolute -top-40 left-1/2 -z-10 -translate-x-1/2">
         <motion.div
           initial={{ y: 120, opacity: 0, scale: 0.85 }}

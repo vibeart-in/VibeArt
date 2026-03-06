@@ -53,7 +53,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   return (
     <div className="relative flex size-full items-center justify-center">
       <GlassModal width={40} height={650} count={16} className="z-10 hidden md:flex" />
-      <GlassModal width="90vw" height={550} count={1} className="z-10 md:hidden" />
+      <GlassModal width="90vw" height={650} count={1} className="z-10 md:hidden" />
 
       <div className="absolute inset-0 z-20 flex items-center justify-center">
         <div

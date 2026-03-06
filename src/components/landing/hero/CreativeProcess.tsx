@@ -526,7 +526,7 @@ export default function CreativeProcess() {
 
       {/* Sound Toggle */}
       <div
-        className={`sound-toggle fixed right-5 top-5 z-[1000] flex size-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/15 ${!isAudioEnabled ? "disabled opacity-50" : ""}`}
+        className={`sound-toggle fixed right-5 bottom-5 z-[1000] flex size-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/15 ${!isAudioEnabled ? "disabled opacity-50" : ""}`}
         onClick={toggleSound}
       >
         <div className="sound-dots relative size-1">

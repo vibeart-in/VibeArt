@@ -705,21 +705,15 @@ const MagicBento: React.FC<BentoProps> = ({
             --accent-border: rgba(217, 233, 43, 0.8);
           }
           
-          // .card-responsive {
-          //   grid-template-columns: 1fr;
-          //   width: 90%;
-          //   margin: 0 auto;
-          //   padding: 0.5rem;
-          // }
-            .card-responsive {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-auto-rows: 220px; /* 👈 controls square size */
-  gap: 16px;             /* optional but recommended */
-  width: 90%;
-  margin: 0 auto;
-  padding: 0.5rem;
-}
+          .card-responsive {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-auto-rows: 220px; /* 👈 controls square size */
+            gap: 16px;             /* optional but recommended */
+            width: 90%;
+            margin: 0 auto;
+            padding: 0.5rem;
+          }
 
           
           @media (min-width: 600px) {
@@ -728,12 +722,12 @@ const MagicBento: React.FC<BentoProps> = ({
             }
           }
           
-        @media (min-width: 1024px) {
-  .card-responsive {
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 260px; /* 👈 bigger squares on desktop */
-  }
-}
+          @media (min-width: 1024px) {
+            .card-responsive {
+              grid-template-columns: repeat(4, 1fr);
+              grid-auto-rows: 260px; /* 👈 bigger squares on desktop */
+            }
+          }
 
           .card--border-glow::after {
             content: '';
