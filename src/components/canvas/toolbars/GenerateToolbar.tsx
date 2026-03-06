@@ -4,11 +4,15 @@ import { CurrencyCircleDollar } from "@phosphor-icons/react";
 import { useNodesData, NodeToolbar, Position, useReactFlow } from "@xyflow/react"; // Remember to import Position
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
-import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
+import { nanoid } from "nanoid";
+import { Sparkles, ChevronDown, Palette, Download, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
 import { getProducts } from "@/src/actions/subscription/getProducts";
 import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
+import { ImageEditorModal } from "../ImageEditorModal";
+import { useCanvas } from "../../providers/CanvasProvider";
 import {
   Select,
   SelectContent,
@@ -101,7 +105,9 @@ export default function GenerateToolbar({
   initialModel,
 }: GenerateToolbarProps) {
   const nodesData = useNodesData(id || "");
-  const { updateNodeData } = useReactFlow();
+  const { updateNodeData, addNodes, addEdges, getNode } = useReactFlow();
+  const { project } = useCanvas();
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   // Check if input images are connected
   const hasInputImages = (nodesData?.data as any)?.inputImageUrls?.length > 0;
@@ -179,6 +185,49 @@ export default function GenerateToolbar({
     } catch (error) {
       console.error("Download failed:", error);
     }
+  };
+
+  const handleSaveEditedImage = async (blob: Blob) => {
+    if (!id || !project?.id) return;
+    const thisNode = getNode(id);
+    if (!thisNode) return;
+
+    // Convert blob to File and upload
+    const file = new File([blob], `edited-${nanoid()}.png`, { type: "image/png" });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("canvasId", project.id);
+
+    const result = await uploadImageAction(formData);
+    if (!result.success || !result.data) {
+      console.error("Failed to upload edited image:", result.error);
+      return;
+    }
+
+    const newNodeId = `input-image-${nanoid()}`;
+    addNodes([
+      {
+        id: newNodeId,
+        type: "inputImage",
+        position: {
+          x: thisNode.position.x + (thisNode.measured?.width || 450) + 100,
+          y: thisNode.position.y,
+        },
+        data: {
+          imageUrl: result.data.url,
+        },
+      },
+    ]);
+
+    addEdges([
+      {
+        id: `e-${id}-${newNodeId}`,
+        source: id,
+        target: newNodeId,
+      },
+    ]);
+
+    setIsEditorOpen(false);
   };
 
   const isActive = selected || isHovered;
@@ -276,15 +325,24 @@ export default function GenerateToolbar({
           <Sparkles className="size-5 text-white hover:text-accent" />
         </button> */}
 
-        {/* Download Button */}
+        {/* Edit and Download Buttons */}
         {imageUrl && (
-          <button
-            onClick={handleDownload}
-            className="group flex size-11 items-center justify-center rounded-2xl bg-[#020202] text-gray-300 transition-colors hover:bg-[#020202]/30"
-            title="Download Generated Image"
-          >
-            <Download className="size-5 text-white group-hover:text-accent" />
-          </button>
+          <>
+            <button
+              onClick={() => setIsEditorOpen(true)}
+              className="group flex size-11 items-center justify-center rounded-2xl bg-[#020202] text-gray-300 transition-colors hover:bg-[#020202]/30"
+              title="Advanced Edit"
+            >
+              <Pencil className="size-5 text-white group-hover:text-accent" />
+            </button>
+            <button
+              onClick={handleDownload}
+              className="group flex size-11 items-center justify-center rounded-2xl bg-[#020202] text-gray-300 transition-colors hover:bg-[#020202]/30"
+              title="Download Generated Image"
+            >
+              <Download className="size-5 text-white group-hover:text-accent" />
+            </button>
+          </>
         )}
       </div>
 
@@ -303,6 +361,15 @@ export default function GenerateToolbar({
         onOpenChangeControlled={setIsUpdatePlanOpen}
         hideTrigger={true}
       />
+
+      {imageUrl && (
+        <ImageEditorModal
+          isOpen={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          imageUrl={imageUrl}
+          onSaveCanvas={handleSaveEditedImage}
+        />
+      )}
     </NodeToolbar>
   );
 }
