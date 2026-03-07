@@ -5,6 +5,7 @@ import AiAppNode from "./AiAppNode";
 import ColorCorrectionNode from "./ColorCorrectionNode";
 import CropNode from "./CropNode";
 import DropNode from "./DropNode";
+import FrameExtractorNode from "./FrameExtractorNode";
 import GenerateVideo from "./GenerateVideo";
 import GroupNode from "./GroupNode";
 import InputImage from "./InputImage";
@@ -22,6 +23,7 @@ export const nodeTypes: NodeTypes = {
   outputImage: OutputImage,
   outputImageAdvanced: OutputImageOpenSource,
   generateVideo: GenerateVideo,
+  frameExtractor: FrameExtractorNode,
   prompt: TextNode,
   text: TextNode,
   sketch: SketchNode,

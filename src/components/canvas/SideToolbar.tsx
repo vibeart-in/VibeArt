@@ -18,6 +18,7 @@ import {
   Crop,
   Brush,
   Eraser,
+  Film,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -212,6 +213,12 @@ function AddNodePanel({
           color: "amber",
         },
         { label: "Crop", icon: <Crop size={12} />, type: "crop", color: "neutral" },
+        {
+          label: "Frame Extractor",
+          icon: <Film size={12} />,
+          type: "frameExtractor",
+          color: "purple",
+        },
         { label: "Painter", icon: <Brush size={12} />, type: "sketch", color: "pink" },
         {
           label: "Upscale",

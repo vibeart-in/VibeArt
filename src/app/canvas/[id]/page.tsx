@@ -1,5 +1,5 @@
+import type { Metadata } from "next";
 import { Background, BackgroundVariant, Panel } from "@xyflow/react";
-import { redirect } from "next/navigation";
 
 import Canvas from "@/src/components/canvas/Canvas";
 import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
@@ -10,6 +10,64 @@ import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
 import { NavbarLogo } from "@/src/components/ui/resizable-navbar";
 import { createClient } from "@/src/lib/supabase/server";
 import { CanvasProject } from "@/src/types/BaseType";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const { data: canvasData, error } = await supabase
+      .from("canvas")
+      .select("title, cover")
+      .eq("id", id)
+      .single();
+
+    if (error || !canvasData) {
+      return {
+        title: "Canvas | VibeArt",
+      };
+    }
+
+    let imageUrl = "";
+    if (canvasData.cover) {
+      const { data: imageData } = await supabase
+        .from("images")
+        .select("*")
+        .eq("id", canvasData.cover)
+        .single();
+
+      imageUrl = imageData?.image_url || "";
+    }
+
+    const title = canvasData.title ? `${canvasData.title} | VibeArt` : "Untitled Project | VibeArt";
+    const description = "Check out this canvas project on VibeArt";
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        images: imageUrl ? [imageUrl] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: imageUrl ? [imageUrl] : [],
+      },
+    };
+  } catch (error) {
+    return {
+      title: "Canvas | VibeArt",
+    };
+  }
+}
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -50,7 +108,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       ...data,
       image: coverImage,
     } as unknown as CanvasProject;
-    console.log("Canvas project:", project);
+    // console.log("Canvas project:", project);
     const isReadOnly = !user || project.user_id !== user.id;
 
     return (

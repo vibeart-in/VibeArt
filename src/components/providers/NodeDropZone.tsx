@@ -68,7 +68,7 @@ export const NodeDropzoneProvider = ({ children }: NodeDropzoneProviderProps) =>
           if (originalFile.type.startsWith("image/")) {
             nodeType = "inputImage";
           } else if (originalFile.type.startsWith("video/")) {
-            nodeType = "inputVideo";
+            nodeType = "inputImage";
           }
 
           addNode(nodeType, {
