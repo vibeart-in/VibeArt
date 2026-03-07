@@ -66,6 +66,20 @@ export const getDimensionsFromNodes = (
   return { width: node.data.width as number, height: node.data.height as number };
 };
 
+export const getVideosFromNodes = (nodes: XYNodeSnapshot[]): string[] => {
+  return nodes
+    .map(
+      (node) =>
+        node.data?.videoUrl ||
+        (node.data?.url &&
+        typeof node.data.url === "string" &&
+        /\.(mp4|webm|ogg|mov)$/i.test(node.data.url)
+          ? node.data.url
+          : undefined),
+    )
+    .filter((url): url is string => typeof url === "string" && !!url);
+};
+
 /**
  * Hook to retrieve aggregated data from upstream nodes (connected to 'target').
  */
@@ -79,6 +93,7 @@ export const useUpstreamData = (handleType: "target" | "source" = "target") => {
     return {
       nodes,
       images: getImagesFromNodes(nodes),
+      videos: getVideosFromNodes(nodes),
       prompt: getTextFromNodes(nodes),
       stylePrompt: getStylePromptsFromNodes(nodes),
       checkpoint: getCheckpointFromNodes(nodes),
