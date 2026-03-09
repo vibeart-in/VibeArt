@@ -510,7 +510,7 @@ function CanvasInner({ children, readOnly, ...props }: ReactFlowProps & { readOn
               canUndo={canUndo}
               canRedo={canRedo}
             />
-            {/* <DevTools position="bottom-left" /> */}
+            <DevTools position="bottom-left" />
             {showMinimap && (
               <MiniMap
                 position="bottom-left"

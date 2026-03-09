@@ -39,19 +39,19 @@ export type GenerateVideoNodeType = Node<GenerateVideoNodeData, "generateVideo">
 const PLACEHOLDERS = [
   {
     url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/431008626864462037.mp4",
-    prompt: "An astronaut in a field of flowers",
+    prompt: "Close up of an eye with reflection of flowers",
   },
   {
     url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179975333151.mp4",
-    prompt: "A moody cyberpunk street at night",
+    prompt: "A fallen solider kissing a rose",
   },
   {
-    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179976969272.mp4",
-    prompt: "A moody cyberpunk street at night",
+    url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/landing/perfume-ads.mp4",
+    prompt: "Create a wild stone perfume ads",
   },
   {
     url: "https://nvbssjoomsozojofygor.supabase.co/storage/v1/object/public/images/video/620230179977407426.mp4",
-    prompt: "A moody cyberpunk street at night",
+    prompt: "A dynamic anime transition",
   },
 ];
 
@@ -187,7 +187,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
     }
 
     // Default aspect ratio for placeholder
-    return 0.7;
+    return 1.2;
   }, [data.outputImages]);
 
   const targetHeight = BASE_WIDTH * aspectRatio;
@@ -500,7 +500,7 @@ const GenerateVideo = React.memo(({ id, data, selected }: NodeProps<GenerateVide
       */}
       <div
         className="relative size-full flex-1 overflow-hidden rounded-3xl"
-        // style={{ minHeight: "300px" }}
+        style={{ minHeight: targetHeight }}
       >
         {data.videoUrl || data.imageUrl ? (
           <video

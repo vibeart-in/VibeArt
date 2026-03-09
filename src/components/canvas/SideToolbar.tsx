@@ -19,8 +19,12 @@ import {
   Brush,
   Eraser,
   Film,
+  Package,
 } from "lucide-react";
 import React, { useState } from "react";
+
+import { AssetsPanel } from "./AssetsPanel";
+import type { AssetItem } from "@/src/app/api/assets/route";
 
 import { useAtom } from "jotai";
 
@@ -29,7 +33,15 @@ import { panOnScrollAtom, showMinimapAtom, snapToGridAtom } from "@/src/store/no
 
 import { useNodeOperations } from "../providers/NodeProvider";
 
-type PanelType = "addNode" | "uploadImage" | "addImage" | "addVideo" | "settings" | "help" | null;
+type PanelType =
+  | "addNode"
+  | "uploadImage"
+  | "addImage"
+  | "addVideo"
+  | "settings"
+  | "help"
+  | "assets"
+  | null;
 
 export default function SideToolbar() {
   const [activePanel, setActivePanel] = useState<PanelType>(null);
@@ -45,6 +57,16 @@ export default function SideToolbar() {
   const handleUploadImage = () => {
     const position = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     addNode("inputImage", { position });
+    setActivePanel(null);
+  };
+
+  const handleAddAsset = (asset: AssetItem) => {
+    const position = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    // inputImage node handles both images and videos via `data.url`
+    addNode("inputImage", {
+      position,
+      data: { url: asset.url, label: asset.name },
+    });
     setActivePanel(null);
   };
 
@@ -78,6 +100,12 @@ export default function SideToolbar() {
       icon: <Settings className="size-5" />,
       onClick: () => setActivePanel(activePanel === "settings" ? null : "settings"),
       active: activePanel === "settings",
+    },
+    {
+      title: "Assets",
+      icon: <Package className="size-5" />,
+      onClick: () => setActivePanel(activePanel === "assets" ? null : "assets"),
+      active: activePanel === "assets",
     },
     {
       title: "Help",
@@ -140,6 +168,7 @@ export default function SideToolbar() {
               {activePanel === "addImage" && "Add Image Node"}
               {activePanel === "settings" && "Settings"}
               {activePanel === "help" && "Help"}
+              {activePanel === "assets" && "Assets"}
             </h3>
             <button
               onClick={() => setActivePanel(null)}
@@ -154,6 +183,7 @@ export default function SideToolbar() {
             {activePanel === "addImage" && <AddImagePanel onAddNode={handleAddNode} />}
             {activePanel === "settings" && <SettingsPanel />}
             {activePanel === "help" && <HelpPanel />}
+            {activePanel === "assets" && <AssetsPanel onAddAsset={handleAddAsset} />}
           </div>
         </div>
       )}

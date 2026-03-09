@@ -166,6 +166,7 @@ const FrameExtractorNode = React.memo(
                 alt="Extracted Frame"
                 className="size-full object-cover"
                 draggable={false}
+                crossOrigin="anonymous"
               />
 
               {/* Hover Overlay Controls */}

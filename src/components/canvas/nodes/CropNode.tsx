@@ -372,11 +372,7 @@ const CropNode = ({ id, data, selected }: NodeProps<CropNodeType>) => {
               ) : (
                 /* Final Cropped Preview */
                 <div className="relative size-full overflow-hidden rounded-lg">
-                  <img
-                    src={data.croppedImageUrl}
-                    className="size-full object-cover"
-                    alt="result"
-                  />
+                  <img src={data.croppedImageUrl} className="size-full object-cover" alt="result" />
                 </div>
               )}
             </div>
