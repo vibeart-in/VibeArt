@@ -4,7 +4,17 @@ import dynamic from "next/dynamic";
 import * as React from "react";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dotted-dialog";
 
-const PinturaEditorDynamic = dynamic(() => import("./PinturaEditorWrapper"), { ssr: false });
+const PinturaEditorDynamic = dynamic(() => import("./PinturaEditorWrapper"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex size-full items-center justify-center bg-[#0c0c0c]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="size-8 animate-spin rounded-full border-2 border-white/10 border-t-accent" />
+        <p className="text-xs text-white/40">Loading editor…</p>
+      </div>
+    </div>
+  ),
+});
 
 interface ImageEditorModalProps {
   isOpen: boolean;
@@ -21,11 +31,14 @@ export function ImageEditorModal({
 }: ImageEditorModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      {/* Use a larger max-w class for the editor */}
-      <DialogContent className="h-[90vh] max-w-6xl overflow-hidden p-0 sm:max-w-[90vw]">
-        <DialogTitle className="hidden">Image edit</DialogTitle>
+      <DialogContent className="h-[92vh] max-w-none w-[95vw] overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c0c] p-0 shadow-2xl shadow-black/60 sm:max-w-none">
+        <DialogTitle className="hidden">Image Editor</DialogTitle>
         {isOpen && (
-          <PinturaEditorDynamic src={imageUrl} onSaveCanvas={onSaveCanvas} onClose={onClose} />
+          <PinturaEditorDynamic
+            src={imageUrl}
+            onSaveCanvas={onSaveCanvas}
+            onClose={onClose}
+          />
         )}
       </DialogContent>
     </Dialog>
