@@ -1,6 +1,5 @@
 import { Background, BackgroundVariant, Panel } from "@xyflow/react";
 import { redirect } from "next/navigation";
-
 import Canvas from "@/src/components/canvas/Canvas";
 import { UserSectionClient } from "@/src/components/home/UserSectionClient";
 import { CanvasProvider } from "@/src/components/providers/CanvasProvider";
@@ -9,7 +8,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { CanvasTitle } from "@/src/components/canvas/CanvasTitle";
 import { CanvasProject } from "@/src/types/BaseType";
 import SideToolbar from "@/src/components/canvas/SideToolbar";
-
+import React from 'react'; 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;

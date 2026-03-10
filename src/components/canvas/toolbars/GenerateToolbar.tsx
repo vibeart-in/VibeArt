@@ -4,12 +4,18 @@ import { CurrencyCircleDollar } from "@phosphor-icons/react";
 import { useNodesData, NodeToolbar, Position } from "@xyflow/react"; // Remember to import Position
 import { ProductListResponse } from "dodopayments/resources/index.mjs";
 import { useAtom } from "jotai";
-import { Sparkles, ChevronDown, Palette, Download } from "lucide-react";
+import { Sparkles, ChevronDown, Palette, Download, Pencil } from "lucide-react";
 
 import { useEffect, useState } from "react";
+import { nanoid } from "nanoid";
+import { useReactFlow } from "@xyflow/react";
 
 import { getProducts } from "@/src/actions/subscription/getProducts";
 import { getUserSubscription } from "@/src/actions/subscription/getUserSubscriptionFull";
+import { uploadImageAction } from "@/src/actions/canvas/image/upload-image";
+import { useCanvas } from "../../providers/CanvasProvider";
+import { ImageEditorModal } from "../ImageEditorModal";
+import { VideoEditorModal } from "../VideoEditorModal";
 import {
   Select,
   SelectContent,
@@ -65,6 +71,8 @@ export default function GenerateToolbar({
     user: any;
   } | null>(null);
 
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+
   useEffect(() => {
     if (isFreeUser) {
       const fetchData = async () => {
@@ -98,6 +106,53 @@ export default function GenerateToolbar({
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel, setSelectedModel, initialModel]);
+
+  const { project } = useCanvas();
+  const { addNodes, addEdges, getNode } = useReactFlow();
+
+  const handleSaveEditedMedia = async (blob: Blob) => {
+    if (!id || !project?.id) return;
+    const thisNode = getNode(id);
+    if (!thisNode) return;
+
+    const fileExt = blob.type.split("/")[1] || "png";
+    const file = new File([blob], `edited-${nanoid()}.${fileExt}`, { type: blob.type });
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("canvasId", project.id);
+
+    const result = await uploadImageAction(formData);
+    if (!result.success || !result.data) {
+      console.error("Failed to upload edited media:", result.error);
+      return;
+    }
+
+    const newNodeId = `input-image-${nanoid()}`;
+    addNodes([
+      {
+        id: newNodeId,
+        type: "inputImage",
+        position: {
+          x: thisNode.position.x + (thisNode.measured?.width || 450) + 100,
+          y: thisNode.position.y,
+        },
+        data: {
+          imageUrl: result.data.url,
+        },
+      },
+    ]);
+
+    addEdges([
+      {
+        id: `e-${id}-${newNodeId}`,
+        source: id,
+        target: newNodeId,
+      },
+    ]);
+
+    setIsEditorOpen(false);
+  };
 
   const handleDownload = async () => {
     if (!imageUrl) return;
@@ -190,13 +245,22 @@ export default function GenerateToolbar({
 
         {/* Download Button */}
         {imageUrl && (
-          <button
-            onClick={handleDownload}
-            className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-            title="Download Generated Image"
-          >
-            <Download className="size-4" />
-          </button>
+          <>
+            <button
+              onClick={() => setIsEditorOpen(true)}
+              className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+              title="Advanced Edit (IMG.LY)"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex size-9 items-center justify-center rounded-full bg-[#1A1A1A] text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+              title="Download Generated Image"
+            >
+              <Download className="size-4" />
+            </button>
+          </>
         )}
       </div>
 
@@ -215,6 +279,24 @@ export default function GenerateToolbar({
         onOpenChangeControlled={setIsUpdatePlanOpen}
         hideTrigger={true}
       />
+
+      {imageUrl && usecase !== ConversationType.VIDEO && (
+        <ImageEditorModal
+          isOpen={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          mediaUrl={imageUrl}
+          onSaveCanvas={handleSaveEditedMedia}
+        />
+      )}
+
+      {imageUrl && usecase === ConversationType.VIDEO && (
+        <VideoEditorModal
+          isOpen={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          mediaUrl={imageUrl}
+          onSaveCanvas={handleSaveEditedMedia}
+        />
+      )}
     </NodeToolbar>
   );
 }
