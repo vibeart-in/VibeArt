@@ -65,6 +65,7 @@ const EXPLICIT_IMAGE_PARAMS = new Set([
   "last_frame",
   "image prompt",
   "Image",
+  "images",
   "last_frame_image",
   "reference_images",
   "first_frame_image",
