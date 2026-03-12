@@ -1,8 +1,8 @@
 "use client";
 
-import { IconPhotoFilled } from "@tabler/icons-react";
+import { IconPhotoFilled, IconVideoPlusFilled } from "@tabler/icons-react";
 import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
-import { FileVideo, Loader2, UploadCloud, Volume2, VolumeX } from "lucide-react";
+import { Loader2, UploadCloud, Volume2, VolumeX } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -34,7 +34,7 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
   const [isUploading, setIsUploading] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
-  const aspectRatio = data.width && data.height ? data.height / data.width : 1;
+  const aspectRatio = data.width && data.height ? data.height / data.width : 9 / 16;
   const nodeHeight = BASE_WIDTH * aspectRatio;
 
   const handleFileUpload = useCallback(
@@ -55,6 +55,18 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
             resolve(null);
           };
           video.onerror = () => resolve(null);
+        });
+      } else if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        await new Promise((resolve) => {
+          img.onload = () => {
+            width = img.naturalWidth;
+            height = img.naturalHeight;
+            URL.revokeObjectURL(img.src);
+            resolve(null);
+          };
+          img.onerror = () => resolve(null);
         });
       }
 
@@ -125,20 +137,22 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
           isVideoUrl(data.url) ? (
             <video
               src={data.url}
-              className="size-full object-cover"
+              className="h-full w-full object-contain"
               autoPlay
               muted={isMuted}
               loop
               playsInline
               draggable={false}
+              crossOrigin="anonymous"
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={data.url}
               alt="Node Input"
-              className="size-full object-cover"
+              className="h-full w-full object-contain"
               draggable={false}
+              crossOrigin="anonymous"
             />
           )
         ) : (
@@ -173,10 +187,10 @@ const InputImage = React.memo(({ id, data, selected }: NodeProps<InputImageNodeT
       {data.url && !isUploading && (
         <label
           htmlFor={`upload-${id}`}
-          className="absolute bottom-0 left-2 z-10 flex cursor-pointer items-center gap-2 rounded-full bg-black/50 px-2 py-1 opacity-0 backdrop-blur-md transition-all duration-300 hover:bg-black/50 group-hover:opacity-100"
+          className="absolute bottom-2 left-2 z-10 flex cursor-pointer items-center gap-2 rounded-full bg-black/50 px-2 py-1 opacity-0 backdrop-blur-md transition-all duration-300 hover:bg-black/50 group-hover:opacity-100"
         >
           {isVideoUrl(data.url) ? (
-            <FileVideo size={12} className="text-white" />
+            <IconVideoPlusFilled size={12} className="text-white" />
           ) : (
             <IconPhotoFilled size={12} className="text-white" />
           )}

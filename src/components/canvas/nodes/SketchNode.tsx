@@ -5,7 +5,6 @@ import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { Loader2, Trash2, Brush, Eraser, Undo, Redo } from "lucide-react";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-
 import { cn } from "@/src/lib/utils";
 import { uploadCanvasToSupabase } from "@/src/utils/canvasUpload";
 import { useUpstreamData } from "@/src/utils/xyflow";
@@ -348,6 +347,8 @@ export default function SketchNode({ id, data, selected }: NodeProps<SketchNodeT
       minWidth={dims.w} // If resizing, this ensures min width is respected
       minHeight={dims.h + 120} // Increased footer space
       style={{ width: dims.w }}
+      toolbarHidden={true}
+      resizeHidden={true}
     >
       {/* Canvas Wrapper */}
       <div className="p-2" style={{ width: dims.w, height: dims.h }}>
